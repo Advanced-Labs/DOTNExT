@@ -9,6 +9,7 @@ using System.Threading.Channels;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Orleans.Metadata;
+using Orleans.Runtime.Metadata;
 using Orleans.Runtime.Placement;
 using Orleans.Serialization.Configuration;
 
@@ -16,28 +17,38 @@ namespace Orleans.Runtime.DynamicGrains;
 
 /// <summary>
 /// Main service for dynamic grain loading functionality.
-/// Coordinates assembly loading, manifest updates, and cache invalidation.
+/// Coordinates assembly loading, manifest updates, cache invalidation, and cluster propagation.
 /// </summary>
 internal sealed class DynamicGrainLoaderService : IDynamicGrainLoader, IAsyncDisposable, ILifecycleParticipant<ISiloLifecycle>
 {
     private readonly DynamicAssemblyLoader _assemblyLoader;
     private readonly SiloManifestProvider _manifestProvider;
-    private readonly IClusterManifestProvider _clusterManifestProvider;
+    private readonly ClusterManifestProvider _clusterManifestProvider;
+    private readonly DynamicSerializationManager _serializationManager;
+    private readonly GrainContextActivator _grainContextActivator;
+    private readonly GrainTypeSharedContextResolver _sharedContextResolver;
     private readonly ILocalSiloDetails _siloDetails;
     private readonly ILogger<DynamicGrainLoaderService> _logger;
     private readonly Channel<GrainAssemblyLoadedEvent> _loadEventsChannel;
     private readonly CancellationTokenSource _shutdownCts = new();
+    private readonly SemaphoreSlim _loadSemaphore = new(1, 1);
 
     public DynamicGrainLoaderService(
         DynamicAssemblyLoader assemblyLoader,
         SiloManifestProvider manifestProvider,
-        IClusterManifestProvider clusterManifestProvider,
+        ClusterManifestProvider clusterManifestProvider,
+        DynamicSerializationManager serializationManager,
+        GrainContextActivator grainContextActivator,
+        GrainTypeSharedContextResolver sharedContextResolver,
         ILocalSiloDetails siloDetails,
         ILogger<DynamicGrainLoaderService> logger)
     {
         _assemblyLoader = assemblyLoader ?? throw new ArgumentNullException(nameof(assemblyLoader));
         _manifestProvider = manifestProvider ?? throw new ArgumentNullException(nameof(manifestProvider));
         _clusterManifestProvider = clusterManifestProvider ?? throw new ArgumentNullException(nameof(clusterManifestProvider));
+        _serializationManager = serializationManager ?? throw new ArgumentNullException(nameof(serializationManager));
+        _grainContextActivator = grainContextActivator ?? throw new ArgumentNullException(nameof(grainContextActivator));
+        _sharedContextResolver = sharedContextResolver ?? throw new ArgumentNullException(nameof(sharedContextResolver));
         _siloDetails = siloDetails ?? throw new ArgumentNullException(nameof(siloDetails));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
 
@@ -58,6 +69,22 @@ internal sealed class DynamicGrainLoaderService : IDynamicGrainLoader, IAsyncDis
             throw new ArgumentNullException(nameof(assemblyPath));
         }
 
+        // Ensure only one assembly is being loaded at a time
+        await _loadSemaphore.WaitAsync(cancellationToken);
+        try
+        {
+            return await LoadGrainAssemblyInternalAsync(assemblyPath, cancellationToken);
+        }
+        finally
+        {
+            _loadSemaphore.Release();
+        }
+    }
+
+    private async Task<GrainLoadResult> LoadGrainAssemblyInternalAsync(
+        string assemblyPath,
+        CancellationToken cancellationToken)
+    {
         var stopwatch = Stopwatch.StartNew();
 
         try
@@ -65,6 +92,7 @@ internal sealed class DynamicGrainLoaderService : IDynamicGrainLoader, IAsyncDis
             _logger.LogInformation("Starting dynamic load of grain assembly: {AssemblyPath}", assemblyPath);
 
             // Phase 1: Load and validate assembly
+            _logger.LogDebug("Phase 1: Loading and validating assembly");
             var (assembly, metadata, errors) = await _assemblyLoader.LoadAssemblyAsync(assemblyPath, cancellationToken);
 
             if (errors.Count > 0)
@@ -82,7 +110,9 @@ internal sealed class DynamicGrainLoaderService : IDynamicGrainLoader, IAsyncDis
             }
 
             // Phase 2: Update local silo manifest
+            _logger.LogDebug("Phase 2: Updating local silo manifest");
             var grainTypes = new List<GrainType>();
+            GrainManifest updatedManifest = null;
 
             if (metadata.GrainClasses.Count > 0 || metadata.GrainInterfaces.Count > 0)
             {
@@ -91,17 +121,18 @@ internal sealed class DynamicGrainLoaderService : IDynamicGrainLoader, IAsyncDis
                     metadata.GrainClasses.Count,
                     metadata.GrainInterfaces.Count);
 
-                var (updatedManifest, typeMap) = _manifestProvider.UpdateManifest(
+                var (manifest, typeMap) = _manifestProvider.UpdateManifest(
                     metadata.GrainClasses,
                     metadata.GrainInterfaces);
 
-                // Extract grain types that were added
+                updatedManifest = manifest;
                 grainTypes.AddRange(typeMap.Keys);
 
                 _logger.LogInformation("Successfully updated silo manifest with {TypeCount} new grain types", grainTypes.Count);
             }
 
-            // Phase 3: Update serialization system (if we have generated serializers)
+            // Phase 3: Update serialization system
+            _logger.LogDebug("Phase 3: Updating serialization system");
             if (metadata.Serializers.Count > 0 || metadata.Copiers.Count > 0)
             {
                 _logger.LogInformation(
@@ -109,18 +140,47 @@ internal sealed class DynamicGrainLoaderService : IDynamicGrainLoader, IAsyncDis
                     metadata.Serializers.Count,
                     metadata.Copiers.Count);
 
-                // TODO: Update CodecProvider with new serializers/copiers
-                // This will be implemented in the serialization update phase
+                _serializationManager.RegisterSerializers(metadata);
+
+                _logger.LogInformation("Successfully registered serialization types");
             }
 
-            // Phase 4: Get new cluster manifest version
-            var currentManifest = _clusterManifestProvider.Current;
-            var newVersion = currentManifest.Version;
+            // Phase 4: Invalidate caches for new grain types
+            _logger.LogDebug("Phase 4: Invalidating caches");
+            if (grainTypes.Count > 0)
+            {
+                foreach (var grainType in grainTypes)
+                {
+                    _grainContextActivator.InvalidateActivator(grainType);
+                    _sharedContextResolver.InvalidateGrainType(grainType);
+                }
 
-            // TODO: Propagate manifest update to cluster
-            // This will trigger ClusterManifestProvider to update
+                _logger.LogInformation("Invalidated caches for {TypeCount} grain types", grainTypes.Count);
+            }
 
-            // Phase 5: Publish load event
+            // Phase 5: Propagate manifest update to cluster
+            _logger.LogDebug("Phase 5: Propagating manifest to cluster");
+            var newVersion = _clusterManifestProvider.Current.Version;
+
+            if (updatedManifest != null)
+            {
+                var propagated = _clusterManifestProvider.UpdateLocalManifest(updatedManifest);
+
+                if (propagated)
+                {
+                    newVersion = _clusterManifestProvider.Current.Version;
+                    _logger.LogInformation(
+                        "Successfully propagated manifest update to cluster. New version: {Version}",
+                        newVersion);
+                }
+                else
+                {
+                    _logger.LogWarning("Failed to propagate manifest update to cluster");
+                }
+            }
+
+            // Phase 6: Publish load event
+            _logger.LogDebug("Phase 6: Publishing load event");
             var loadEvent = new GrainAssemblyLoadedEvent
             {
                 Assembly = assembly,
@@ -135,9 +195,10 @@ internal sealed class DynamicGrainLoaderService : IDynamicGrainLoader, IAsyncDis
             stopwatch.Stop();
 
             _logger.LogInformation(
-                "Successfully completed dynamic load of assembly {AssemblyName} in {Duration}ms",
+                "Successfully completed dynamic load of assembly {AssemblyName} in {Duration}ms with {GrainTypeCount} grain types",
                 assembly.GetName().Name,
-                stopwatch.ElapsedMilliseconds);
+                stopwatch.ElapsedMilliseconds,
+                grainTypes.Count);
 
             return new GrainLoadResult
             {

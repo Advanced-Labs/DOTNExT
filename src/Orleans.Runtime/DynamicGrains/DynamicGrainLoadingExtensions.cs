@@ -32,6 +32,7 @@ public static class DynamicGrainLoadingExtensions
         // Register core services
         services.TryAddSingleton<AssemblyValidator>();
         services.TryAddSingleton<DynamicAssemblyLoader>();
+        services.TryAddSingleton<DynamicSerializationManager>();
         services.TryAddSingleton<DynamicGrainLoaderService>();
 
         // Register the public interface
