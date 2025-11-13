@@ -17,8 +17,7 @@ var host = Host.CreateDefaultBuilder(args)
     {
         siloBuilder
             .UseLocalhostClustering()
-            .AddDynamicGrainLoading()  // ← Enable dynamic grain loading
-            .UseDashboard();  // Optional: for monitoring
+            .AddDynamicGrainLoading();  // ← Enable dynamic grain loading
     })
     .ConfigureLogging(logging =>
     {
@@ -135,9 +134,7 @@ try
     // Test 1: Hello Grain
     Console.WriteLine("Test 1: HelloGrain");
     Console.WriteLine("------------------");
-    var getGrainMethod = typeof(IGrainFactory).GetMethod("GetGrain", new[] { typeof(string) });
-    var helloGrainGenericMethod = getGrainMethod!.MakeGenericMethod(helloGrainType);
-    dynamic helloGrain = helloGrainGenericMethod.Invoke(grainFactory, new object[] { "test-user" })!;
+    dynamic helloGrain = grainFactory.GetGrain(helloGrainType, "test-user");
 
     var helloMessage = await helloGrain.SayHello("World");
     Console.WriteLine($"✓ Response: {helloMessage}");
@@ -149,9 +146,7 @@ try
     // Test 2: Counter Grain
     Console.WriteLine("Test 2: CounterGrain");
     Console.WriteLine("--------------------");
-    var getGrainIntMethod = typeof(IGrainFactory).GetMethod("GetGrain", new[] { typeof(long), typeof(string) });
-    var counterGrainGenericMethod = getGrainIntMethod!.MakeGenericMethod(counterGrainType);
-    dynamic counterGrain = counterGrainGenericMethod.Invoke(grainFactory, new object[] { 123L, null! })!;
+    dynamic counterGrain = grainFactory.GetGrain(counterGrainType, 123L);
 
     await counterGrain.Increment();
     Console.WriteLine("✓ Incremented counter");
@@ -172,9 +167,7 @@ try
     // Test 3: Echo Grain (Serialization Test)
     Console.WriteLine("Test 3: EchoGrain (Serialization Test)");
     Console.WriteLine("---------------------------------------");
-    var getGrainGuidMethod = typeof(IGrainFactory).GetMethod("GetGrain", new[] { typeof(Guid), typeof(string) });
-    var echoGrainGenericMethod = getGrainGuidMethod!.MakeGenericMethod(echoGrainType);
-    dynamic echoGrain = echoGrainGenericMethod.Invoke(grainFactory, new object[] { Guid.NewGuid(), null! })!;
+    dynamic echoGrain = grainFactory.GetGrain(echoGrainType, Guid.NewGuid());
 
     var echoResponse = await echoGrain.Echo("Hello from dynamic grain!");
     Console.WriteLine($"✓ Simple echo: {echoResponse}");
@@ -235,10 +228,10 @@ static string? FindTestGrainsAssembly()
     // Try common locations
     var locations = new[]
     {
-        "../DynamicGrainLoading.TestGrains/bin/Debug/net9.0/DynamicGrainLoading.TestGrains.dll",
-        "../DynamicGrainLoading.TestGrains/bin/Release/net9.0/DynamicGrainLoading.TestGrains.dll",
-        "../../DynamicGrainLoading.TestGrains/bin/Debug/net9.0/DynamicGrainLoading.TestGrains.dll",
-        "../../DynamicGrainLoading.TestGrains/bin/Release/net9.0/DynamicGrainLoading.TestGrains.dll",
+        "../DynamicGrainLoading.TestGrains/bin/Debug/net8.0/DynamicGrainLoading.TestGrains.dll",
+        "../DynamicGrainLoading.TestGrains/bin/Release/net8.0/DynamicGrainLoading.TestGrains.dll",
+        "../../DynamicGrainLoading.TestGrains/bin/Debug/net8.0/DynamicGrainLoading.TestGrains.dll",
+        "../../DynamicGrainLoading.TestGrains/bin/Release/net8.0/DynamicGrainLoading.TestGrains.dll",
     };
 
     foreach (var location in locations)

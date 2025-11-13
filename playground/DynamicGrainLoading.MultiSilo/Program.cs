@@ -154,12 +154,9 @@ try
     Console.WriteLine("Test 1: Activate HelloGrain (may be on any silo)");
     Console.WriteLine("--------------------------------------------------");
 
-    var getGrainMethod = typeof(IGrainFactory).GetMethod("GetGrain", new[] { typeof(string) });
-    var helloGrainGenericMethod = getGrainMethod!.MakeGenericMethod(helloGrainType);
-
-    dynamic helloGrain1 = helloGrainGenericMethod.Invoke(grainFactory1, new object[] { "user1" })!;
-    dynamic helloGrain2 = helloGrainGenericMethod.Invoke(grainFactory1, new object[] { "user2" })!;
-    dynamic helloGrain3 = helloGrainGenericMethod.Invoke(grainFactory1, new object[] { "user3" })!;
+    dynamic helloGrain1 = grainFactory1.GetGrain(helloGrainType, "user1");
+    dynamic helloGrain2 = grainFactory1.GetGrain(helloGrainType, "user2");
+    dynamic helloGrain3 = grainFactory1.GetGrain(helloGrainType, "user3");
 
     var response1 = await helloGrain1.SayHello("from grain 1");
     Console.WriteLine($"✓ HelloGrain user1: {response1}");
@@ -174,11 +171,8 @@ try
     Console.WriteLine("Test 2: Counter Grains");
     Console.WriteLine("-----------------------");
 
-    var getGrainIntMethod = typeof(IGrainFactory).GetMethod("GetGrain", new[] { typeof(long), typeof(string) });
-    var counterGrainGenericMethod = getGrainIntMethod!.MakeGenericMethod(counterGrainType);
-
-    dynamic counter1 = counterGrainGenericMethod.Invoke(grainFactory1, new object[] { 1L, null! })!;
-    dynamic counter2 = counterGrainGenericMethod.Invoke(grainFactory1, new object[] { 2L, null! })!;
+    dynamic counter1 = grainFactory1.GetGrain(counterGrainType, 1L);
+    dynamic counter2 = grainFactory1.GetGrain(counterGrainType, 2L);
 
     await counter1.Increment();
     await counter1.Increment();
@@ -314,10 +308,10 @@ static string? FindTestGrainsAssembly()
 {
     var locations = new[]
     {
-        "../DynamicGrainLoading.TestGrains/bin/Debug/net9.0/DynamicGrainLoading.TestGrains.dll",
-        "../DynamicGrainLoading.TestGrains/bin/Release/net9.0/DynamicGrainLoading.TestGrains.dll",
-        "../../DynamicGrainLoading.TestGrains/bin/Debug/net9.0/DynamicGrainLoading.TestGrains.dll",
-        "../../DynamicGrainLoading.TestGrains/bin/Release/net9.0/DynamicGrainLoading.TestGrains.dll",
+        "../DynamicGrainLoading.TestGrains/bin/Debug/net8.0/DynamicGrainLoading.TestGrains.dll",
+        "../DynamicGrainLoading.TestGrains/bin/Release/net8.0/DynamicGrainLoading.TestGrains.dll",
+        "../../DynamicGrainLoading.TestGrains/bin/Debug/net8.0/DynamicGrainLoading.TestGrains.dll",
+        "../../DynamicGrainLoading.TestGrains/bin/Release/net8.0/DynamicGrainLoading.TestGrains.dll",
     };
 
     foreach (var location in locations)
