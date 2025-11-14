@@ -8,6 +8,7 @@ using System.Threading;
 using System.Threading.Channels;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
+using Orleans.GrainReferences;
 using Orleans.Metadata;
 using Orleans.Runtime.Metadata;
 using Orleans.Runtime.Placement;
@@ -27,6 +28,8 @@ internal sealed class DynamicGrainLoaderService : IDynamicGrainLoader, IAsyncDis
     private readonly DynamicSerializationManager _serializationManager;
     private readonly GrainContextActivator _grainContextActivator;
     private readonly GrainTypeSharedContextResolver _sharedContextResolver;
+    private readonly RpcProvider _rpcProvider;
+    private readonly GrainReferenceActivator _grainReferenceActivator;
     private readonly ILocalSiloDetails _siloDetails;
     private readonly ILogger<DynamicGrainLoaderService> _logger;
     private readonly Channel<GrainAssemblyLoadedEvent> _loadEventsChannel;
@@ -40,6 +43,8 @@ internal sealed class DynamicGrainLoaderService : IDynamicGrainLoader, IAsyncDis
         DynamicSerializationManager serializationManager,
         GrainContextActivator grainContextActivator,
         GrainTypeSharedContextResolver sharedContextResolver,
+        RpcProvider rpcProvider,
+        GrainReferenceActivator grainReferenceActivator,
         ILocalSiloDetails siloDetails,
         ILogger<DynamicGrainLoaderService> logger)
     {
@@ -49,6 +54,8 @@ internal sealed class DynamicGrainLoaderService : IDynamicGrainLoader, IAsyncDis
         _serializationManager = serializationManager ?? throw new ArgumentNullException(nameof(serializationManager));
         _grainContextActivator = grainContextActivator ?? throw new ArgumentNullException(nameof(grainContextActivator));
         _sharedContextResolver = sharedContextResolver ?? throw new ArgumentNullException(nameof(sharedContextResolver));
+        _rpcProvider = rpcProvider ?? throw new ArgumentNullException(nameof(rpcProvider));
+        _grainReferenceActivator = grainReferenceActivator ?? throw new ArgumentNullException(nameof(grainReferenceActivator));
         _siloDetails = siloDetails ?? throw new ArgumentNullException(nameof(siloDetails));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
 
@@ -143,6 +150,20 @@ internal sealed class DynamicGrainLoaderService : IDynamicGrainLoader, IAsyncDis
                 _serializationManager.RegisterSerializers(metadata);
 
                 _logger.LogInformation("Successfully registered serialization types");
+            }
+
+            // Phase 3.5: Register grain reference activators (proxy types)
+            _logger.LogDebug("Phase 3.5: Registering grain reference activators");
+            if (metadata.Proxies.Count > 0)
+            {
+                _logger.LogInformation(
+                    "Registering {ProxyCount} grain reference proxy types",
+                    metadata.Proxies.Count);
+
+                _rpcProvider.AddProxyTypes(metadata.Proxies);
+                _grainReferenceActivator.InvalidateCache();
+
+                _logger.LogInformation("Successfully registered grain reference activators");
             }
 
             // Phase 4: Invalidate caches for new grain types

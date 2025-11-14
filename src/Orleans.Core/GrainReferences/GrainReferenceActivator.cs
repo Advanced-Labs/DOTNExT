@@ -29,6 +29,17 @@ namespace Orleans.GrainReferences
         private Dictionary<(GrainType, GrainInterfaceType), IGrainReferenceActivator> _activators = new();
 
         /// <summary>
+        /// Invalidates the activator cache. Used for dynamic grain loading.
+        /// </summary>
+        internal void InvalidateCache()
+        {
+            lock (_lockObj)
+            {
+                _activators = new Dictionary<(GrainType, GrainInterfaceType), IGrainReferenceActivator>();
+            }
+        }
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="GrainReferenceActivator"/> class.
         /// </summary>
         /// <param name="serviceProvider">The service provider.</param>
@@ -178,8 +189,10 @@ namespace Orleans.GrainReferences
     /// </summary>
     internal class RpcProvider
     {
+        private readonly object _lockObj = new object();
         private readonly TypeConverter _typeConverter;
-        private readonly Dictionary<GrainInterfaceType, Type> _mapping;
+        private readonly GrainInterfaceTypeResolver _resolver;
+        private Dictionary<GrainInterfaceType, Type> _mapping;
 
         /// <summary>
         /// Initializes a new  instance of the <see cref="RpcProvider"/> class.
@@ -193,8 +206,9 @@ namespace Orleans.GrainReferences
             TypeConverter typeConverter)
         {
             _typeConverter = typeConverter;
-            var proxyTypes = config.Value.InterfaceProxies;
+            _resolver = resolver;
             _mapping = new Dictionary<GrainInterfaceType, Type>();
+            var proxyTypes = config.Value.InterfaceProxies;
             foreach (var proxyType in proxyTypes)
             {
                 if (!typeof(IAddressable).IsAssignableFrom(proxyType))
@@ -241,6 +255,41 @@ namespace Orleans.GrainReferences
         }
 
         /// <summary>
+        /// Adds new proxy types to the mapping. Used for dynamic grain loading.
+        /// </summary>
+        /// <param name="proxyTypes">The proxy types to add</param>
+        internal void AddProxyTypes(IEnumerable<Type> proxyTypes)
+        {
+            lock (_lockObj)
+            {
+                var newMapping = new Dictionary<GrainInterfaceType, Type>(_mapping);
+                foreach (var proxyType in proxyTypes)
+                {
+                    if (!typeof(IAddressable).IsAssignableFrom(proxyType))
+                    {
+                        continue;
+                    }
+
+                    var type = proxyType switch
+                    {
+                        { IsGenericType: true } => proxyType.GetGenericTypeDefinition(),
+                        _ => proxyType
+                    };
+
+                    var grainInterface = GetMainInterface(type);
+                    if (grainInterface == null)
+                    {
+                        continue;
+                    }
+
+                    var id = _resolver.GetGrainInterfaceType(grainInterface);
+                    newMapping[id] = type;
+                }
+                _mapping = newMapping;
+            }
+        }
+
+        /// <summary>
         /// Gets the generated proxy object type corresponding to the specified <see cref="GrainInterfaceType"/>.
         /// </summary>
         /// <param name="interfaceType">The grain interface type.</param>
@@ -261,17 +310,46 @@ namespace Orleans.GrainReferences
                 args = default;
             }
 
-            if (!_mapping.TryGetValue(lookupId, out result))
+            lock (_lockObj)
             {
-                return false;
+                if (!_mapping.TryGetValue(lookupId, out result))
+                {
+                    return false;
+                }
+
+                if (args is not null)
+                {
+                    result = result.MakeGenericType(args);
+                }
+
+                return true;
+            }
+        }
+
+        private static Type GetMainInterface(Type t)
+        {
+            var all = t.GetInterfaces();
+            Type result = null;
+            foreach (var candidate in all)
+            {
+                if (result is null)
+                {
+                    result = candidate;
+                }
+                else
+                {
+                    if (result.IsAssignableFrom(candidate))
+                    {
+                        result = candidate;
+                    }
+                }
             }
 
-            if (args is not null)
+            return result switch
             {
-                result = result.MakeGenericType(args);
-            }
-
-            return true;
+                { IsGenericType: true } => result.GetGenericTypeDefinition(),
+                _ => result
+            };
         }
     }
 
