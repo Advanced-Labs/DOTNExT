@@ -165,9 +165,9 @@ try
                           && m.GetParameters()[0].ParameterType == typeof(string));
     var helloGrainGenericMethod = getGrainStringMethod!.MakeGenericMethod(helloGrainType);
 
-    dynamic helloGrain1 = helloGrainGenericMethod.Invoke(grainFactory1, new object[] { "user1", null })!;
-    dynamic helloGrain2 = helloGrainGenericMethod.Invoke(grainFactory1, new object[] { "user2", null })!;
-    dynamic helloGrain3 = helloGrainGenericMethod.Invoke(grainFactory1, new object[] { "user3", null })!;
+    dynamic helloGrain1 = helloGrainGenericMethod.Invoke(grainFactory1, new object?[] { "user1", null })!;
+    dynamic helloGrain2 = helloGrainGenericMethod.Invoke(grainFactory1, new object?[] { "user2", null })!;
+    dynamic helloGrain3 = helloGrainGenericMethod.Invoke(grainFactory1, new object?[] { "user3", null })!;
 
     var response1 = await helloGrain1.SayHello("from grain 1");
     Console.WriteLine($"✓ HelloGrain user1: {response1}");
@@ -193,8 +193,8 @@ try
                           && m.GetParameters()[0].ParameterType == typeof(long));
     var counterGrainGenericMethod = getGrainLongMethod!.MakeGenericMethod(counterGrainType);
 
-    dynamic counter1 = counterGrainGenericMethod.Invoke(grainFactory1, new object[] { 1L, null })!;
-    dynamic counter2 = counterGrainGenericMethod.Invoke(grainFactory1, new object[] { 2L, null })!;
+    dynamic counter1 = counterGrainGenericMethod.Invoke(grainFactory1, new object?[] { 1L, null })!;
+    dynamic counter2 = counterGrainGenericMethod.Invoke(grainFactory1, new object?[] { 2L, null })!;
 
     await counter1.Increment();
     await counter1.Increment();

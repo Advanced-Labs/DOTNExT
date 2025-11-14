@@ -145,7 +145,7 @@ try
                           && m.GetParameters().Length == 2
                           && m.GetParameters()[0].ParameterType == typeof(string));
     var helloGrainGenericMethod = getGrainStringMethod!.MakeGenericMethod(helloGrainType);
-    dynamic helloGrain = helloGrainGenericMethod.Invoke(grainFactory, new object[] { "test-user", null })!;
+    dynamic helloGrain = helloGrainGenericMethod.Invoke(grainFactory, new object?[] { "test-user", null })!;
 
     var helloMessage = await helloGrain.SayHello("World");
     Console.WriteLine($"✓ Response: {helloMessage}");
@@ -168,7 +168,7 @@ try
                           && m.GetParameters().Length == 2
                           && m.GetParameters()[0].ParameterType == typeof(long));
     var counterGrainGenericMethod = getGrainLongMethod!.MakeGenericMethod(counterGrainType);
-    dynamic counterGrain = counterGrainGenericMethod.Invoke(grainFactory, new object[] { 123L, null })!;
+    dynamic counterGrain = counterGrainGenericMethod.Invoke(grainFactory, new object?[] { 123L, null })!;
 
     await counterGrain.Increment();
     Console.WriteLine("✓ Incremented counter");
@@ -200,7 +200,7 @@ try
                           && m.GetParameters().Length == 2
                           && m.GetParameters()[0].ParameterType == typeof(Guid));
     var echoGrainGenericMethod = getGrainGuidMethod!.MakeGenericMethod(echoGrainType);
-    dynamic echoGrain = echoGrainGenericMethod.Invoke(grainFactory, new object[] { Guid.NewGuid(), null })!;
+    dynamic echoGrain = echoGrainGenericMethod.Invoke(grainFactory, new object?[] { Guid.NewGuid(), null })!;
 
     var echoResponse = await echoGrain.Echo("Hello from dynamic grain!");
     Console.WriteLine($"✓ Simple echo: {echoResponse}");
