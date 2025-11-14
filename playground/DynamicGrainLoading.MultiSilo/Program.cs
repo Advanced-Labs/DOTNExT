@@ -2,6 +2,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Orleans;
+using Orleans.Configuration;
 using Orleans.Hosting;
 using Orleans.Runtime;
 using Orleans.Runtime.DynamicGrains;
@@ -165,17 +166,19 @@ try
                           && m.GetParameters()[0].ParameterType == typeof(string));
     var helloGrainGenericMethod = getGrainStringMethod!.MakeGenericMethod(helloGrainType);
 
-    dynamic helloGrain1 = helloGrainGenericMethod.Invoke(grainFactory1, new object?[] { "user1", null })!;
-    dynamic helloGrain2 = helloGrainGenericMethod.Invoke(grainFactory1, new object?[] { "user2", null })!;
-    dynamic helloGrain3 = helloGrainGenericMethod.Invoke(grainFactory1, new object?[] { "user3", null })!;
+    object helloGrain1 = helloGrainGenericMethod.Invoke(grainFactory1, new object?[] { "user1", null })!;
+    object helloGrain2 = helloGrainGenericMethod.Invoke(grainFactory1, new object?[] { "user2", null })!;
+    object helloGrain3 = helloGrainGenericMethod.Invoke(grainFactory1, new object?[] { "user3", null })!;
 
-    var response1 = await helloGrain1.SayHello("from grain 1");
+    // Use reflection to invoke SayHello method
+    var sayHelloMethod = helloGrainType.GetMethod("SayHello");
+    var response1 = await (Task<string>)sayHelloMethod!.Invoke(helloGrain1, new object[] { "from grain 1" })!;
     Console.WriteLine($"✓ HelloGrain user1: {response1}");
 
-    var response2 = await helloGrain2.SayHello("from grain 2");
+    var response2 = await (Task<string>)sayHelloMethod!.Invoke(helloGrain2, new object[] { "from grain 2" })!;
     Console.WriteLine($"✓ HelloGrain user2: {response2}");
 
-    var response3 = await helloGrain3.SayHello("from grain 3");
+    var response3 = await (Task<string>)sayHelloMethod!.Invoke(helloGrain3, new object[] { "from grain 3" })!;
     Console.WriteLine($"✓ HelloGrain user3: {response3}");
     Console.WriteLine();
 
@@ -193,16 +196,20 @@ try
                           && m.GetParameters()[0].ParameterType == typeof(long));
     var counterGrainGenericMethod = getGrainLongMethod!.MakeGenericMethod(counterGrainType);
 
-    dynamic counter1 = counterGrainGenericMethod.Invoke(grainFactory1, new object?[] { 1L, null })!;
-    dynamic counter2 = counterGrainGenericMethod.Invoke(grainFactory1, new object?[] { 2L, null })!;
+    object counter1 = counterGrainGenericMethod.Invoke(grainFactory1, new object?[] { 1L, null })!;
+    object counter2 = counterGrainGenericMethod.Invoke(grainFactory1, new object?[] { 2L, null })!;
 
-    await counter1.Increment();
-    await counter1.Increment();
-    var count1 = await counter1.GetCount();
+    // Use reflection to invoke methods
+    var incrementMethod = counterGrainType.GetMethod("Increment");
+    var getCountMethod = counterGrainType.GetMethod("GetCount");
+
+    await (Task)incrementMethod!.Invoke(counter1, null)!;
+    await (Task)incrementMethod!.Invoke(counter1, null)!;
+    var count1 = await (Task<int>)getCountMethod!.Invoke(counter1, null)!;
     Console.WriteLine($"✓ Counter 1: {count1}");
 
-    await counter2.Increment();
-    var count2 = await counter2.GetCount();
+    await (Task)incrementMethod!.Invoke(counter2, null)!;
+    var count2 = await (Task<int>)getCountMethod!.Invoke(counter2, null)!;
     Console.WriteLine($"✓ Counter 2: {count2}");
     Console.WriteLine();
 

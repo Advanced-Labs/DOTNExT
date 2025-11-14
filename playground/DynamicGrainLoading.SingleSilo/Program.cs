@@ -145,12 +145,17 @@ try
                           && m.GetParameters().Length == 2
                           && m.GetParameters()[0].ParameterType == typeof(string));
     var helloGrainGenericMethod = getGrainStringMethod!.MakeGenericMethod(helloGrainType);
-    dynamic helloGrain = helloGrainGenericMethod.Invoke(grainFactory, new object?[] { "test-user", null })!;
+    object helloGrain = helloGrainGenericMethod.Invoke(grainFactory, new object?[] { "test-user", null })!;
 
-    var helloMessage = await helloGrain.SayHello("World");
+    // Use reflection to invoke SayHello method
+    var sayHelloMethod = helloGrainType.GetMethod("SayHello");
+    var helloMessageTask = (Task<string>)sayHelloMethod!.Invoke(helloGrain, new object[] { "World" })!;
+    var helloMessage = await helloMessageTask;
     Console.WriteLine($"✓ Response: {helloMessage}");
 
-    var callCount = await helloGrain.GetCallCount();
+    var getCallCountMethod = helloGrainType.GetMethod("GetCallCount");
+    var callCountTask = (Task<int>)getCallCountMethod!.Invoke(helloGrain, null)!;
+    var callCount = await callCountTask;
     Console.WriteLine($"✓ Call count: {callCount}");
     Console.WriteLine();
 
@@ -168,21 +173,25 @@ try
                           && m.GetParameters().Length == 2
                           && m.GetParameters()[0].ParameterType == typeof(long));
     var counterGrainGenericMethod = getGrainLongMethod!.MakeGenericMethod(counterGrainType);
-    dynamic counterGrain = counterGrainGenericMethod.Invoke(grainFactory, new object?[] { 123L, null })!;
+    object counterGrain = counterGrainGenericMethod.Invoke(grainFactory, new object?[] { 123L, null })!;
 
-    await counterGrain.Increment();
+    // Use reflection to invoke methods
+    var incrementMethod = counterGrainType.GetMethod("Increment");
+    await (Task)incrementMethod!.Invoke(counterGrain, null)!;
     Console.WriteLine("✓ Incremented counter");
 
-    await counterGrain.Increment();
+    await (Task)incrementMethod!.Invoke(counterGrain, null)!;
     Console.WriteLine("✓ Incremented counter again");
 
-    var count = await counterGrain.GetCount();
+    var getCountMethod = counterGrainType.GetMethod("GetCount");
+    var count = await (Task<int>)getCountMethod!.Invoke(counterGrain, null)!;
     Console.WriteLine($"✓ Current count: {count}");
 
-    await counterGrain.Reset();
+    var resetMethod = counterGrainType.GetMethod("Reset");
+    await (Task)resetMethod!.Invoke(counterGrain, null)!;
     Console.WriteLine("✓ Reset counter");
 
-    count = await counterGrain.GetCount();
+    count = await (Task<int>)getCountMethod!.Invoke(counterGrain, null)!;
     Console.WriteLine($"✓ Count after reset: {count}");
     Console.WriteLine();
 
@@ -200,29 +209,38 @@ try
                           && m.GetParameters().Length == 2
                           && m.GetParameters()[0].ParameterType == typeof(Guid));
     var echoGrainGenericMethod = getGrainGuidMethod!.MakeGenericMethod(echoGrainType);
-    dynamic echoGrain = echoGrainGenericMethod.Invoke(grainFactory, new object?[] { Guid.NewGuid(), null })!;
+    object echoGrain = echoGrainGenericMethod.Invoke(grainFactory, new object?[] { Guid.NewGuid(), null })!;
 
-    var echoResponse = await echoGrain.Echo("Hello from dynamic grain!");
+    // Use reflection to invoke Echo method
+    var echoMethod = echoGrainType.GetMethod("Echo");
+    var echoResponseTask = (Task<string>)echoMethod!.Invoke(echoGrain, new object[] { "Hello from dynamic grain!" })!;
+    var echoResponse = await echoResponseTask;
     Console.WriteLine($"✓ Simple echo: {echoResponse}");
 
-    // Create complex data
-    dynamic complexData = Activator.CreateInstance(complexDataType!)!;
-    complexData.Name = "Test Data";
-    complexData.Value = 42;
-    complexData.Timestamp = DateTime.UtcNow;
-    complexData.Tags = new List<string> { "dynamic", "test", "orleans" };
+    // Create complex data using reflection
+    object complexData = Activator.CreateInstance(complexDataType!)!;
+    complexDataType!.GetProperty("Name")!.SetValue(complexData, "Test Data");
+    complexDataType.GetProperty("Value")!.SetValue(complexData, 42);
+    complexDataType.GetProperty("Timestamp")!.SetValue(complexData, DateTime.UtcNow);
+    complexDataType.GetProperty("Tags")!.SetValue(complexData, new List<string> { "dynamic", "test", "orleans" });
 
     Console.WriteLine("Sending complex data:");
-    Console.WriteLine($"  Name: {complexData.Name}");
-    Console.WriteLine($"  Value: {complexData.Value}");
-    Console.WriteLine($"  Tags: {string.Join(", ", complexData.Tags)}");
+    Console.WriteLine($"  Name: {complexDataType.GetProperty("Name")!.GetValue(complexData)}");
+    Console.WriteLine($"  Value: {complexDataType.GetProperty("Value")!.GetValue(complexData)}");
+    var tags = (List<string>)complexDataType.GetProperty("Tags")!.GetValue(complexData)!;
+    Console.WriteLine($"  Tags: {string.Join(", ", tags)}");
 
-    var echoComplexResponse = await echoGrain.EchoComplex(complexData);
+    // Use reflection to invoke EchoComplex method
+    var echoComplexMethod = echoGrainType.GetMethod("EchoComplex");
+    var echoComplexResponseTask = (Task<object>)echoComplexMethod!.Invoke(echoGrain, new object[] { complexData })!;
+    var echoComplexResponse = await echoComplexResponseTask;
+
     Console.WriteLine("✓ Received complex echo:");
-    Console.WriteLine($"  Name: {echoComplexResponse.Name}");
-    Console.WriteLine($"  Value: {echoComplexResponse.Value}");
-    Console.WriteLine($"  Timestamp: {echoComplexResponse.Timestamp}");
-    Console.WriteLine($"  Tags: {string.Join(", ", echoComplexResponse.Tags)}");
+    Console.WriteLine($"  Name: {complexDataType.GetProperty("Name")!.GetValue(echoComplexResponse)}");
+    Console.WriteLine($"  Value: {complexDataType.GetProperty("Value")!.GetValue(echoComplexResponse)}");
+    Console.WriteLine($"  Timestamp: {complexDataType.GetProperty("Timestamp")!.GetValue(echoComplexResponse)}");
+    var responseTags = (List<string>)complexDataType.GetProperty("Tags")!.GetValue(echoComplexResponse)!;
+    Console.WriteLine($"  Tags: {string.Join(", ", responseTags)}");
     Console.WriteLine();
 
     Console.WriteLine("═══════════════════════════════════════════════════════");
