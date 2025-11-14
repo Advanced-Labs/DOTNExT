@@ -10,10 +10,11 @@ namespace Tester
     /// </summary>
     public class GrainServiceTests : OrleansTestingBase, IClassFixture<GrainServiceTests.Fixture>
     {
-        public class Fixture : BaseTestClusterFixture
+        public class Fixture : DynamicLoadingTestClusterFixture
         {
             protected override void ConfigureTestCluster(TestClusterBuilder builder)
             {
+                base.ConfigureTestCluster(builder);
                 builder.Options.InitialSilosCount = 1;
                 builder.AddSiloBuilderConfigurator<GrainServiceSiloBuilderConfigurator>();
             }

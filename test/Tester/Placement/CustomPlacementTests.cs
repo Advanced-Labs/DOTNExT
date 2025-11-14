@@ -20,10 +20,11 @@ namespace Tester.CustomPlacementTests
         private readonly string[] silos;
         private readonly SiloAddress[] siloAddresses;
 
-        public class Fixture : BaseTestClusterFixture
+        public class Fixture : DynamicLoadingTestClusterFixture
         {
             protected override void ConfigureTestCluster(TestClusterBuilder builder)
             {
+                base.ConfigureTestCluster(builder);
                 builder.Options.InitialSilosCount = nSilos;
                 builder.AddSiloBuilderConfigurator<TestSiloBuilderConfigurator>();
             }

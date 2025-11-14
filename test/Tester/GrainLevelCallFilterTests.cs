@@ -8,10 +8,11 @@ namespace UnitTests.General
     [TestCategory("BVT"), TestCategory("GrainLevelCallFilter")]
     public class GrainLevelCallFilterTests : OrleansTestingBase, IClassFixture<GrainLevelCallFilterTests.Fixture>
     {
-        public class Fixture : BaseTestClusterFixture
+        public class Fixture : DynamicLoadingTestClusterFixture
         {
             protected override void ConfigureTestCluster(TestClusterBuilder builder)
             {
+                base.ConfigureTestCluster(builder);
                 builder.ConfigureHostConfiguration(TestDefaultConfiguration.ConfigureHostConfiguration);
             }
         }
