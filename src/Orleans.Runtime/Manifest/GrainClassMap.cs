@@ -12,7 +12,7 @@ namespace Orleans.Metadata
     public class GrainClassMap
     {
         private readonly TypeConverter _typeConverter;
-        private readonly ImmutableDictionary<GrainType, Type> _types;
+        private volatile ImmutableDictionary<GrainType, Type> _types;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="GrainClassMap"/> class.
@@ -58,5 +58,43 @@ namespace Orleans.Metadata
 
             return true;
         }
+
+        /// <summary>
+        /// Updates the grain type mappings with new types.
+        /// This method is thread-safe and uses atomic replacement of the internal dictionary.
+        /// </summary>
+        /// <param name="updatedTypes">The updated dictionary of grain type mappings</param>
+        internal void UpdateTypes(ImmutableDictionary<GrainType, Type> updatedTypes)
+        {
+            _types = updatedTypes ?? throw new ArgumentNullException(nameof(updatedTypes));
+        }
+
+        /// <summary>
+        /// Adds new grain types to the existing mappings.
+        /// This method is thread-safe.
+        /// </summary>
+        /// <param name="newTypes">The new grain type mappings to add</param>
+        internal void AddTypes(IEnumerable<KeyValuePair<GrainType, Type>> newTypes)
+        {
+            if (newTypes == null)
+            {
+                throw new ArgumentNullException(nameof(newTypes));
+            }
+
+            // Atomic update using ImmutableDictionary.AddRange
+            var current = _types;
+            var updated = current.AddRange(newTypes);
+            _types = updated;
+        }
+
+        /// <summary>
+        /// Gets the current count of registered grain types.
+        /// </summary>
+        internal int Count => _types.Count;
+
+        /// <summary>
+        /// Gets all registered grain types.
+        /// </summary>
+        internal IEnumerable<GrainType> GetGrainTypes() => _types.Keys;
     }
 }

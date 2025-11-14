@@ -105,6 +105,36 @@ namespace Orleans.Runtime
                 return configuredActivator;
             }
         }
+
+        /// <summary>
+        /// Invalidates the cached activator for a specific grain type.
+        /// The activator will be recreated on next access.
+        /// </summary>
+        /// <param name="grainType">The grain type to invalidate</param>
+        internal void InvalidateActivator(GrainType grainType)
+        {
+            lock (_lockObj)
+            {
+                _activators = _activators.Remove(grainType);
+            }
+        }
+
+        /// <summary>
+        /// Invalidates all cached activators.
+        /// Activators will be recreated on next access.
+        /// </summary>
+        internal void InvalidateAllActivators()
+        {
+            lock (_lockObj)
+            {
+                _activators = ImmutableDictionary<GrainType, (IGrainContextActivator, IConfigureGrainContext[])>.Empty;
+            }
+        }
+
+        /// <summary>
+        /// Gets the current count of cached activators.
+        /// </summary>
+        internal int CachedActivatorCount => _activators.Count;
     }
 
     /// <summary>
@@ -207,6 +237,30 @@ namespace Orleans.Runtime
 
             return result;
         }
+
+        /// <summary>
+        /// Invalidates the cached shared context for a specific grain type.
+        /// The shared context will be recreated on next access.
+        /// </summary>
+        /// <param name="grainType">The grain type to invalidate</param>
+        internal void InvalidateGrainType(GrainType grainType)
+        {
+            _components.TryRemove(grainType, out _);
+        }
+
+        /// <summary>
+        /// Invalidates all cached shared contexts.
+        /// Shared contexts will be recreated on next access.
+        /// </summary>
+        internal void InvalidateAll()
+        {
+            _components.Clear();
+        }
+
+        /// <summary>
+        /// Gets the current count of cached shared contexts.
+        /// </summary>
+        internal int CachedContextCount => _components.Count;
     }
 
     /// <summary>

@@ -54,7 +54,7 @@ namespace Orleans.Runtime.Metadata
 
         public IAsyncEnumerable<ClusterManifest> Updates => _updates;
 
-        public GrainManifest LocalGrainManifest { get; }
+        public GrainManifest LocalGrainManifest { get; private set; }
 
         private async Task ProcessMembershipUpdates()
         {
@@ -192,6 +192,53 @@ namespace Orleans.Runtime.Metadata
             }
 
             return fetchSuccess;
+        }
+
+        /// <summary>
+        /// Updates the local silo's grain manifest and propagates the change to the cluster.
+        /// This is used for dynamic grain loading scenarios.
+        /// </summary>
+        /// <param name="updatedLocalManifest">The updated local grain manifest</param>
+        /// <returns>True if the update was successfully published, false otherwise</returns>
+        internal bool UpdateLocalManifest(GrainManifest updatedLocalManifest)
+        {
+            if (updatedLocalManifest == null)
+            {
+                throw new ArgumentNullException(nameof(updatedLocalManifest));
+            }
+
+            // Update the local manifest reference
+            LocalGrainManifest = updatedLocalManifest;
+
+            // Get the current cluster manifest
+            var existingManifest = _current;
+            var builder = existingManifest.Silos.ToBuilder();
+
+            // Update the local silo's manifest in the cluster view
+            builder[_localSiloAddress] = updatedLocalManifest;
+
+            // Increment the minor version to indicate a manifest change
+            var newVersion = new MajorMinorVersion(existingManifest.Version.Major, existingManifest.Version.Minor + 1);
+
+            // Publish the updated cluster manifest
+            var newClusterManifest = new ClusterManifest(newVersion, builder.ToImmutable());
+            var published = _updates.TryPublish(newClusterManifest);
+
+            if (published)
+            {
+                _logger.LogInformation(
+                    "Updated local grain manifest and propagated to cluster. New version: {Version}",
+                    newVersion);
+            }
+            else
+            {
+                _logger.LogWarning(
+                    "Failed to publish updated local grain manifest. Current version: {CurrentVersion}, Attempted version: {AttemptedVersion}",
+                    existingManifest.Version,
+                    newVersion);
+            }
+
+            return published;
         }
 
         [MemberNotNull(nameof(_runTask))]
