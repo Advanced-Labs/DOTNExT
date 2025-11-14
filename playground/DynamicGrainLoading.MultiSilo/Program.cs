@@ -255,8 +255,9 @@ try
     var tasks = new List<Task>();
     for (int i = 0; i < 10; i++)
     {
-        dynamic grain = helloGrainGenericMethod.Invoke(grainFactory1, new object[] { $"bulk-user-{i}" })!;
-        tasks.Add(grain.SayHello($"bulk message {i}"));
+        object grain = helloGrainGenericMethod.Invoke(grainFactory1, new object?[] { $"bulk-user-{i}", null })!;
+        var messageTask = (Task<string>)sayHelloMethod!.Invoke(grain, new object[] { $"bulk message {i}" })!;
+        tasks.Add(messageTask);
     }
 
     await Task.WhenAll(tasks);
@@ -305,14 +306,9 @@ static async Task<IHost> StartSilo(string siloName, int siloPort, int gatewayPor
                     options.ServiceId = "dynamic-test-service";
                 })
                 .ConfigureEndpoints(IPAddress.Loopback, siloPort, gatewayPort)
-                .UseAdoNetClustering(options =>
+                .UseDevelopmentClustering(options =>
                 {
-                    options.Invariant = "System.Data.SqlClient";
-                    options.ConnectionString = "Data Source=(localdb)\\MSSQLLocalDB;Initial Catalog=Orleans;Integrated Security=True";
-                })
-                .ConfigureApplicationParts(parts =>
-                {
-                    // Empty - we'll load grains dynamically
+                    options.PrimarySiloEndpoint = new IPEndPoint(IPAddress.Loopback, primarySiloPort);
                 })
                 .AddDynamicGrainLoading();  // ← Enable dynamic grain loading
         })
