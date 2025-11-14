@@ -23,7 +23,7 @@ namespace Tester
     /// Base test cluster fixture for Azure-based integration tests.
     /// Ensures Azure Storage connectivity is available before running tests.
     /// </summary>
-    public abstract class BaseAzureTestClusterFixture : BaseTestClusterFixture
+    public abstract class BaseAzureTestClusterFixture : DynamicLoadingTestClusterFixture
     {
         protected override void CheckPreconditionsOrThrow()
         {

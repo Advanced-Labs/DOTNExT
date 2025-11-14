@@ -17,7 +17,7 @@ namespace DefaultCluster.Tests
         {
         }
 
-        public class Fixture : BaseTestClusterFixture
+        public class Fixture : DynamicLoadingTestClusterFixture
         {
         }
     }

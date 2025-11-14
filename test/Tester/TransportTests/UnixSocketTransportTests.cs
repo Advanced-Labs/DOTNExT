@@ -14,10 +14,11 @@ public class UnixSocketTransportTests : TransportTestsBase, IClassFixture<UnixSo
     {
     }
 
-    public class Fixture : BaseTestClusterFixture
+    public class Fixture : DynamicLoadingTestClusterFixture
     {
         protected override void CheckPreconditionsOrThrow()
         {
+            base.CheckPreconditionsOrThrow();
             try
             {
                 var socket = new Socket(AddressFamily.Unix, SocketType.Stream, ProtocolType.Unspecified);
@@ -30,6 +31,7 @@ public class UnixSocketTransportTests : TransportTestsBase, IClassFixture<UnixSo
 
         protected override void ConfigureTestCluster(TestClusterBuilder builder)
         {
+            base.ConfigureTestCluster(builder);
             builder.Options.ConnectionTransport = ConnectionTransportType.UnixSocket;
         }
     }
