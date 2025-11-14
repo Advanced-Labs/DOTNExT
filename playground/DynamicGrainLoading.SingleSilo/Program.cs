@@ -136,9 +136,16 @@ try
     Console.WriteLine("------------------");
 
     // Use generic GetGrain<T> via reflection to get properly typed proxy
-    var getGrainStringMethod = typeof(IGrainFactory).GetMethod("GetGrain", new[] { typeof(string) });
+    // Find GetGrain<T>(string primaryKey, string? grainClassNamePrefix = null)
+    var getGrainStringMethod = typeof(IGrainFactory)
+        .GetMethods()
+        .FirstOrDefault(m => m.Name == "GetGrain"
+                          && m.IsGenericMethod
+                          && m.GetGenericArguments().Length == 1
+                          && m.GetParameters().Length == 2
+                          && m.GetParameters()[0].ParameterType == typeof(string));
     var helloGrainGenericMethod = getGrainStringMethod!.MakeGenericMethod(helloGrainType);
-    dynamic helloGrain = helloGrainGenericMethod.Invoke(grainFactory, new object[] { "test-user" })!;
+    dynamic helloGrain = helloGrainGenericMethod.Invoke(grainFactory, new object[] { "test-user", null })!;
 
     var helloMessage = await helloGrain.SayHello("World");
     Console.WriteLine($"✓ Response: {helloMessage}");
@@ -152,9 +159,16 @@ try
     Console.WriteLine("--------------------");
 
     // Use generic GetGrain<T> via reflection
-    var getGrainLongMethod = typeof(IGrainFactory).GetMethod("GetGrain", new[] { typeof(long), typeof(string) });
+    // Find GetGrain<T>(long primaryKey, string? grainClassNamePrefix = null)
+    var getGrainLongMethod = typeof(IGrainFactory)
+        .GetMethods()
+        .FirstOrDefault(m => m.Name == "GetGrain"
+                          && m.IsGenericMethod
+                          && m.GetGenericArguments().Length == 1
+                          && m.GetParameters().Length == 2
+                          && m.GetParameters()[0].ParameterType == typeof(long));
     var counterGrainGenericMethod = getGrainLongMethod!.MakeGenericMethod(counterGrainType);
-    dynamic counterGrain = counterGrainGenericMethod.Invoke(grainFactory, new object[] { 123L, null! })!;
+    dynamic counterGrain = counterGrainGenericMethod.Invoke(grainFactory, new object[] { 123L, null })!;
 
     await counterGrain.Increment();
     Console.WriteLine("✓ Incremented counter");
@@ -177,9 +191,16 @@ try
     Console.WriteLine("---------------------------------------");
 
     // Use generic GetGrain<T> via reflection
-    var getGrainGuidMethod = typeof(IGrainFactory).GetMethod("GetGrain", new[] { typeof(Guid), typeof(string) });
+    // Find GetGrain<T>(Guid primaryKey, string? grainClassNamePrefix = null)
+    var getGrainGuidMethod = typeof(IGrainFactory)
+        .GetMethods()
+        .FirstOrDefault(m => m.Name == "GetGrain"
+                          && m.IsGenericMethod
+                          && m.GetGenericArguments().Length == 1
+                          && m.GetParameters().Length == 2
+                          && m.GetParameters()[0].ParameterType == typeof(Guid));
     var echoGrainGenericMethod = getGrainGuidMethod!.MakeGenericMethod(echoGrainType);
-    dynamic echoGrain = echoGrainGenericMethod.Invoke(grainFactory, new object[] { Guid.NewGuid(), null! })!;
+    dynamic echoGrain = echoGrainGenericMethod.Invoke(grainFactory, new object[] { Guid.NewGuid(), null })!;
 
     var echoResponse = await echoGrain.Echo("Hello from dynamic grain!");
     Console.WriteLine($"✓ Simple echo: {echoResponse}");

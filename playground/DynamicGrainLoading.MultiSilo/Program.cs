@@ -155,12 +155,19 @@ try
     Console.WriteLine("--------------------------------------------------");
 
     // Use generic GetGrain<T> via reflection
-    var getGrainStringMethod = typeof(IGrainFactory).GetMethod("GetGrain", new[] { typeof(string) });
+    // Find GetGrain<T>(string primaryKey, string? grainClassNamePrefix = null)
+    var getGrainStringMethod = typeof(IGrainFactory)
+        .GetMethods()
+        .FirstOrDefault(m => m.Name == "GetGrain"
+                          && m.IsGenericMethod
+                          && m.GetGenericArguments().Length == 1
+                          && m.GetParameters().Length == 2
+                          && m.GetParameters()[0].ParameterType == typeof(string));
     var helloGrainGenericMethod = getGrainStringMethod!.MakeGenericMethod(helloGrainType);
 
-    dynamic helloGrain1 = helloGrainGenericMethod.Invoke(grainFactory1, new object[] { "user1" })!;
-    dynamic helloGrain2 = helloGrainGenericMethod.Invoke(grainFactory1, new object[] { "user2" })!;
-    dynamic helloGrain3 = helloGrainGenericMethod.Invoke(grainFactory1, new object[] { "user3" })!;
+    dynamic helloGrain1 = helloGrainGenericMethod.Invoke(grainFactory1, new object[] { "user1", null })!;
+    dynamic helloGrain2 = helloGrainGenericMethod.Invoke(grainFactory1, new object[] { "user2", null })!;
+    dynamic helloGrain3 = helloGrainGenericMethod.Invoke(grainFactory1, new object[] { "user3", null })!;
 
     var response1 = await helloGrain1.SayHello("from grain 1");
     Console.WriteLine($"✓ HelloGrain user1: {response1}");
@@ -176,11 +183,18 @@ try
     Console.WriteLine("-----------------------");
 
     // Use generic GetGrain<T> via reflection
-    var getGrainLongMethod = typeof(IGrainFactory).GetMethod("GetGrain", new[] { typeof(long), typeof(string) });
+    // Find GetGrain<T>(long primaryKey, string? grainClassNamePrefix = null)
+    var getGrainLongMethod = typeof(IGrainFactory)
+        .GetMethods()
+        .FirstOrDefault(m => m.Name == "GetGrain"
+                          && m.IsGenericMethod
+                          && m.GetGenericArguments().Length == 1
+                          && m.GetParameters().Length == 2
+                          && m.GetParameters()[0].ParameterType == typeof(long));
     var counterGrainGenericMethod = getGrainLongMethod!.MakeGenericMethod(counterGrainType);
 
-    dynamic counter1 = counterGrainGenericMethod.Invoke(grainFactory1, new object[] { 1L, null! })!;
-    dynamic counter2 = counterGrainGenericMethod.Invoke(grainFactory1, new object[] { 2L, null! })!;
+    dynamic counter1 = counterGrainGenericMethod.Invoke(grainFactory1, new object[] { 1L, null })!;
+    dynamic counter2 = counterGrainGenericMethod.Invoke(grainFactory1, new object[] { 2L, null })!;
 
     await counter1.Increment();
     await counter1.Increment();
