@@ -258,14 +258,13 @@ internal sealed class DynamicGrainLoaderService : IDynamicGrainLoader, IAsyncDis
     }
 
     /// <inheritdoc/>
-    public async IAsyncEnumerable<GrainAssemblyLoadedEvent> LoadEvents
+    public IAsyncEnumerable<GrainAssemblyLoadedEvent> LoadEvents => GetLoadEventsAsync();
+
+    private async IAsyncEnumerable<GrainAssemblyLoadedEvent> GetLoadEventsAsync()
     {
-        get
+        await foreach (var loadEvent in _loadEventsChannel.Reader.ReadAllAsync(_shutdownCts.Token))
         {
-            await foreach (var loadEvent in _loadEventsChannel.Reader.ReadAllAsync(_shutdownCts.Token))
-            {
-                yield return loadEvent;
-            }
+            yield return loadEvent;
         }
     }
 
