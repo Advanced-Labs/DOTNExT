@@ -22,7 +22,7 @@ namespace UnitTests.StreamingTests
         private const int TotalQueueCount = 4;
         private readonly Fixture fixture;
 
-        public class Fixture : BaseTestClusterFixture
+        public class Fixture : DynamicLoadingTestClusterFixture
         {
             public const string StreamProviderName = GeneratedStreamTestConstants.StreamProviderName;
             public static readonly string StreamProviderTypeName = typeof(PersistentStreamProvider).FullName;
@@ -30,6 +30,7 @@ namespace UnitTests.StreamingTests
 
             protected override void ConfigureTestCluster(TestClusterBuilder builder)
             {
+                base.ConfigureTestCluster(builder);
                 builder.AddSiloBuilderConfigurator<MySiloBuilderConfigurator>();
             }
 

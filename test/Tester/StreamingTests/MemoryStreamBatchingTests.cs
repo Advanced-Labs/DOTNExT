@@ -15,12 +15,13 @@ namespace UnitTests.StreamingTests
     [TestCategory("BVT")]
     public class MemoryStreamBatchingTests : StreamBatchingTestRunner, IClassFixture<MemoryStreamBatchingTests.Fixture>
     {
-        public class Fixture : BaseTestClusterFixture
+        public class Fixture : DynamicLoadingTestClusterFixture
         {
             private const int partitionCount = 1;
 
             protected override void ConfigureTestCluster(TestClusterBuilder builder)
             {
+                base.ConfigureTestCluster(builder);
                 builder.AddSiloBuilderConfigurator<MySiloBuilderConfigurator>();
                 builder.AddClientBuilderConfigurator<MyClientBuilderConfigurator>();
             }

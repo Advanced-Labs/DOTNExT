@@ -18,10 +18,11 @@ namespace UnitTests.StreamingTests
 
         private readonly ILogger logger;
 
-        public class Fixture : BaseTestClusterFixture
+        public class Fixture : DynamicLoadingTestClusterFixture
         {
             protected override void ConfigureTestCluster(TestClusterBuilder builder)
             {
+                base.ConfigureTestCluster(builder);
                 builder.AddSiloBuilderConfigurator<SiloConfigurator>();
                 builder.AddClientBuilderConfigurator<ClientConfiguretor>();
             }
