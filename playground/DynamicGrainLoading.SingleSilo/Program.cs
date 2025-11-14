@@ -232,8 +232,11 @@ try
 
     // Use reflection to invoke EchoComplex method
     var echoComplexMethod = echoGrainType.GetMethod("EchoComplex");
-    var echoComplexResponseTask = (Task<object>)echoComplexMethod!.Invoke(echoGrain, new object[] { complexData })!;
-    var echoComplexResponse = await echoComplexResponseTask;
+    var echoComplexResponseTask = (Task)echoComplexMethod!.Invoke(echoGrain, new object[] { complexData })!;
+    await echoComplexResponseTask;
+    // Get the result using reflection since we don't know the exact Task<T> type at compile time
+    var resultProperty = echoComplexResponseTask.GetType().GetProperty("Result");
+    var echoComplexResponse = resultProperty!.GetValue(echoComplexResponseTask)!;
 
     Console.WriteLine("✓ Received complex echo:");
     Console.WriteLine($"  Name: {complexDataType.GetProperty("Name")!.GetValue(echoComplexResponse)}");
