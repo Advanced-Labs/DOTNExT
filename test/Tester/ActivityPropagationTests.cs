@@ -57,10 +57,11 @@ namespace UnitTests.General
         /// Test fixture that configures an Orleans cluster with activity propagation enabled.
         /// Both the silo and client are configured to support distributed tracing.
         /// </summary>
-        public class Fixture : BaseTestClusterFixture
+        public class Fixture : DynamicLoadingTestClusterFixture
         {
             protected override void ConfigureTestCluster(TestClusterBuilder builder)
             {
+                base.ConfigureTestCluster(builder);
                 builder.ConfigureHostConfiguration(TestDefaultConfiguration.ConfigureHostConfiguration);
                 builder.AddSiloBuilderConfigurator<SiloInvokerTestSiloBuilderConfigurator>();
                 builder.AddClientBuilderConfigurator<ClientConfigurator>();
