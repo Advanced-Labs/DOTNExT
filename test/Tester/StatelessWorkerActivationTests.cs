@@ -23,10 +23,11 @@ namespace UnitTests.General;
 /// </summary>
 public class StatelessWorkerActivationTests : IClassFixture<StatelessWorkerActivationTests.Fixture>
 {
-    public class Fixture : BaseTestClusterFixture
+    public class Fixture : DynamicLoadingTestClusterFixture
     {
         protected override void ConfigureTestCluster(TestClusterBuilder builder)
         {
+            base.ConfigureTestCluster(builder);
             builder.Options.InitialSilosCount = 1;
             builder.AddSiloBuilderConfigurator<SiloConfigurator>();
         }
