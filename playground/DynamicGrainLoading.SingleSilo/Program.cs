@@ -134,7 +134,11 @@ try
     // Test 1: Hello Grain
     Console.WriteLine("Test 1: HelloGrain");
     Console.WriteLine("------------------");
-    dynamic helloGrain = grainFactory.GetGrain(helloGrainType, "test-user");
+
+    // Use generic GetGrain<T> via reflection to get properly typed proxy
+    var getGrainStringMethod = typeof(IGrainFactory).GetMethod("GetGrain", new[] { typeof(string) });
+    var helloGrainGenericMethod = getGrainStringMethod!.MakeGenericMethod(helloGrainType);
+    dynamic helloGrain = helloGrainGenericMethod.Invoke(grainFactory, new object[] { "test-user" })!;
 
     var helloMessage = await helloGrain.SayHello("World");
     Console.WriteLine($"✓ Response: {helloMessage}");
@@ -146,7 +150,11 @@ try
     // Test 2: Counter Grain
     Console.WriteLine("Test 2: CounterGrain");
     Console.WriteLine("--------------------");
-    dynamic counterGrain = grainFactory.GetGrain(counterGrainType, 123L);
+
+    // Use generic GetGrain<T> via reflection
+    var getGrainLongMethod = typeof(IGrainFactory).GetMethod("GetGrain", new[] { typeof(long), typeof(string) });
+    var counterGrainGenericMethod = getGrainLongMethod!.MakeGenericMethod(counterGrainType);
+    dynamic counterGrain = counterGrainGenericMethod.Invoke(grainFactory, new object[] { 123L, null! })!;
 
     await counterGrain.Increment();
     Console.WriteLine("✓ Incremented counter");
@@ -167,7 +175,11 @@ try
     // Test 3: Echo Grain (Serialization Test)
     Console.WriteLine("Test 3: EchoGrain (Serialization Test)");
     Console.WriteLine("---------------------------------------");
-    dynamic echoGrain = grainFactory.GetGrain(echoGrainType, Guid.NewGuid());
+
+    // Use generic GetGrain<T> via reflection
+    var getGrainGuidMethod = typeof(IGrainFactory).GetMethod("GetGrain", new[] { typeof(Guid), typeof(string) });
+    var echoGrainGenericMethod = getGrainGuidMethod!.MakeGenericMethod(echoGrainType);
+    dynamic echoGrain = echoGrainGenericMethod.Invoke(grainFactory, new object[] { Guid.NewGuid(), null! })!;
 
     var echoResponse = await echoGrain.Echo("Hello from dynamic grain!");
     Console.WriteLine($"✓ Simple echo: {echoResponse}");
