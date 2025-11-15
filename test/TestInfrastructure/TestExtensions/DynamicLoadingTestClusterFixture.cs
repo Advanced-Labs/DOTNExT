@@ -144,6 +144,19 @@ namespace TestExtensions
             // Load assemblies on all silos
             foreach (var silo in HostedCluster.Silos)
             {
+                // Skip standalone (out-of-process) silos as they don't expose IServiceProvider
+                // and cannot be accessed for dynamic loading. Standalone silos are used by tests
+                // that require process isolation (e.g., ManagementGrainTests for accurate statistics).
+                if (silo is not InProcessSiloHandle)
+                {
+                    Logger?.LogWarning(
+                        "Skipping dynamic grain loading for silo {SiloName} ({SiloType}). " +
+                        "Dynamic loading is only supported for in-process silos. " +
+                        "Standalone silos running in separate processes should pre-configure grain assemblies via builder.Properties[\"GrainAssembly\"].",
+                        silo.Name, silo.GetType().Name);
+                    continue;
+                }
+
                 var serviceProvider = HostedCluster.GetSiloServiceProvider(silo.SiloAddress);
                 var grainLoader = serviceProvider.GetRequiredService<IDynamicGrainLoader>();
 
