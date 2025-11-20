@@ -23,12 +23,13 @@ namespace UnitTests.StreamingTests
         private readonly Fixture fixture;
         private readonly ImplicitSubscritionRecoverableStreamTestRunner runner;
 
-        public class Fixture : BaseTestClusterFixture
+        public class Fixture : DynamicLoadingTestClusterFixture
         {
             public const string StreamProviderName = GeneratedStreamTestConstants.StreamProviderName;
 
             protected override void ConfigureTestCluster(TestClusterBuilder builder)
             {
+                base.ConfigureTestCluster(builder);
                 builder.AddSiloBuilderConfigurator<MySiloBuilderConfigurator>();
             }
 

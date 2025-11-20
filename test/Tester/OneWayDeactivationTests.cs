@@ -16,10 +16,11 @@ namespace UnitTests.General
     {
         private readonly Fixture _fixture;
 
-        public class Fixture : BaseTestClusterFixture
+        public class Fixture : DynamicLoadingTestClusterFixture
         {
             protected override void ConfigureTestCluster(TestClusterBuilder builder)
             {
+                base.ConfigureTestCluster(builder);
                 builder.Options.InitialSilosCount = 3;
                 builder.AddSiloBuilderConfigurator<SiloConfiguration>();
             }

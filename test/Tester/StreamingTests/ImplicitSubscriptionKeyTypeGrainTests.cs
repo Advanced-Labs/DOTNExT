@@ -17,12 +17,13 @@ namespace UnitTests.StreamingTests
         private readonly Fixture fixture;
         private readonly IStreamProvider _streamProvider;
 
-        public class Fixture : BaseTestClusterFixture
+        public class Fixture : DynamicLoadingTestClusterFixture
         {
             public const string StreamProviderName = GeneratedStreamTestConstants.StreamProviderName;
 
             protected override void ConfigureTestCluster(TestClusterBuilder builder)
             {
+                base.ConfigureTestCluster(builder);
                 builder.AddSiloBuilderConfigurator<MySiloBuilderConfigurator>();
                 builder.AddClientBuilderConfigurator<MyClientBuilderConfigurator>();
             }

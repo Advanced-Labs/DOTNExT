@@ -134,62 +134,116 @@ try
     // Test 1: Hello Grain
     Console.WriteLine("Test 1: HelloGrain");
     Console.WriteLine("------------------");
-    dynamic helloGrain = grainFactory.GetGrain(helloGrainType, "test-user");
 
-    var helloMessage = await helloGrain.SayHello("World");
+    // Use generic GetGrain<T> via reflection to get properly typed proxy
+    // Find GetGrain<T>(string primaryKey, string? grainClassNamePrefix = null)
+    var getGrainStringMethod = typeof(IGrainFactory)
+        .GetMethods()
+        .FirstOrDefault(m => m.Name == "GetGrain"
+                          && m.IsGenericMethod
+                          && m.GetGenericArguments().Length == 1
+                          && m.GetParameters().Length == 2
+                          && m.GetParameters()[0].ParameterType == typeof(string));
+    var helloGrainGenericMethod = getGrainStringMethod!.MakeGenericMethod(helloGrainType);
+    object helloGrain = helloGrainGenericMethod.Invoke(grainFactory, new object?[] { "test-user", null })!;
+
+    // Use reflection to invoke SayHello method
+    var sayHelloMethod = helloGrainType.GetMethod("SayHello");
+    var helloMessageTask = (Task<string>)sayHelloMethod!.Invoke(helloGrain, new object[] { "World" })!;
+    var helloMessage = await helloMessageTask;
     Console.WriteLine($"✓ Response: {helloMessage}");
 
-    var callCount = await helloGrain.GetCallCount();
+    var getCallCountMethod = helloGrainType.GetMethod("GetCallCount");
+    var callCountTask = (Task<int>)getCallCountMethod!.Invoke(helloGrain, null)!;
+    var callCount = await callCountTask;
     Console.WriteLine($"✓ Call count: {callCount}");
     Console.WriteLine();
 
     // Test 2: Counter Grain
     Console.WriteLine("Test 2: CounterGrain");
     Console.WriteLine("--------------------");
-    dynamic counterGrain = grainFactory.GetGrain(counterGrainType, 123L);
 
-    await counterGrain.Increment();
+    // Use generic GetGrain<T> via reflection
+    // Find GetGrain<T>(long primaryKey, string? grainClassNamePrefix = null)
+    var getGrainLongMethod = typeof(IGrainFactory)
+        .GetMethods()
+        .FirstOrDefault(m => m.Name == "GetGrain"
+                          && m.IsGenericMethod
+                          && m.GetGenericArguments().Length == 1
+                          && m.GetParameters().Length == 2
+                          && m.GetParameters()[0].ParameterType == typeof(long));
+    var counterGrainGenericMethod = getGrainLongMethod!.MakeGenericMethod(counterGrainType);
+    object counterGrain = counterGrainGenericMethod.Invoke(grainFactory, new object?[] { 123L, null })!;
+
+    // Use reflection to invoke methods
+    var incrementMethod = counterGrainType.GetMethod("Increment");
+    await (Task)incrementMethod!.Invoke(counterGrain, null)!;
     Console.WriteLine("✓ Incremented counter");
 
-    await counterGrain.Increment();
+    await (Task)incrementMethod!.Invoke(counterGrain, null)!;
     Console.WriteLine("✓ Incremented counter again");
 
-    var count = await counterGrain.GetCount();
+    var getCountMethod = counterGrainType.GetMethod("GetCount");
+    var count = await (Task<int>)getCountMethod!.Invoke(counterGrain, null)!;
     Console.WriteLine($"✓ Current count: {count}");
 
-    await counterGrain.Reset();
+    var resetMethod = counterGrainType.GetMethod("Reset");
+    await (Task)resetMethod!.Invoke(counterGrain, null)!;
     Console.WriteLine("✓ Reset counter");
 
-    count = await counterGrain.GetCount();
+    count = await (Task<int>)getCountMethod!.Invoke(counterGrain, null)!;
     Console.WriteLine($"✓ Count after reset: {count}");
     Console.WriteLine();
 
     // Test 3: Echo Grain (Serialization Test)
     Console.WriteLine("Test 3: EchoGrain (Serialization Test)");
     Console.WriteLine("---------------------------------------");
-    dynamic echoGrain = grainFactory.GetGrain(echoGrainType, Guid.NewGuid());
 
-    var echoResponse = await echoGrain.Echo("Hello from dynamic grain!");
+    // Use generic GetGrain<T> via reflection
+    // Find GetGrain<T>(Guid primaryKey, string? grainClassNamePrefix = null)
+    var getGrainGuidMethod = typeof(IGrainFactory)
+        .GetMethods()
+        .FirstOrDefault(m => m.Name == "GetGrain"
+                          && m.IsGenericMethod
+                          && m.GetGenericArguments().Length == 1
+                          && m.GetParameters().Length == 2
+                          && m.GetParameters()[0].ParameterType == typeof(Guid));
+    var echoGrainGenericMethod = getGrainGuidMethod!.MakeGenericMethod(echoGrainType);
+    object echoGrain = echoGrainGenericMethod.Invoke(grainFactory, new object?[] { Guid.NewGuid(), null })!;
+
+    // Use reflection to invoke Echo method
+    var echoMethod = echoGrainType.GetMethod("Echo");
+    var echoResponseTask = (Task<string>)echoMethod!.Invoke(echoGrain, new object[] { "Hello from dynamic grain!" })!;
+    var echoResponse = await echoResponseTask;
     Console.WriteLine($"✓ Simple echo: {echoResponse}");
 
-    // Create complex data
-    dynamic complexData = Activator.CreateInstance(complexDataType!)!;
-    complexData.Name = "Test Data";
-    complexData.Value = 42;
-    complexData.Timestamp = DateTime.UtcNow;
-    complexData.Tags = new List<string> { "dynamic", "test", "orleans" };
+    // Create complex data using reflection
+    object complexData = Activator.CreateInstance(complexDataType!)!;
+    complexDataType!.GetProperty("Name")!.SetValue(complexData, "Test Data");
+    complexDataType.GetProperty("Value")!.SetValue(complexData, 42);
+    complexDataType.GetProperty("Timestamp")!.SetValue(complexData, DateTime.UtcNow);
+    complexDataType.GetProperty("Tags")!.SetValue(complexData, new List<string> { "dynamic", "test", "orleans" });
 
     Console.WriteLine("Sending complex data:");
-    Console.WriteLine($"  Name: {complexData.Name}");
-    Console.WriteLine($"  Value: {complexData.Value}");
-    Console.WriteLine($"  Tags: {string.Join(", ", complexData.Tags)}");
+    Console.WriteLine($"  Name: {complexDataType.GetProperty("Name")!.GetValue(complexData)}");
+    Console.WriteLine($"  Value: {complexDataType.GetProperty("Value")!.GetValue(complexData)}");
+    var tags = (List<string>)complexDataType.GetProperty("Tags")!.GetValue(complexData)!;
+    Console.WriteLine($"  Tags: {string.Join(", ", tags)}");
 
-    var echoComplexResponse = await echoGrain.EchoComplex(complexData);
+    // Use reflection to invoke EchoComplex method
+    var echoComplexMethod = echoGrainType.GetMethod("EchoComplex");
+    var echoComplexResponseTask = (Task)echoComplexMethod!.Invoke(echoGrain, new object[] { complexData })!;
+    await echoComplexResponseTask;
+    // Get the result using reflection since we don't know the exact Task<T> type at compile time
+    var resultProperty = echoComplexResponseTask.GetType().GetProperty("Result");
+    var echoComplexResponse = resultProperty!.GetValue(echoComplexResponseTask)!;
+
     Console.WriteLine("✓ Received complex echo:");
-    Console.WriteLine($"  Name: {echoComplexResponse.Name}");
-    Console.WriteLine($"  Value: {echoComplexResponse.Value}");
-    Console.WriteLine($"  Timestamp: {echoComplexResponse.Timestamp}");
-    Console.WriteLine($"  Tags: {string.Join(", ", echoComplexResponse.Tags)}");
+    Console.WriteLine($"  Name: {complexDataType.GetProperty("Name")!.GetValue(echoComplexResponse)}");
+    Console.WriteLine($"  Value: {complexDataType.GetProperty("Value")!.GetValue(echoComplexResponse)}");
+    Console.WriteLine($"  Timestamp: {complexDataType.GetProperty("Timestamp")!.GetValue(echoComplexResponse)}");
+    var responseTags = (List<string>)complexDataType.GetProperty("Tags")!.GetValue(echoComplexResponse)!;
+    Console.WriteLine($"  Tags: {string.Join(", ", responseTags)}");
     Console.WriteLine();
 
     Console.WriteLine("═══════════════════════════════════════════════════════");

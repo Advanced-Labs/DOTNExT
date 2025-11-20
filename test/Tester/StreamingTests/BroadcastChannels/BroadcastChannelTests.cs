@@ -20,7 +20,7 @@ namespace Tester.StreamingTests.BroadcastChannel
         private IBroadcastChannelProvider _provider => _fixture.Client.GetBroadcastChannelProvider(ProviderName);
         private IBroadcastChannelProvider _providerNonFireAndForget => _fixture.Client.GetBroadcastChannelProvider(ProviderNameNonFireAndForget);
 
-        public class Fixture : BaseTestClusterFixture
+        public class Fixture : DynamicLoadingTestClusterFixture
         {
             protected override void CheckPreconditionsOrThrow()
             {
@@ -29,6 +29,7 @@ namespace Tester.StreamingTests.BroadcastChannel
 
             protected override void ConfigureTestCluster(TestClusterBuilder builder)
             {
+                base.ConfigureTestCluster(builder);
                 builder.AddClientBuilderConfigurator<ClientConfigurator>();
                 builder.AddSiloBuilderConfigurator<SiloConfigurator>();
             }

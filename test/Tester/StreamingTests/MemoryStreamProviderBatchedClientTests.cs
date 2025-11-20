@@ -14,13 +14,14 @@ namespace Tester.StreamingTests
     /// </summary>
     public class MemoryStreamProviderBatchedClientTests : OrleansTestingBase, IClassFixture<MemoryStreamProviderBatchedClientTests.Fixture>
     {
-        public class Fixture : BaseTestClusterFixture
+        public class Fixture : DynamicLoadingTestClusterFixture
         {
             public const string StreamProviderName = "MemoryStreamProvider";
             public const string StreamNamespace = "StreamNamespace";
             private const int partitionCount = 8;
             protected override void ConfigureTestCluster(TestClusterBuilder builder)
             {
+                base.ConfigureTestCluster(builder);
                 builder.AddSiloBuilderConfigurator<MySiloBuilderConfigurator>();
                 builder.AddClientBuilderConfigurator<MyClientBuilderConfigurator>();
             }

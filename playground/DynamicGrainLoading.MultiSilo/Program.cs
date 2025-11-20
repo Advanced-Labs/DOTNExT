@@ -2,6 +2,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Orleans;
+using Orleans.Configuration;
 using Orleans.Hosting;
 using Orleans.Runtime;
 using Orleans.Runtime.DynamicGrains;
@@ -154,33 +155,61 @@ try
     Console.WriteLine("Test 1: Activate HelloGrain (may be on any silo)");
     Console.WriteLine("--------------------------------------------------");
 
-    dynamic helloGrain1 = grainFactory1.GetGrain(helloGrainType, "user1");
-    dynamic helloGrain2 = grainFactory1.GetGrain(helloGrainType, "user2");
-    dynamic helloGrain3 = grainFactory1.GetGrain(helloGrainType, "user3");
+    // Use generic GetGrain<T> via reflection
+    // Find GetGrain<T>(string primaryKey, string? grainClassNamePrefix = null)
+    var getGrainStringMethod = typeof(IGrainFactory)
+        .GetMethods()
+        .FirstOrDefault(m => m.Name == "GetGrain"
+                          && m.IsGenericMethod
+                          && m.GetGenericArguments().Length == 1
+                          && m.GetParameters().Length == 2
+                          && m.GetParameters()[0].ParameterType == typeof(string));
+    var helloGrainGenericMethod = getGrainStringMethod!.MakeGenericMethod(helloGrainType);
 
-    var response1 = await helloGrain1.SayHello("from grain 1");
+    object helloGrain1 = helloGrainGenericMethod.Invoke(grainFactory1, new object?[] { "user1", null })!;
+    object helloGrain2 = helloGrainGenericMethod.Invoke(grainFactory1, new object?[] { "user2", null })!;
+    object helloGrain3 = helloGrainGenericMethod.Invoke(grainFactory1, new object?[] { "user3", null })!;
+
+    // Use reflection to invoke SayHello method
+    var sayHelloMethod = helloGrainType.GetMethod("SayHello");
+    var response1 = await (Task<string>)sayHelloMethod!.Invoke(helloGrain1, new object[] { "from grain 1" })!;
     Console.WriteLine($"✓ HelloGrain user1: {response1}");
 
-    var response2 = await helloGrain2.SayHello("from grain 2");
+    var response2 = await (Task<string>)sayHelloMethod!.Invoke(helloGrain2, new object[] { "from grain 2" })!;
     Console.WriteLine($"✓ HelloGrain user2: {response2}");
 
-    var response3 = await helloGrain3.SayHello("from grain 3");
+    var response3 = await (Task<string>)sayHelloMethod!.Invoke(helloGrain3, new object[] { "from grain 3" })!;
     Console.WriteLine($"✓ HelloGrain user3: {response3}");
     Console.WriteLine();
 
     Console.WriteLine("Test 2: Counter Grains");
     Console.WriteLine("-----------------------");
 
-    dynamic counter1 = grainFactory1.GetGrain(counterGrainType, 1L);
-    dynamic counter2 = grainFactory1.GetGrain(counterGrainType, 2L);
+    // Use generic GetGrain<T> via reflection
+    // Find GetGrain<T>(long primaryKey, string? grainClassNamePrefix = null)
+    var getGrainLongMethod = typeof(IGrainFactory)
+        .GetMethods()
+        .FirstOrDefault(m => m.Name == "GetGrain"
+                          && m.IsGenericMethod
+                          && m.GetGenericArguments().Length == 1
+                          && m.GetParameters().Length == 2
+                          && m.GetParameters()[0].ParameterType == typeof(long));
+    var counterGrainGenericMethod = getGrainLongMethod!.MakeGenericMethod(counterGrainType);
 
-    await counter1.Increment();
-    await counter1.Increment();
-    var count1 = await counter1.GetCount();
+    object counter1 = counterGrainGenericMethod.Invoke(grainFactory1, new object?[] { 1L, null })!;
+    object counter2 = counterGrainGenericMethod.Invoke(grainFactory1, new object?[] { 2L, null })!;
+
+    // Use reflection to invoke methods
+    var incrementMethod = counterGrainType.GetMethod("Increment");
+    var getCountMethod = counterGrainType.GetMethod("GetCount");
+
+    await (Task)incrementMethod!.Invoke(counter1, null)!;
+    await (Task)incrementMethod!.Invoke(counter1, null)!;
+    var count1 = await (Task<int>)getCountMethod!.Invoke(counter1, null)!;
     Console.WriteLine($"✓ Counter 1: {count1}");
 
-    await counter2.Increment();
-    var count2 = await counter2.GetCount();
+    await (Task)incrementMethod!.Invoke(counter2, null)!;
+    var count2 = await (Task<int>)getCountMethod!.Invoke(counter2, null)!;
     Console.WriteLine($"✓ Counter 2: {count2}");
     Console.WriteLine();
 
@@ -226,8 +255,9 @@ try
     var tasks = new List<Task>();
     for (int i = 0; i < 10; i++)
     {
-        dynamic grain = helloGrainGenericMethod.Invoke(grainFactory1, new object[] { $"bulk-user-{i}" })!;
-        tasks.Add(grain.SayHello($"bulk message {i}"));
+        object grain = helloGrainGenericMethod.Invoke(grainFactory1, new object?[] { $"bulk-user-{i}", null })!;
+        var messageTask = (Task<string>)sayHelloMethod!.Invoke(grain, new object[] { $"bulk message {i}" })!;
+        tasks.Add(messageTask);
     }
 
     await Task.WhenAll(tasks);
@@ -276,14 +306,9 @@ static async Task<IHost> StartSilo(string siloName, int siloPort, int gatewayPor
                     options.ServiceId = "dynamic-test-service";
                 })
                 .ConfigureEndpoints(IPAddress.Loopback, siloPort, gatewayPort)
-                .UseAdoNetClustering(options =>
+                .UseDevelopmentClustering(options =>
                 {
-                    options.Invariant = "System.Data.SqlClient";
-                    options.ConnectionString = "Data Source=(localdb)\\MSSQLLocalDB;Initial Catalog=Orleans;Integrated Security=True";
-                })
-                .ConfigureApplicationParts(parts =>
-                {
-                    // Empty - we'll load grains dynamically
+                    options.PrimarySiloEndpoint = new IPEndPoint(IPAddress.Loopback, primarySiloPort);
                 })
                 .AddDynamicGrainLoading();  // ← Enable dynamic grain loading
         })

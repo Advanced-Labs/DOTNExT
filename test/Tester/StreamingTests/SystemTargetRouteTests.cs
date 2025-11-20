@@ -18,12 +18,13 @@ namespace Tester.StreamingTests
         private static readonly TimeSpan Timeout = TimeSpan.FromSeconds(30);
         private int eventsConsumed = 0;
 
-        public class Fixture : BaseTestClusterFixture
+        public class Fixture : DynamicLoadingTestClusterFixture
         {
             public const string StreamProviderName = "MemoryStreamProvider";
             private const int partitionCount = 8;
             protected override void ConfigureTestCluster(TestClusterBuilder builder)
             {
+                base.ConfigureTestCluster(builder);
                 builder.Options.GatewayPerSilo = false;
                 builder.AddSiloBuilderConfigurator<MySiloBuilderConfigurator>();
                 builder.AddClientBuilderConfigurator<MyClientBuilderConfigurator>();

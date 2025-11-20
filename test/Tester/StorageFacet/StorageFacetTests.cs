@@ -13,10 +13,11 @@ namespace Tester
     {
         private readonly Fixture fixture;
 
-        public class Fixture : BaseTestClusterFixture
+        public class Fixture : DynamicLoadingTestClusterFixture
         {
             protected override void ConfigureTestCluster(TestClusterBuilder builder)
             {
+                base.ConfigureTestCluster(builder);
                 builder.AddSiloBuilderConfigurator<TestSiloBuilderConfigurator>();
             }
 

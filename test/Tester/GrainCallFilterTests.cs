@@ -69,10 +69,11 @@ namespace UnitTests.General
     [TestCategory("BVT"), TestCategory("GrainCallFilter")]
     public class GrainCallFilterTests : OrleansTestingBase, IClassFixture<GrainCallFilterTests.Fixture>
     {
-        public class Fixture : BaseTestClusterFixture
+        public class Fixture : DynamicLoadingTestClusterFixture
         {
             protected override void ConfigureTestCluster(TestClusterBuilder builder)
             {
+                base.ConfigureTestCluster(builder);
                 builder.ConfigureHostConfiguration(TestDefaultConfiguration.ConfigureHostConfiguration);
                 builder.AddSiloBuilderConfigurator<SiloInvokerTestSiloBuilderConfigurator>();
                 builder.AddClientBuilderConfigurator<ClientConfigurator>();

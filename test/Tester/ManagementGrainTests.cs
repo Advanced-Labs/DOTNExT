@@ -41,10 +41,11 @@ namespace UnitTests.Management
 
         private TestCluster HostedCluster => this.fixture.HostedCluster;
 
-        public class Fixture : BaseTestClusterFixture
+        public class Fixture : DynamicLoadingTestClusterFixture
         {
             protected override void ConfigureTestCluster(TestClusterBuilder builder)
             {
+                base.ConfigureTestCluster(builder);
                 // The ActivationCount tests rely on CounterStatistic, which is a shared static value, so isolation
                 // between silos is obtained using external processes. This ensures each silo maintains independent
                 // statistics rather than sharing them through static fields in the same process.
