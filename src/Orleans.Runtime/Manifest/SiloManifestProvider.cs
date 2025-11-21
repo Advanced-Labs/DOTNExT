@@ -182,59 +182,5 @@ namespace Orleans.Metadata
 
             return (updatedManifest, grainTypeMapBuilder.ToImmutable());
         }
-
-        /// <summary>
-        /// Removes grain types and interfaces from the silo manifest.
-        /// This method is thread-safe and used during dynamic grain unloading.
-        /// </summary>
-        /// <param name="grainClassesToRemove">Grain implementation classes to remove</param>
-        /// <param name="grainInterfacesToRemove">Grain interfaces to remove</param>
-        /// <returns>The updated manifest and list of removed grain types</returns>
-        internal (GrainManifest Manifest, IEnumerable<GrainType> RemovedGrainTypes) RemoveFromManifest(
-            IEnumerable<Type> grainClassesToRemove,
-            IEnumerable<Type> grainInterfacesToRemove)
-        {
-            if (grainClassesToRemove == null) throw new ArgumentNullException(nameof(grainClassesToRemove));
-            if (grainInterfacesToRemove == null) throw new ArgumentNullException(nameof(grainInterfacesToRemove));
-
-            // Build list of grain types to remove
-            var grainTypesToRemove = new List<GrainType>();
-            foreach (var grainClass in grainClassesToRemove)
-            {
-                var grainType = _typeProvider.GetGrainType(grainClass);
-                grainTypesToRemove.Add(grainType);
-            }
-
-            // Remove from grain properties
-            var grainPropertiesBuilder = _siloManifest.Grains.ToBuilder();
-            foreach (var grainType in grainTypesToRemove)
-            {
-                grainPropertiesBuilder.Remove(grainType);
-            }
-
-            // Remove from interface properties
-            var interfacePropertiesBuilder = _siloManifest.Interfaces.ToBuilder();
-            foreach (var grainInterface in grainInterfacesToRemove)
-            {
-                var interfaceId = _interfaceIdProvider.GetGrainInterfaceType(grainInterface);
-                interfacePropertiesBuilder.Remove(interfaceId);
-            }
-
-            // Create updated manifest
-            var updatedManifest = new GrainManifest(
-                grainPropertiesBuilder.ToImmutable(),
-                interfacePropertiesBuilder.ToImmutable());
-
-            // Update the silo manifest atomically
-            _siloManifest = updatedManifest;
-
-            // Update the grain type map
-            if (grainTypesToRemove.Count > 0)
-            {
-                GrainTypeMap.RemoveTypes(grainTypesToRemove);
-            }
-
-            return (updatedManifest, grainTypesToRemove);
-        }
     }
 }

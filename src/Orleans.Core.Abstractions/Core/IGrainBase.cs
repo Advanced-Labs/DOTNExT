@@ -308,11 +308,6 @@ namespace Orleans
         /// Runtime detected that app is running on low memory, and forcefully decided to deactivate.
         /// </summary>
         HighMemoryPressure,
-
-        /// <summary>
-        /// The grain type is being dynamically unloaded from this silo.
-        /// </summary>
-        TypeUnloading,
     }
 
     internal static class DeactivationReasonCodeExtensions

@@ -34,20 +34,13 @@ public static class DynamicGrainLoadingExtensions
         services.TryAddSingleton<DynamicAssemblyLoader>();
         services.TryAddSingleton<DynamicSerializationManager>();
         services.TryAddSingleton<DynamicGrainLoaderService>();
-        services.TryAddSingleton<DynamicGrainUnloaderService>();
 
-        // Register grain lifecycle manager for deactivation during unloading
-        services.TryAddSingleton<IGrainLifecycleManager, GrainLifecycleManager>();
-
-        // Register the public interfaces
+        // Register the public interface
         services.TryAddSingleton<IDynamicGrainLoader>(sp => sp.GetRequiredService<DynamicGrainLoaderService>());
-        services.TryAddSingleton<IDynamicGrainUnloader>(sp => sp.GetRequiredService<DynamicGrainUnloaderService>());
 
-        // Register lifecycle participants
+        // Register lifecycle participant
         services.TryAddSingleton<ILifecycleParticipant<ISiloLifecycle>>(
             sp => sp.GetRequiredService<DynamicGrainLoaderService>());
-        services.TryAddSingleton<ILifecycleParticipant<ISiloLifecycle>>(
-            sp => sp.GetRequiredService<DynamicGrainUnloaderService>());
 
         return services;
     }
