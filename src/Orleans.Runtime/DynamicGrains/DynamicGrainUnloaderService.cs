@@ -215,12 +215,18 @@ internal sealed class DynamicGrainUnloaderService : IDynamicGrainUnloader, ILife
 
             // Update the local manifest in the cluster manifest provider
             // This triggers propagation to other silos
-            _clusterManifestProvider.LocalGrainManifest = updatedManifest;
+            var published = _clusterManifestProvider.UpdateLocalManifest(updatedManifest);
+
+            if (!published)
+            {
+                _logger.LogWarning("Failed to publish manifest update to cluster");
+            }
 
             var newVersion = _clusterManifestProvider.Current.Version;
 
             _logger.LogInformation(
-                "Propagated manifest removal to cluster. New version: {Version}",
+                "Propagated manifest removal to cluster. Published: {Published}, New version: {Version}",
+                published,
                 newVersion);
 
             // Small delay to allow manifest propagation before clearing caches
