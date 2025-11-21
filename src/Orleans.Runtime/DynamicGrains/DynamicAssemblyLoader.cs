@@ -299,51 +299,77 @@ internal sealed class DynamicAssemblyLoader
 
     /// <summary>
     /// Returns the comprehensive list of Orleans types that should be shared across plugin boundaries.
-    /// These types must be unified to ensure type identity and proper casting across contexts.
+    /// Uses reflection to automatically discover all Orleans types from loaded assemblies,
+    /// eliminating the need for manual maintenance and avoiding circular dependency issues.
     /// </summary>
-    private static Type[] GetOrleansSharedTypes()
+    private Type[] GetOrleansSharedTypes()
     {
-        return new[]
+        var sharedTypes = new List<Type>();
+
+        // Scan all currently loaded assemblies that belong to Orleans
+        var orleansAssemblies = AppDomain.CurrentDomain.GetAssemblies()
+            .Where(a =>
+            {
+                var name = a.GetName().Name;
+                return name != null &&
+                       (name.StartsWith("Orleans", StringComparison.Ordinal) ||
+                        name.StartsWith("Microsoft.Orleans", StringComparison.Ordinal));
+            })
+            .ToList();
+
+        _logger.LogDebug(
+            "Scanning {AssemblyCount} Orleans assemblies for shared types",
+            orleansAssemblies.Count);
+
+        foreach (var assembly in orleansAssemblies)
         {
-            // === Core Grain Abstractions ===
-            typeof(IGrain),
-            typeof(IGrainWithGuidKey),
-            typeof(IGrainWithStringKey),
-            typeof(IGrainWithIntegerKey),
-            typeof(IGrainWithGuidCompoundKey),
-            typeof(IGrainWithIntegerCompoundKey),
-            typeof(IAddressable),
-            typeof(IGrainObserver),
-            typeof(IGrainBase),
+            try
+            {
+                // Get all exported (public) types from Orleans namespaces
+                var types = assembly.GetExportedTypes()
+                    .Where(t => t.Namespace?.StartsWith("Orleans", StringComparison.Ordinal) == true)
+                    .Where(t =>
+                        // Include interfaces (IGrain, IGrainFactory, IRemindable, etc.)
+                        t.IsInterface ||
+                        // Include abstract classes (Grain base class, etc.)
+                        (t.IsClass && t.IsAbstract) ||
+                        // Include attributes
+                        typeof(Attribute).IsAssignableFrom(t) ||
+                        // Include value types/structs (GrainId, SiloAddress, etc.)
+                        t.IsValueType ||
+                        // Include enums (DeactivationReasonCode, etc.)
+                        t.IsEnum
+                    )
+                    .ToList();
 
-            // === Base Grain Classes ===
-            typeof(Grain),
+                sharedTypes.AddRange(types);
 
-            // === Grain References ===
-            typeof(GrainReference),
-            typeof(GrainId),
-            typeof(GrainType),
+                _logger.LogTrace(
+                    "Found {TypeCount} shared types in assembly {AssemblyName}",
+                    types.Count,
+                    assembly.GetName().Name);
+            }
+            catch (Exception ex)
+            {
+                // Log but continue - some assemblies might fail to load types
+                _logger.LogWarning(ex,
+                    "Failed to get types from assembly {AssemblyName}",
+                    assembly.GetName().Name);
+            }
+        }
 
-            // === Grain Context & Runtime ===
-            typeof(IGrainContext),
-            typeof(IGrainRuntime),
-            typeof(IServiceProvider),
-
-            // === Grain Lifecycle ===
-            typeof(IGrainLifecycle),
-
-            // === Timers & Reminders ===
-            typeof(IGrainTimer),
-            typeof(IRemindable),
-
-            // === Common .NET Types ===
+        // Also add common .NET types that grains typically use
+        var commonNetTypes = new[]
+        {
             typeof(Task),
             typeof(Task<>),
             typeof(ValueTask),
             typeof(ValueTask<>),
             typeof(CancellationToken),
-
-            // === Collections ===
+            typeof(IServiceProvider),
+            typeof(IAsyncEnumerable<>),
+            typeof(IAsyncEnumerator<>),
+            typeof(IAsyncDisposable),
             typeof(IEnumerable<>),
             typeof(ICollection<>),
             typeof(IList<>),
@@ -352,47 +378,19 @@ internal sealed class DynamicAssemblyLoader
             typeof(IReadOnlyCollection<>),
             typeof(IReadOnlyList<>),
             typeof(IReadOnlyDictionary<,>),
-
-            // === Common Value Types ===
-            typeof(int),
-            typeof(long),
-            typeof(string),
-            typeof(bool),
-            typeof(Guid),
-            typeof(DateTime),
-            typeof(DateTimeOffset),
-            typeof(TimeSpan),
-            typeof(decimal),
-            typeof(double),
-            typeof(float),
-
-            // === Attributes (for runtime reflection) ===
-            typeof(Attribute),
-            typeof(SerializableAttribute),
-
-            // === Exceptions ===
-            typeof(Exception),
-            typeof(InvalidOperationException),
-            typeof(ArgumentException),
-            typeof(ArgumentNullException),
-
-            // === CRITICAL: Grain Factory ===
-            typeof(IGrainFactory),
-
-            // === Additional Orleans Types ===
-            typeof(GrainInterfaceType),
-            typeof(SiloAddress),
-            typeof(MajorMinorVersion),
-
-            // === .NET Async Types ===
-            typeof(IAsyncEnumerable<>),
-            typeof(IAsyncEnumerator<>),
-            typeof(IAsyncDisposable),
-
-            // === Nullable Types ===
             typeof(Nullable<>),
-
-            // Add more as needed based on compilation errors or grain dependencies
+            typeof(Attribute),
+            typeof(Exception),
         };
+
+        sharedTypes.AddRange(commonNetTypes);
+
+        var distinctTypes = sharedTypes.Distinct().ToArray();
+
+        _logger.LogInformation(
+            "Discovered {TypeCount} distinct shared types for plugin loading",
+            distinctTypes.Length);
+
+        return distinctTypes;
     }
 }

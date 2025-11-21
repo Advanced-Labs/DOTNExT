@@ -12,7 +12,6 @@
     <ProjectReference Include="$(SourceRoot)src\\Orleans.Core\Orleans.Core.csproj" />
     <ProjectReference Include="$(SourceRoot)src\\Orleans.Core.Abstractions\Orleans.Core.Abstractions.csproj" />
     <ProjectReference Include="$(SourceRoot)src\\Orleans.Serialization\Orleans.Serialization.csproj" />
-    <ProjectReference Include="$(SourceRoot)src\\Orleans.Reminders.Abstractions\Orleans.Reminders.Abstractions.csproj" />
   </ItemGroup>
 
   <ItemGroup>
