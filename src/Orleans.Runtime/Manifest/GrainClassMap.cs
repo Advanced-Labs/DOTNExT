@@ -89,6 +89,24 @@ namespace Orleans.Metadata
         }
 
         /// <summary>
+        /// Removes grain types from the existing mappings.
+        /// This method is thread-safe and used during dynamic grain unloading.
+        /// </summary>
+        /// <param name="grainTypes">The grain types to remove</param>
+        internal void RemoveTypes(IEnumerable<GrainType> grainTypes)
+        {
+            if (grainTypes == null)
+            {
+                throw new ArgumentNullException(nameof(grainTypes));
+            }
+
+            // Atomic update using ImmutableDictionary.RemoveRange
+            var current = _types;
+            var updated = current.RemoveRange(grainTypes);
+            _types = updated;
+        }
+
+        /// <summary>
         /// Gets the current count of registered grain types.
         /// </summary>
         internal int Count => _types.Count;
