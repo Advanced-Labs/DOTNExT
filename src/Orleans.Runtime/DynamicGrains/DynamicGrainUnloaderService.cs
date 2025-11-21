@@ -108,6 +108,21 @@ internal sealed class DynamicGrainUnloaderService : IDynamicGrainUnloader, ILife
                 };
             }
 
+            // Validate that the assembly was loaded via PluginLoader and can be unloaded
+            if (!_assemblyLoader.IsAssemblyUnloadable(assemblyPath))
+            {
+                var error = "Assembly was not loaded via dynamic loader (PluginLoader) and cannot be unloaded. " +
+                           "Only assemblies loaded dynamically at runtime can be unloaded.";
+                _logger.LogError("{Error}: {AssemblyPath}", error, assemblyPath);
+
+                return new GrainUnloadResult
+                {
+                    Success = false,
+                    Errors = new[] { error },
+                    UnloadDuration = stopwatch.Elapsed
+                };
+            }
+
             // Build list of grain types being unloaded
             var grainTypes = new List<GrainType>();
             foreach (var grainClass in metadata.GrainClasses)
@@ -177,9 +192,45 @@ internal sealed class DynamicGrainUnloaderService : IDynamicGrainUnloader, ILife
             }
 
             // ===================================================================
-            // Phase 3: Remove from Caches
+            // Phase 3: Update Silo Manifest
             // ===================================================================
-            _logger.LogDebug("Phase 3: Removing from caches");
+            // CRITICAL: Manifest must be updated BEFORE clearing caches to prevent race conditions
+            // This ensures new requests won't be routed here before we clear local state
+            _logger.LogDebug("Phase 3: Updating silo manifest");
+
+            var (updatedManifest, removedGrainTypes) = _manifestProvider.RemoveFromManifest(
+                metadata.GrainClasses,
+                metadata.GrainInterfaces);
+
+            _logger.LogInformation(
+                "Updated silo manifest, removed {TypeCount} types",
+                removedGrainTypes.Count());
+
+            // ===================================================================
+            // Phase 4: Propagate to Cluster
+            // ===================================================================
+            _logger.LogDebug("Phase 4: Propagating manifest to cluster");
+
+            // Update the local manifest in the cluster manifest provider
+            // This triggers propagation to other silos
+            _clusterManifestProvider.LocalGrainManifest = updatedManifest;
+
+            var newVersion = _clusterManifestProvider.Current.Version;
+
+            _logger.LogInformation(
+                "Propagated manifest removal to cluster. New version: {Version}",
+                newVersion);
+
+            // Small delay to allow manifest propagation before clearing caches
+            // This prevents race conditions where requests arrive for types being unloaded
+            await Task.Delay(100, cancellationToken);
+
+            // ===================================================================
+            // Phase 5: Remove from Caches
+            // ===================================================================
+            // Safe to clear caches now - manifest has been updated and propagated
+            // No new requests will be routed to this silo for these types
+            _logger.LogDebug("Phase 5: Removing from caches");
 
             foreach (var grainType in grainTypes)
             {
@@ -194,38 +245,6 @@ internal sealed class DynamicGrainUnloaderService : IDynamicGrainUnloader, ILife
             _grainReferenceActivator.InvalidateCache();
 
             _logger.LogInformation("Removed {TypeCount} grain types from caches", grainTypes.Count);
-
-            // ===================================================================
-            // Phase 4: Update Silo Manifest
-            // ===================================================================
-            _logger.LogDebug("Phase 4: Updating silo manifest");
-
-            var (updatedManifest, removedGrainTypes) = _manifestProvider.RemoveFromManifest(
-                metadata.GrainClasses,
-                metadata.GrainInterfaces);
-
-            _logger.LogInformation(
-                "Updated silo manifest, removed {TypeCount} types",
-                removedGrainTypes.Count());
-
-            // ===================================================================
-            // Phase 5: Propagate to Cluster
-            // ===================================================================
-            _logger.LogDebug("Phase 5: Propagating manifest to cluster");
-
-            // Update the local manifest in the cluster manifest provider
-            // This triggers propagation to other silos
-            _clusterManifestProvider.LocalGrainManifest = updatedManifest;
-
-            var newVersion = _clusterManifestProvider.Current.Version;
-
-            _logger.LogInformation(
-                "Propagated manifest removal to cluster. New version: {Version}",
-                newVersion);
-
-            // Small delay to allow manifest propagation before actual assembly unload
-            // This prevents race conditions where requests arrive for types being unloaded
-            await Task.Delay(100, cancellationToken);
 
             // ===================================================================
             // Phase 6: Unload Assembly

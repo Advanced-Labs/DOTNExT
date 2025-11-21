@@ -215,6 +215,16 @@ internal sealed class DynamicAssemblyLoader
     }
 
     /// <summary>
+    /// Checks if an assembly was loaded via PluginLoader and can be dynamically unloaded.
+    /// Returns false for statically loaded assemblies that cannot be unloaded.
+    /// </summary>
+    public bool IsAssemblyUnloadable(string assemblyPath)
+    {
+        assemblyPath = Path.GetFullPath(assemblyPath);
+        return _pluginLoaders.ContainsKey(assemblyPath);
+    }
+
+    /// <summary>
     /// Rescans all loaded assemblies in the current AppDomain.
     /// </summary>
     public IEnumerable<Assembly> RescanLoadedAssemblies()
@@ -365,6 +375,22 @@ internal sealed class DynamicAssemblyLoader
             typeof(InvalidOperationException),
             typeof(ArgumentException),
             typeof(ArgumentNullException),
+
+            // === CRITICAL: Grain Factory ===
+            typeof(IGrainFactory),
+
+            // === Additional Orleans Types ===
+            typeof(GrainInterfaceType),
+            typeof(SiloAddress),
+            typeof(MajorMinorVersion),
+
+            // === .NET Async Types ===
+            typeof(IAsyncEnumerable<>),
+            typeof(IAsyncEnumerator<>),
+            typeof(IAsyncDisposable),
+
+            // === Nullable Types ===
+            typeof(Nullable<>),
 
             // Add more as needed based on compilation errors or grain dependencies
         };

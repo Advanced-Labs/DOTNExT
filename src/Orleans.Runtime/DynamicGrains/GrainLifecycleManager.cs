@@ -100,16 +100,46 @@ internal sealed class GrainLifecycleManager : IGrainLifecycleManager
         {
             // Timeout occurred (not user cancellation)
             _logger.LogWarning(
-                "Deactivation timeout reached after {Timeout}ms, some grains may still be active",
+                "Deactivation timeout reached after {Timeout}ms, forcing remaining grain deactivation",
                 timeout.TotalMilliseconds);
 
-            // Count remaining active grains as "forced"
-            var stillActive = GetActiveGrainCounts(grainTypeSet);
-            forcedCount = stillActive.Values.Sum();
+            // Find remaining active grains and force deactivate them
+            var stillActiveGrains = new List<IGrainContext>();
+            foreach (var activation in GetAllActivations())
+            {
+                if (grainTypeSet.Contains(activation.GrainId.Type))
+                {
+                    stillActiveGrains.Add(activation);
+                }
+            }
+
+            forcedCount = stillActiveGrains.Count;
 
             if (forcedCount > 0)
             {
-                errors.Add($"{forcedCount} grains did not complete graceful deactivation within timeout");
+                _logger.LogWarning(
+                    "Forcing deactivation of {Count} remaining grains that did not complete gracefully",
+                    forcedCount);
+
+                try
+                {
+                    // Force deactivate without timeout - use the user's cancellationToken only
+                    // This ensures we actually clean up the grains
+                    await _catalog.DeactivateActivations(reason, stillActiveGrains, cancellationToken);
+
+                    _logger.LogInformation(
+                        "Successfully force deactivated {Count} remaining grains",
+                        forcedCount);
+                }
+                catch (Exception forceEx)
+                {
+                    _logger.LogError(forceEx, "Failed to force deactivate {Count} remaining grains", forcedCount);
+                    errors.Add($"Force deactivation failed for {forcedCount} grains: {forceEx.Message}");
+
+                    // Even if force deactivation fails, continue - the assembly unload will fail safely
+                }
+
+                errors.Add($"{forcedCount} grains required forced deactivation after timeout");
             }
         }
         catch (Exception ex)
