@@ -112,6 +112,18 @@ namespace Orleans.Runtime
         }
 
         /// <summary>
+        /// Gets all active grain contexts.
+        /// Used by dynamic grain unloading to enumerate activations for deactivation.
+        /// </summary>
+        internal IEnumerable<IGrainContext> GetAllActivations()
+        {
+            foreach (var kvp in activations)
+            {
+                yield return kvp.Value;
+            }
+        }
+
+        /// <summary>
         /// If activation already exists, return it.
         /// Otherwise, creates a new activation, begins rehydrating it and activating it, then returns it.
         /// </summary>
