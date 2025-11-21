@@ -6,8 +6,10 @@ using System.Threading;
 using System.Threading.Channels;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
+using Orleans.GrainReferences;
 using Orleans.Metadata;
 using Orleans.Runtime.GrainDirectory;
+using Orleans.Runtime.Metadata;
 
 namespace Orleans.Runtime.DynamicGrains;
 

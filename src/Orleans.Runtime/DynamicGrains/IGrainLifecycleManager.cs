@@ -36,7 +36,7 @@ internal interface IGrainLifecycleManager
 /// <summary>
 /// Result of a grain deactivation operation.
 /// </summary>
-internal sealed class GrainDeactivationResult
+public sealed class GrainDeactivationResult
 {
     public bool Success { get; init; }
     public int TotalGrainsDeactivated { get; init; }
