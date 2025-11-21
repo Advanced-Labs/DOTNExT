@@ -8,19 +8,22 @@ using System.Reflection;
 using System.Runtime.Loader;
 using System.Threading;
 using System.Threading.Tasks;
+using McMaster.NETCore.Plugins;
 using Microsoft.Extensions.Logging;
 using Orleans.Metadata;
 
 namespace Orleans.Runtime.DynamicGrains;
 
 /// <summary>
-/// Manages dynamic loading of grain assemblies at runtime.
+/// Manages dynamic loading of grain assemblies at runtime using collectible AssemblyLoadContext.
 /// </summary>
 internal sealed class DynamicAssemblyLoader
 {
     private readonly AssemblyValidator _validator;
     private readonly ILogger<DynamicAssemblyLoader> _logger;
     private readonly ConcurrentDictionary<string, Assembly> _loadedAssemblies = new();
+    private readonly ConcurrentDictionary<string, PluginLoader> _pluginLoaders = new();
+    private readonly ConcurrentDictionary<string, AssemblyLoadMetadata> _assemblyMetadata = new();
     private readonly SemaphoreSlim _loadLock = new(1, 1);
 
     public DynamicAssemblyLoader(
@@ -32,7 +35,7 @@ internal sealed class DynamicAssemblyLoader
     }
 
     /// <summary>
-    /// Loads an assembly from the specified path.
+    /// Loads an assembly from the specified path using a collectible AssemblyLoadContext.
     /// </summary>
     public async Task<(Assembly Assembly, AssemblyLoadMetadata Metadata, List<string> Errors)> LoadAssemblyAsync(
         string assemblyPath,
@@ -55,8 +58,8 @@ internal sealed class DynamicAssemblyLoader
         if (_loadedAssemblies.TryGetValue(assemblyPath, out var existing))
         {
             _logger.LogWarning("Assembly {AssemblyPath} is already loaded", assemblyPath);
-            var validationResult = _validator.Validate(existing);
-            return (existing, validationResult.Metadata, new List<string> { "Assembly already loaded" });
+            var cachedMetadata = _assemblyMetadata[assemblyPath];
+            return (existing, cachedMetadata, new List<string> { "Assembly already loaded" });
         }
 
         await _loadLock.WaitAsync(cancellationToken);
@@ -65,19 +68,35 @@ internal sealed class DynamicAssemblyLoader
             // Double-check after acquiring lock
             if (_loadedAssemblies.TryGetValue(assemblyPath, out existing))
             {
-                var validationResult = _validator.Validate(existing);
-                return (existing, validationResult.Metadata, new List<string> { "Assembly already loaded" });
+                var cachedMetadata = _assemblyMetadata[assemblyPath];
+                return (existing, cachedMetadata, new List<string> { "Assembly already loaded" });
             }
 
-            _logger.LogInformation("Loading grain assembly from {AssemblyPath}", assemblyPath);
+            _logger.LogInformation("Loading grain assembly from {AssemblyPath} using PluginLoader", assemblyPath);
 
             Assembly assembly;
+            PluginLoader loader;
+
             try
             {
-                // Load the assembly
-                // Note: This loads into the default AssemblyLoadContext
-                // For isolation and unloading support, we would need to create a custom AssemblyLoadContext
-                assembly = Assembly.LoadFrom(assemblyPath);
+                // Create plugin loader with Orleans shared types
+                loader = PluginLoader.CreateFromAssemblyFile(
+                    assemblyFile: assemblyPath,
+                    sharedTypes: GetOrleansSharedTypes(),
+                    isUnloadable: true,
+                    configure: config =>
+                    {
+                        config.PreferSharedTypes = true;
+                        config.IsUnloadable = true;
+                        config.LoadInMemory = false;  // Load from disk for better unloading
+                    });
+
+                // Load the default assembly from the plugin
+                assembly = loader.LoadDefaultAssembly();
+
+                _logger.LogDebug(
+                    "Successfully loaded assembly {AssemblyName} into collectible context",
+                    assembly.GetName().Name);
             }
             catch (Exception ex)
             {
@@ -91,6 +110,10 @@ internal sealed class DynamicAssemblyLoader
             {
                 _logger.LogError("Assembly {AssemblyPath} failed validation: {Errors}",
                     assemblyPath, string.Join("; ", validation.Errors));
+
+                // Clean up on validation failure
+                loader.Dispose();
+
                 return (null, null, validation.Errors.ToList());
             }
 
@@ -100,8 +123,10 @@ internal sealed class DynamicAssemblyLoader
                 _logger.LogWarning("Assembly {AssemblyPath}: {Warning}", assemblyPath, warning);
             }
 
-            // Track loaded assembly
+            // Track loaded assembly, plugin loader, and metadata
             _loadedAssemblies[assemblyPath] = assembly;
+            _pluginLoaders[assemblyPath] = loader;
+            _assemblyMetadata[assemblyPath] = validation.Metadata;
 
             _logger.LogInformation(
                 "Successfully loaded assembly {AssemblyName} with {GrainCount} grain classes and {InterfaceCount} interfaces",
@@ -115,6 +140,78 @@ internal sealed class DynamicAssemblyLoader
         {
             _loadLock.Release();
         }
+    }
+
+    /// <summary>
+    /// Unloads an assembly and releases its collectible AssemblyLoadContext.
+    /// </summary>
+    public async Task<bool> UnloadAssemblyAsync(string assemblyPath)
+    {
+        if (string.IsNullOrWhiteSpace(assemblyPath))
+        {
+            throw new ArgumentNullException(nameof(assemblyPath));
+        }
+
+        assemblyPath = Path.GetFullPath(assemblyPath);
+
+        await _loadLock.WaitAsync();
+        try
+        {
+            if (!_pluginLoaders.TryRemove(assemblyPath, out var loader))
+            {
+                _logger.LogWarning("Assembly {AssemblyPath} not found or not loaded via PluginLoader", assemblyPath);
+                return false;
+            }
+
+            _loadedAssemblies.TryRemove(assemblyPath, out _);
+            _assemblyMetadata.TryRemove(assemblyPath, out _);
+
+            _logger.LogInformation("Unloading assembly from {AssemblyPath}", assemblyPath);
+
+            // Dispose triggers AssemblyLoadContext.Unload()
+            loader.Dispose();
+
+            // Force garbage collection to reclaim memory
+            // Multiple cycles increase likelihood of collection
+            for (int i = 0; i < 3; i++)
+            {
+                GC.Collect();
+                GC.WaitForPendingFinalizers();
+                await Task.Delay(100);
+            }
+
+            _logger.LogInformation("Assembly {AssemblyPath} unloaded and memory collection triggered", assemblyPath);
+            return true;
+        }
+        finally
+        {
+            _loadLock.Release();
+        }
+    }
+
+    /// <summary>
+    /// Gets information about a loaded assembly.
+    /// </summary>
+    public (Assembly Assembly, AssemblyLoadMetadata Metadata) GetLoadedAssemblyInfo(string assemblyPath)
+    {
+        assemblyPath = Path.GetFullPath(assemblyPath);
+
+        if (_loadedAssemblies.TryGetValue(assemblyPath, out var assembly) &&
+            _assemblyMetadata.TryGetValue(assemblyPath, out var metadata))
+        {
+            return (assembly, metadata);
+        }
+
+        return (null, null);
+    }
+
+    /// <summary>
+    /// Checks if an assembly is currently loaded.
+    /// </summary>
+    public bool IsAssemblyLoaded(string assemblyPath)
+    {
+        assemblyPath = Path.GetFullPath(assemblyPath);
+        return _loadedAssemblies.ContainsKey(assemblyPath);
     }
 
     /// <summary>
@@ -157,6 +254,7 @@ internal sealed class DynamicAssemblyLoader
                 if (validation.IsValid && validation.Metadata.HasGeneratedCode)
                 {
                     _loadedAssemblies[location] = assembly;
+                    _assemblyMetadata[location] = validation.Metadata;
                     newAssemblies.Add(assembly);
 
                     _logger.LogInformation(
@@ -179,5 +277,96 @@ internal sealed class DynamicAssemblyLoader
     public IEnumerable<Assembly> GetLoadedAssemblies()
     {
         return _loadedAssemblies.Values;
+    }
+
+    /// <summary>
+    /// Gets all loaded assembly paths.
+    /// </summary>
+    public IEnumerable<string> GetLoadedAssemblyPaths()
+    {
+        return _loadedAssemblies.Keys;
+    }
+
+    /// <summary>
+    /// Returns the comprehensive list of Orleans types that should be shared across plugin boundaries.
+    /// These types must be unified to ensure type identity and proper casting across contexts.
+    /// </summary>
+    private static Type[] GetOrleansSharedTypes()
+    {
+        return new[]
+        {
+            // === Core Grain Abstractions ===
+            typeof(IGrain),
+            typeof(IGrainWithGuidKey),
+            typeof(IGrainWithStringKey),
+            typeof(IGrainWithIntegerKey),
+            typeof(IGrainWithGuidCompoundKey),
+            typeof(IGrainWithIntegerCompoundKey),
+            typeof(IAddressable),
+            typeof(IGrainObserver),
+            typeof(IGrainBase),
+
+            // === Base Grain Classes ===
+            typeof(Grain),
+
+            // === Grain References ===
+            typeof(GrainReference),
+            typeof(GrainId),
+            typeof(GrainType),
+
+            // === Grain Context & Runtime ===
+            typeof(IGrainContext),
+            typeof(IGrainRuntime),
+            typeof(IServiceProvider),
+
+            // === Grain Lifecycle ===
+            typeof(IGrainLifecycle),
+
+            // === Timers & Reminders ===
+            typeof(IGrainTimer),
+            typeof(IRemindable),
+
+            // === Common .NET Types ===
+            typeof(Task),
+            typeof(Task<>),
+            typeof(ValueTask),
+            typeof(ValueTask<>),
+            typeof(CancellationToken),
+
+            // === Collections ===
+            typeof(IEnumerable<>),
+            typeof(ICollection<>),
+            typeof(IList<>),
+            typeof(List<>),
+            typeof(Dictionary<,>),
+            typeof(IReadOnlyCollection<>),
+            typeof(IReadOnlyList<>),
+            typeof(IReadOnlyDictionary<,>),
+
+            // === Common Value Types ===
+            typeof(int),
+            typeof(long),
+            typeof(string),
+            typeof(bool),
+            typeof(Guid),
+            typeof(DateTime),
+            typeof(DateTimeOffset),
+            typeof(TimeSpan),
+            typeof(decimal),
+            typeof(double),
+            typeof(float),
+
+            // === Attributes (for runtime reflection) ===
+            typeof(Attribute),
+            typeof(SerializableAttribute),
+
+            // === Exceptions ===
+            typeof(Exception),
+            typeof(InvalidOperationException),
+            typeof(ArgumentException),
+            typeof(ArgumentNullException),
+
+            // Add more as needed based on compilation errors or grain dependencies
+        };
     }
 }
