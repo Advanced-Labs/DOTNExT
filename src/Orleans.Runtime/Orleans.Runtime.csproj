@@ -11,10 +11,15 @@
   <ItemGroup>
     <ProjectReference Include="$(SourceRoot)src\\Orleans.Core\Orleans.Core.csproj" />
     <ProjectReference Include="$(SourceRoot)src\\Orleans.Core.Abstractions\Orleans.Core.Abstractions.csproj" />
+    <ProjectReference Include="$(SourceRoot)src\\Orleans.Serialization\Orleans.Serialization.csproj" />
   </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="McMaster.NETCore.Plugins" Version="2.0.0" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" />
+    <PackageReference Include="Microsoft.Extensions.Logging" />
+    <PackageReference Include="Microsoft.Extensions.Options" />
+    <PackageReference Include="Microsoft.Extensions.Configuration" />
   </ItemGroup>
 
   <ItemGroup>
