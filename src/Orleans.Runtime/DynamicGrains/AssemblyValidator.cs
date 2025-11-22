@@ -113,15 +113,19 @@ internal sealed class AssemblyValidator
         // Validation: must have ApplicationPart attribute in at least one assembly
         if (!hasApplicationPart)
         {
-            errors.Add($"Plugin assembly set is missing [ApplicationPart] attribute. " +
-                      "At least one assembly must be compiled with Orleans.Sdk.");
+            var errorMessage = $"Plugin assembly set is missing [ApplicationPart] attribute.\n" +
+                              $"  Assemblies checked: {string.Join(", ", pluginSet.AllAssemblies.Select(a => a.GetName().Name))}\n" +
+                              $"  At least one assembly must be compiled with Orleans.Sdk.";
+            errors.Add(errorMessage);
         }
 
         // Validation: must have TypeManifestProvider in at least one assembly
         if (!hasManifestProvider)
         {
-            errors.Add($"Plugin assembly set is missing [TypeManifestProvider] attribute. " +
-                      "No Orleans code generation was detected.");
+            var errorMessage = $"Plugin assembly set is missing [TypeManifestProvider] attribute. No Orleans code generation was detected.\n" +
+                              $"  Assemblies checked: {string.Join(", ", pluginSet.AllAssemblies.Select(a => a.GetName().Name))}\n" +
+                              $"  This indicates that none of the assemblies in this plugin were built with Orleans code generation enabled.";
+            errors.Add(errorMessage);
         }
 
         // Warning: no grain types found
@@ -135,8 +139,16 @@ internal sealed class AssemblyValidator
         // Validation: if we have grain classes, we must have generated code somewhere
         if (allGrainClasses.Count > 0 && !hasGeneratedCode)
         {
-            errors.Add($"Plugin assembly set contains grain types but no generated code was found. " +
-                      "Ensure at least one assembly was compiled with Orleans.Sdk and code generation succeeded.");
+            var errorMessage = $"Plugin assembly set contains {allGrainClasses.Count} grain type(s) but no Orleans generated code was found.\n" +
+                              $"  Assemblies checked: {string.Join(", ", pluginSet.AllAssemblies.Select(a => a.GetName().Name))}\n" +
+                              $"  Grain classes found: {string.Join(", ", allGrainClasses.Select(t => $"{t.FullName} (in {t.Assembly.GetName().Name})"))}\n" +
+                              $"  Grain interfaces found: {string.Join(", ", allGrainInterfaces.Select(t => $"{t.FullName} (in {t.Assembly.GetName().Name})"))}\n" +
+                              $"  Interface assemblies: {string.Join(", ", pluginSet.InterfaceAssemblies.Select(a => a.GetName().Name))}\n" +
+                              $"  Implementation assemblies: {string.Join(", ", pluginSet.ImplementationAssemblies.Select(a => a.GetName().Name))}\n" +
+                              $"  Codegen assemblies: {string.Join(", ", pluginSet.CodegenAssemblies.Select(a => a.GetName().Name))}\n" +
+                              $"  Serializers: {allSerializers.Count}, Copiers: {allCopiers.Count}, Proxies: {allProxies.Count}\n" +
+                              $"Ensure at least one assembly in the plugin was compiled with Orleans.Sdk and code generation succeeded.";
+            errors.Add(errorMessage);
         }
 
         var metadata = new AssemblyLoadMetadata

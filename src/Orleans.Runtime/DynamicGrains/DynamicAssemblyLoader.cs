@@ -114,12 +114,21 @@ internal sealed class DynamicAssemblyLoader
                 loadContext,
                 assemblyPath);
 
-            _logger.LogDebug(
-                "Discovered plugin assembly set: {TotalAssemblies} assemblies, {InterfaceAssemblies} with interfaces, {ImplementationAssemblies} with implementations, {CodegenAssemblies} with codegen",
+            _logger.LogInformation(
+                "Discovered plugin assembly set for {RootAssembly}:\n" +
+                "  Total assemblies: {TotalAssemblies} [{AllAssemblyNames}]\n" +
+                "  Interface assemblies: {InterfaceAssemblies} [{InterfaceAssemblyNames}]\n" +
+                "  Implementation assemblies: {ImplementationAssemblies} [{ImplementationAssemblyNames}]\n" +
+                "  Codegen assemblies: {CodegenAssemblies} [{CodegenAssemblyNames}]",
+                assembly.GetName().Name,
                 pluginSet.AllAssemblies.Count,
+                string.Join(", ", pluginSet.AllAssemblies.Select(a => a.GetName().Name)),
                 pluginSet.InterfaceAssemblies.Count,
+                string.Join(", ", pluginSet.InterfaceAssemblies.Select(a => a.GetName().Name)),
                 pluginSet.ImplementationAssemblies.Count,
-                pluginSet.CodegenAssemblies.Count);
+                string.Join(", ", pluginSet.ImplementationAssemblies.Select(a => a.GetName().Name)),
+                pluginSet.CodegenAssemblies.Count,
+                string.Join(", ", pluginSet.CodegenAssemblies.Select(a => a.GetName().Name)));
 
             // Validate the plugin set (multiple assemblies)
             var validation = _validator.ValidatePluginSet(pluginSet);
