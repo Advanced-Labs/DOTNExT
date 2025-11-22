@@ -13,6 +13,152 @@ namespace Orleans.Runtime.DynamicGrains;
 internal sealed class AssemblyValidator
 {
     /// <summary>
+    /// Validates a plugin assembly set (multiple assemblies) for required Orleans code.
+    /// Supports the split grain pattern where interfaces, implementations, and codegen
+    /// can be distributed across multiple assemblies.
+    /// </summary>
+    /// <param name="pluginSet">The plugin assembly set to validate</param>
+    /// <returns>Validation result with aggregated metadata from all assemblies</returns>
+    public ValidationResult ValidatePluginSet(DynamicPluginAssemblySet pluginSet)
+    {
+        if (pluginSet == null)
+        {
+            throw new ArgumentNullException(nameof(pluginSet));
+        }
+
+        var errors = new List<string>();
+        var warnings = new List<string>();
+
+        var allGrainInterfaces = new List<Type>();
+        var allGrainClasses = new List<Type>();
+        var allSerializers = new List<Type>();
+        var allCopiers = new List<Type>();
+        var allProxies = new List<Type>();
+
+        var hasApplicationPart = false;
+        var hasManifestProvider = false;
+
+        // Validate each assembly in the plugin set
+        foreach (var assembly in pluginSet.AllAssemblies)
+        {
+            try
+            {
+                // Check for ApplicationPartAttribute
+                if (assembly.IsDefined(typeof(ApplicationPartAttribute)))
+                {
+                    hasApplicationPart = true;
+                }
+
+                // Check for TypeManifestProviderAttribute
+                if (assembly.GetCustomAttributes<TypeManifestProviderAttribute>().Any())
+                {
+                    hasManifestProvider = true;
+                }
+
+                // Find grain types
+                foreach (var type in assembly.GetTypes())
+                {
+                    if (typeof(IGrain).IsAssignableFrom(type))
+                    {
+                        if (type.IsInterface)
+                        {
+                            allGrainInterfaces.Add(type);
+                        }
+                        else if (type.IsClass && !type.IsAbstract)
+                        {
+                            allGrainClasses.Add(type);
+                        }
+                    }
+                }
+
+                // Find generated types
+                foreach (var type in assembly.GetTypes())
+                {
+                    if (type.Namespace?.Contains("OrleansCodeGen") == true ||
+                        type.GetCustomAttribute<GeneratedCodeAttribute>()?.Tool?.Contains("Orleans") == true)
+                    {
+                        // Heuristics to identify generated types
+                        if (type.Name.StartsWith("Codec_") ||
+                            type.GetInterfaces().Any(i => i.Name.Contains("IFieldCodec") || i.Name.Contains("IBaseCodec")))
+                        {
+                            allSerializers.Add(type);
+                        }
+                        else if (type.Name.StartsWith("Copier_") ||
+                                 type.GetInterfaces().Any(i => i.Name.Contains("IDeepCopier")))
+                        {
+                            allCopiers.Add(type);
+                        }
+                        else if (type.Name.StartsWith("Proxy_") ||
+                                 typeof(GrainReference).IsAssignableFrom(type))
+                        {
+                            allProxies.Add(type);
+                        }
+                    }
+                }
+            }
+            catch (ReflectionTypeLoadException ex)
+            {
+                errors.Add($"Failed to load types from assembly '{assembly.GetName().Name}': {ex.Message}");
+                foreach (var loaderEx in ex.LoaderExceptions.Where(e => e != null).Take(5))
+                {
+                    errors.Add($"  Loader exception: {loaderEx.Message}");
+                }
+            }
+            catch (Exception ex)
+            {
+                warnings.Add($"Error scanning assembly '{assembly.GetName().Name}': {ex.Message}");
+            }
+        }
+
+        // Validation: must have ApplicationPart attribute in at least one assembly
+        if (!hasApplicationPart)
+        {
+            errors.Add($"Plugin assembly set is missing [ApplicationPart] attribute. " +
+                      "At least one assembly must be compiled with Orleans.Sdk.");
+        }
+
+        // Validation: must have TypeManifestProvider in at least one assembly
+        if (!hasManifestProvider)
+        {
+            errors.Add($"Plugin assembly set is missing [TypeManifestProvider] attribute. " +
+                      "No Orleans code generation was detected.");
+        }
+
+        // Warning: no grain types found
+        if (allGrainClasses.Count == 0 && allGrainInterfaces.Count == 0)
+        {
+            warnings.Add($"Plugin assembly set contains no grain types or interfaces.");
+        }
+
+        var hasGeneratedCode = allSerializers.Count > 0 || allCopiers.Count > 0 || allProxies.Count > 0;
+
+        // Validation: if we have grain classes, we must have generated code somewhere
+        if (allGrainClasses.Count > 0 && !hasGeneratedCode)
+        {
+            errors.Add($"Plugin assembly set contains grain types but no generated code was found. " +
+                      "Ensure at least one assembly was compiled with Orleans.Sdk and code generation succeeded.");
+        }
+
+        var metadata = new AssemblyLoadMetadata
+        {
+            GrainInterfaces = allGrainInterfaces,
+            GrainClasses = allGrainClasses,
+            Serializers = allSerializers,
+            Copiers = allCopiers,
+            Proxies = allProxies,
+            HasGeneratedCode = hasGeneratedCode
+        };
+
+        return new ValidationResult
+        {
+            IsValid = errors.Count == 0,
+            Errors = errors,
+            Warnings = warnings,
+            Metadata = metadata
+        };
+    }
+
+    /// <summary>
     /// Validates that an assembly has the required Orleans-generated code and metadata.
     /// </summary>
     /// <param name="assembly">The assembly to validate</param>

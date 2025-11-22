@@ -24,6 +24,7 @@ internal sealed class DynamicAssemblyLoader
     private readonly ConcurrentDictionary<string, Assembly> _loadedAssemblies = new();
     private readonly ConcurrentDictionary<string, PluginLoader> _pluginLoaders = new();
     private readonly ConcurrentDictionary<string, AssemblyLoadMetadata> _assemblyMetadata = new();
+    private readonly ConcurrentDictionary<string, DynamicPluginAssemblySet> _pluginSets = new();
     private readonly SemaphoreSlim _loadLock = new(1, 1);
 
     public DynamicAssemblyLoader(
@@ -104,11 +105,27 @@ internal sealed class DynamicAssemblyLoader
                 return (null, null, new List<string> { $"Failed to load assembly: {ex.Message}" });
             }
 
-            // Validate the assembly
-            var validation = _validator.Validate(assembly);
+            // Get the AssemblyLoadContext for the loaded assembly
+            var loadContext = AssemblyLoadContext.GetLoadContext(assembly);
+
+            // Create plugin assembly set - discover all related assemblies in the same ALC
+            var pluginSet = DynamicPluginAssemblySet.FromAssemblyLoadContext(
+                assembly,
+                loadContext,
+                assemblyPath);
+
+            _logger.LogDebug(
+                "Discovered plugin assembly set: {TotalAssemblies} assemblies, {InterfaceAssemblies} with interfaces, {ImplementationAssemblies} with implementations, {CodegenAssemblies} with codegen",
+                pluginSet.AllAssemblies.Count,
+                pluginSet.InterfaceAssemblies.Count,
+                pluginSet.ImplementationAssemblies.Count,
+                pluginSet.CodegenAssemblies.Count);
+
+            // Validate the plugin set (multiple assemblies)
+            var validation = _validator.ValidatePluginSet(pluginSet);
             if (!validation.IsValid)
             {
-                _logger.LogError("Assembly {AssemblyPath} failed validation: {Errors}",
+                _logger.LogError("Plugin assembly set {AssemblyPath} failed validation: {Errors}",
                     assemblyPath, string.Join("; ", validation.Errors));
 
                 // Clean up on validation failure
@@ -120,13 +137,14 @@ internal sealed class DynamicAssemblyLoader
             // Log warnings
             foreach (var warning in validation.Warnings)
             {
-                _logger.LogWarning("Assembly {AssemblyPath}: {Warning}", assemblyPath, warning);
+                _logger.LogWarning("Plugin assembly set {AssemblyPath}: {Warning}", assemblyPath, warning);
             }
 
-            // Track loaded assembly, plugin loader, and metadata
+            // Track loaded assembly, plugin loader, metadata, and plugin set
             _loadedAssemblies[assemblyPath] = assembly;
             _pluginLoaders[assemblyPath] = loader;
             _assemblyMetadata[assemblyPath] = validation.Metadata;
+            _pluginSets[assemblyPath] = pluginSet;
 
             _logger.LogInformation(
                 "Successfully loaded assembly {AssemblyName} with {GrainCount} grain classes and {InterfaceCount} interfaces",
@@ -140,6 +158,45 @@ internal sealed class DynamicAssemblyLoader
         {
             _loadLock.Release();
         }
+    }
+
+    /// <summary>
+    /// Loads an assembly and returns the complete plugin assembly set.
+    /// This method discovers all Orleans-relevant assemblies in the same AssemblyLoadContext,
+    /// supporting the split grain pattern where interfaces, implementations, and codegen
+    /// can be in separate assemblies.
+    /// </summary>
+    public async Task<(DynamicPluginAssemblySet PluginSet, AssemblyLoadMetadata Metadata, List<string> Errors)> LoadPluginAssemblySetAsync(
+        string assemblyPath,
+        CancellationToken cancellationToken)
+    {
+        // First, load the assembly using existing method
+        var (assembly, metadata, errors) = await LoadAssemblyAsync(assemblyPath, cancellationToken);
+
+        if (errors.Count > 0 || assembly == null)
+        {
+            return (null, metadata, errors);
+        }
+
+        // Get the plugin set that was created during loading
+        if (_pluginSets.TryGetValue(Path.GetFullPath(assemblyPath), out var pluginSet))
+        {
+            return (pluginSet, metadata, errors);
+        }
+
+        // Fallback: create a single-assembly plugin set
+        var loadContext = AssemblyLoadContext.GetLoadContext(assembly);
+        var fallbackSet = DynamicPluginAssemblySet.ForSingleAssembly(assembly, loadContext, assemblyPath);
+        return (fallbackSet, metadata, errors);
+    }
+
+    /// <summary>
+    /// Gets the plugin assembly set for a loaded assembly.
+    /// </summary>
+    public DynamicPluginAssemblySet GetPluginAssemblySet(string assemblyPath)
+    {
+        assemblyPath = Path.GetFullPath(assemblyPath);
+        return _pluginSets.TryGetValue(assemblyPath, out var pluginSet) ? pluginSet : null;
     }
 
     /// <summary>
@@ -165,6 +222,7 @@ internal sealed class DynamicAssemblyLoader
 
             _loadedAssemblies.TryRemove(assemblyPath, out _);
             _assemblyMetadata.TryRemove(assemblyPath, out _);
+            _pluginSets.TryRemove(assemblyPath, out _);
 
             _logger.LogInformation("Unloading assembly from {AssemblyPath}", assemblyPath);
 
