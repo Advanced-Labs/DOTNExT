@@ -93,6 +93,10 @@ internal sealed class DynamicPluginAssemblySet
             throw new ArgumentNullException(nameof(loadContext));
         }
 
+        // Force load all referenced assemblies to ensure dependencies are loaded
+        // This is critical for split-assembly pattern where interfaces are in a dependency
+        LoadReferencedAssemblies(rootAssembly, loadContext);
+
         // Get all assemblies loaded in this context
         var candidateAssemblies = loadContext.Assemblies
             .Where(IsPluginCandidateAssembly)
@@ -233,6 +237,44 @@ internal sealed class DynamicPluginAssemblySet
         catch
         {
             return false;
+        }
+    }
+
+    /// <summary>
+    /// Recursively loads all referenced assemblies to ensure dependencies are loaded into the context.
+    /// This is critical for split-assembly patterns where interfaces may be in dependency assemblies.
+    /// </summary>
+    private static void LoadReferencedAssemblies(Assembly assembly, AssemblyLoadContext loadContext)
+    {
+        try
+        {
+            var referencedAssemblies = assembly.GetReferencedAssemblies();
+            foreach (var referencedAssembly in referencedAssemblies)
+            {
+                try
+                {
+                    // Skip if already loaded
+                    if (loadContext.Assemblies.Any(a => a.GetName().Name == referencedAssembly.Name))
+                    {
+                        continue;
+                    }
+
+                    // Try to load the referenced assembly into this context
+                    var loaded = loadContext.LoadFromAssemblyName(referencedAssembly);
+
+                    // Recursively load its dependencies
+                    LoadReferencedAssemblies(loaded, loadContext);
+                }
+                catch
+                {
+                    // Ignore load failures for individual references
+                    // They might be system assemblies or unavailable dependencies
+                }
+            }
+        }
+        catch
+        {
+            // Ignore failures to enumerate references
         }
     }
 }
