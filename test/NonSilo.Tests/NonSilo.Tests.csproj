@@ -11,6 +11,7 @@
     <ProjectReference Include="$(SourceRoot)test\Misc\TestInternalDtosRefOrleans\TestInternalDtosRefOrleans.csproj" />
     <ProjectReference Include="..\..\src\Orleans.Serialization.SystemTextJson\Orleans.Serialization.SystemTextJson.csproj" />
     <ProjectReference Include="..\..\src\Serializers\Orleans.Serialization.Protobuf\Orleans.Serialization.Protobuf.csproj" />
+    <ProjectReference Include="$(SourceRoot)test\Grains\TestSplitGrainContracts\TestSplitGrainContracts.csproj" />
   </ItemGroup>
 
   <ItemGroup>

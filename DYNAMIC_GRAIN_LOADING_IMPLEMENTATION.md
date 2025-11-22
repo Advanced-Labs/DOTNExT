@@ -59,6 +59,132 @@ This document provides a comprehensive record of the dynamic grain loading imple
 
 ---
 
+## Split-Assembly Pattern Support
+
+### Overview
+
+As of the latest update, Orleans dynamic grain loading now fully supports the **split-assembly pattern**, where grain interfaces, implementations, and generated code can be distributed across multiple assemblies within a single plugin.
+
+This pattern is common in Orleans applications where:
+- **Grain interfaces** (contracts) are defined in one assembly
+- **Grain implementations** are defined in a separate assembly
+- **Orleans-generated code** (proxies, serializers, manifests) can reside in either assembly
+
+### Supported Patterns
+
+The dynamic grain loader now supports the following assembly configurations:
+
+1. **Single-Assembly Pattern** (Original, still supported)
+   ```
+   MyGrains.dll
+   ├── IMyGrain (interface)
+   ├── MyGrain (implementation)
+   └── OrleansCodeGen.* (generated)
+   ```
+
+2. **Split Contracts Pattern** (New)
+   ```
+   MyGrainContracts.dll
+   ├── IMyGrain (interface)
+   └── OrleansCodeGen.* (generated)
+
+   MyGrains.dll
+   └── MyGrain (implementation)
+   ```
+
+3. **Split Implementations Pattern** (New)
+   ```
+   MyGrainContracts.dll
+   └── IMyGrain (interface)
+
+   MyGrains.dll
+   ├── MyGrain (implementation)
+   └── OrleansCodeGen.* (generated)
+   ```
+
+### How It Works
+
+When you call `IDynamicGrainLoader.LoadGrainAssemblyAsync("MyGrains.dll")`, the loader:
+
+1. **Loads the root assembly** into a collectible AssemblyLoadContext
+2. **Discovers related assemblies** automatically by scanning the ALC for Orleans-relevant assemblies
+3. **Classifies assemblies** by role:
+   - Interface assemblies (contain `IGrain` interfaces)
+   - Implementation assemblies (contain `Grain` subclasses)
+   - Codegen assemblies (contain Orleans-generated types)
+4. **Validates the plugin set** across all assemblies
+5. **Registers everything** - types from all assemblies are registered in the manifest
+
+### New Components
+
+**`DynamicPluginAssemblySet`** (`src/Orleans.Runtime/DynamicGrains/DynamicPluginAssemblySet.cs`)
+- Represents a logical plugin spanning multiple assemblies
+- Automatically discovers and classifies assemblies in the plugin's ALC
+- Filters out system/framework assemblies
+- Properties:
+  - `RootAssembly`: The explicitly loaded assembly
+  - `AllAssemblies`: All Orleans-relevant assemblies in the ALC
+  - `InterfaceAssemblies`: Assemblies with grain interfaces
+  - `ImplementationAssemblies`: Assemblies with grain classes
+  - `CodegenAssemblies`: Assemblies with generated types
+
+### Changes to Existing Components
+
+**`AssemblyValidator`** - Extended with `ValidatePluginSet()` method
+- Now validates multiple assemblies as a single unit
+- Aggregates metadata from all assemblies in the plugin set
+- Ensures at least one assembly has ApplicationPart and TypeManifestProvider attributes
+- Backward compatible: single-assembly `Validate()` method still exists
+
+**`DynamicAssemblyLoader`** - Enhanced to support plugin sets
+- After loading root assembly, discovers all assemblies in its ALC
+- Creates `DynamicPluginAssemblySet` automatically
+- Validates the entire plugin set instead of just the root assembly
+- New method: `LoadPluginAssemblySetAsync()` returns the full plugin set
+- Tracks plugin sets for later unloading
+
+**`DynamicGrainLoaderService`** - No changes required
+- Automatically benefits from multi-assembly validation
+- Metadata returned by loader now includes types from all assemblies
+- Registers all grain types regardless of which assembly they came from
+
+**`DynamicGrainUnloaderService`** - No changes required
+- Uses metadata that already includes types from all assemblies
+- Unloads the entire AssemblyLoadContext which includes all plugin assemblies
+
+### Usage
+
+The API remains unchanged. Simply load the grain implementation assembly:
+
+```csharp
+var loader = serviceProvider.GetRequiredService<IDynamicGrainLoader>();
+var result = await loader.LoadGrainAssemblyAsync("path/to/MyGrains.dll");
+
+// The loader automatically discovers MyGrainContracts.dll if it's loaded
+// as a dependency of MyGrains.dll
+```
+
+### Testing
+
+New test projects have been added:
+
+- **`test/Grains/TestSplitGrainContracts`**
+  - Contains grain interfaces
+  - Has codegen enabled
+  - Defines `ITestSplitGrain` and `ICalculatorSplitGrain`
+
+- **`test/Grains/TestSplitGrains`**
+  - Contains grain implementations
+  - **No codegen** (tests split pattern)
+  - Implements `TestSplitGrain` and `CalculatorSplitGrain`
+
+- **`test/NonSilo.Tests/Runtime/SplitAssemblyDynamicGrainTests.cs`**
+  - Integration tests for split-assembly loading
+  - Verifies grain calls work across split assemblies
+  - Validates plugin set discovery and metadata aggregation
+
+---
+
 ## Files Modified and Created
 
 ### New Files Created
@@ -68,33 +194,66 @@ This document provides a comprehensive record of the dynamic grain loading imple
    - Public API interface
    - GrainLoadResult, AssemblyLoadMetadata, GrainAssemblyLoadedEvent
 
-2. `src/Orleans.Runtime/DynamicGrains/AssemblyValidator.cs` (147 lines)
+2. `src/Orleans.Runtime/DynamicGrains/AssemblyValidator.cs` (147+ lines)
    - Validates assemblies have Orleans-generated code
+   - **NEW**: ValidatePluginSet() method for multi-assembly validation
    - Checks for ApplicationPart and TypeManifestProvider attributes
    - Extracts grain types, serializers, copiers, proxies
 
-3. `src/Orleans.Runtime/DynamicGrains/DynamicAssemblyLoader.cs` (168 lines)
+3. `src/Orleans.Runtime/DynamicGrains/DynamicAssemblyLoader.cs` (168+ lines)
    - Loads assemblies from file paths
+   - **NEW**: Creates DynamicPluginAssemblySet for each load
+   - **NEW**: LoadPluginAssemblySetAsync() method
    - Thread-safe with SemaphoreSlim
    - Tracks loaded assemblies to prevent duplicates
    - Supports rescanning for new assemblies
 
-4. `src/Orleans.Runtime/DynamicGrains/DynamicGrainLoaderService.cs` (260 lines)
+4. `src/Orleans.Runtime/DynamicGrains/DynamicPluginAssemblySet.cs` (220 lines) **NEW**
+   - Represents a logical plugin spanning multiple assemblies
+   - Automatically discovers Orleans-relevant assemblies in an ALC
+   - Classifies assemblies by role (interfaces, implementations, codegen)
+   - Filters out system/framework assemblies
+   - Supports both single-assembly and split-assembly patterns
+
+5. `src/Orleans.Runtime/DynamicGrains/DynamicGrainLoaderService.cs` (260 lines)
    - Main coordinator for all loading operations
    - Implements 6-phase loading process
    - Lifecycle integration (ISiloLifecycle)
    - Event publishing via Channel<T>
+   - Now automatically handles multi-assembly plugins
 
-5. `src/Orleans.Runtime/DynamicGrains/DynamicSerializationManager.cs` (172 lines)
+6. `src/Orleans.Runtime/DynamicGrains/DynamicSerializationManager.cs` (172 lines)
    - Registers serializers and copiers at runtime
    - Uses reflection to call CodecProvider.ConsumeMetadata()
    - Invalidates codec caches for updated types
    - Thread-safe with lock-based synchronization
 
-6. `src/Orleans.Runtime/DynamicGrains/DynamicGrainLoadingExtensions.cs` (48 lines)
+7. `src/Orleans.Runtime/DynamicGrains/DynamicGrainLoadingExtensions.cs` (48 lines)
    - Dependency injection setup
    - AddDynamicGrainLoading() extension methods
    - Service registration for all components
+
+**Test Assets** (for split-assembly testing):
+8. `test/Grains/TestSplitGrainContracts/TestSplitGrainContracts.csproj` **NEW**
+   - Test project for grain interfaces
+   - Orleans codegen enabled
+
+9. `test/Grains/TestSplitGrainContracts/ITestSplitGrain.cs` **NEW**
+   - Sample grain interfaces for split-assembly testing
+   - ITestSplitGrain, ICalculatorSplitGrain
+
+10. `test/Grains/TestSplitGrains/TestSplitGrains.csproj` **NEW**
+    - Test project for grain implementations
+    - Orleans codegen **disabled** (tests split pattern)
+
+11. `test/Grains/TestSplitGrains/TestSplitGrain.cs` **NEW**
+    - Sample grain implementations
+    - TestSplitGrain, CalculatorSplitGrain
+
+12. `test/NonSilo.Tests/Runtime/SplitAssemblyDynamicGrainTests.cs` **NEW**
+    - Integration tests for split-assembly loading
+    - Verifies grain calls work across assemblies
+    - Validates plugin set discovery
 
 **Documentation**:
 7. `DYNAMIC_GRAIN_LOADING_RESEARCH.md` (852 lines)

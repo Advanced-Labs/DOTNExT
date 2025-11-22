@@ -13,6 +13,164 @@ namespace Orleans.Runtime.DynamicGrains;
 internal sealed class AssemblyValidator
 {
     /// <summary>
+    /// Validates a plugin assembly set (multiple assemblies) for required Orleans code.
+    /// Supports the split grain pattern where interfaces, implementations, and codegen
+    /// can be distributed across multiple assemblies.
+    /// </summary>
+    /// <param name="pluginSet">The plugin assembly set to validate</param>
+    /// <returns>Validation result with aggregated metadata from all assemblies</returns>
+    public ValidationResult ValidatePluginSet(DynamicPluginAssemblySet pluginSet)
+    {
+        if (pluginSet == null)
+        {
+            throw new ArgumentNullException(nameof(pluginSet));
+        }
+
+        var errors = new List<string>();
+        var warnings = new List<string>();
+
+        var allGrainInterfaces = new List<Type>();
+        var allGrainClasses = new List<Type>();
+        var allSerializers = new List<Type>();
+        var allCopiers = new List<Type>();
+        var allProxies = new List<Type>();
+
+        var hasApplicationPart = false;
+        var hasManifestProvider = false;
+
+        // Validate each assembly in the plugin set
+        foreach (var assembly in pluginSet.AllAssemblies)
+        {
+            try
+            {
+                // Check for ApplicationPartAttribute
+                if (assembly.IsDefined(typeof(ApplicationPartAttribute)))
+                {
+                    hasApplicationPart = true;
+                }
+
+                // Check for TypeManifestProviderAttribute
+                if (assembly.GetCustomAttributes<TypeManifestProviderAttribute>().Any())
+                {
+                    hasManifestProvider = true;
+                }
+
+                // Find grain types
+                foreach (var type in assembly.GetTypes())
+                {
+                    if (typeof(IGrain).IsAssignableFrom(type))
+                    {
+                        if (type.IsInterface)
+                        {
+                            allGrainInterfaces.Add(type);
+                        }
+                        else if (type.IsClass && !type.IsAbstract)
+                        {
+                            allGrainClasses.Add(type);
+                        }
+                    }
+                }
+
+                // Find generated types
+                foreach (var type in assembly.GetTypes())
+                {
+                    if (type.Namespace?.Contains("OrleansCodeGen") == true ||
+                        type.GetCustomAttribute<GeneratedCodeAttribute>()?.Tool?.Contains("Orleans") == true)
+                    {
+                        // Heuristics to identify generated types
+                        if (type.Name.StartsWith("Codec_") ||
+                            type.GetInterfaces().Any(i => i.Name.Contains("IFieldCodec") || i.Name.Contains("IBaseCodec")))
+                        {
+                            allSerializers.Add(type);
+                        }
+                        else if (type.Name.StartsWith("Copier_") ||
+                                 type.GetInterfaces().Any(i => i.Name.Contains("IDeepCopier")))
+                        {
+                            allCopiers.Add(type);
+                        }
+                        else if (type.Name.StartsWith("Proxy_") ||
+                                 typeof(GrainReference).IsAssignableFrom(type))
+                        {
+                            allProxies.Add(type);
+                        }
+                    }
+                }
+            }
+            catch (ReflectionTypeLoadException ex)
+            {
+                errors.Add($"Failed to load types from assembly '{assembly.GetName().Name}': {ex.Message}");
+                foreach (var loaderEx in ex.LoaderExceptions.Where(e => e != null).Take(5))
+                {
+                    errors.Add($"  Loader exception: {loaderEx.Message}");
+                }
+            }
+            catch (Exception ex)
+            {
+                warnings.Add($"Error scanning assembly '{assembly.GetName().Name}': {ex.Message}");
+            }
+        }
+
+        // Validation: must have ApplicationPart attribute in at least one assembly
+        if (!hasApplicationPart)
+        {
+            var errorMessage = $"Plugin assembly set is missing [ApplicationPart] attribute.\n" +
+                              $"  Assemblies checked: {string.Join(", ", pluginSet.AllAssemblies.Select(a => a.GetName().Name))}\n" +
+                              $"  At least one assembly must be compiled with Orleans.Sdk.";
+            errors.Add(errorMessage);
+        }
+
+        // Validation: must have TypeManifestProvider in at least one assembly
+        if (!hasManifestProvider)
+        {
+            var errorMessage = $"Plugin assembly set is missing [TypeManifestProvider] attribute. No Orleans code generation was detected.\n" +
+                              $"  Assemblies checked: {string.Join(", ", pluginSet.AllAssemblies.Select(a => a.GetName().Name))}\n" +
+                              $"  This indicates that none of the assemblies in this plugin were built with Orleans code generation enabled.";
+            errors.Add(errorMessage);
+        }
+
+        // Warning: no grain types found
+        if (allGrainClasses.Count == 0 && allGrainInterfaces.Count == 0)
+        {
+            warnings.Add($"Plugin assembly set contains no grain types or interfaces.");
+        }
+
+        var hasGeneratedCode = allSerializers.Count > 0 || allCopiers.Count > 0 || allProxies.Count > 0;
+
+        // Validation: if we have grain classes, we must have generated code somewhere
+        if (allGrainClasses.Count > 0 && !hasGeneratedCode)
+        {
+            var errorMessage = $"Plugin assembly set contains {allGrainClasses.Count} grain type(s) but no Orleans generated code was found.\n" +
+                              $"  Assemblies checked: {string.Join(", ", pluginSet.AllAssemblies.Select(a => a.GetName().Name))}\n" +
+                              $"  Grain classes found: {string.Join(", ", allGrainClasses.Select(t => $"{t.FullName} (in {t.Assembly.GetName().Name})"))}\n" +
+                              $"  Grain interfaces found: {string.Join(", ", allGrainInterfaces.Select(t => $"{t.FullName} (in {t.Assembly.GetName().Name})"))}\n" +
+                              $"  Interface assemblies: {string.Join(", ", pluginSet.InterfaceAssemblies.Select(a => a.GetName().Name))}\n" +
+                              $"  Implementation assemblies: {string.Join(", ", pluginSet.ImplementationAssemblies.Select(a => a.GetName().Name))}\n" +
+                              $"  Codegen assemblies: {string.Join(", ", pluginSet.CodegenAssemblies.Select(a => a.GetName().Name))}\n" +
+                              $"  Serializers: {allSerializers.Count}, Copiers: {allCopiers.Count}, Proxies: {allProxies.Count}\n" +
+                              $"Ensure at least one assembly in the plugin was compiled with Orleans.Sdk and code generation succeeded.";
+            errors.Add(errorMessage);
+        }
+
+        var metadata = new AssemblyLoadMetadata
+        {
+            GrainInterfaces = allGrainInterfaces,
+            GrainClasses = allGrainClasses,
+            Serializers = allSerializers,
+            Copiers = allCopiers,
+            Proxies = allProxies,
+            HasGeneratedCode = hasGeneratedCode
+        };
+
+        return new ValidationResult
+        {
+            IsValid = errors.Count == 0,
+            Errors = errors,
+            Warnings = warnings,
+            Metadata = metadata
+        };
+    }
+
+    /// <summary>
     /// Validates that an assembly has the required Orleans-generated code and metadata.
     /// </summary>
     /// <param name="assembly">The assembly to validate</param>
