@@ -27,7 +27,7 @@ namespace Tester.StreamingTests
         /// Sets up both silo and client with the same stream provider configuration
         /// to ensure proper communication.
         /// </summary>
-        public class Fixture : DynamicLoadingTestClusterFixture
+        public class Fixture : PluginLoadingTestClusterFixture
         {
             public const string StreamProviderName = "MemoryStreamProvider";
             public const string StreamNamespace = "StreamNamespace";

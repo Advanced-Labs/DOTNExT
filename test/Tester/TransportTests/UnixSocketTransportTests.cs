@@ -14,7 +14,7 @@ public class UnixSocketTransportTests : TransportTestsBase, IClassFixture<UnixSo
     {
     }
 
-    public class Fixture : DynamicLoadingTestClusterFixture
+    public class Fixture : PluginLoadingTestClusterFixture
     {
         protected override void CheckPreconditionsOrThrow()
         {

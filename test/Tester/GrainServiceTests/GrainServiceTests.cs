@@ -10,7 +10,7 @@ namespace Tester
     /// </summary>
     public class GrainServiceTests : OrleansTestingBase, IClassFixture<GrainServiceTests.Fixture>
     {
-        public class Fixture : DynamicLoadingTestClusterFixture
+        public class Fixture : PluginLoadingTestClusterFixture
         {
             protected override void ConfigureTestCluster(TestClusterBuilder builder)
             {

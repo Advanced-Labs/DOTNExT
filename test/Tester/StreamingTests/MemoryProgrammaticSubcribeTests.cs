@@ -13,7 +13,7 @@ namespace UnitTests.StreamingTests
     [TestCategory("BVT"), TestCategory("Streaming")]
     public class MemoryProgrammaticSubcribeTests : ProgrammaticSubscribeTestsRunner, IClassFixture<MemoryProgrammaticSubcribeTests.Fixture>
     {
-        public class Fixture : DynamicLoadingTestClusterFixture
+        public class Fixture : PluginLoadingTestClusterFixture
         {
             protected override void ConfigureTestCluster(TestClusterBuilder builder)
             {

@@ -23,7 +23,7 @@ namespace UnitTests.StreamingTests
         private readonly Fixture fixture;
         private readonly ImplicitSubscritionRecoverableStreamTestRunner runner;
 
-        public class Fixture : DynamicLoadingTestClusterFixture
+        public class Fixture : PluginLoadingTestClusterFixture
         {
             public const string StreamProviderName = GeneratedStreamTestConstants.StreamProviderName;
 

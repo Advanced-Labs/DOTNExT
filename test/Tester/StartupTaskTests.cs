@@ -15,7 +15,7 @@ namespace DefaultCluster.Tests
     [TestCategory("BVT"), TestCategory("Lifecycle")]
     public class StartupTaskTests : IClassFixture<StartupTaskTests.Fixture>
     {
-        public class Fixture : DynamicLoadingTestClusterFixture
+        public class Fixture : PluginLoadingTestClusterFixture
         {
             protected override void ConfigureTestCluster(TestClusterBuilder builder)
             {

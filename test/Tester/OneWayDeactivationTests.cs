@@ -16,7 +16,7 @@ namespace UnitTests.General
     {
         private readonly Fixture _fixture;
 
-        public class Fixture : DynamicLoadingTestClusterFixture
+        public class Fixture : PluginLoadingTestClusterFixture
         {
             protected override void ConfigureTestCluster(TestClusterBuilder builder)
             {

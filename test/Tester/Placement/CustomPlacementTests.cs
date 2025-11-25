@@ -20,7 +20,7 @@ namespace Tester.CustomPlacementTests
         private readonly string[] silos;
         private readonly SiloAddress[] siloAddresses;
 
-        public class Fixture : DynamicLoadingTestClusterFixture
+        public class Fixture : PluginLoadingTestClusterFixture
         {
             protected override void ConfigureTestCluster(TestClusterBuilder builder)
             {

@@ -12,7 +12,7 @@ namespace UnitTests.CatalogTests
     {
         private readonly Fixture fixture;
 
-        public class Fixture : DynamicLoadingTestClusterFixture
+        public class Fixture : PluginLoadingTestClusterFixture
         {
             protected override void ConfigureTestCluster(TestClusterBuilder builder)
             {

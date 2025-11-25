@@ -11,7 +11,7 @@ namespace Tester.EventSourcingTests
     /// so we can add the required log consistency providers, and 
     /// do more tracing
     /// </summary>
-    public class EventSourcingClusterFixture : DynamicLoadingTestClusterFixture
+    public class EventSourcingClusterFixture : PluginLoadingTestClusterFixture
     {
         protected override void ConfigureTestCluster(TestClusterBuilder builder)
         {

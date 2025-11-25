@@ -20,7 +20,7 @@ namespace Tester.StreamingTests.BroadcastChannel
         private IBroadcastChannelProvider _provider => _fixture.Client.GetBroadcastChannelProvider(ProviderName);
         private IBroadcastChannelProvider _providerNonFireAndForget => _fixture.Client.GetBroadcastChannelProvider(ProviderNameNonFireAndForget);
 
-        public class Fixture : DynamicLoadingTestClusterFixture
+        public class Fixture : PluginLoadingTestClusterFixture
         {
             protected override void CheckPreconditionsOrThrow()
             {

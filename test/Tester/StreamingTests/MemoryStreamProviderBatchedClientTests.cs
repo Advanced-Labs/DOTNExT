@@ -14,7 +14,7 @@ namespace Tester.StreamingTests
     /// </summary>
     public class MemoryStreamProviderBatchedClientTests : OrleansTestingBase, IClassFixture<MemoryStreamProviderBatchedClientTests.Fixture>
     {
-        public class Fixture : DynamicLoadingTestClusterFixture
+        public class Fixture : PluginLoadingTestClusterFixture
         {
             public const string StreamProviderName = "MemoryStreamProvider";
             public const string StreamNamespace = "StreamNamespace";

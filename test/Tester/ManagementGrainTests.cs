@@ -41,7 +41,7 @@ namespace UnitTests.Management
 
         private TestCluster HostedCluster => this.fixture.HostedCluster;
 
-        public class Fixture : DynamicLoadingTestClusterFixture
+        public class Fixture : PluginLoadingTestClusterFixture
         {
             protected override void ConfigureTestCluster(TestClusterBuilder builder)
             {

@@ -15,7 +15,7 @@ namespace UnitTests.StreamingTests
     [TestCategory("BVT")]
     public class MemoryStreamBatchingTests : StreamBatchingTestRunner, IClassFixture<MemoryStreamBatchingTests.Fixture>
     {
-        public class Fixture : DynamicLoadingTestClusterFixture
+        public class Fixture : PluginLoadingTestClusterFixture
         {
             private const int partitionCount = 1;
 

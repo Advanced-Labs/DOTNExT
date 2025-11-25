@@ -18,7 +18,7 @@ namespace Tester.StreamingTests
         private static readonly TimeSpan Timeout = TimeSpan.FromSeconds(30);
         private int eventsConsumed = 0;
 
-        public class Fixture : DynamicLoadingTestClusterFixture
+        public class Fixture : PluginLoadingTestClusterFixture
         {
             public const string StreamProviderName = "MemoryStreamProvider";
             private const int partitionCount = 8;

@@ -23,7 +23,7 @@ namespace UnitTests.General;
 /// </summary>
 public class StatelessWorkerActivationTests : IClassFixture<StatelessWorkerActivationTests.Fixture>
 {
-    public class Fixture : DynamicLoadingTestClusterFixture
+    public class Fixture : PluginLoadingTestClusterFixture
     {
         protected override void ConfigureTestCluster(TestClusterBuilder builder)
         {

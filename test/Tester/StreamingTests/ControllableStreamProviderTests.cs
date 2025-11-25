@@ -14,7 +14,7 @@ namespace UnitTests.StreamingTests
     /// </summary>
     public class ControllableStreamProviderTests : OrleansTestingBase, IClassFixture<ControllableStreamProviderTests.Fixture>
     {
-        public class Fixture : DynamicLoadingTestClusterFixture
+        public class Fixture : PluginLoadingTestClusterFixture
         {
             public const string StreamProviderName = "ControllableTestStreamProvider";
             public readonly string StreamProviderTypeName = typeof(PersistentStreamProvider).FullName;

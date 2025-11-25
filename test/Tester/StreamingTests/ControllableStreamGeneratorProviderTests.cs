@@ -22,7 +22,7 @@ namespace UnitTests.StreamingTests
         private const int TotalQueueCount = 4;
         private readonly Fixture fixture;
 
-        public class Fixture : DynamicLoadingTestClusterFixture
+        public class Fixture : PluginLoadingTestClusterFixture
         {
             public const string StreamProviderName = GeneratedStreamTestConstants.StreamProviderName;
             public static readonly string StreamProviderTypeName = typeof(PersistentStreamProvider).FullName;

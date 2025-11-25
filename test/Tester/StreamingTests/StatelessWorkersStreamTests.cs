@@ -18,7 +18,7 @@ namespace UnitTests.StreamingTests
 
         private readonly ILogger logger;
 
-        public class Fixture : DynamicLoadingTestClusterFixture
+        public class Fixture : PluginLoadingTestClusterFixture
         {
             protected override void ConfigureTestCluster(TestClusterBuilder builder)
             {
