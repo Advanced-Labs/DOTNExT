@@ -97,5 +97,23 @@ namespace Orleans.Metadata
         /// Gets all registered grain types.
         /// </summary>
         internal IEnumerable<GrainType> GetGrainTypes() => _types.Keys;
+
+        /// <summary>
+        /// Removes grain types from the existing mappings.
+        /// This method is thread-safe.
+        /// </summary>
+        /// <param name="grainTypesToRemove">The grain types to remove</param>
+        internal void RemoveTypes(IEnumerable<GrainType> grainTypesToRemove)
+        {
+            if (grainTypesToRemove == null)
+            {
+                throw new ArgumentNullException(nameof(grainTypesToRemove));
+            }
+
+            // Atomic update using ImmutableDictionary.RemoveRange
+            var current = _types;
+            var updated = current.RemoveRange(grainTypesToRemove);
+            _types = updated;
+        }
     }
 }
