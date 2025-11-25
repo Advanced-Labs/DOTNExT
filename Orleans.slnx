@@ -1,6 +1,8 @@
 <Solution>
   <Folder Name="/playground/">
     <Project Path="playground/ActivationSheddingToy/ActivationSheddingToy.csproj" />
+    <Project Path="playground/DynamicGrainLoading.TestGrains/DynamicGrainLoading.TestGrains.csproj" />
+    <Project Path="playground/PluginGrainScenarios/PluginGrainScenarios.csproj" />
   </Folder>
   <Folder Name="/playground/ActivationRebalancing/">
     <Project Path="playground/ActivationRebalancing/ActivationRebalancing.AppHost/ActivationRebalancing.AppHost.csproj" />
