@@ -450,3 +450,74 @@ public static ISiloBuilder AddDynamicGrainLoading(...)
 
 **Status:** Phase 2.5 COMPLETE
 
+### Session 6 (2025-11-25) - Unified Scenario Runner
+
+**Goal:** Create a single console app that the user can run from VS2022 to test all plugin grain scenarios.
+
+**Created: `playground/PluginGrainScenarios/`**
+
+Project structure:
+```
+PluginGrainScenarios/
+├── PluginGrainScenarios.csproj
+├── Program.cs (menu and helpers)
+└── Scenarios/
+    ├── SingleSiloBasicLoadUnload.cs
+    ├── MdcpIsolationVerification.cs
+    ├── MultiSiloManifestPropagation.cs
+    ├── AssemblyUnloadMemoryReclaim.cs
+    └── SplitGrainAssemblies.cs
+```
+
+**Scenarios:**
+
+1. **Single Silo - Basic Load/Unload**: Tests basic MDCP grain loading on a single silo
+   - Loads DynamicGrainLoading.TestGrains.dll
+   - Reports grain types discovered
+   - Tests grain invocation via reflection
+   - Unloads the assembly
+
+2. **MDCP Isolation Verification**: Verifies MDCP provides proper isolation
+   - Checks assembly is in separate AssemblyLoadContext
+   - Verifies IsCollectible = true
+   - Confirms Orleans runtime types are shared (not duplicated)
+   - Shows assembly count breakdown
+
+3. **Multi-Silo Manifest Propagation**: Tests cluster behavior
+   - Starts 3-silo cluster
+   - Loads grains on one silo only
+   - Verifies manifest propagates to all silos
+   - Checks manifest version consistency
+
+4. **Assembly Unload and Memory Reclaim**: Tests memory management
+   - Captures baseline memory
+   - Loads assembly and measures memory increase
+   - Unloads assembly and forces GC
+   - Reports memory recovered
+
+5. **Split Grain Assemblies**: Tests interface/implementation separation
+   - Analyzes grain types and their interfaces
+   - Shows which assemblies contain interfaces vs implementations
+   - Explains GTD implications for split grains
+
+**Usage:**
+1. Build `DynamicGrainLoading.TestGrains` first:
+   ```
+   cd playground/DynamicGrainLoading.TestGrains
+   dotnet build
+   ```
+2. Run `PluginGrainScenarios` from VS2022 or:
+   ```
+   cd playground/PluginGrainScenarios
+   dotnet run
+   ```
+3. Select a scenario from the menu - no command-line arguments needed
+
+**Features:**
+- Uses Spectre.Console for interactive menu and rich output
+- Auto-discovers TestGrains.dll location
+- Each scenario is self-contained with proper startup/cleanup
+- Detailed output with pass/fail indicators
+
+**Status:** Complete - ready for testing
+
