@@ -316,6 +316,12 @@ namespace Orleans.Hosting
             services.TryAddSingleton<IPluginGrainLoader>(sp => sp.GetRequiredService<PluginGrainLoaderService>());
             services.TryAddSingleton<ILifecycleParticipant<ISiloLifecycle>>(sp => sp.GetRequiredService<PluginGrainLoaderService>());
 
+            // Plugin grain unloading support
+            services.TryAddSingleton<GrainLifecycleManager>();
+            services.TryAddSingleton<IGrainLifecycleManager>(sp => sp.GetRequiredService<GrainLifecycleManager>());
+            services.TryAddSingleton<PluginGrainUnloaderService>();
+            services.TryAddSingleton<IPluginGrainUnloader>(sp => sp.GetRequiredService<PluginGrainUnloaderService>());
+
             //Add default option formatter if none is configured, for options which are required to be configured
             services.ConfigureFormatter<SiloOptions>();
             services.ConfigureFormatter<SchedulingOptions>();

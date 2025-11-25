@@ -31,6 +31,8 @@ internal sealed class PluginGrainLoaderService : IPluginGrainLoader, IAsyncDispo
     private readonly RpcProvider _rpcProvider;
     private readonly GrainReferenceActivator _grainReferenceActivator;
     private readonly ILocalSiloDetails _siloDetails;
+    private readonly IClusterMembershipService _clusterMembershipService;
+    private readonly IInternalGrainFactory _grainFactory;
     private readonly ILogger<PluginGrainLoaderService> _logger;
     private readonly Channel<GrainAssemblyLoadedEvent> _loadEventsChannel;
     private readonly CancellationTokenSource _shutdownCts = new();
@@ -46,6 +48,8 @@ internal sealed class PluginGrainLoaderService : IPluginGrainLoader, IAsyncDispo
         RpcProvider rpcProvider,
         GrainReferenceActivator grainReferenceActivator,
         ILocalSiloDetails siloDetails,
+        IClusterMembershipService clusterMembershipService,
+        IInternalGrainFactory grainFactory,
         ILogger<PluginGrainLoaderService> logger)
     {
         _assemblyLoader = assemblyLoader ?? throw new ArgumentNullException(nameof(assemblyLoader));
@@ -57,6 +61,8 @@ internal sealed class PluginGrainLoaderService : IPluginGrainLoader, IAsyncDispo
         _rpcProvider = rpcProvider ?? throw new ArgumentNullException(nameof(rpcProvider));
         _grainReferenceActivator = grainReferenceActivator ?? throw new ArgumentNullException(nameof(grainReferenceActivator));
         _siloDetails = siloDetails ?? throw new ArgumentNullException(nameof(siloDetails));
+        _clusterMembershipService = clusterMembershipService ?? throw new ArgumentNullException(nameof(clusterMembershipService));
+        _grainFactory = grainFactory ?? throw new ArgumentNullException(nameof(grainFactory));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
 
         _loadEventsChannel = Channel.CreateUnbounded<GrainAssemblyLoadedEvent>(new UnboundedChannelOptions
@@ -193,6 +199,9 @@ internal sealed class PluginGrainLoaderService : IPluginGrainLoader, IAsyncDispo
                     _logger.LogInformation(
                         "Successfully propagated manifest update to cluster. New version: {Version}",
                         newVersion);
+
+                    // Notify other silos to refresh their cluster manifest
+                    await NotifyOtherSilosOfManifestChangeAsync(cancellationToken);
                 }
                 else
                 {
@@ -292,6 +301,60 @@ internal sealed class PluginGrainLoaderService : IPluginGrainLoader, IAsyncDispo
         _shutdownCts.Cancel();
         _loadEventsChannel.Writer.Complete();
         return Task.CompletedTask;
+    }
+
+    /// <summary>
+    /// Notifies all other silos in the cluster to refresh their manifest to pick up the changes.
+    /// </summary>
+    private async Task NotifyOtherSilosOfManifestChangeAsync(CancellationToken cancellationToken)
+    {
+        try
+        {
+            var membershipSnapshot = _clusterMembershipService.CurrentSnapshot;
+            var localSiloAddress = _siloDetails.SiloAddress;
+            var notificationTasks = new List<Task>();
+
+            foreach (var entry in membershipSnapshot.Members)
+            {
+                var member = entry.Value;
+
+                // Skip local silo and inactive silos
+                if (member.SiloAddress.Equals(localSiloAddress) || member.Status != SiloStatus.Active)
+                {
+                    continue;
+                }
+
+                notificationTasks.Add(NotifySiloAsync(member.SiloAddress, cancellationToken));
+            }
+
+            if (notificationTasks.Count > 0)
+            {
+                _logger.LogDebug("Notifying {Count} silos of manifest change", notificationTasks.Count);
+
+                // Wait for all notifications, but don't fail if some don't respond
+                await Task.WhenAll(notificationTasks).ConfigureAwait(ConfigureAwaitOptions.SuppressThrowing);
+
+                _logger.LogInformation("Notified {Count} silos of manifest change", notificationTasks.Count);
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "Error notifying silos of manifest change");
+        }
+
+        async Task NotifySiloAsync(SiloAddress siloAddress, CancellationToken ct)
+        {
+            try
+            {
+                var remoteManifestProvider = _grainFactory.GetSystemTarget<ISiloManifestSystemTarget>(
+                    Constants.ManifestProviderType, siloAddress);
+                await remoteManifestProvider.NotifyManifestChanged().AsTask().WaitAsync(ct);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Failed to notify silo {SiloAddress} of manifest change", siloAddress);
+            }
+        }
     }
 
     public async ValueTask DisposeAsync()

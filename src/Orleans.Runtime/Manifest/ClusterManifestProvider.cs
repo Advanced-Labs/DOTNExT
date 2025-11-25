@@ -195,6 +195,91 @@ namespace Orleans.Runtime.Metadata
         }
 
         /// <summary>
+        /// Forces a refresh of all silo manifests in the cluster.
+        /// This is used after dynamic grain loading to ensure all silos have the latest manifests.
+        /// </summary>
+        internal async Task ForceRefreshAllManifestsAsync()
+        {
+            if (_grainFactory == null)
+            {
+                _logger.LogWarning("Cannot force refresh manifests - grain factory not initialized");
+                return;
+            }
+
+            try
+            {
+                var membershipSnapshot = _clusterMembershipService.CurrentSnapshot;
+                var existingManifest = _current;
+                var builder = existingManifest.Silos.ToBuilder();
+                var modified = false;
+
+                var tasks = new List<Task<(SiloAddress Key, GrainManifest? Value, Exception? Exception)>>();
+                foreach (var entry in membershipSnapshot.Members)
+                {
+                    var member = entry.Value;
+
+                    if (member.SiloAddress.Equals(_localSiloAddress))
+                    {
+                        // Skip local silo - use LocalGrainManifest directly
+                        builder[_localSiloAddress] = LocalGrainManifest;
+                        continue;
+                    }
+
+                    if (member.Status != SiloStatus.Active)
+                    {
+                        continue;
+                    }
+
+                    tasks.Add(GetManifestFromSilo(member.SiloAddress));
+                }
+
+                await Task.WhenAll(tasks);
+
+                foreach (var task in tasks)
+                {
+                    var result = await task;
+                    if (result.Exception == null && result.Value != null)
+                    {
+                        builder[result.Key] = result.Value;
+                        modified = true;
+                    }
+                    else if (result.Exception != null)
+                    {
+                        _logger.LogWarning(result.Exception, "Error refreshing manifest from silo {SiloAddress}", result.Key);
+                    }
+                }
+
+                if (modified)
+                {
+                    var newVersion = new MajorMinorVersion(membershipSnapshot.Version.Value, existingManifest.Version.Minor + 1);
+                    var published = _updates.TryPublish(new ClusterManifest(newVersion, builder.ToImmutable()));
+                    if (published)
+                    {
+                        _logger.LogInformation("Force refreshed cluster manifests. New version: {Version}", newVersion);
+                    }
+                }
+
+                async Task<(SiloAddress, GrainManifest?, Exception?)> GetManifestFromSilo(SiloAddress siloAddress)
+                {
+                    try
+                    {
+                        var remoteManifestProvider = _grainFactory!.GetSystemTarget<ISiloManifestSystemTarget>(Constants.ManifestProviderType, siloAddress);
+                        var manifest = await remoteManifestProvider.GetSiloManifest().AsTask().WaitAsync(_shutdownCts.Token);
+                        return (siloAddress, manifest, null);
+                    }
+                    catch (Exception exception)
+                    {
+                        return (siloAddress, null, exception);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Error during force manifest refresh");
+            }
+        }
+
+        /// <summary>
         /// Updates the local silo's grain manifest and propagates the change to the cluster.
         /// This is used for dynamic grain loading scenarios.
         /// </summary>

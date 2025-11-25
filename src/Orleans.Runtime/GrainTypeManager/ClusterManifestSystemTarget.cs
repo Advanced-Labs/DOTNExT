@@ -1,13 +1,14 @@
 using System.Threading.Tasks;
 using Orleans.Metadata;
+using Orleans.Runtime.Metadata;
 
 namespace Orleans.Runtime
 {
     internal sealed class ClusterManifestSystemTarget : SystemTarget, IClusterManifestSystemTarget, ISiloManifestSystemTarget, ILifecycleParticipant<ISiloLifecycle>
     {
-        private readonly GrainManifest _siloManifest;
         private readonly IClusterMembershipService _clusterMembershipService;
         private readonly IClusterManifestProvider _clusterManifestProvider;
+        private readonly ClusterManifestProvider _clusterManifestProviderInternal;
         private readonly ClusterManifestUpdate _noUpdate = default;
         private MembershipVersion _cachedMembershipVersion;
         private ClusterManifestUpdate _cachedUpdate;
@@ -15,12 +16,13 @@ namespace Orleans.Runtime
         public ClusterManifestSystemTarget(
             IClusterMembershipService clusterMembershipService,
             IClusterManifestProvider clusterManifestProvider,
+            ClusterManifestProvider clusterManifestProviderInternal,
             SystemTargetShared shared)
             : base(Constants.ManifestProviderType, shared)
         {
-            _siloManifest = clusterManifestProvider.LocalGrainManifest;
             _clusterMembershipService = clusterMembershipService;
             _clusterManifestProvider = clusterManifestProvider;
+            _clusterManifestProviderInternal = clusterManifestProviderInternal;
             shared.ActivationDirectory.RecordNewTarget(this);
         }
 
@@ -61,7 +63,14 @@ namespace Orleans.Runtime
             return new (_cachedUpdate);
         }
 
-        public ValueTask<GrainManifest> GetSiloManifest() => new(_siloManifest);
+        public ValueTask<GrainManifest> GetSiloManifest() => new(_clusterManifestProvider.LocalGrainManifest);
+
+        public async ValueTask NotifyManifestChanged()
+        {
+            // Trigger a refresh of all silo manifests to pick up changes from other silos
+            await _clusterManifestProviderInternal.ForceRefreshAllManifestsAsync();
+        }
+
         void ILifecycleParticipant<ISiloLifecycle>.Participate(ISiloLifecycle lifecycle)
         {
             // We don't participate in any lifecycle stages: activating this instance is all that is necessary.
