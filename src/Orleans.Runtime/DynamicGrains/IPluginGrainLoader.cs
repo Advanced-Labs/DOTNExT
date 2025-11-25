@@ -8,9 +8,9 @@ using Orleans.Metadata;
 namespace Orleans.Runtime.DynamicGrains;
 
 /// <summary>
-/// Service for loading grain assemblies at runtime.
+/// Service for loading plugin grain assemblies at runtime.
 /// </summary>
-public interface IDynamicGrainLoader
+public interface IPluginGrainLoader
 {
     /// <summary>
     /// Loads a pre-compiled grain assembly with Orleans-generated code.

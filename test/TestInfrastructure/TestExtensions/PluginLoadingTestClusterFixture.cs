@@ -13,10 +13,10 @@ using Orleans.TestingHost;
 namespace TestExtensions
 {
     /// <summary>
-    /// Base test cluster fixture that loads grain assemblies dynamically after host build.
-    /// This ensures that dynamic grain loading is always tested as part of the test infrastructure.
+    /// Base test cluster fixture that loads grain plugin assemblies after host build.
+    /// This ensures that plugin grain loading is always tested as part of the test infrastructure.
     /// </summary>
-    public abstract class DynamicLoadingTestClusterFixture : BaseTestClusterFixture
+    public abstract class PluginLoadingTestClusterFixture : BaseTestClusterFixture
     {
         /// <summary>
         /// Gets the list of grain assembly names to load dynamically.
@@ -100,8 +100,8 @@ namespace TestExtensions
         {
             base.ConfigureTestCluster(builder);
 
-            // Add dynamic grain loading support to all silos
-            builder.AddSiloBuilderConfigurator<DynamicGrainLoadingConfigurator>();
+            // Add plugin grain loading support to all silos
+            builder.AddSiloBuilderConfigurator<PluginGrainLoadingConfigurator>();
         }
 
         public override async Task InitializeAsync()
@@ -158,7 +158,7 @@ namespace TestExtensions
                 }
 
                 var serviceProvider = HostedCluster.GetSiloServiceProvider(silo.SiloAddress);
-                var grainLoader = serviceProvider.GetRequiredService<IDynamicGrainLoader>();
+                var grainLoader = serviceProvider.GetRequiredService<IPluginGrainLoader>();
 
                 foreach (var assemblyPath in assembliesToLoad)
                 {
@@ -186,13 +186,13 @@ namespace TestExtensions
         }
 
         /// <summary>
-        /// Configurator to enable dynamic grain loading on each silo.
+        /// Configurator to enable plugin grain loading on each silo.
         /// </summary>
-        private class DynamicGrainLoadingConfigurator : ISiloConfigurator
+        private class PluginGrainLoadingConfigurator : ISiloConfigurator
         {
             public void Configure(ISiloBuilder siloBuilder)
             {
-                siloBuilder.AddDynamicGrainLoading();
+                siloBuilder.AddPluginGrainLoading();
             }
         }
     }

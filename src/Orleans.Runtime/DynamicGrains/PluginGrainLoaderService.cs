@@ -17,36 +17,36 @@ using Orleans.Serialization.Configuration;
 namespace Orleans.Runtime.DynamicGrains;
 
 /// <summary>
-/// Main service for dynamic grain loading functionality.
+/// Main service for plugin grain loading functionality.
 /// Coordinates assembly loading, manifest updates, cache invalidation, and cluster propagation.
 /// </summary>
-internal sealed class DynamicGrainLoaderService : IDynamicGrainLoader, IAsyncDisposable, ILifecycleParticipant<ISiloLifecycle>
+internal sealed class PluginGrainLoaderService : IPluginGrainLoader, IAsyncDisposable, ILifecycleParticipant<ISiloLifecycle>
 {
-    private readonly DynamicAssemblyLoader _assemblyLoader;
+    private readonly PluginAssemblyLoader _assemblyLoader;
     private readonly SiloManifestProvider _manifestProvider;
     private readonly ClusterManifestProvider _clusterManifestProvider;
-    private readonly DynamicSerializationManager _serializationManager;
+    private readonly PluginSerializationManager _serializationManager;
     private readonly GrainContextActivator _grainContextActivator;
     private readonly GrainTypeSharedContextResolver _sharedContextResolver;
     private readonly RpcProvider _rpcProvider;
     private readonly GrainReferenceActivator _grainReferenceActivator;
     private readonly ILocalSiloDetails _siloDetails;
-    private readonly ILogger<DynamicGrainLoaderService> _logger;
+    private readonly ILogger<PluginGrainLoaderService> _logger;
     private readonly Channel<GrainAssemblyLoadedEvent> _loadEventsChannel;
     private readonly CancellationTokenSource _shutdownCts = new();
     private readonly SemaphoreSlim _loadSemaphore = new(1, 1);
 
-    public DynamicGrainLoaderService(
-        DynamicAssemblyLoader assemblyLoader,
+    public PluginGrainLoaderService(
+        PluginAssemblyLoader assemblyLoader,
         SiloManifestProvider manifestProvider,
         ClusterManifestProvider clusterManifestProvider,
-        DynamicSerializationManager serializationManager,
+        PluginSerializationManager serializationManager,
         GrainContextActivator grainContextActivator,
         GrainTypeSharedContextResolver sharedContextResolver,
         RpcProvider rpcProvider,
         GrainReferenceActivator grainReferenceActivator,
         ILocalSiloDetails siloDetails,
-        ILogger<DynamicGrainLoaderService> logger)
+        ILogger<PluginGrainLoaderService> logger)
     {
         _assemblyLoader = assemblyLoader ?? throw new ArgumentNullException(nameof(assemblyLoader));
         _manifestProvider = manifestProvider ?? throw new ArgumentNullException(nameof(manifestProvider));
@@ -274,7 +274,7 @@ internal sealed class DynamicGrainLoaderService : IDynamicGrainLoader, IAsyncDis
     public void Participate(ISiloLifecycle lifecycle)
     {
         lifecycle.Subscribe(
-            observerName: nameof(DynamicGrainLoaderService),
+            observerName: nameof(PluginGrainLoaderService),
             stage: ServiceLifecycleStage.RuntimeGrainServices,
             onStart: OnStart,
             onStop: OnStop);

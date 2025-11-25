@@ -7,7 +7,7 @@ using Orleans.Runtime;
 using Orleans.Runtime.DynamicGrains;
 
 Console.WriteLine("═══════════════════════════════════════════════════════");
-Console.WriteLine("  Orleans Dynamic Grain Loading - Single Silo Test");
+Console.WriteLine("  Orleans Plugin Grain Loading - Single Silo Test");
 Console.WriteLine("═══════════════════════════════════════════════════════");
 Console.WriteLine();
 
@@ -17,7 +17,7 @@ var host = Host.CreateDefaultBuilder(args)
     {
         siloBuilder
             .UseLocalhostClustering()
-            .AddDynamicGrainLoading();  // ← Enable dynamic grain loading
+            .AddPluginGrainLoading();  // ← Enable plugin grain loading
     })
     .ConfigureLogging(logging =>
     {
@@ -25,13 +25,13 @@ var host = Host.CreateDefaultBuilder(args)
         logging.AddConsole();
         logging.SetMinimumLevel(LogLevel.Information);
 
-        // Enable detailed logging for dynamic grain loading
+        // Enable detailed logging for plugin grain loading
         logging.AddFilter("Orleans.Runtime.DynamicGrains", LogLevel.Debug);
     })
     .Build();
 
 Console.WriteLine("✓ Host configured");
-Console.WriteLine("✓ Dynamic grain loading enabled");
+Console.WriteLine("✓ Plugin grain loading enabled");
 Console.WriteLine();
 
 // Start the silo
@@ -43,7 +43,7 @@ Console.WriteLine();
 try
 {
     var grainFactory = host.Services.GetRequiredService<IGrainFactory>();
-    var grainLoader = host.Services.GetRequiredService<IDynamicGrainLoader>();
+    var grainLoader = host.Services.GetRequiredService<IPluginGrainLoader>();
 
     Console.WriteLine("═══════════════════════════════════════════════════════");
     Console.WriteLine("  Test Phase 1: Load Test Grain Assembly");

@@ -98,11 +98,30 @@ pluginLoader.Dispose();
 - [ ] Test loading works (dotnet SDK not available in environment)
 - [ ] Test unloading works (dotnet SDK not available in environment)
 
-### Phase 2: Remove "Dynamic" Distinction (Later)
+### Phase 2: Remove "Dynamic" Distinction (COMPLETED)
 
-- [ ] Rename classes (remove "Dynamic" prefix where misleading)
-- [ ] Make startup grains load through same path
-- [ ] Update documentation
+- [x] Rename classes (Dynamic* → Plugin*)
+- [x] Update test infrastructure
+- [x] Update playground examples
+- [x] Add backward-compatible aliases with [Obsolete] warnings
+- [ ] Make startup grains load through same path (deferred - complex change)
+
+**Renamed Classes:**
+| Old Name | New Name |
+|----------|----------|
+| DynamicAssemblyLoader | PluginAssemblyLoader |
+| DynamicPluginAssemblySet | PluginAssemblySet |
+| DynamicGrainLoaderService | PluginGrainLoaderService |
+| DynamicGrainUnloaderService | PluginGrainUnloaderService |
+| DynamicSerializationManager | PluginSerializationManager |
+| DynamicGrainLoadingExtensions | PluginGrainLoadingExtensions |
+| IDynamicGrainLoader | IPluginGrainLoader |
+| IDynamicGrainUnloader | IPluginGrainUnloader |
+| DynamicLoadingTestClusterFixture | PluginLoadingTestClusterFixture |
+
+**Backward Compatibility:**
+- `AddDynamicGrainLoading()` still works but marked `[Obsolete]`
+- Will emit compiler warnings guiding users to new names
 
 ### Phase 3: GTD Enhancements (Later)
 
@@ -337,4 +356,46 @@ already had complete MDCP integration from a previous session.
 
 **Conclusion:** Phase 1 (MDCP Integration) is COMPLETE on this branch.
 Ready for Phase 2 (Remove "Dynamic" Distinction) when user requests it.
+
+### Session 4 (2025-11-25) - Phase 2: "Dynamic" → "Plugin" Rename
+
+**Goal:** Remove confusing "Dynamic" terminology, rename to "Plugin" which better describes what these are.
+
+**Rationale:**
+- "Dynamic grains" implies there are "static grains" - but all grains are just grains
+- "Plugin" aligns with MDCP (McMaster.NETCore.Plugins) terminology
+- More accurate - these are grain plugins loaded at runtime
+
+**Files Renamed:**
+1. `DynamicAssemblyLoader.cs` → `PluginAssemblyLoader.cs`
+2. `DynamicPluginAssemblySet.cs` → `PluginAssemblySet.cs`
+3. `DynamicGrainLoaderService.cs` → `PluginGrainLoaderService.cs`
+4. `DynamicGrainUnloaderService.cs` → `PluginGrainUnloaderService.cs`
+5. `DynamicSerializationManager.cs` → `PluginSerializationManager.cs`
+6. `DynamicGrainLoadingExtensions.cs` → `PluginGrainLoadingExtensions.cs`
+7. `IDynamicGrainLoader.cs` → `IPluginGrainLoader.cs`
+8. `IDynamicGrainUnloader.cs` → `IPluginGrainUnloader.cs`
+9. `DynamicLoadingTestClusterFixture.cs` → `PluginLoadingTestClusterFixture.cs`
+
+**Test Infrastructure Updated:**
+- `DefaultClusterFixture` now extends `PluginLoadingTestClusterFixture`
+- `SplitAssemblyDynamicGrainTests` updated to use new names
+- Test configurations updated
+
+**Playground Updated:**
+- `DynamicGrainLoading.SingleSilo/Program.cs` uses `IPluginGrainLoader`
+- `DynamicGrainLoading.MultiSilo/Program.cs` uses `IPluginGrainLoader`
+
+**Backward Compatibility:**
+Added `[Obsolete]` aliases in `PluginGrainLoadingExtensions.cs`:
+```csharp
+[Obsolete("Use AddPluginGrainLoading instead")]
+public static ISiloBuilder AddDynamicGrainLoading(...)
+```
+
+**Deferred:**
+- Making startup grains load through MDCP path (complex, may not be needed)
+- Renaming `DynamicGrains` folder (namespace would need changes across entire codebase)
+
+**Status:** Phase 2 COMPLETE
 

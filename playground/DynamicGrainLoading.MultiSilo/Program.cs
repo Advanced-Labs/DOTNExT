@@ -9,7 +9,7 @@ using Orleans.Runtime.DynamicGrains;
 using System.Net;
 
 Console.WriteLine("═══════════════════════════════════════════════════════");
-Console.WriteLine("  Orleans Dynamic Grain Loading - Multi-Silo Test");
+Console.WriteLine("  Orleans Plugin Grain Loading - Multi-Silo Test");
 Console.WriteLine("═══════════════════════════════════════════════════════");
 Console.WriteLine();
 
@@ -45,9 +45,9 @@ Console.WriteLine();
 try
 {
     var grainFactory1 = silo1.Services.GetRequiredService<IGrainFactory>();
-    var grainLoader1 = silo1.Services.GetRequiredService<IDynamicGrainLoader>();
-    var grainLoader2 = silo2.Services.GetRequiredService<IDynamicGrainLoader>();
-    var grainLoader3 = silo3.Services.GetRequiredService<IDynamicGrainLoader>();
+    var grainLoader1 = silo1.Services.GetRequiredService<IPluginGrainLoader>();
+    var grainLoader2 = silo2.Services.GetRequiredService<IPluginGrainLoader>();
+    var grainLoader3 = silo3.Services.GetRequiredService<IPluginGrainLoader>();
 
     Console.WriteLine("═══════════════════════════════════════════════════════");
     Console.WriteLine("  Test Phase 1: Load Assembly on Silo 1");
@@ -310,7 +310,7 @@ static async Task<IHost> StartSilo(string siloName, int siloPort, int gatewayPor
                 {
                     options.PrimarySiloEndpoint = new IPEndPoint(IPAddress.Loopback, primarySiloPort);
                 })
-                .AddDynamicGrainLoading();  // ← Enable dynamic grain loading
+                .AddPluginGrainLoading();  // ← Enable plugin grain loading
         })
         .ConfigureLogging(logging =>
         {

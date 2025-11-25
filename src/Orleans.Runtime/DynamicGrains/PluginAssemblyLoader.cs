@@ -15,22 +15,22 @@ using Orleans.Metadata;
 namespace Orleans.Runtime.DynamicGrains;
 
 /// <summary>
-/// Manages dynamic loading of grain assemblies at runtime.
+/// Manages plugin grain assembly loading at runtime using MDCP (McMaster.NETCore.Plugins).
 /// </summary>
-internal sealed class DynamicAssemblyLoader
+internal sealed class PluginAssemblyLoader
 {
     private readonly AssemblyValidator _validator;
-    private readonly ILogger<DynamicAssemblyLoader> _logger;
+    private readonly ILogger<PluginAssemblyLoader> _logger;
     private readonly ConcurrentDictionary<string, Assembly> _loadedAssemblies = new();
     private readonly ConcurrentDictionary<string, AssemblyLoadMetadata> _assemblyMetadata = new();
-    private readonly ConcurrentDictionary<string, DynamicPluginAssemblySet> _pluginSets = new();
+    private readonly ConcurrentDictionary<string, PluginAssemblySet> _pluginSets = new();
     private readonly ConcurrentDictionary<string, PluginLoader> _pluginLoaders = new();
     private readonly SemaphoreSlim _loadLock = new(1, 1);
     private Type[] _cachedSharedTypes;
 
-    public DynamicAssemblyLoader(
+    public PluginAssemblyLoader(
         AssemblyValidator validator,
-        ILogger<DynamicAssemblyLoader> logger)
+        ILogger<PluginAssemblyLoader> logger)
     {
         _validator = validator ?? throw new ArgumentNullException(nameof(validator));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
@@ -119,7 +119,7 @@ internal sealed class DynamicAssemblyLoader
             var loadContext = AssemblyLoadContext.GetLoadContext(assembly);
 
             // Create plugin assembly set - discover all related assemblies in the same ALC
-            var pluginSet = DynamicPluginAssemblySet.FromAssemblyLoadContext(
+            var pluginSet = PluginAssemblySet.FromAssemblyLoadContext(
                 assembly,
                 loadContext,
                 assemblyPath);
@@ -181,7 +181,7 @@ internal sealed class DynamicAssemblyLoader
     /// supporting the split grain pattern where interfaces, implementations, and codegen
     /// can be in separate assemblies.
     /// </summary>
-    public async Task<(DynamicPluginAssemblySet PluginSet, AssemblyLoadMetadata Metadata, List<string> Errors)> LoadPluginAssemblySetAsync(
+    public async Task<(PluginAssemblySet PluginSet, AssemblyLoadMetadata Metadata, List<string> Errors)> LoadPluginAssemblySetAsync(
         string assemblyPath,
         CancellationToken cancellationToken)
     {
@@ -201,14 +201,14 @@ internal sealed class DynamicAssemblyLoader
 
         // Fallback: create a single-assembly plugin set
         var loadContext = AssemblyLoadContext.GetLoadContext(assembly);
-        var fallbackSet = DynamicPluginAssemblySet.ForSingleAssembly(assembly, loadContext, assemblyPath);
+        var fallbackSet = PluginAssemblySet.ForSingleAssembly(assembly, loadContext, assemblyPath);
         return (fallbackSet, metadata, errors);
     }
 
     /// <summary>
     /// Gets the plugin assembly set for a loaded assembly.
     /// </summary>
-    public DynamicPluginAssemblySet GetPluginAssemblySet(string assemblyPath)
+    public PluginAssemblySet GetPluginAssemblySet(string assemblyPath)
     {
         assemblyPath = Path.GetFullPath(assemblyPath);
         return _pluginSets.TryGetValue(assemblyPath, out var pluginSet) ? pluginSet : null;

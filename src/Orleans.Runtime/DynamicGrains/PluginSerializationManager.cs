@@ -10,17 +10,17 @@ using Orleans.Serialization.Serializers;
 namespace Orleans.Runtime.DynamicGrains;
 
 /// <summary>
-/// Manages dynamic registration of serializers and codecs for dynamically loaded grain types.
+/// Manages registration of serializers and codecs for plugin grain types.
 /// </summary>
-internal sealed class DynamicSerializationManager
+internal sealed class PluginSerializationManager
 {
     private readonly CodecProvider _codecProvider;
-    private readonly ILogger<DynamicSerializationManager> _logger;
+    private readonly ILogger<PluginSerializationManager> _logger;
     private readonly object _registrationLock = new();
 
-    public DynamicSerializationManager(
+    public PluginSerializationManager(
         CodecProvider codecProvider,
-        ILogger<DynamicSerializationManager> logger)
+        ILogger<PluginSerializationManager> logger)
     {
         _codecProvider = codecProvider ?? throw new ArgumentNullException(nameof(codecProvider));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
@@ -40,7 +40,7 @@ internal sealed class DynamicSerializationManager
         lock (_registrationLock)
         {
             _logger.LogInformation(
-                "Registering {SerializerCount} serializers and {CopierCount} copiers for dynamic grain types",
+                "Registering {SerializerCount} serializers and {CopierCount} copiers for plugin grain types",
                 metadata.Serializers.Count,
                 metadata.Copiers.Count);
 

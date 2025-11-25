@@ -19,7 +19,7 @@ internal sealed class AssemblyValidator
     /// </summary>
     /// <param name="pluginSet">The plugin assembly set to validate</param>
     /// <returns>Validation result with aggregated metadata from all assemblies</returns>
-    public ValidationResult ValidatePluginSet(DynamicPluginAssemblySet pluginSet)
+    public ValidationResult ValidatePluginSet(PluginAssemblySet pluginSet)
     {
         if (pluginSet == null)
         {

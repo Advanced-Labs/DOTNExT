@@ -8,13 +8,13 @@ using Orleans.Metadata;
 namespace Orleans.Runtime.DynamicGrains;
 
 /// <summary>
-/// Service for unloading grain assemblies at runtime.
+/// Service for unloading plugin grain assemblies at runtime.
 /// Orchestrates deactivation, cache cleanup, manifest updates, and memory reclamation.
 /// </summary>
-public interface IDynamicGrainUnloader
+public interface IPluginGrainUnloader
 {
     /// <summary>
-    /// Unloads a dynamically loaded grain assembly from this silo.
+    /// Unloads a plugin grain assembly from this silo.
     /// This is a multi-phase operation that:
     /// 1. Validates assembly is loaded
     /// 2. Deactivates all active grain instances

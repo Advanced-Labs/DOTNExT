@@ -148,8 +148,8 @@ public class SplitAssemblyDynamicGrainTests : IClassFixture<SplitAssemblyDynamic
         {
             base.ConfigureTestCluster(builder);
 
-            // Add dynamic grain loading support
-            builder.AddSiloBuilderConfigurator<DynamicGrainLoadingConfigurator>();
+            // Add plugin grain loading support
+            builder.AddSiloBuilderConfigurator<PluginGrainLoadingConfigurator>();
         }
 
         public override async Task InitializeAsync()
@@ -167,7 +167,7 @@ public class SplitAssemblyDynamicGrainTests : IClassFixture<SplitAssemblyDynamic
             // Load the assembly dynamically
             var silo = HostedCluster.Silos.First();
             var serviceProvider = HostedCluster.GetSiloServiceProvider(silo.SiloAddress);
-            var grainLoader = serviceProvider.GetRequiredService<IDynamicGrainLoader>();
+            var grainLoader = serviceProvider.GetRequiredService<IPluginGrainLoader>();
 
             LoadResult = await grainLoader.LoadGrainAssemblyAsync(assemblyPath);
 
@@ -222,11 +222,11 @@ public class SplitAssemblyDynamicGrainTests : IClassFixture<SplitAssemblyDynamic
             return null;
         }
 
-        private class DynamicGrainLoadingConfigurator : ISiloConfigurator
+        private class PluginGrainLoadingConfigurator : ISiloConfigurator
         {
             public void Configure(ISiloBuilder siloBuilder)
             {
-                siloBuilder.AddDynamicGrainLoading();
+                siloBuilder.AddPluginGrainLoading();
             }
         }
     }

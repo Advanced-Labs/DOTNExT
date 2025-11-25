@@ -14,27 +14,27 @@ using Orleans.Runtime.Metadata;
 namespace Orleans.Runtime.DynamicGrains;
 
 /// <summary>
-/// Service that orchestrates dynamic grain assembly unloading.
+/// Service that orchestrates plugin grain assembly unloading.
 /// Coordinates all phases: deactivation, cache cleanup, manifest updates, and memory reclamation.
 /// </summary>
-internal sealed class DynamicGrainUnloaderService : IDynamicGrainUnloader, ILifecycleParticipant<ISiloLifecycle>
+internal sealed class PluginGrainUnloaderService : IPluginGrainUnloader, ILifecycleParticipant<ISiloLifecycle>
 {
-    private readonly DynamicAssemblyLoader _assemblyLoader;
+    private readonly PluginAssemblyLoader _assemblyLoader;
     private readonly IGrainLifecycleManager _lifecycleManager;
     private readonly SiloManifestProvider _manifestProvider;
     private readonly ClusterManifestProvider _clusterManifestProvider;
     private readonly GrainContextActivator _grainContextActivator;
     private readonly GrainTypeSharedContextResolver _sharedContextResolver;
     private readonly GrainReferenceActivator _grainReferenceActivator;
-    private readonly ILogger<DynamicGrainUnloaderService> _logger;
+    private readonly ILogger<PluginGrainUnloaderService> _logger;
     private readonly SiloAddress _siloAddress;
     private readonly Channel<GrainAssemblyUnloadedEvent> _unloadEventsChannel;
     private readonly SemaphoreSlim _unloadSemaphore = new(1, 1);
 
     private static readonly TimeSpan DefaultDeactivationTimeout = TimeSpan.FromSeconds(30);
 
-    public DynamicGrainUnloaderService(
-        DynamicAssemblyLoader assemblyLoader,
+    public PluginGrainUnloaderService(
+        PluginAssemblyLoader assemblyLoader,
         IGrainLifecycleManager lifecycleManager,
         SiloManifestProvider manifestProvider,
         ClusterManifestProvider clusterManifestProvider,
@@ -42,7 +42,7 @@ internal sealed class DynamicGrainUnloaderService : IDynamicGrainUnloader, ILife
         GrainTypeSharedContextResolver sharedContextResolver,
         GrainReferenceActivator grainReferenceActivator,
         ILocalSiloDetails siloDetails,
-        ILogger<DynamicGrainUnloaderService> logger)
+        ILogger<PluginGrainUnloaderService> logger)
     {
         _assemblyLoader = assemblyLoader ?? throw new ArgumentNullException(nameof(assemblyLoader));
         _lifecycleManager = lifecycleManager ?? throw new ArgumentNullException(nameof(lifecycleManager));

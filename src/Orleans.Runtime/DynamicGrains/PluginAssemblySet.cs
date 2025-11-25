@@ -8,11 +8,11 @@ using Orleans.Serialization.Configuration;
 namespace Orleans.Runtime.DynamicGrains;
 
 /// <summary>
-/// Represents a logical plugin composed of multiple assemblies within a dedicated AssemblyLoadContext.
+/// Represents a grain plugin composed of multiple assemblies within a dedicated AssemblyLoadContext.
 /// Supports the split grain pattern where grain interfaces, implementations, and codegen
 /// can be distributed across multiple assemblies.
 /// </summary>
-internal sealed class DynamicPluginAssemblySet
+internal sealed class PluginAssemblySet
 {
     /// <summary>
     /// The root assembly that was explicitly loaded (entry point to the plugin).
@@ -52,7 +52,7 @@ internal sealed class DynamicPluginAssemblySet
     /// <summary>
     /// Creates a plugin assembly set for a single assembly (backward compatibility).
     /// </summary>
-    public static DynamicPluginAssemblySet ForSingleAssembly(Assembly assembly, AssemblyLoadContext loadContext, string assemblyPath)
+    public static PluginAssemblySet ForSingleAssembly(Assembly assembly, AssemblyLoadContext loadContext, string assemblyPath)
     {
         if (assembly == null)
         {
@@ -63,7 +63,7 @@ internal sealed class DynamicPluginAssemblySet
         var isImplementationAssembly = HasGrainImplementations(assembly);
         var isCodegenAssembly = HasOrleansCodegen(assembly);
 
-        return new DynamicPluginAssemblySet
+        return new PluginAssemblySet
         {
             RootAssembly = assembly,
             AllAssemblies = new[] { assembly },
@@ -78,7 +78,7 @@ internal sealed class DynamicPluginAssemblySet
     /// <summary>
     /// Creates a plugin assembly set from all Orleans-relevant assemblies in an AssemblyLoadContext.
     /// </summary>
-    public static DynamicPluginAssemblySet FromAssemblyLoadContext(
+    public static PluginAssemblySet FromAssemblyLoadContext(
         Assembly rootAssembly,
         AssemblyLoadContext loadContext,
         string assemblyPath)
@@ -113,7 +113,7 @@ internal sealed class DynamicPluginAssemblySet
         var implementationAssemblies = candidateAssemblies.Where(HasGrainImplementations).ToList();
         var codegenAssemblies = candidateAssemblies.Where(HasOrleansCodegen).ToList();
 
-        return new DynamicPluginAssemblySet
+        return new PluginAssemblySet
         {
             RootAssembly = rootAssembly,
             AllAssemblies = candidateAssemblies,

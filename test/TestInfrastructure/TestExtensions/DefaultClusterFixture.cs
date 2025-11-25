@@ -5,7 +5,7 @@ using Orleans.TestingHost;
 
 namespace TestExtensions
 {
-    public class DefaultClusterFixture : DynamicLoadingTestClusterFixture
+    public class DefaultClusterFixture : PluginLoadingTestClusterFixture
     {
         static DefaultClusterFixture()
         {
