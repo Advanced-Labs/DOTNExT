@@ -8,6 +8,7 @@ using System.Reflection;
 using System.Runtime.Loader;
 using System.Threading;
 using System.Threading.Tasks;
+using McMaster.NETCore.Plugins;
 using Microsoft.Extensions.Logging;
 using Orleans.Metadata;
 
@@ -21,10 +22,11 @@ internal sealed class DynamicAssemblyLoader
     private readonly AssemblyValidator _validator;
     private readonly ILogger<DynamicAssemblyLoader> _logger;
     private readonly ConcurrentDictionary<string, Assembly> _loadedAssemblies = new();
-    private readonly ConcurrentDictionary<string, PluginLoader> _pluginLoaders = new();
     private readonly ConcurrentDictionary<string, AssemblyLoadMetadata> _assemblyMetadata = new();
     private readonly ConcurrentDictionary<string, DynamicPluginAssemblySet> _pluginSets = new();
+    private readonly ConcurrentDictionary<string, PluginLoader> _pluginLoaders = new();
     private readonly SemaphoreSlim _loadLock = new(1, 1);
+    private Type[] _cachedSharedTypes;
 
     public DynamicAssemblyLoader(
         AssemblyValidator validator,
@@ -75,12 +77,37 @@ internal sealed class DynamicAssemblyLoader
             _logger.LogInformation("Loading grain assembly from {AssemblyPath}", assemblyPath);
 
             Assembly assembly;
+            PluginLoader pluginLoader;
             try
             {
-                // Load the assembly
-                // Note: This loads into the default AssemblyLoadContext
-                // For isolation and unloading support, we would need to create a custom AssemblyLoadContext
-                assembly = Assembly.LoadFrom(assemblyPath);
+                // Get or initialize shared types for plugin isolation
+                var sharedTypes = GetOrCreateSharedTypes();
+
+                // Load the assembly using McMaster.NETCore.Plugins for proper isolation and unloading
+                // This creates a collectible AssemblyLoadContext that enables runtime unloading
+                pluginLoader = PluginLoader.CreateFromAssemblyFile(
+                    assemblyPath,
+                    config =>
+                    {
+                        // Share Orleans types between host and plugin to avoid type identity issues
+                        config.PreferSharedTypes = true;
+
+                        // Enable unloading support - critical for runtime grain replacement
+                        config.IsUnloadable = true;
+
+                        // Configure explicit shared types from Orleans runtime
+                        foreach (var sharedType in sharedTypes)
+                        {
+                            config.SharedAssemblies.Add(sharedType.Assembly.GetName());
+                        }
+                    });
+
+                assembly = pluginLoader.LoadDefaultAssembly();
+
+                _logger.LogDebug(
+                    "Loaded assembly {AssemblyName} using MDCP PluginLoader (IsCollectible: {IsCollectible})",
+                    assembly.GetName().Name,
+                    AssemblyLoadContext.GetLoadContext(assembly)?.IsCollectible ?? false);
             }
             catch (Exception ex)
             {
@@ -128,11 +155,11 @@ internal sealed class DynamicAssemblyLoader
                 _logger.LogWarning("Plugin assembly set {AssemblyPath}: {Warning}", assemblyPath, warning);
             }
 
-            // Track loaded assembly, plugin loader, metadata, and plugin set
+            // Track loaded assembly, metadata, plugin set, and MDCP loader
             _loadedAssemblies[assemblyPath] = assembly;
-            _pluginLoaders[assemblyPath] = loader;
             _assemblyMetadata[assemblyPath] = validation.Metadata;
             _pluginSets[assemblyPath] = pluginSet;
+            _pluginLoaders[assemblyPath] = pluginLoader;
 
             _logger.LogInformation(
                 "Successfully loaded assembly {AssemblyName} with {GrainCount} grain classes and {InterfaceCount} interfaces",
@@ -188,7 +215,7 @@ internal sealed class DynamicAssemblyLoader
     }
 
     /// <summary>
-    /// Unloads an assembly and releases its collectible AssemblyLoadContext.
+    /// Unloads an assembly and releases its collectible AssemblyLoadContext via MDCP PluginLoader.Dispose().
     /// </summary>
     public async Task<bool> UnloadAssemblyAsync(string assemblyPath)
     {
@@ -202,20 +229,23 @@ internal sealed class DynamicAssemblyLoader
         await _loadLock.WaitAsync();
         try
         {
-            if (!_pluginLoaders.TryRemove(assemblyPath, out var loader))
+            // First check if we have the MDCP loader for this assembly
+            if (!_pluginLoaders.TryRemove(assemblyPath, out var pluginLoader))
             {
-                _logger.LogWarning("Assembly {AssemblyPath} not found or not loaded via PluginLoader", assemblyPath);
+                _logger.LogWarning("Assembly {AssemblyPath} not found or not loaded via MDCP", assemblyPath);
                 return false;
             }
 
+            // Remove from all tracking dictionaries
+            _pluginSets.TryRemove(assemblyPath, out _);
             _loadedAssemblies.TryRemove(assemblyPath, out _);
             _assemblyMetadata.TryRemove(assemblyPath, out _);
-            _pluginSets.TryRemove(assemblyPath, out _);
 
-            _logger.LogInformation("Unloading assembly from {AssemblyPath}", assemblyPath);
+            _logger.LogInformation("Unloading assembly from {AssemblyPath} via MDCP PluginLoader.Dispose()", assemblyPath);
 
-            // Dispose triggers AssemblyLoadContext.Unload()
-            loader.Dispose();
+            // Dispose the MDCP PluginLoader - this triggers AssemblyLoadContext.Unload()
+            // MDCP handles the collectible ALC lifecycle internally
+            pluginLoader.Dispose();
 
             // Force garbage collection to reclaim memory
             // Multiple cycles increase likelihood of collection
@@ -226,7 +256,7 @@ internal sealed class DynamicAssemblyLoader
                 await Task.Delay(100);
             }
 
-            _logger.LogInformation("Assembly {AssemblyPath} unloaded and memory collection triggered", assemblyPath);
+            _logger.LogInformation("Assembly {AssemblyPath} unloaded via MDCP and memory collection triggered", assemblyPath);
             return true;
         }
         finally
@@ -261,7 +291,7 @@ internal sealed class DynamicAssemblyLoader
     }
 
     /// <summary>
-    /// Checks if an assembly was loaded via PluginLoader and can be dynamically unloaded.
+    /// Checks if an assembly was loaded via MDCP PluginLoader and can be unloaded.
     /// Returns false for statically loaded assemblies that cannot be unloaded.
     /// </summary>
     public bool IsAssemblyUnloadable(string assemblyPath)
@@ -340,6 +370,21 @@ internal sealed class DynamicAssemblyLoader
     public IEnumerable<string> GetLoadedAssemblyPaths()
     {
         return _loadedAssemblies.Keys;
+    }
+
+    /// <summary>
+    /// Gets or creates the cached list of shared types for MDCP plugin loading.
+    /// Caching prevents expensive reflection on every assembly load.
+    /// </summary>
+    private Type[] GetOrCreateSharedTypes()
+    {
+        if (_cachedSharedTypes != null)
+        {
+            return _cachedSharedTypes;
+        }
+
+        _cachedSharedTypes = GetOrleansSharedTypes();
+        return _cachedSharedTypes;
     }
 
     /// <summary>
