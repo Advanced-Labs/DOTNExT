@@ -1,4 +1,5 @@
 using Microsoft.Extensions.DependencyInjection;
+using Orleans;
 using Orleans.Runtime.DynamicGrains;
 using Spectre.Console;
 using System.Runtime;
@@ -61,7 +62,7 @@ public static class AssemblyUnloadMemoryReclaim
 
         if (!loadResult.Success)
         {
-            AnsiConsole.MarkupLine($"[red]FAILED to load assembly: {loadResult.ErrorMessage}[/]");
+            AnsiConsole.MarkupLine($"[red]FAILED to load assembly: {string.Join(", ", loadResult.Errors)}[/]");
             await host.StopAsync();
             return;
         }
@@ -77,9 +78,14 @@ public static class AssemblyUnloadMemoryReclaim
         AnsiConsole.MarkupLine("[blue]Phase 2: Creating and using grain instances...[/]");
         var grainFactory = host.Services.GetRequiredService<IGrainFactory>();
 
+        // Get actual types from the loaded assembly
+        var grainClasses = loadResult.Assembly?.GetExportedTypes()
+            .Where(t => t.IsClass && !t.IsAbstract && typeof(IGrain).IsAssignableFrom(t))
+            .ToList() ?? new List<Type>();
+
         // Create multiple grain references to ensure we're allocating
         var grainRefs = new List<object>();
-        foreach (var grainType in loadResult.GrainTypes.Take(3))
+        foreach (var grainType in grainClasses.Take(3))
         {
             AnsiConsole.MarkupLine($"  Creating reference for: {grainType.Name}");
 
@@ -128,7 +134,7 @@ public static class AssemblyUnloadMemoryReclaim
         }
         else
         {
-            AnsiConsole.MarkupLine($"[red]Unload failed: {unloadResult.ErrorMessage}[/]");
+            AnsiConsole.MarkupLine($"[red]Unload failed: {string.Join(", ", unloadResult.Errors)}[/]");
         }
         AnsiConsole.WriteLine();
 

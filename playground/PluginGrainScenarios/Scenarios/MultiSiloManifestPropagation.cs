@@ -1,6 +1,6 @@
 using Microsoft.Extensions.DependencyInjection;
+using Orleans.Runtime;
 using Orleans.Runtime.DynamicGrains;
-using Orleans.Runtime.Metadata;
 using Spectre.Console;
 
 namespace PluginGrainScenarios.Scenarios;
@@ -92,24 +92,28 @@ public static class MultiSiloManifestPropagation
         table.AddColumn("Manifest Version");
         table.AddColumn("Grain Type Count");
 
-        var manifest1 = silo1.Services.GetService<ClusterManifestProvider>();
-        var manifest2 = silo2.Services.GetService<ClusterManifestProvider>();
-        var manifest3 = silo3.Services.GetService<ClusterManifestProvider>();
+        // Use IClusterManifestProvider (public interface)
+        var manifest1 = silo1.Services.GetService<IClusterManifestProvider>();
+        var manifest2 = silo2.Services.GetService<IClusterManifestProvider>();
+        var manifest3 = silo3.Services.GetService<IClusterManifestProvider>();
 
         if (manifest1 != null)
         {
             var current1 = manifest1.Current;
-            table.AddRow("Silo1", current1.Version.ToString(), current1.AllGrainManifests.Values.Sum(m => m.Grains.Count).ToString());
+            var grainCount1 = current1.AllGrainManifests.Sum(m => m.Grains.Count);
+            table.AddRow("Silo1", current1.Version.ToString(), grainCount1.ToString());
         }
         if (manifest2 != null)
         {
             var current2 = manifest2.Current;
-            table.AddRow("Silo2", current2.Version.ToString(), current2.AllGrainManifests.Values.Sum(m => m.Grains.Count).ToString());
+            var grainCount2 = current2.AllGrainManifests.Sum(m => m.Grains.Count);
+            table.AddRow("Silo2", current2.Version.ToString(), grainCount2.ToString());
         }
         if (manifest3 != null)
         {
             var current3 = manifest3.Current;
-            table.AddRow("Silo3", current3.Version.ToString(), current3.AllGrainManifests.Values.Sum(m => m.Grains.Count).ToString());
+            var grainCount3 = current3.AllGrainManifests.Sum(m => m.Grains.Count);
+            table.AddRow("Silo3", current3.Version.ToString(), grainCount3.ToString());
         }
 
         AnsiConsole.Write(table);

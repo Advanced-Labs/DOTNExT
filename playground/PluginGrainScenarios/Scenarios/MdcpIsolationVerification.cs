@@ -1,6 +1,8 @@
 using System.Reflection;
 using System.Runtime.Loader;
 using Microsoft.Extensions.DependencyInjection;
+using Orleans;
+using Orleans.Runtime;
 using Orleans.Runtime.DynamicGrains;
 using Spectre.Console;
 
@@ -95,8 +97,8 @@ public static class MdcpIsolationVerification
             var orleansTypes = new[]
             {
                 typeof(IGrain),
-                typeof(Orleans.GrainId),
-                typeof(Orleans.Runtime.SiloAddress)
+                typeof(GrainId),
+                typeof(SiloAddress)
             };
 
             foreach (var hostType in orleansTypes)

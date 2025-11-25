@@ -1,6 +1,7 @@
 using Microsoft.Extensions.DependencyInjection;
+using Orleans;
+using Orleans.Runtime;
 using Orleans.Runtime.DynamicGrains;
-using Orleans.Runtime.Metadata;
 using Spectre.Console;
 
 namespace PluginGrainScenarios.Scenarios;
@@ -115,7 +116,7 @@ public static class SplitGrainAssemblies
 
         if (!loadResult.Success)
         {
-            AnsiConsole.MarkupLine($"[red]FAILED: {loadResult.ErrorMessage}[/]");
+            AnsiConsole.MarkupLine($"[red]FAILED: {string.Join(", ", loadResult.Errors)}[/]");
             await host.StopAsync();
             return;
         }
@@ -123,7 +124,7 @@ public static class SplitGrainAssemblies
         AnsiConsole.MarkupLine($"[green]Loaded {loadResult.GrainTypes.Count} grain types[/]");
         AnsiConsole.WriteLine();
 
-        // Analyze the grain types
+        // Analyze the grain types - get actual System.Type from the loaded assembly
         AnsiConsole.MarkupLine("[blue]Grain Type Analysis[/]");
 
         var table = new Table();
@@ -132,7 +133,11 @@ public static class SplitGrainAssemblies
         table.AddColumn("Interface Assembly");
         table.AddColumn("Split?");
 
-        foreach (var grainType in loadResult.GrainTypes)
+        var grainClasses = loadResult.Assembly?.GetExportedTypes()
+            .Where(t => t.IsClass && !t.IsAbstract && typeof(IGrain).IsAssignableFrom(t))
+            .ToList() ?? new List<Type>();
+
+        foreach (var grainType in grainClasses)
         {
             var grainInterfaces = grainType.GetInterfaces()
                 .Where(i => typeof(IGrain).IsAssignableFrom(i) && i != typeof(IGrain) && i != typeof(IGrainObserver))
@@ -158,15 +163,15 @@ public static class SplitGrainAssemblies
 
         // Check manifest
         AnsiConsole.MarkupLine("[blue]Cluster Manifest Grain Types[/]");
-        var manifestProvider = host.Services.GetService<ClusterManifestProvider>();
+        var manifestProvider = host.Services.GetService<IClusterManifestProvider>();
         if (manifestProvider != null)
         {
             var manifest = manifestProvider.Current;
-            var grainCount = manifest.AllGrainManifests.Values.Sum(m => m.Grains.Count);
+            var grainCount = manifest.AllGrainManifests.Sum(m => m.Grains.Count);
             AnsiConsole.MarkupLine($"  Total grain types in manifest: {grainCount}");
 
             // Show sample grain types
-            var grains = manifest.AllGrainManifests.Values
+            var grains = manifest.AllGrainManifests
                 .SelectMany(m => m.Grains)
                 .Take(10)
                 .ToList();
@@ -226,7 +231,7 @@ public static class SplitGrainAssemblies
 
         if (!contractsResult.Success)
         {
-            AnsiConsole.MarkupLine($"[red]FAILED to load contracts: {contractsResult.ErrorMessage}[/]");
+            AnsiConsole.MarkupLine($"[red]FAILED to load contracts: {string.Join(", ", contractsResult.Errors)}[/]");
         }
         else
         {
@@ -235,10 +240,10 @@ public static class SplitGrainAssemblies
         AnsiConsole.WriteLine();
 
         // Check what we have after contracts
-        var manifestProvider = host.Services.GetService<ClusterManifestProvider>();
+        var manifestProvider = host.Services.GetService<IClusterManifestProvider>();
         if (manifestProvider != null)
         {
-            var grainCount = manifestProvider.Current.AllGrainManifests.Values.Sum(m => m.Grains.Count);
+            var grainCount = manifestProvider.Current.AllGrainManifests.Sum(m => m.Grains.Count);
             AnsiConsole.MarkupLine($"  Grain types in manifest after contracts: {grainCount}");
         }
         AnsiConsole.WriteLine();
@@ -249,7 +254,7 @@ public static class SplitGrainAssemblies
 
         if (!implResult.Success)
         {
-            AnsiConsole.MarkupLine($"[red]FAILED to load implementation: {implResult.ErrorMessage}[/]");
+            AnsiConsole.MarkupLine($"[red]FAILED to load implementation: {string.Join(", ", implResult.Errors)}[/]");
         }
         else
         {
@@ -260,7 +265,7 @@ public static class SplitGrainAssemblies
         // Check final state
         if (manifestProvider != null)
         {
-            var grainCount = manifestProvider.Current.AllGrainManifests.Values.Sum(m => m.Grains.Count);
+            var grainCount = manifestProvider.Current.AllGrainManifests.Sum(m => m.Grains.Count);
             AnsiConsole.MarkupLine($"  Grain types in manifest after implementation: {grainCount}");
         }
         AnsiConsole.WriteLine();
@@ -269,9 +274,14 @@ public static class SplitGrainAssemblies
         AnsiConsole.MarkupLine("[blue]Phase 3: Testing Grain Invocation[/]");
         var grainFactory = host.Services.GetRequiredService<IGrainFactory>();
 
-        if (implResult.Success && implResult.GrainTypes.Any())
+        // Get actual types from the implementation assembly
+        var implGrainClasses = implResult.Assembly?.GetExportedTypes()
+            .Where(t => t.IsClass && !t.IsAbstract && typeof(IGrain).IsAssignableFrom(t))
+            .ToList() ?? new List<Type>();
+
+        if (implResult.Success && implGrainClasses.Any())
         {
-            var grainType = implResult.GrainTypes.First();
+            var grainType = implGrainClasses.First();
             var interfaces = grainType.GetInterfaces()
                 .Where(i => typeof(IGrain).IsAssignableFrom(i) && i != typeof(IGrain) && i != typeof(IGrainObserver))
                 .ToList();
