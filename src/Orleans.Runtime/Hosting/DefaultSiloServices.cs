@@ -33,6 +33,7 @@ using Microsoft.AspNetCore.Connections;
 using Orleans.Networking.Shared;
 using Orleans.Configuration.Internal;
 using Orleans.Runtime.Metadata;
+using Orleans.Runtime.DynamicGrains;
 using Orleans.GrainReferences;
 using Orleans.Storage;
 using Orleans.Serialization.TypeSystem;
@@ -306,6 +307,14 @@ namespace Orleans.Hosting
             services.AddFromExisting<ILifecycleParticipant<ISiloLifecycle>, ClusterManifestProvider>();
             services.AddSingleton<ClusterManifestSystemTarget>();
             services.AddFromExisting<ILifecycleParticipant<ISiloLifecycle>, ClusterManifestSystemTarget>();
+
+            // Plugin grain loading (enabled by default for uniform grain loading/unloading)
+            services.TryAddSingleton<AssemblyValidator>();
+            services.TryAddSingleton<PluginAssemblyLoader>();
+            services.TryAddSingleton<PluginSerializationManager>();
+            services.TryAddSingleton<PluginGrainLoaderService>();
+            services.TryAddSingleton<IPluginGrainLoader>(sp => sp.GetRequiredService<PluginGrainLoaderService>());
+            services.TryAddSingleton<ILifecycleParticipant<ISiloLifecycle>>(sp => sp.GetRequiredService<PluginGrainLoaderService>());
 
             //Add default option formatter if none is configured, for options which are required to be configured
             services.ConfigureFormatter<SiloOptions>();

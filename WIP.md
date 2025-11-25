@@ -120,8 +120,17 @@ pluginLoader.Dispose();
 | DynamicLoadingTestClusterFixture | PluginLoadingTestClusterFixture |
 
 **Backward Compatibility:**
-- `AddDynamicGrainLoading()` still works but marked `[Obsolete]`
-- Will emit compiler warnings guiding users to new names
+- `AddDynamicGrainLoading()` and `AddPluginGrainLoading()` are now no-ops marked `[Obsolete]`
+- Will emit compiler warnings indicating plugin loading is enabled by default
+
+### Phase 2.5: Make Plugin Loading Default (COMPLETED)
+
+- [x] Register plugin services in `DefaultSiloServices.cs` by default
+- [x] Make `AddPluginGrainLoading()` a no-op with `[Obsolete]` warning
+- [x] Remove explicit configuration from test infrastructure
+- [x] Update playground examples
+
+**Key Change:** Plugin grain loading is now enabled automatically. No explicit `AddPluginGrainLoading()` call needed.
 
 ### Phase 3: GTD Enhancements (Later)
 
@@ -398,4 +407,46 @@ public static ISiloBuilder AddDynamicGrainLoading(...)
 - Renaming `DynamicGrains` folder (namespace would need changes across entire codebase)
 
 **Status:** Phase 2 COMPLETE
+
+### Session 5 (2025-11-25) - Phase 2.5: Make Plugin Loading Default
+
+**Goal:** Remove the need for explicit `AddPluginGrainLoading()` calls - plugin loading should be the default.
+
+**Rationale (from user):**
+- If all grains should be loadable/unloadable uniformly, plugin loading should be built-in
+- No distinction between "plugin grains" and "regular grains"
+- Simplifies user code - just use `IPluginGrainLoader` without any setup
+
+**Changes Made:**
+
+1. **`DefaultSiloServices.cs`** - Added plugin services to default registration:
+   ```csharp
+   // Plugin grain loading (enabled by default for uniform grain loading/unloading)
+   services.TryAddSingleton<AssemblyValidator>();
+   services.TryAddSingleton<PluginAssemblyLoader>();
+   services.TryAddSingleton<PluginSerializationManager>();
+   services.TryAddSingleton<PluginGrainLoaderService>();
+   services.TryAddSingleton<IPluginGrainLoader>(...);
+   services.TryAddSingleton<ILifecycleParticipant<ISiloLifecycle>>(...);
+   ```
+
+2. **`PluginGrainLoadingExtensions.cs`** - Made methods no-ops with `[Obsolete]`:
+   ```csharp
+   [Obsolete("Plugin grain loading is now enabled by default...")]
+   public static ISiloBuilder AddPluginGrainLoading(...)
+   {
+       // No-op: services are now registered by default
+       return builder;
+   }
+   ```
+
+3. **Test infrastructure** - Removed `PluginGrainLoadingConfigurator` from:
+   - `PluginLoadingTestClusterFixture.cs`
+   - `SplitAssemblyDynamicGrainTests.cs`
+
+4. **Playground examples** - Removed explicit calls from:
+   - `DynamicGrainLoading.SingleSilo/Program.cs`
+   - `DynamicGrainLoading.MultiSilo/Program.cs`
+
+**Status:** Phase 2.5 COMPLETE
 

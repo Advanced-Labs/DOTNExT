@@ -12,12 +12,11 @@ Console.WriteLine("════════════════════�
 Console.WriteLine();
 
 // Build the host with Orleans silo
+// Note: Plugin grain loading is enabled by default - no explicit configuration needed
 var host = Host.CreateDefaultBuilder(args)
     .UseOrleans((context, siloBuilder) =>
     {
-        siloBuilder
-            .UseLocalhostClustering()
-            .AddPluginGrainLoading();  // ← Enable plugin grain loading
+        siloBuilder.UseLocalhostClustering();
     })
     .ConfigureLogging(logging =>
     {

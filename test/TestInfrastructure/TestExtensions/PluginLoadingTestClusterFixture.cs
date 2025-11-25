@@ -99,9 +99,7 @@ namespace TestExtensions
         protected override void ConfigureTestCluster(TestClusterBuilder builder)
         {
             base.ConfigureTestCluster(builder);
-
-            // Add plugin grain loading support to all silos
-            builder.AddSiloBuilderConfigurator<PluginGrainLoadingConfigurator>();
+            // Plugin grain loading is now enabled by default - no explicit configuration needed
         }
 
         public override async Task InitializeAsync()
@@ -183,17 +181,6 @@ namespace TestExtensions
             await Task.Delay(500);
 
             Logger?.LogInformation("Dynamic grain loading complete for all silos.");
-        }
-
-        /// <summary>
-        /// Configurator to enable plugin grain loading on each silo.
-        /// </summary>
-        private class PluginGrainLoadingConfigurator : ISiloConfigurator
-        {
-            public void Configure(ISiloBuilder siloBuilder)
-            {
-                siloBuilder.AddPluginGrainLoading();
-            }
         }
     }
 }

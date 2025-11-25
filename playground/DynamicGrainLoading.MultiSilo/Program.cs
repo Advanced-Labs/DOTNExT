@@ -309,8 +309,8 @@ static async Task<IHost> StartSilo(string siloName, int siloPort, int gatewayPor
                 .UseDevelopmentClustering(options =>
                 {
                     options.PrimarySiloEndpoint = new IPEndPoint(IPAddress.Loopback, primarySiloPort);
-                })
-                .AddPluginGrainLoading();  // ← Enable plugin grain loading
+                });
+                // Plugin grain loading is enabled by default - no explicit configuration needed
         })
         .ConfigureLogging(logging =>
         {

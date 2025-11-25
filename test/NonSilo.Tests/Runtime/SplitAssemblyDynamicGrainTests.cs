@@ -147,9 +147,7 @@ public class SplitAssemblyDynamicGrainTests : IClassFixture<SplitAssemblyDynamic
         protected override void ConfigureTestCluster(TestClusterBuilder builder)
         {
             base.ConfigureTestCluster(builder);
-
-            // Add plugin grain loading support
-            builder.AddSiloBuilderConfigurator<PluginGrainLoadingConfigurator>();
+            // Plugin grain loading is now enabled by default - no explicit configuration needed
         }
 
         public override async Task InitializeAsync()
@@ -220,14 +218,6 @@ public class SplitAssemblyDynamicGrainTests : IClassFixture<SplitAssemblyDynamic
             }
 
             return null;
-        }
-
-        private class PluginGrainLoadingConfigurator : ISiloConfigurator
-        {
-            public void Configure(ISiloBuilder siloBuilder)
-            {
-                siloBuilder.AddPluginGrainLoading();
-            }
         }
     }
 }
