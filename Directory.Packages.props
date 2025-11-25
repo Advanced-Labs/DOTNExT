@@ -79,6 +79,7 @@
     <PackageVersion Include="KubernetesClient" Version="15.0.1" />
     <PackageVersion Include="CassandraCSharpDriver" Version="3.20.1" />
     <PackageVersion Include="NATS.Net" Version="2.6.4" />
+    <PackageVersion Include="Spectre.Console" Version="0.49.1" />
     <!-- Test related packages -->
     <PackageVersion Include="coverlet.collector" Version="6.0.4" />
     <PackageVersion Include="coverlet.msbuild" Version="6.0.0" />
