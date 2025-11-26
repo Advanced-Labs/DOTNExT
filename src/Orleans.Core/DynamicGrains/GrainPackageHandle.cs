@@ -7,6 +7,8 @@ using System.Runtime.Loader;
 using System.Threading.Tasks;
 using Orleans.Metadata;
 
+#nullable enable
+
 namespace Orleans.DynamicGrains
 {
     /// <summary>

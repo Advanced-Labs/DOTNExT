@@ -12,6 +12,8 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Orleans.Metadata;
 
+#nullable enable
+
 namespace Orleans.DynamicGrains
 {
     /// <summary>

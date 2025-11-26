@@ -4,6 +4,8 @@ using System.Threading.Tasks;
 using Orleans.DynamicGrains;
 using Orleans.Metadata;
 
+#nullable enable
+
 namespace Orleans.DynamicGrains
 {
     /// <summary>
