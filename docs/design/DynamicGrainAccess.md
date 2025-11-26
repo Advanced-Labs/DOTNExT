@@ -1003,9 +1003,9 @@ var result = await dynRef.InvokeAsync("SayHello", "World");
 ```csharp
 public interface IGrainPackageStore
 {
-    Task<GrainPackageContent?> GetPackageAsync(string packageId, string? version = null);
+    Task<LoadedGrainPackage?> GetPackageAsync(string packageId, string? version = null);
     Task<IReadOnlyList<GrainPackageInfo>> ListPackagesAsync();
-    Task<bool> PublishPackageAsync(GrainPackage package, GrainPackageContent content);
+    Task<bool> PublishPackageAsync(GrainPackage package, LoadedGrainPackage content);
     void RegisterSource(IGrainPackageSource source);
     IReadOnlyList<IGrainPackageSource> Sources { get; }
 }
@@ -1015,12 +1015,12 @@ public interface IGrainPackageSource
     string Name { get; }
     int Priority { get; }           // Lower = checked first
     bool IsWritable { get; }
-    Task<GrainPackageContent?> FetchAsync(string packageId, string? version = null);
+    Task<LoadedGrainPackage?> FetchAsync(string packageId, string? version = null);
     Task<IReadOnlyList<GrainPackageInfo>> ListAsync();
-    Task<bool> PublishAsync(GrainPackage package, GrainPackageContent content);
+    Task<bool> PublishAsync(GrainPackage package, LoadedGrainPackage content);
 }
 
-public sealed class GrainPackageContent  // Package + assembly bytes
+public sealed class LoadedGrainPackage  // Package + assembly bytes
 {
     public GrainPackage Package { get; }
     public IReadOnlyDictionary<string, byte[]> Assemblies { get; }
@@ -1068,8 +1068,8 @@ public sealed class GrainPackageContent  // Package + assembly bytes
 ```csharp
 public interface IGrainPackageCache
 {
-    Task<GrainPackageContent?> GetAsync(string packageId, string? version = null, CancellationToken ct = default);
-    Task<bool> PutAsync(GrainPackageContent content, CancellationToken ct = default);
+    Task<LoadedGrainPackage?> GetAsync(string packageId, string? version = null, CancellationToken ct = default);
+    Task<bool> PutAsync(LoadedGrainPackage content, CancellationToken ct = default);
     Task<bool> EvictAsync(string packageId, string? version = null, CancellationToken ct = default);
     Task ClearAsync(CancellationToken ct = default);
     GrainPackageCacheStats GetStats();
@@ -1200,7 +1200,7 @@ public interface IDynamicGrainClient
 public sealed class GrainPackageHandle : IAsyncDisposable
 {
     public GrainPackage Package { get; }
-    public GrainPackageContent Content { get; }
+    public LoadedGrainPackage Content { get; }
     public bool IsLoaded { get; }
     public string PackageId { get; }
     public string Version { get; }
