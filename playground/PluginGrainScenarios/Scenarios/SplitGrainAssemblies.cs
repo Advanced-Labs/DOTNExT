@@ -354,67 +354,134 @@ public static class SplitGrainAssemblies
         AnsiConsole.MarkupLine("[blue]Phase 4: Testing Grain Invocation[/]");
         var grainFactory = host.Services.GetRequiredService<IGrainFactory>();
 
+        var invocationSuccess = false;
+        string? invocationError = null;
+
         if (implResult.Success && implGrainClasses.Any())
         {
-            foreach (var grainType in implGrainClasses.Take(1)) // Test first grain
-            {
-                var interfaces = grainType.GetInterfaces()
-                    .Where(i => typeof(IGrain).IsAssignableFrom(i) && i != typeof(IGrain) && i != typeof(IGrainObserver) && !i.Name.StartsWith("IGrainWith"))
-                    .ToList();
+            // Find IHelloGrain specifically since we know it has SayHello
+            var helloGrainClass = implGrainClasses.FirstOrDefault(t =>
+                t.GetInterfaces().Any(i => i.Name == "IHelloGrain"));
 
-                if (interfaces.Any())
+            if (helloGrainClass != null)
+            {
+                var helloInterface = helloGrainClass.GetInterfaces()
+                    .FirstOrDefault(i => i.Name == "IHelloGrain");
+
+                if (helloInterface != null)
                 {
-                    var grainInterface = interfaces.First();
-                    AnsiConsole.MarkupLine($"  Testing grain: {grainInterface.Name} (impl: {grainType.Name})");
+                    AnsiConsole.MarkupLine($"  Testing grain: {helloInterface.Name} (impl: {helloGrainClass.Name})");
 
                     try
                     {
-                        var getGrainMethod = typeof(IGrainFactory).GetMethod(nameof(IGrainFactory.GetGrain), new[] { typeof(string) });
-                        if (getGrainMethod != null)
-                        {
-                            var genericMethod = getGrainMethod.MakeGenericMethod(grainInterface);
-                            var grainRef = genericMethod.Invoke(grainFactory, new object[] { "split-test-grain" });
-                            AnsiConsole.MarkupLine($"[green]  Got grain reference: {grainRef?.GetType().Name}[/]");
+                        // Find the GetGrain<TGrainInterface>(string) method
+                        // IGrainFactory has multiple GetGrain overloads, we need the one with string key
+                        var getGrainMethods = typeof(IGrainFactory).GetMethods()
+                            .Where(m => m.Name == "GetGrain" && m.IsGenericMethod)
+                            .ToList();
 
-                            // Try to invoke SayHello if it's IHelloGrain
-                            var sayHelloMethod = grainInterface.GetMethod("SayHello");
-                            if (sayHelloMethod != null && grainRef != null)
+                        AnsiConsole.MarkupLine($"  [grey]Found {getGrainMethods.Count} GetGrain overloads[/]");
+
+                        // Find the overload: GetGrain<TGrainInterface>(string primaryKey, string? grainClassNamePrefix = null)
+                        var getGrainMethod = getGrainMethods.FirstOrDefault(m =>
+                        {
+                            var parameters = m.GetParameters();
+                            return parameters.Length >= 1 &&
+                                   parameters[0].ParameterType == typeof(string) &&
+                                   m.GetGenericArguments().Length == 1;
+                        });
+
+                        if (getGrainMethod == null)
+                        {
+                            AnsiConsole.MarkupLine("[yellow]  Could not find GetGrain<T>(string) method[/]");
+                            // Show available overloads for debugging
+                            foreach (var method in getGrainMethods.Take(5))
                             {
-                                AnsiConsole.MarkupLine("  Invoking SayHello(\"Split Test\")...");
-                                var task = (Task<string>)sayHelloMethod.Invoke(grainRef, new object[] { "Split Test" })!;
-                                var result = await task;
-                                AnsiConsole.MarkupLine($"[green]  Response: {result}[/]");
+                                var parms = string.Join(", ", method.GetParameters().Select(p => $"{p.ParameterType.Name} {p.Name}"));
+                                AnsiConsole.MarkupLine($"  [grey]  - GetGrain<>({parms})[/]");
+                            }
+                        }
+                        else
+                        {
+                            var genericMethod = getGrainMethod.MakeGenericMethod(helloInterface);
+                            AnsiConsole.MarkupLine($"  [grey]Calling {genericMethod.Name}<{helloInterface.Name}>(\"split-test-grain\")[/]");
+
+                            var grainRef = genericMethod.Invoke(grainFactory, new object?[] { "split-test-grain", null });
+
+                            if (grainRef == null)
+                            {
+                                AnsiConsole.MarkupLine("[red]  ERROR: GetGrain returned null[/]");
+                            }
+                            else
+                            {
+                                AnsiConsole.MarkupLine($"[green]  ✓ Got grain reference: {grainRef.GetType().Name}[/]");
+
+                                // Now invoke SayHello
+                                var sayHelloMethod = helloInterface.GetMethod("SayHello");
+                                if (sayHelloMethod != null)
+                                {
+                                    AnsiConsole.MarkupLine("  Invoking SayHello(\"Split Test\")...");
+                                    var task = (Task<string>)sayHelloMethod.Invoke(grainRef, new object[] { "Split Test" })!;
+                                    var result = await task;
+                                    AnsiConsole.MarkupLine($"[green]  ✓ Response: \"{result}\"[/]");
+                                    invocationSuccess = true;
+                                }
+                                else
+                                {
+                                    AnsiConsole.MarkupLine("[yellow]  SayHello method not found on interface[/]");
+                                }
                             }
                         }
                     }
                     catch (Exception ex)
                     {
-                        AnsiConsole.MarkupLine($"[yellow]  Could not invoke grain: {ex.InnerException?.Message ?? ex.Message}[/]");
+                        var innerEx = ex.InnerException ?? ex;
+                        invocationError = innerEx.Message;
+                        AnsiConsole.MarkupLine($"[red]  ✗ Invocation failed: {innerEx.GetType().Name}[/]");
+                        AnsiConsole.MarkupLine($"[red]    {innerEx.Message}[/]");
+                        if (innerEx.InnerException != null)
+                        {
+                            AnsiConsole.MarkupLine($"[red]    Inner: {innerEx.InnerException.Message}[/]");
+                        }
                     }
                 }
+                else
+                {
+                    AnsiConsole.MarkupLine("[yellow]  Could not find IHelloGrain interface[/]");
+                }
             }
+            else
+            {
+                AnsiConsole.MarkupLine("[yellow]  No HelloGrain found in implementation assembly[/]");
+            }
+        }
+        else
+        {
+            AnsiConsole.MarkupLine("[yellow]  Implementation not loaded or no grain classes found[/]");
         }
         AnsiConsole.WriteLine();
 
         // Summary
         AnsiConsole.MarkupLine("[blue]Split Assembly Test Summary[/]");
         var summaryTable = new Table();
-        summaryTable.AddColumn("Assembly");
-        summaryTable.AddColumn("Load Status");
-        summaryTable.AddColumn("Types");
-        summaryTable.AddColumn("Purpose");
+        summaryTable.AddColumn("Component");
+        summaryTable.AddColumn("Status");
+        summaryTable.AddColumn("Details");
 
         summaryTable.AddRow(
-            "Contracts",
-            contractsResult.Success ? "[green]OK[/]" : "[red]Failed[/]",
-            contractsResult.GrainTypes.Count.ToString(),
-            "Interfaces + Proxies"
+            "Contracts Assembly",
+            contractsResult.Success ? "[green]✓ Loaded[/]" : "[red]✗ Failed[/]",
+            $"{contractsResult.GrainTypes.Count} grain types (Interfaces + Proxies)"
         );
         summaryTable.AddRow(
-            "Implementation",
-            implResult.Success ? "[green]OK[/]" : "[red]Failed[/]",
-            implResult.GrainTypes.Count.ToString(),
-            "Grain Classes + Invokers"
+            "Implementation Assembly",
+            implResult.Success ? "[green]✓ Loaded[/]" : "[red]✗ Failed[/]",
+            $"{implResult.GrainTypes.Count} grain types (Classes + Invokers)"
+        );
+        summaryTable.AddRow(
+            "Grain Invocation",
+            invocationSuccess ? "[green]✓ Success[/]" : $"[red]✗ Failed[/]",
+            invocationSuccess ? "SayHello() returned valid response" : invocationError ?? "Not attempted"
         );
 
         AnsiConsole.Write(summaryTable);

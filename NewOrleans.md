@@ -135,6 +135,20 @@ Both projects require `<OrleansBuildTimeCodeGen>true</OrleansBuildTimeCodeGen>` 
 - **Contracts**: Generates proxy/stub classes (GrainReference implementations) for clients
 - **Implementation**: Generates grain activators and method invokers for silos
 
+### Scenario 6: Grain Type Directory (GTD)
+- Cluster-wide registry of all available grain types with metadata
+- Query grain types without compile-time references
+- Track which silos can host which grain types
+- Expose method/property metadata for reflection-like access
+- **Status**: NOT YET IMPLEMENTED - Placeholder scenario with planned API design
+
+### Scenario 7: Dynamic Grain Client Loading
+- Download interface/proxy DLLs from cluster on demand
+- Load into isolated AssemblyLoadContext on client side
+- Create grain references without static typing
+- Support both strong-typed and fully dynamic access patterns
+- **Status**: NOT YET IMPLEMENTED - Placeholder scenario with planned API design
+
 ---
 
 ## What's Left to Implement

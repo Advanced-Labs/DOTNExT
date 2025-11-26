@@ -27,7 +27,7 @@ public static class Program
             var scenario = AnsiConsole.Prompt(
                 new SelectionPrompt<string>()
                     .Title("[green]Select a scenario to run:[/]")
-                    .PageSize(10)
+                    .PageSize(12)
                     .AddChoices(new[]
                     {
                         "1. Single Silo - Basic Load/Unload",
@@ -35,6 +35,9 @@ public static class Program
                         "3. Multi-Silo Cluster - Manifest Propagation",
                         "4. Assembly Unload and Memory Reclaim",
                         "5. Split Grain Assemblies",
+                        "─── Future Features (Not Yet Implemented) ───",
+                        "6. Grain Type Directory (GTD)",
+                        "7. Dynamic Grain Client",
                         "Exit"
                     }));
 
@@ -42,6 +45,12 @@ public static class Program
             {
                 AnsiConsole.MarkupLine("[yellow]Goodbye![/]");
                 break;
+            }
+
+            // Skip separator line
+            if (scenario.StartsWith("───"))
+            {
+                continue;
             }
 
             try
@@ -79,6 +88,12 @@ public static class Program
                 break;
             case "5. Split Grain Assemblies":
                 await Scenarios.SplitGrainAssemblies.RunAsync();
+                break;
+            case "6. Grain Type Directory (GTD)":
+                await Scenarios.GrainTypeDirectory.RunAsync();
+                break;
+            case "7. Dynamic Grain Client":
+                await Scenarios.DynamicGrainClient.RunAsync();
                 break;
         }
     }
