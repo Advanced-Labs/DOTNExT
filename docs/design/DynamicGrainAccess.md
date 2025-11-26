@@ -824,12 +824,27 @@ if (package != null)
 
 ---
 
-### Phase 2: GTD Implementation ⬅️ CURRENT
-- [ ] `IGrainTypeDirectoryGrain` interface in `Orleans.Core.Abstractions`
-- [ ] `GrainTypeDirectoryGrain` implementation in `Orleans.Runtime`
-- [ ] Package registration (`RegisterPackageAsync`, `UnregisterPackageAsync`)
-- [ ] Type queries (`GetAllGrainTypesAsync`, `FindGrainTypesAsync`, `GetGrainTypeAsync`)
-- [ ] Silo tracking (`ReportPackageLoadedAsync`, `GetHostingSilosAsync`)
+### Phase 2: GTD Implementation ✅ COMPLETE
+
+**Implemented:**
+
+| File | Location | Description |
+|------|----------|-------------|
+| `IGrainTypeDirectoryGrain.cs` | `Orleans.Core.Abstractions/DynamicGrains/` | Public grain interface |
+| `GrainTypeDirectoryGrain.cs` | `Orleans.Runtime/DynamicGrains/` | Singleton grain implementation |
+| `GrainTypeDirectoryState` | (in above file) | Persisted state with packages & silo tracking |
+
+**Methods implemented:**
+- [x] Package registration: `RegisterPackageAsync`, `UnregisterPackageAsync`
+- [x] Package queries: `GetPackagesAsync`, `GetPackageAsync` (with optional version)
+- [x] Type queries: `GetAllGrainTypesAsync`, `FindGrainTypesAsync` (wildcard support), `GetGrainTypeAsync`
+- [x] Silo tracking: `ReportPackageLoadedAsync`, `ReportPackageUnloadedAsync`, `GetHostingSilosAsync`, `ReportSiloDownAsync`
+
+**Key features:**
+- Uses `Grain<TState>` pattern with `[StorageProvider]` for persistence
+- Automatically updates `GrainTypeMeta.HostingSilos` and `IsAvailable` in queries
+- Wildcard pattern matching in `FindGrainTypesAsync` (e.g., `*Hello*`)
+- Package versioning with latest-version fallback in `GetPackageAsync`
 
 ---
 
@@ -884,8 +899,8 @@ src/Orleans.Core.Abstractions/
 │   ├── GrainTypeMeta.cs                   # ✅ GrainTypeMeta, GrainKeyType
 │   ├── GrainInterfaceMeta.cs              # ✅ Interface/Method/Parameter meta
 │   └── (existing Orleans manifest types)
-├── DynamicGrains/                         # Phase 2
-│   └── IGrainTypeDirectoryGrain.cs        # GTD grain interface (public API)
+├── DynamicGrains/                         # ✅ Phase 2 Complete
+│   └── IGrainTypeDirectoryGrain.cs        # ✅ GTD grain interface (public API)
 
 src/Orleans.Core/
 ├── DynamicGrains/                         # Phase 5-6
@@ -896,8 +911,8 @@ src/Orleans.Core/
 │   └── DynamicGrainReference.cs
 
 src/Orleans.Runtime/
-├── DynamicGrains/                         # Phase 2, 4
-│   ├── GrainTypeDirectoryGrain.cs         # GTD implementation
+├── DynamicGrains/                         # ✅ Phase 2 (partial), Phase 4
+│   ├── GrainTypeDirectoryGrain.cs         # ✅ GTD implementation + state
 │   ├── IGrainPackageStore.cs
 │   ├── GrainStoragePackageSource.cs
 │   └── NuGetPackageSource.cs (optional)
