@@ -155,51 +155,128 @@ public static class AssemblyUnloadMemoryReclaim
         AnsiConsole.MarkupLine($"[yellow]Memory after GC:[/] {FormatBytes(afterGCMemory)}");
         AnsiConsole.WriteLine();
 
-        // Summary
+        // Summary of first cycle
+        var memoryRecovered = afterLoadMemory - afterGCMemory;
+        var loadedMemory = afterLoadMemory - baselineMemory;
+        var retainedMemory = afterGCMemory - baselineMemory;
+
         AnsiConsole.MarkupLine("[blue]═══════════════════════════════════════════════════════[/]");
-        AnsiConsole.MarkupLine("[blue]  Memory Analysis Summary[/]");
+        AnsiConsole.MarkupLine("[blue]  Memory Analysis Summary (First Load/Unload Cycle)[/]");
         AnsiConsole.MarkupLine("[blue]═══════════════════════════════════════════════════════[/]");
 
         var table = new Table();
-        table.AddColumn("Phase");
-        table.AddColumn("Memory");
-        table.AddColumn("Delta from Baseline");
+        table.AddColumn("Metric");
+        table.AddColumn("Value");
+        table.AddColumn("Explanation");
 
-        table.AddRow("Baseline", FormatBytes(baselineMemory), "-");
-        table.AddRow("After Load", FormatBytes(afterLoadMemory), $"+{FormatBytes(afterLoadMemory - baselineMemory)}");
-        table.AddRow("After Use", FormatBytes(afterUseMemory), $"+{FormatBytes(afterUseMemory - baselineMemory)}");
-        table.AddRow("After Unload+GC", FormatBytes(afterGCMemory), FormatDelta(afterGCMemory - baselineMemory));
+        table.AddRow("Baseline", FormatBytes(baselineMemory), "Memory before loading any plugin");
+        table.AddRow("After Load", FormatBytes(afterLoadMemory), "Memory with plugin loaded");
+        table.AddRow("Memory Added by Load", FormatBytes(loadedMemory), "What loading the plugin added");
+        table.AddRow("After Unload+GC", FormatBytes(afterGCMemory), "Memory after unload and GC");
+        table.AddRow("Memory Recovered", FormatBytes(memoryRecovered), "Freed by unloading");
+        table.AddRow("Memory Still Retained", FormatBytes(retainedMemory), "Still above baseline");
 
         AnsiConsole.Write(table);
         AnsiConsole.WriteLine();
 
-        var memoryRecovered = afterLoadMemory - afterGCMemory;
-        var loadedMemory = afterLoadMemory - baselineMemory;
-
-        if (memoryRecovered > 0 && loadedMemory > 0)
+        if (loadedMemory > 0)
         {
             var recoveryPercent = (memoryRecovered * 100.0) / loadedMemory;
-            AnsiConsole.MarkupLine($"[green]Memory recovered: {FormatBytes(memoryRecovered)} ({recoveryPercent:F1}% of loaded)[/]");
+            var retainedPercent = (retainedMemory * 100.0) / loadedMemory;
 
-            if (recoveryPercent > 50)
+            AnsiConsole.MarkupLine($"[yellow]Recovery analysis:[/]");
+            AnsiConsole.MarkupLine($"  Loaded: {FormatBytes(loadedMemory)} (100%)");
+            AnsiConsole.MarkupLine($"  Recovered: {FormatBytes(memoryRecovered)} ({recoveryPercent:F1}%)");
+            AnsiConsole.MarkupLine($"  Retained: {FormatBytes(retainedMemory)} ({retainedPercent:F1}%)");
+            AnsiConsole.WriteLine();
+
+            if (retainedPercent > 10)
             {
-                AnsiConsole.MarkupLine("[green]MDCP unloading appears to be working - significant memory recovered![/]");
-            }
-            else
-            {
-                AnsiConsole.MarkupLine("[yellow]Some memory recovered, but less than expected. This could be normal variance.[/]");
+                AnsiConsole.MarkupLine("[yellow]⚠ Significant memory retained after unload. Possible causes:[/]");
+                AnsiConsole.MarkupLine("  - Orleans caches (serializers, type metadata, etc.)");
+                AnsiConsole.MarkupLine("  - Weak references not yet collected");
+                AnsiConsole.MarkupLine("  - JIT-compiled code retained in memory");
+                AnsiConsole.MarkupLine("  - Actual memory leak");
             }
         }
-        else if (afterGCMemory <= baselineMemory * 1.1) // Within 10% of baseline
+        AnsiConsole.WriteLine();
+
+        // Phase 5: Multiple load/unload cycles to detect leaks
+        AnsiConsole.MarkupLine("[blue]Phase 5: Testing for memory leaks (3 additional load/unload cycles)...[/]");
+        AnsiConsole.MarkupLine("[grey]If memory grows with each cycle, there's likely a leak.[/]");
+        AnsiConsole.WriteLine();
+
+        var cycleMemory = new List<(int Cycle, long AfterLoad, long AfterUnload)>();
+        cycleMemory.Add((1, afterLoadMemory, afterGCMemory)); // First cycle already done
+
+        for (int cycle = 2; cycle <= 4; cycle++)
         {
-            AnsiConsole.MarkupLine("[green]Memory returned to near baseline - unloading successful![/]");
+            // Load
+            var cycleLoadResult = await grainLoader.LoadGrainAssemblyAsync(assemblyPath);
+            if (!cycleLoadResult.Success)
+            {
+                AnsiConsole.MarkupLine($"[red]Cycle {cycle}: Load failed[/]");
+                break;
+            }
+            var cycleAfterLoad = GC.GetTotalMemory(true);
+
+            // Unload
+            var cycleUnloadResult = await grainUnloader.UnloadGrainAssemblyAsync(assemblyPath);
+
+            // GC
+            for (int i = 0; i < 5; i++)
+            {
+                GCSettings.LargeObjectHeapCompactionMode = GCLargeObjectHeapCompactionMode.CompactOnce;
+                GC.Collect(2, GCCollectionMode.Aggressive, true, true);
+                GC.WaitForPendingFinalizers();
+                await Task.Delay(100);
+            }
+            var cycleAfterUnload = GC.GetTotalMemory(true);
+
+            cycleMemory.Add((cycle, cycleAfterLoad, cycleAfterUnload));
+            AnsiConsole.MarkupLine($"  Cycle {cycle}: Load={FormatBytes(cycleAfterLoad)}, After Unload+GC={FormatBytes(cycleAfterUnload)}");
+        }
+        AnsiConsole.WriteLine();
+
+        // Analyze leak pattern
+        var cycleTable = new Table();
+        cycleTable.AddColumn("Cycle");
+        cycleTable.AddColumn("After Load");
+        cycleTable.AddColumn("After Unload+GC");
+        cycleTable.AddColumn("Delta from Cycle 1");
+
+        foreach (var cm in cycleMemory)
+        {
+            var delta = cm.AfterUnload - cycleMemory[0].AfterUnload;
+            cycleTable.AddRow(
+                cm.Cycle.ToString(),
+                FormatBytes(cm.AfterLoad),
+                FormatBytes(cm.AfterUnload),
+                FormatDelta(delta)
+            );
+        }
+        AnsiConsole.Write(cycleTable);
+        AnsiConsole.WriteLine();
+
+        // Check for growing memory (leak indicator)
+        var firstUnloadMem = cycleMemory[0].AfterUnload;
+        var lastUnloadMem = cycleMemory.Last().AfterUnload;
+        var growth = lastUnloadMem - firstUnloadMem;
+        var growthPerCycle = growth / (cycleMemory.Count - 1);
+
+        if (growth > loadedMemory * 0.5) // Growing by more than 50% of loaded size
+        {
+            AnsiConsole.MarkupLine($"[red]⚠ POTENTIAL LEAK: Memory grew by {FormatBytes(growth)} over {cycleMemory.Count - 1} cycles[/]");
+            AnsiConsole.MarkupLine($"[red]  Average growth per cycle: {FormatBytes(growthPerCycle)}[/]");
+        }
+        else if (growth > 0)
+        {
+            AnsiConsole.MarkupLine($"[yellow]Minor memory growth: {FormatBytes(growth)} over {cycleMemory.Count - 1} cycles[/]");
+            AnsiConsole.MarkupLine($"[grey]  This may be normal runtime behavior or small caches[/]");
         }
         else
         {
-            AnsiConsole.MarkupLine("[yellow]Memory not fully reclaimed. This may indicate:");
-            AnsiConsole.MarkupLine("  - Cached references still holding assembly");
-            AnsiConsole.MarkupLine("  - GC not yet collected all objects");
-            AnsiConsole.MarkupLine("  - Normal runtime memory growth[/]");
+            AnsiConsole.MarkupLine($"[green]✓ No memory leak detected - memory stable across cycles[/]");
         }
         AnsiConsole.WriteLine();
 

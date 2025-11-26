@@ -81,59 +81,121 @@ public static class MultiSiloManifestPropagation
         AnsiConsole.MarkupLine($"[green]Assembly loaded on Silo1: {loadResult.GrainTypes.Count} grain types[/]");
         AnsiConsole.WriteLine();
 
-        // Wait for propagation
-        AnsiConsole.MarkupLine("[blue]Phase 2: Waiting for manifest propagation...[/]");
-        await Task.Delay(2000);
-
-        // Check manifest versions on all silos
-        AnsiConsole.MarkupLine("[blue]Phase 3: Checking manifest versions across cluster...[/]");
-        var table = new Table();
-        table.AddColumn("Silo");
-        table.AddColumn("Manifest Version");
-        table.AddColumn("Grain Type Count");
-
-        // Use IClusterManifestProvider (public interface)
+        // Get manifest providers
         var manifest1 = silo1.Services.GetService<IClusterManifestProvider>();
         var manifest2 = silo2.Services.GetService<IClusterManifestProvider>();
         var manifest3 = silo3.Services.GetService<IClusterManifestProvider>();
 
-        if (manifest1 != null)
+        if (manifest1 == null || manifest2 == null || manifest3 == null)
         {
-            var current1 = manifest1.Current;
-            var grainCount1 = current1.AllGrainManifests.Sum(m => m.Grains.Count);
-            table.AddRow("Silo1", current1.Version.ToString(), grainCount1.ToString());
-        }
-        if (manifest2 != null)
-        {
-            var current2 = manifest2.Current;
-            var grainCount2 = current2.AllGrainManifests.Sum(m => m.Grains.Count);
-            table.AddRow("Silo2", current2.Version.ToString(), grainCount2.ToString());
-        }
-        if (manifest3 != null)
-        {
-            var current3 = manifest3.Current;
-            var grainCount3 = current3.AllGrainManifests.Sum(m => m.Grains.Count);
-            table.AddRow("Silo3", current3.Version.ToString(), grainCount3.ToString());
+            AnsiConsole.MarkupLine("[red]ERROR: Could not get manifest providers[/]");
+            await StopAllSilos(silo1, silo2, silo3);
+            return;
         }
 
-        AnsiConsole.Write(table);
+        // Phase 2: Take multiple snapshots over time to study version convergence
+        AnsiConsole.MarkupLine("[blue]Phase 2: Monitoring manifest versions over time...[/]");
+        AnsiConsole.MarkupLine("[grey]Taking snapshots every 500ms for 5 seconds to study convergence...[/]");
         AnsiConsole.WriteLine();
 
-        // Verify all have same version
-        if (manifest1 != null && manifest2 != null && manifest3 != null)
-        {
-            var v1 = manifest1.Current.Version;
-            var v2 = manifest2.Current.Version;
-            var v3 = manifest3.Current.Version;
+        var snapshots = new List<(int Ms, string V1, string V2, string V3, int C1, int C2, int C3)>();
 
-            if (v1 == v2 && v2 == v3)
-            {
-                AnsiConsole.MarkupLine("[green]All silos have the same manifest version![/]");
-            }
-            else
-            {
-                AnsiConsole.MarkupLine("[yellow]WARNING: Manifest versions differ - propagation may need more time[/]");
-            }
+        for (int i = 0; i <= 10; i++)
+        {
+            var current1 = manifest1.Current;
+            var current2 = manifest2.Current;
+            var current3 = manifest3.Current;
+
+            var v1 = current1.Version.ToString();
+            var v2 = current2.Version.ToString();
+            var v3 = current3.Version.ToString();
+
+            var c1 = current1.AllGrainManifests.Sum(m => m.Grains.Count);
+            var c2 = current2.AllGrainManifests.Sum(m => m.Grains.Count);
+            var c3 = current3.AllGrainManifests.Sum(m => m.Grains.Count);
+
+            snapshots.Add((i * 500, v1, v2, v3, c1, c2, c3));
+
+            if (i < 10)
+                await Task.Delay(500);
+        }
+
+        // Display snapshot history
+        AnsiConsole.MarkupLine("[blue]Phase 3: Manifest Version Timeline[/]");
+        var timelineTable = new Table();
+        timelineTable.AddColumn("Time (ms)");
+        timelineTable.AddColumn("Silo1 Version");
+        timelineTable.AddColumn("Silo2 Version");
+        timelineTable.AddColumn("Silo3 Version");
+        timelineTable.AddColumn("Converged?");
+
+        foreach (var snap in snapshots)
+        {
+            var converged = (snap.V1 == snap.V2 && snap.V2 == snap.V3) ? "[green]Yes[/]" : "[yellow]No[/]";
+            timelineTable.AddRow(
+                snap.Ms.ToString(),
+                snap.V1,
+                snap.V2,
+                snap.V3,
+                converged
+            );
+        }
+        AnsiConsole.Write(timelineTable);
+        AnsiConsole.WriteLine();
+
+        // Check if versions are bouncing (changing after initial stabilization)
+        var uniqueVersionSets = snapshots
+            .Select(s => $"{s.V1}|{s.V2}|{s.V3}")
+            .Distinct()
+            .ToList();
+
+        AnsiConsole.MarkupLine($"[blue]Unique version combinations observed:[/] {uniqueVersionSets.Count}");
+        foreach (var vs in uniqueVersionSets)
+        {
+            AnsiConsole.MarkupLine($"  [grey]{vs.Replace("|", " / ")}[/]");
+        }
+        AnsiConsole.WriteLine();
+
+        // Final state analysis
+        var finalSnap = snapshots.Last();
+        AnsiConsole.MarkupLine("[blue]Phase 4: Final State Analysis[/]");
+
+        var finalTable = new Table();
+        finalTable.AddColumn("Silo");
+        finalTable.AddColumn("Manifest Version");
+        finalTable.AddColumn("Grain Type Count");
+        finalTable.AddRow("Silo1", finalSnap.V1, finalSnap.C1.ToString());
+        finalTable.AddRow("Silo2", finalSnap.V2, finalSnap.C2.ToString());
+        finalTable.AddRow("Silo3", finalSnap.V3, finalSnap.C3.ToString());
+        AnsiConsole.Write(finalTable);
+        AnsiConsole.WriteLine();
+
+        // Conclusions
+        var allConverged = finalSnap.V1 == finalSnap.V2 && finalSnap.V2 == finalSnap.V3;
+        var allSameCount = finalSnap.C1 == finalSnap.C2 && finalSnap.C2 == finalSnap.C3;
+        var versionsBouncing = uniqueVersionSets.Count > 2; // More than initial + final
+
+        if (allConverged && allSameCount)
+        {
+            AnsiConsole.MarkupLine("[green]✓ SUCCESS: All silos converged to same version and grain count[/]");
+        }
+        else if (allSameCount && !allConverged)
+        {
+            AnsiConsole.MarkupLine("[yellow]⚠ PARTIAL: All silos have same grain count but different versions[/]");
+            AnsiConsole.MarkupLine("[grey]  This means each silo has the grain types but tracks versions independently[/]");
+        }
+        else
+        {
+            AnsiConsole.MarkupLine("[red]✗ FAILED: Silos have inconsistent state[/]");
+        }
+
+        if (versionsBouncing)
+        {
+            AnsiConsole.MarkupLine("[red]⚠ WARNING: Versions appear to be bouncing (more than 2 unique combinations)[/]");
+        }
+        else
+        {
+            AnsiConsole.MarkupLine("[green]✓ Versions stabilized (no bouncing detected)[/]");
         }
         AnsiConsole.WriteLine();
 
