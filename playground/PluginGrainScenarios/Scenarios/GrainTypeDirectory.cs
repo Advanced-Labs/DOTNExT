@@ -10,13 +10,14 @@ namespace PluginGrainScenarios.Scenarios;
 /// Scenario 6: Grain Type Directory (GTD).
 /// Tests the cluster-wide registry of all available grain types with metadata.
 ///
-/// STATUS: NOT YET IMPLEMENTED - This scenario outlines what needs to be built.
+/// STATUS: NOT YET IMPLEMENTED - This scenario outlines the comprehensive design.
 ///
 /// Features to test:
-/// - Register grain types with metadata in the directory
-/// - Query available grain types without compile-time references
+/// - IGrainTypeDirectoryGrain singleton grain
+/// - Register grain packages with full metadata
+/// - Query available grain types by name/namespace
 /// - Track which silos can host which grain types
-/// - Metadata includes: methods, properties, version info
+/// - GrainTypeMeta with package reference
 /// - Cross-silo type resolution
 /// </summary>
 public static class GrainTypeDirectory
@@ -35,91 +36,23 @@ public static class GrainTypeDirectory
         AnsiConsole.MarkupLine("[blue]Purpose:[/]");
         AnsiConsole.MarkupLine("  The Grain Type Directory (GTD) is a cluster-wide registry that enables");
         AnsiConsole.MarkupLine("  discovery of grain types without compile-time references.");
+        AnsiConsole.MarkupLine("  It is implemented as a [bold]singleton grain[/] for cluster-wide consistency.");
         AnsiConsole.WriteLine();
 
-        AnsiConsole.MarkupLine("[blue]Planned Features to Test:[/]");
-        var featuresTable = new Table();
-        featuresTable.AddColumn("Feature");
-        featuresTable.AddColumn("Description");
-        featuresTable.AddColumn("Status");
+        // Show features
+        ShowPlannedFeatures();
 
-        featuresTable.AddRow("Type Registration", "Register grain types with full metadata", "[yellow]Planned[/]");
-        featuresTable.AddRow("Type Discovery", "Query available grain types by name/namespace", "[yellow]Planned[/]");
-        featuresTable.AddRow("Silo Mapping", "Track which silos can host which grain types", "[yellow]Planned[/]");
-        featuresTable.AddRow("Method Metadata", "Expose grain interface methods/parameters", "[yellow]Planned[/]");
-        featuresTable.AddRow("Version Tracking", "Track assembly versions and compatibility", "[yellow]Planned[/]");
-        featuresTable.AddRow("Cross-Silo Resolution", "Resolve types registered on other silos", "[yellow]Planned[/]");
+        // Show the API design
+        ShowApiDesign();
 
-        AnsiConsole.Write(featuresTable);
-        AnsiConsole.WriteLine();
+        // Show package registration
+        ShowPackageRegistration();
 
-        // Show the planned API
-        AnsiConsole.MarkupLine("[blue]Planned API:[/]");
-        AnsiConsole.WriteLine();
+        // Show implementation components
+        ShowImplementationComponents();
 
-        var apiPanel = new Panel(
-            """
-            // Query the directory
-            public interface IGrainTypeDirectory
-            {
-                // List all registered grain types
-                Task<IReadOnlyList<GrainTypeRegistration>> GetAllTypesAsync();
-
-                // Find types by name pattern
-                Task<IReadOnlyList<GrainTypeRegistration>> FindTypesAsync(string pattern);
-
-                // Get detailed metadata for a type
-                Task<GrainTypeMetadata?> GetTypeMetadataAsync(string fullTypeName);
-
-                // Find silos that host a grain type
-                Task<IReadOnlyList<SiloAddress>> GetHostingSilosAsync(string fullTypeName);
-
-                // Check if a grain type is available
-                Task<bool> IsTypeAvailableAsync(string fullTypeName);
-            }
-
-            // Registration data
-            public class GrainTypeRegistration
-            {
-                public string FullName { get; set; }
-                public string Namespace { get; set; }
-                public string AssemblyName { get; set; }
-                public string AssemblyHash { get; set; }  // For versioning
-                public GrainTypeKind Kind { get; set; }   // Interface or Class
-                public IReadOnlyList<SiloAddress> AvailableOn { get; set; }
-            }
-            """)
-        {
-            Header = new PanelHeader("IGrainTypeDirectory Interface"),
-            Border = BoxBorder.Rounded
-        };
-        AnsiConsole.Write(apiPanel);
-        AnsiConsole.WriteLine();
-
-        // Show what implementation looks like
-        AnsiConsole.MarkupLine("[blue]Implementation Components Needed:[/]");
-        var componentsTable = new Table();
-        componentsTable.AddColumn("Component");
-        componentsTable.AddColumn("Location");
-        componentsTable.AddColumn("Purpose");
-
-        componentsTable.AddRow("GrainTypeDirectory", "Orleans.Runtime/DynamicGrains/", "Core directory implementation");
-        componentsTable.AddRow("GrainTypeRegistryGrain", "Orleans.Runtime/DynamicGrains/", "Singleton grain storing registry");
-        componentsTable.AddRow("GrainTypeMetadataProvider", "Orleans.Runtime/DynamicGrains/", "Service to query/cache metadata");
-        componentsTable.AddRow("IGrainTypeDirectory", "Orleans.Core.Abstractions/", "Public interface for clients");
-
-        AnsiConsole.Write(componentsTable);
-        AnsiConsole.WriteLine();
-
-        // Demo what the test will do once implemented
-        AnsiConsole.MarkupLine("[blue]Test Phases (Once Implemented):[/]");
-        AnsiConsole.MarkupLine("  Phase 1: Start silo cluster");
-        AnsiConsole.MarkupLine("  Phase 2: Load plugin grain assemblies");
-        AnsiConsole.MarkupLine("  Phase 3: Query GTD for registered types");
-        AnsiConsole.MarkupLine("  Phase 4: Get detailed metadata for IHelloGrain");
-        AnsiConsole.MarkupLine("  Phase 5: Find which silos host HelloGrain");
-        AnsiConsole.MarkupLine("  Phase 6: Unload assembly and verify GTD updates");
-        AnsiConsole.WriteLine();
+        // Show test phases
+        ShowTestPhases();
 
         // Option to run current implementation status check
         var runCheck = AnsiConsole.Confirm("Run a check to see current implementation status?", defaultValue: true);
@@ -133,6 +66,178 @@ public static class GrainTypeDirectory
         AnsiConsole.MarkupLine("[green]═══════════════════════════════════════════════════════[/]");
         AnsiConsole.MarkupLine("[green]  Scenario 6 Complete (GTD Not Yet Implemented)[/]");
         AnsiConsole.MarkupLine("[green]═══════════════════════════════════════════════════════[/]");
+    }
+
+    private static void ShowPlannedFeatures()
+    {
+        AnsiConsole.MarkupLine("[blue]Planned Features to Test:[/]");
+        var featuresTable = new Table();
+        featuresTable.AddColumn("Feature");
+        featuresTable.AddColumn("Description");
+        featuresTable.AddColumn("Status");
+
+        featuresTable.AddRow("Package Registration", "Register GrainPackage with full metadata", "[yellow]Planned[/]");
+        featuresTable.AddRow("Type Discovery", "Query available grain types by name/namespace", "[yellow]Planned[/]");
+        featuresTable.AddRow("Silo Tracking", "Track which silos have loaded which packages", "[yellow]Planned[/]");
+        featuresTable.AddRow("Method Metadata", "GrainInterfaceMeta with methods/parameters", "[yellow]Planned[/]");
+        featuresTable.AddRow("Version Tracking", "Track package versions and compatibility", "[yellow]Planned[/]");
+        featuresTable.AddRow("Cross-Silo Resolution", "Resolve types registered on other silos", "[yellow]Planned[/]");
+        featuresTable.AddRow("Package References", "GrainTypeMeta has reference back to package", "[yellow]Planned[/]");
+
+        AnsiConsole.Write(featuresTable);
+        AnsiConsole.WriteLine();
+    }
+
+    private static void ShowApiDesign()
+    {
+        AnsiConsole.MarkupLine("[blue]GTD Grain API:[/]");
+        AnsiConsole.WriteLine();
+
+        var apiPanel = new Panel(
+            """
+            // The Grain Type Directory - a cluster-wide singleton grain
+            public interface IGrainTypeDirectoryGrain : IGrainWithStringKey
+            {
+                // =============================================
+                // Package Registration
+                // =============================================
+
+                Task RegisterPackageAsync(GrainPackage package);
+                Task UnregisterPackageAsync(string packageId, string version);
+
+                // =============================================
+                // Package Queries
+                // =============================================
+
+                Task<ImmutableList<GrainPackageInfo>> GetPackagesAsync();
+                Task<GrainPackage?> GetPackageAsync(string packageId, string? version = null);
+
+                // =============================================
+                // Grain Type Queries
+                // =============================================
+
+                Task<ImmutableList<GrainTypeMeta>> GetAllGrainTypesAsync();
+                Task<ImmutableList<GrainTypeMeta>> FindGrainTypesAsync(
+                    string? namespaceFilter = null,
+                    string? namePattern = null);
+                Task<GrainTypeMeta?> GetGrainTypeAsync(string fullTypeName);
+
+                // =============================================
+                // Silo Tracking
+                // =============================================
+
+                Task ReportPackageLoadedAsync(SiloAddress silo, string packageId, string version);
+                Task ReportPackageUnloadedAsync(SiloAddress silo, string packageId, string version);
+                Task<ImmutableList<SiloAddress>> GetHostingSilosAsync(string grainTypeName);
+            }
+            """)
+        {
+            Header = new PanelHeader("IGrainTypeDirectoryGrain Interface"),
+            Border = BoxBorder.Rounded
+        };
+        AnsiConsole.Write(apiPanel);
+        AnsiConsole.WriteLine();
+
+        // Package info type
+        var infoPanel = new Panel(
+            """
+            // Summary info about a package (without full assembly content)
+            [GenerateSerializer, Immutable]
+            public sealed class GrainPackageInfo
+            {
+                public string PackageId { get; init; }
+                public string Version { get; init; }
+                public string ContentHash { get; init; }
+                public int GrainTypeCount { get; init; }
+                public GrainPackageContent ContentType { get; init; }
+                public ImmutableList<SiloAddress> LoadedOnSilos { get; init; }
+            }
+            """)
+        {
+            Header = new PanelHeader("GrainPackageInfo Type"),
+            Border = BoxBorder.Rounded
+        };
+        AnsiConsole.Write(infoPanel);
+        AnsiConsole.WriteLine();
+    }
+
+    private static void ShowPackageRegistration()
+    {
+        AnsiConsole.MarkupLine("[blue]Package Registration Flow:[/]");
+        AnsiConsole.WriteLine();
+
+        var flowPanel = new Panel(
+            """
+            // When a silo loads a plugin grain assembly:
+            1. IPluginGrainLoader.LoadAsync(assemblyPath) is called
+            2. MDCP loads assembly into isolated AssemblyLoadContext
+            3. Grain types are discovered and added to local manifest
+            4. GrainPackage is created from loaded assembly metadata
+            5. GTD.RegisterPackageAsync(package) is called
+            6. GTD.ReportPackageLoadedAsync(localSilo, packageId, version)
+            7. Other silos can now query GTD to discover the new types
+
+            // When a silo unloads a plugin:
+            1. IPluginGrainUnloader.UnloadAsync(assemblyName) is called
+            2. GTD.ReportPackageUnloadedAsync(localSilo, packageId, version)
+            3. If no silos have the package loaded, GTD updates availability
+            4. AssemblyLoadContext is unloaded
+            """)
+        {
+            Header = new PanelHeader("Registration Flow"),
+            Border = BoxBorder.Rounded
+        };
+        AnsiConsole.Write(flowPanel);
+        AnsiConsole.WriteLine();
+    }
+
+    private static void ShowImplementationComponents()
+    {
+        AnsiConsole.MarkupLine("[blue]Implementation Components Needed:[/]");
+        var componentsTable = new Table();
+        componentsTable.AddColumn("Component");
+        componentsTable.AddColumn("Location");
+        componentsTable.AddColumn("Purpose");
+
+        componentsTable.AddRow("IGrainTypeDirectoryGrain", "Orleans.Core.Abstractions/DynamicGrains/", "Public grain interface");
+        componentsTable.AddRow("GrainTypeDirectoryGrain", "Orleans.Runtime/DynamicGrains/", "Singleton grain implementation");
+        componentsTable.AddRow("GrainPackage", "Orleans.Core.Abstractions/Metadata/", "Package definition type");
+        componentsTable.AddRow("GrainPackageInfo", "Orleans.Core.Abstractions/Metadata/", "Package summary type");
+        componentsTable.AddRow("GrainTypeMeta", "Orleans.Core.Abstractions/Metadata/", "Type metadata with package ref");
+        componentsTable.AddRow("GrainInterfaceMeta", "Orleans.Core.Abstractions/Metadata/", "Interface method metadata");
+        componentsTable.AddRow("GrainMethodMeta", "Orleans.Core.Abstractions/Metadata/", "Method parameter metadata");
+
+        AnsiConsole.Write(componentsTable);
+        AnsiConsole.WriteLine();
+
+        // Show integration points
+        AnsiConsole.MarkupLine("[blue]Integration Points:[/]");
+        var integrationTable = new Table();
+        integrationTable.AddColumn("Existing Component");
+        integrationTable.AddColumn("Integration");
+
+        integrationTable.AddRow("IPluginGrainLoader", "Calls GTD.RegisterPackageAsync after loading");
+        integrationTable.AddRow("IPluginGrainUnloader", "Calls GTD.ReportPackageUnloadedAsync before unloading");
+        integrationTable.AddRow("IClusterManifestProvider", "GTD uses this for initial type discovery");
+        integrationTable.AddRow("IMembershipService", "GTD subscribes to detect silo failures");
+
+        AnsiConsole.Write(integrationTable);
+        AnsiConsole.WriteLine();
+    }
+
+    private static void ShowTestPhases()
+    {
+        AnsiConsole.MarkupLine("[blue]Test Phases (Once Implemented):[/]");
+        AnsiConsole.MarkupLine("  Phase 1: Start silo cluster (2 silos)");
+        AnsiConsole.MarkupLine("  Phase 2: Load plugin grain assembly on silo 1");
+        AnsiConsole.MarkupLine("  Phase 3: Query GTD from silo 2 for registered types");
+        AnsiConsole.MarkupLine("  Phase 4: Verify GrainTypeMeta includes SourcePackage reference");
+        AnsiConsole.MarkupLine("  Phase 5: Query GetHostingSilosAsync for HelloGrain");
+        AnsiConsole.MarkupLine("  Phase 6: Load same assembly on silo 2");
+        AnsiConsole.MarkupLine("  Phase 7: Verify HostingSilos now shows both silos");
+        AnsiConsole.MarkupLine("  Phase 8: Unload assembly from silo 1, verify GTD updates");
+        AnsiConsole.MarkupLine("  Phase 9: Shutdown silo 2, verify GTD detects via membership");
+        AnsiConsole.WriteLine();
     }
 
     private static async Task RunImplementationStatusCheck()
@@ -162,22 +267,36 @@ public static class GrainTypeDirectory
         statusTable.AddRow(
             "IPluginGrainLoader",
             grainLoader != null ? "[green]Yes[/]" : "[red]No[/]",
-            grainLoader != null ? "Can load grain assemblies" : "Not registered"
+            grainLoader != null ? "[green]Can load grain assemblies[/]" : "Not registered"
         );
 
         var manifestProvider = host.Services.GetService<IClusterManifestProvider>();
         statusTable.AddRow(
             "IClusterManifestProvider",
             manifestProvider != null ? "[green]Yes[/]" : "[red]No[/]",
-            manifestProvider != null ? $"Has {manifestProvider.Current.AllGrainManifests.Sum(m => m.Grains.Count)} grain types" : "Not registered"
+            manifestProvider != null ? $"[green]Has {manifestProvider.Current.AllGrainManifests.Sum(m => m.Grains.Count)} grain types[/]" : "Not registered"
         );
 
-        // Check for GTD interface (won't exist yet)
-        var gtdType = Type.GetType("Orleans.Runtime.DynamicGrains.IGrainTypeDirectory, Orleans.Runtime");
+        // Check for GTD types (won't exist yet)
+        var gtdType = Type.GetType("Orleans.Runtime.DynamicGrains.IGrainTypeDirectoryGrain, Orleans.Runtime");
         statusTable.AddRow(
-            "IGrainTypeDirectory",
+            "IGrainTypeDirectoryGrain",
             gtdType != null ? "[green]Yes[/]" : "[yellow]No[/]",
-            gtdType != null ? "GTD interface exists" : "Not yet implemented"
+            gtdType != null ? "[green]GTD grain interface exists[/]" : "[grey]Not yet implemented[/]"
+        );
+
+        var packageType = Type.GetType("Orleans.Metadata.GrainPackage, Orleans.Core.Abstractions");
+        statusTable.AddRow(
+            "GrainPackage",
+            packageType != null ? "[green]Yes[/]" : "[yellow]No[/]",
+            packageType != null ? "[green]Package type exists[/]" : "[grey]Not yet implemented[/]"
+        );
+
+        var metaType = Type.GetType("Orleans.Metadata.GrainTypeMeta, Orleans.Core.Abstractions");
+        statusTable.AddRow(
+            "GrainTypeMeta",
+            metaType != null ? "[green]Yes[/]" : "[yellow]No[/]",
+            metaType != null ? "[green]Type metadata exists[/]" : "[grey]Not yet implemented[/]"
         );
 
         AnsiConsole.Write(statusTable);
@@ -209,6 +328,13 @@ public static class GrainTypeDirectory
                 AnsiConsole.Write(grainTable);
                 AnsiConsole.MarkupLine($"[grey]  (showing first 10 of {manifest.AllGrainManifests.Sum(m => m.Grains.Count)} grain types)[/]");
             }
+
+            AnsiConsole.WriteLine();
+            AnsiConsole.MarkupLine("[blue]How GTD Extends This:[/]");
+            AnsiConsole.MarkupLine("  • Current manifest is local - GTD is cluster-wide");
+            AnsiConsole.MarkupLine("  • Current manifest has GrainType - GTD adds GrainTypeMeta with more detail");
+            AnsiConsole.MarkupLine("  • Current manifest doesn't track silos - GTD tracks HostingSilos");
+            AnsiConsole.MarkupLine("  • Current manifest has no packaging - GTD has GrainPackage");
         }
 
         AnsiConsole.WriteLine();
