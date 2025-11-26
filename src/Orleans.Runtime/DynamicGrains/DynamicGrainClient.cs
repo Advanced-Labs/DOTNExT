@@ -288,7 +288,7 @@ namespace Orleans.Runtime.DynamicGrains
 
         private static string MakeKey(string packageId, string version) => $"{packageId}:{version}";
 
-        private async Task OnPackageUnloaded(GrainPackageHandle handle)
+        private Task OnPackageUnloaded(GrainPackageHandle handle)
         {
             var key = MakeKey(handle.PackageId, handle.Version);
             _loadedPackages.TryRemove(key, out _);
@@ -302,6 +302,7 @@ namespace Orleans.Runtime.DynamicGrains
             }
 
             _logger.LogInformation("Unloaded package {PackageId} v{Version}", handle.PackageId, handle.Version);
+            return Task.CompletedTask;
         }
 
         private async Task<GrainPackageHandle?> FindOrLoadPackageForType(
