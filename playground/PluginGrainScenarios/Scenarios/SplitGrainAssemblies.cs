@@ -69,25 +69,39 @@ public static class SplitGrainAssemblies
     {
         if (baseDir == null) return null;
 
-        // Common patterns for split assembly projects
-        var patterns = new[]
+        // Search from AppContext.BaseDirectory upward to find Orleans root
+        var currentDir = new DirectoryInfo(AppContext.BaseDirectory);
+        while (currentDir != null && !File.Exists(Path.Combine(currentDir.FullName, "Orleans.slnx")))
         {
-            $"**/DynamicGrainLoading.{assemblyType}/bin/**/DynamicGrainLoading.{assemblyType}.dll",
-            $"**/TestGrains.{assemblyType}/bin/**/TestGrains.{assemblyType}.dll",
-            $"**/{assemblyType}/bin/**/{assemblyType}.dll",
-        };
-
-        foreach (var pattern in patterns)
-        {
-            try
-            {
-                var files = Directory.GetFiles(baseDir, $"*{assemblyType}*.dll", SearchOption.AllDirectories)
-                    .Where(f => f.Contains("bin") && !f.Contains("obj"))
-                    .FirstOrDefault();
-                if (files != null) return files;
-            }
-            catch { }
+            currentDir = currentDir.Parent;
         }
+
+        if (currentDir != null)
+        {
+            // Look for DynamicGrainLoading.Contracts or DynamicGrainLoading.Implementation
+            var playgroundPath = Path.Combine(currentDir.FullName, "playground", $"DynamicGrainLoading.{assemblyType}", "bin");
+            if (Directory.Exists(playgroundPath))
+            {
+                foreach (var binDir in Directory.GetDirectories(playgroundPath, "*", SearchOption.AllDirectories))
+                {
+                    var dllPath = Path.Combine(binDir, $"DynamicGrainLoading.{assemblyType}.dll");
+                    if (File.Exists(dllPath))
+                    {
+                        return dllPath;
+                    }
+                }
+            }
+        }
+
+        // Fallback: search in the provided baseDir
+        try
+        {
+            var files = Directory.GetFiles(baseDir, $"DynamicGrainLoading.{assemblyType}.dll", SearchOption.AllDirectories)
+                .Where(f => f.Contains("bin") && !f.Contains("obj"))
+                .FirstOrDefault();
+            if (files != null) return files;
+        }
+        catch { }
 
         return null;
     }
@@ -211,6 +225,12 @@ public static class SplitGrainAssemblies
     private static async Task RunSplitAssemblyTest(string contractsPath, string implementationPath)
     {
         AnsiConsole.MarkupLine("[blue]Full Split Assembly Test Mode[/]");
+        AnsiConsole.MarkupLine("[grey]Testing: Interface and Implementation in separate DLLs[/]");
+        AnsiConsole.WriteLine();
+
+        AnsiConsole.MarkupLine("[blue]Assembly Paths:[/]");
+        AnsiConsole.MarkupLine($"  Contracts: {contractsPath}");
+        AnsiConsole.MarkupLine($"  Implementation: {implementationPath}");
         AnsiConsole.WriteLine();
 
         var host = SiloHelper.BuildSingleSilo();
@@ -226,7 +246,9 @@ public static class SplitGrainAssemblies
         var grainLoader = host.Services.GetRequiredService<IPluginGrainLoader>();
 
         // Phase 1: Load contracts (interfaces) first
-        AnsiConsole.MarkupLine("[blue]Phase 1: Loading Contracts Assembly[/]");
+        AnsiConsole.MarkupLine("[blue]Phase 1: Loading Contracts Assembly (interfaces only)[/]");
+        AnsiConsole.MarkupLine("[grey]  Contracts contain grain interfaces and shared data types.[/]");
+        AnsiConsole.MarkupLine("[grey]  Orleans generates proxy/stub classes from interfaces.[/]");
         var contractsResult = await grainLoader.LoadGrainAssemblyAsync(contractsPath);
 
         if (!contractsResult.Success)
@@ -235,7 +257,16 @@ public static class SplitGrainAssemblies
         }
         else
         {
-            AnsiConsole.MarkupLine($"[green]Contracts loaded - {contractsResult.GrainTypes.Count} types[/]");
+            AnsiConsole.MarkupLine($"[green]Contracts loaded - {contractsResult.GrainTypes.Count} grain types registered[/]");
+
+            // Show what types were loaded from contracts
+            if (contractsResult.Assembly != null)
+            {
+                var ifaceTypes = contractsResult.Assembly.GetExportedTypes()
+                    .Where(t => t.IsInterface && typeof(IGrain).IsAssignableFrom(t))
+                    .ToList();
+                AnsiConsole.MarkupLine($"  Interfaces found: {string.Join(", ", ifaceTypes.Select(t => t.Name))}");
+            }
         }
         AnsiConsole.WriteLine();
 
@@ -249,7 +280,9 @@ public static class SplitGrainAssemblies
         AnsiConsole.WriteLine();
 
         // Phase 2: Load implementation
-        AnsiConsole.MarkupLine("[blue]Phase 2: Loading Implementation Assembly[/]");
+        AnsiConsole.MarkupLine("[blue]Phase 2: Loading Implementation Assembly (grain classes)[/]");
+        AnsiConsole.MarkupLine("[grey]  Implementation contains grain classes that implement the interfaces.[/]");
+        AnsiConsole.MarkupLine("[grey]  Orleans generates activators and method invokers.[/]");
         var implResult = await grainLoader.LoadGrainAssemblyAsync(implementationPath);
 
         if (!implResult.Success)
@@ -258,7 +291,16 @@ public static class SplitGrainAssemblies
         }
         else
         {
-            AnsiConsole.MarkupLine($"[green]Implementation loaded - {implResult.GrainTypes.Count} types[/]");
+            AnsiConsole.MarkupLine($"[green]Implementation loaded - {implResult.GrainTypes.Count} grain types registered[/]");
+
+            // Show what types were loaded from implementation
+            if (implResult.Assembly != null)
+            {
+                var grainClasses = implResult.Assembly.GetExportedTypes()
+                    .Where(t => t.IsClass && !t.IsAbstract && typeof(IGrain).IsAssignableFrom(t))
+                    .ToList();
+                AnsiConsole.MarkupLine($"  Grain classes found: {string.Join(", ", grainClasses.Select(t => t.Name))}");
+            }
         }
         AnsiConsole.WriteLine();
 
@@ -270,40 +312,85 @@ public static class SplitGrainAssemblies
         }
         AnsiConsole.WriteLine();
 
-        // Phase 3: Try to invoke a grain
-        AnsiConsole.MarkupLine("[blue]Phase 3: Testing Grain Invocation[/]");
-        var grainFactory = host.Services.GetRequiredService<IGrainFactory>();
+        // Phase 3: Analyze the split - show interface vs implementation assemblies
+        AnsiConsole.MarkupLine("[blue]Phase 3: Split Assembly Analysis[/]");
+        var analysisTable = new Table();
+        analysisTable.AddColumn("Grain Class");
+        analysisTable.AddColumn("Implementation Assembly");
+        analysisTable.AddColumn("Interface");
+        analysisTable.AddColumn("Interface Assembly");
+        analysisTable.AddColumn("Split?");
 
-        // Get actual types from the implementation assembly
         var implGrainClasses = implResult.Assembly?.GetExportedTypes()
             .Where(t => t.IsClass && !t.IsAbstract && typeof(IGrain).IsAssignableFrom(t))
             .ToList() ?? new List<Type>();
 
-        if (implResult.Success && implGrainClasses.Any())
+        foreach (var grainType in implGrainClasses)
         {
-            var grainType = implGrainClasses.First();
-            var interfaces = grainType.GetInterfaces()
-                .Where(i => typeof(IGrain).IsAssignableFrom(i) && i != typeof(IGrain) && i != typeof(IGrainObserver))
+            var grainInterfaces = grainType.GetInterfaces()
+                .Where(i => typeof(IGrain).IsAssignableFrom(i) && i != typeof(IGrain) && i != typeof(IGrainObserver) && !i.Name.StartsWith("IGrainWith"))
                 .ToList();
 
-            if (interfaces.Any())
+            foreach (var iface in grainInterfaces)
             {
-                var grainInterface = interfaces.First();
-                AnsiConsole.MarkupLine($"  Attempting to get grain: {grainInterface.Name}");
+                var implAssembly = grainType.Assembly.GetName().Name;
+                var ifaceAssembly = iface.Assembly.GetName().Name;
+                var isSplit = implAssembly != ifaceAssembly;
 
-                try
+                analysisTable.AddRow(
+                    grainType.Name,
+                    implAssembly ?? "unknown",
+                    iface.Name,
+                    ifaceAssembly ?? "unknown",
+                    isSplit ? "[green]Yes - SPLIT[/]" : "[yellow]No - Same Assembly[/]"
+                );
+            }
+        }
+
+        AnsiConsole.Write(analysisTable);
+        AnsiConsole.WriteLine();
+
+        // Phase 4: Try to invoke a grain
+        AnsiConsole.MarkupLine("[blue]Phase 4: Testing Grain Invocation[/]");
+        var grainFactory = host.Services.GetRequiredService<IGrainFactory>();
+
+        if (implResult.Success && implGrainClasses.Any())
+        {
+            foreach (var grainType in implGrainClasses.Take(1)) // Test first grain
+            {
+                var interfaces = grainType.GetInterfaces()
+                    .Where(i => typeof(IGrain).IsAssignableFrom(i) && i != typeof(IGrain) && i != typeof(IGrainObserver) && !i.Name.StartsWith("IGrainWith"))
+                    .ToList();
+
+                if (interfaces.Any())
                 {
-                    var getGrainMethod = typeof(IGrainFactory).GetMethod(nameof(IGrainFactory.GetGrain), new[] { typeof(string) });
-                    if (getGrainMethod != null)
+                    var grainInterface = interfaces.First();
+                    AnsiConsole.MarkupLine($"  Testing grain: {grainInterface.Name} (impl: {grainType.Name})");
+
+                    try
                     {
-                        var genericMethod = getGrainMethod.MakeGenericMethod(grainInterface);
-                        var grainRef = genericMethod.Invoke(grainFactory, new object[] { "split-test-grain" });
-                        AnsiConsole.MarkupLine($"[green]  Successfully got grain reference: {grainRef?.GetType().Name}[/]");
+                        var getGrainMethod = typeof(IGrainFactory).GetMethod(nameof(IGrainFactory.GetGrain), new[] { typeof(string) });
+                        if (getGrainMethod != null)
+                        {
+                            var genericMethod = getGrainMethod.MakeGenericMethod(grainInterface);
+                            var grainRef = genericMethod.Invoke(grainFactory, new object[] { "split-test-grain" });
+                            AnsiConsole.MarkupLine($"[green]  Got grain reference: {grainRef?.GetType().Name}[/]");
+
+                            // Try to invoke SayHello if it's IHelloGrain
+                            var sayHelloMethod = grainInterface.GetMethod("SayHello");
+                            if (sayHelloMethod != null && grainRef != null)
+                            {
+                                AnsiConsole.MarkupLine("  Invoking SayHello(\"Split Test\")...");
+                                var task = (Task<string>)sayHelloMethod.Invoke(grainRef, new object[] { "Split Test" })!;
+                                var result = await task;
+                                AnsiConsole.MarkupLine($"[green]  Response: {result}[/]");
+                            }
+                        }
                     }
-                }
-                catch (Exception ex)
-                {
-                    AnsiConsole.MarkupLine($"[yellow]  Could not get grain: {ex.Message}[/]");
+                    catch (Exception ex)
+                    {
+                        AnsiConsole.MarkupLine($"[yellow]  Could not invoke grain: {ex.InnerException?.Message ?? ex.Message}[/]");
+                    }
                 }
             }
         }
@@ -315,19 +402,30 @@ public static class SplitGrainAssemblies
         summaryTable.AddColumn("Assembly");
         summaryTable.AddColumn("Load Status");
         summaryTable.AddColumn("Types");
+        summaryTable.AddColumn("Purpose");
 
         summaryTable.AddRow(
             "Contracts",
             contractsResult.Success ? "[green]OK[/]" : "[red]Failed[/]",
-            contractsResult.GrainTypes.Count.ToString()
+            contractsResult.GrainTypes.Count.ToString(),
+            "Interfaces + Proxies"
         );
         summaryTable.AddRow(
             "Implementation",
             implResult.Success ? "[green]OK[/]" : "[red]Failed[/]",
-            implResult.GrainTypes.Count.ToString()
+            implResult.GrainTypes.Count.ToString(),
+            "Grain Classes + Invokers"
         );
 
         AnsiConsole.Write(summaryTable);
+        AnsiConsole.WriteLine();
+
+        // Explain split grain benefits
+        AnsiConsole.MarkupLine("[blue]Benefits of Split Grain Assemblies:[/]");
+        AnsiConsole.MarkupLine("  1. Clients only need Contracts DLL (smaller deployment)");
+        AnsiConsole.MarkupLine("  2. Implementation can be updated without client changes");
+        AnsiConsole.MarkupLine("  3. Better separation of concerns");
+        AnsiConsole.MarkupLine("  4. Enables future GTD (Grain Type Directory) features");
         AnsiConsole.WriteLine();
 
         // Cleanup

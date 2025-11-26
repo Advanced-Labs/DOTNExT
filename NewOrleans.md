@@ -120,9 +120,20 @@ Located in `playground/PluginGrainScenarios/`:
 - **Status**: Working (~51% memory recovered)
 
 ### Scenario 5: Split Grain Assemblies
+- Tests loading Contracts (interfaces) and Implementation (grain classes) as separate DLLs
 - Analyzes interface vs implementation separation
-- Shows which interfaces come from Orleans vs plugin
-- **Status**: Working (fallback mode - needs split assemblies)
+- Demonstrates Orleans codegen for both assemblies
+- Invokes grains from split assemblies
+- **Status**: Working with real split assemblies
+
+#### Split Assembly Projects
+Located in `playground/`:
+- `DynamicGrainLoading.Contracts/` - Contains grain interfaces (IHelloGrain, ICounterGrain, IEchoGrain) and ComplexData
+- `DynamicGrainLoading.Implementation/` - Contains grain classes (HelloGrain, CounterGrain, EchoGrain)
+
+Both projects require `<OrleansBuildTimeCodeGen>true</OrleansBuildTimeCodeGen>` in their .csproj files:
+- **Contracts**: Generates proxy/stub classes (GrainReference implementations) for clients
+- **Implementation**: Generates grain activators and method invokers for silos
 
 ---
 
@@ -400,6 +411,8 @@ if (unloadResult.Success)
 ### New Files
 - `src/Orleans.Runtime/DynamicGrains/GrainLifecycleManager.cs`
 - `playground/PluginGrainScenarios/` (entire project)
+- `playground/DynamicGrainLoading.Contracts/` - Split assembly: grain interfaces
+- `playground/DynamicGrainLoading.Implementation/` - Split assembly: grain implementations
 
 ### Modified Files
 - `src/Orleans.Runtime/Hosting/DefaultSiloServices.cs` - Added unloader registration
