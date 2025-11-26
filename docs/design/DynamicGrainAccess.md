@@ -1131,10 +1131,117 @@ Console.WriteLine($"Hit rate: {stats.HitRate:P1}, Size: {stats.TotalSizeMB:N1} M
 
 ---
 
-### Phase 6: Client Integration ⬅️ NEXT
-- [ ] `IDynamicGrainClient` implementation
-- [ ] Client-side package loading
-- [ ] Integration with Orleans Client
+### Phase 6: Client Integration ✅ COMPLETE
+
+**Implemented files:**
+
+| File | Location | Description |
+|------|----------|-------------|
+| `IDynamicGrainClient.cs` | `Orleans.Core/DynamicGrains/` | Client interface for dynamic grain access |
+| `GrainPackageHandle.cs` | `Orleans.Core/DynamicGrains/` | Handle to a loaded package |
+| `DynamicGrainClient.cs` | `Orleans.Runtime/DynamicGrains/` | Full implementation |
+
+**IDynamicGrainClient interface:**
+
+```csharp
+public interface IDynamicGrainClient
+{
+    // Package Management
+    Task<GrainPackageHandle> LoadPackageAsync(string packageId, string? version = null, CancellationToken ct = default);
+    Task UnloadPackageAsync(GrainPackageHandle handle, CancellationToken ct = default);
+    Task<IReadOnlyList<GrainPackageInfo>> ListAvailablePackagesAsync(CancellationToken ct = default);
+    IReadOnlyList<GrainPackageHandle> LoadedPackages { get; }
+
+    // Grain Access
+    Task<dynamic> GetGrainDynamicAsync(string grainTypeName, string primaryKey, CancellationToken ct = default);
+    Task<dynamic> GetGrainDynamicAsync(string grainTypeName, Guid primaryKey, CancellationToken ct = default);
+    Task<dynamic> GetGrainDynamicAsync(string grainTypeName, long primaryKey, CancellationToken ct = default);
+    dynamic GetGrain(GrainTypeMeta grainType, string primaryKey);
+    Task<object?> InvokeMethodAsync(string grainTypeName, string primaryKey, string methodName, object?[]? args = null, CancellationToken ct = default);
+
+    // GTD Queries
+    Task<IReadOnlyList<GrainTypeMeta>> QueryGrainTypesAsync(string? namespaceFilter = null, string? namePattern = null, CancellationToken ct = default);
+    Task<GrainTypeMeta?> GetGrainTypeMetaAsync(string grainTypeName, CancellationToken ct = default);
+
+    IGrainFactory GrainFactory { get; }
+}
+```
+
+**GrainPackageHandle class:**
+
+```csharp
+public sealed class GrainPackageHandle : IAsyncDisposable
+{
+    public GrainPackage Package { get; }
+    public GrainPackageContent Content { get; }
+    public bool IsLoaded { get; }
+    public string PackageId { get; }
+    public string Version { get; }
+    public IReadOnlyList<GrainTypeMeta> GrainTypes { get; }
+
+    // Get grain type from package
+    public GrainTypeMeta? GetGrainType(string name, string? version = null);
+
+    // Get grain references
+    public dynamic GetGrain(string grainTypeName, string primaryKey);
+    public dynamic GetGrain(string grainTypeName, Guid primaryKey);
+    public dynamic GetGrain(string grainTypeName, long primaryKey);
+
+    // Strongly-typed access
+    public TGrainInterface GetGrain<TGrainInterface>(string primaryKey) where TGrainInterface : IGrain;
+
+    // Type resolution
+    public bool TryGetType(string grainTypeName, out Type? type);
+
+    public ValueTask DisposeAsync();
+}
+```
+
+**DynamicGrainClient implementation:**
+
+Key features:
+- Integrates `IGrainPackageStore` for fetching packages
+- Integrates `IGrainPackageCache` for local caching
+- Integrates `IGrainTypeDirectoryGrain` for GTD queries
+- Thread-safe package loading with `SemaphoreSlim`
+- Auto-loads packages when grain type is requested
+- Falls back to direct `GrainFactoryExtensions` if package not found
+- Maintains loaded package handles with cleanup on dispose
+
+**Usage example:**
+```csharp
+// Get the dynamic client
+var dynamicClient = serviceProvider.GetRequiredService<IDynamicGrainClient>();
+
+// Option A: Fully dynamic by type name (auto-loads package)
+var result = await dynamicClient.InvokeMethodAsync(
+    "MyNamespace.IHelloGrain",
+    "my-grain-id",
+    "SayHello",
+    new object[] { "World" }
+);
+
+// Option B: Load package explicitly
+await using var handle = await dynamicClient.LoadPackageAsync("MyGrains", "1.0.0");
+var grainType = handle.GetGrainType("MyNamespace.IHelloGrain");
+dynamic grain = handle.GetGrain("MyNamespace.IHelloGrain", "my-grain-id");
+string greeting = await grain.SayHello("World");
+
+// Option C: Query GTD then access
+var grainMeta = await dynamicClient.GetGrainTypeMetaAsync("MyNamespace.IHelloGrain");
+if (grainMeta != null)
+{
+    dynamic grain2 = dynamicClient.GetGrain(grainMeta, "my-grain-id");
+    await grain2.SayHello("World");
+}
+
+// List available packages
+var packages = await dynamicClient.ListAvailablePackagesAsync();
+foreach (var pkg in packages)
+{
+    Console.WriteLine($"{pkg.PackageId} v{pkg.Version} ({pkg.GrainTypeCount} types)");
+}
+```
 
 ---
 
@@ -1171,19 +1278,20 @@ src/Orleans.Core.Abstractions/
 │   └── IGrainPackageStore.cs              # ✅ Store & source interfaces
 
 src/Orleans.Core/
-├── DynamicGrains/                         # ✅ Phase 3, 5 Complete, Phase 6 Pending
+├── DynamicGrains/                         # ✅ Phase 3, 5, 6 Complete
 │   ├── DynamicGrainReference.cs           # ✅ DLR wrapper for dynamic invocation
 │   ├── GrainFactoryExtensions.cs          # ✅ GetGrainDynamic(), GetGrain(GrainTypeMeta)
 │   ├── IGrainPackageCache.cs              # ✅ Cache interface, stats, options, eviction policy
 │   ├── FileSystemPackageCache.cs          # ✅ File system cache with LRU/LFU/FIFO/LargestFirst
-│   ├── IDynamicGrainClient.cs             # Phase 6
-│   └── DynamicGrainClient.cs              # Phase 6
+│   ├── IDynamicGrainClient.cs             # ✅ Client interface for dynamic grain access
+│   └── GrainPackageHandle.cs              # ✅ Handle to loaded package with grain access
 
 src/Orleans.Runtime/
-├── DynamicGrains/                         # ✅ Phase 2, 4 Complete
+├── DynamicGrains/                         # ✅ Phase 2, 4, 6 Complete
 │   ├── GrainTypeDirectoryGrain.cs         # ✅ GTD implementation + state
 │   ├── FileSystemPackageSource.cs         # ✅ File system package source
 │   ├── GrainStoragePackageSource.cs       # ✅ Grain storage source + grains
 │   ├── GrainPackageStore.cs               # ✅ Multi-source orchestrator
+│   ├── DynamicGrainClient.cs              # ✅ Full IDynamicGrainClient implementation
 │   └── NuGetPackageSource.cs              # (optional, not implemented)
 ```
