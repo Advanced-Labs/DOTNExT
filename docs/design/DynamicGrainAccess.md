@@ -1027,12 +1027,111 @@ public sealed class GrainPackageContent  // Package + assembly bytes
 
 ---
 
-### Phase 5: Package Cache ⬅️ NEXT
-- [ ] `IGrainPackageCache` interface
-- [ ] File system cache implementation
-- [ ] Cache eviction policies
+### Phase 5: Package Cache ✅ COMPLETE
 
-### Phase 6: Client Integration
+**Implemented files:**
+
+| File | Location | Description |
+|------|----------|-------------|
+| `IGrainPackageCache.cs` | `Orleans.Core/DynamicGrains/` | Cache interface, stats, options, eviction policies |
+| `FileSystemPackageCache.cs` | `Orleans.Core/DynamicGrains/` | File system cache implementation |
+
+**Interfaces and types:**
+
+```csharp
+public interface IGrainPackageCache
+{
+    Task<GrainPackageContent?> GetAsync(string packageId, string? version = null, CancellationToken ct = default);
+    Task<bool> PutAsync(GrainPackageContent content, CancellationToken ct = default);
+    Task<bool> EvictAsync(string packageId, string? version = null, CancellationToken ct = default);
+    Task ClearAsync(CancellationToken ct = default);
+    GrainPackageCacheStats GetStats();
+    bool Contains(string packageId, string version);
+}
+
+public sealed class GrainPackageCacheStats
+{
+    public int PackageCount { get; }
+    public long TotalSizeBytes { get; }
+    public long HitCount { get; }
+    public long MissCount { get; }
+    public long EvictionCount { get; }
+    public double HitRate { get; }    // 0.0 - 1.0
+    public double TotalSizeMB { get; }
+}
+
+public sealed class GrainPackageCacheOptions
+{
+    public int MaxPackageCount { get; set; } = 100;
+    public long MaxTotalSizeBytes { get; set; } = 500 * 1024 * 1024;  // 500 MB
+    public string? CacheDirectory { get; set; }
+    public TimeSpan? ExpirationTime { get; set; } = TimeSpan.FromHours(24);
+    public CacheEvictionPolicy EvictionPolicy { get; set; } = CacheEvictionPolicy.LeastRecentlyUsed;
+}
+
+public enum CacheEvictionPolicy
+{
+    LeastRecentlyUsed,      // Evict least recently accessed
+    LeastFrequentlyUsed,    // Evict least frequently accessed
+    FirstInFirstOut,        // Evict oldest cached first
+    LargestFirst            // Evict largest packages first
+}
+```
+
+**FileSystemPackageCache implementation:**
+
+Cache directory structure:
+```
+{cacheDir}/{packageId}/{version}/
+├── cache-metadata.json    # CacheMetadata (times, hash, file list)
+├── assembly1.dll
+└── assembly2.dll
+```
+
+**Key features:**
+- Thread-safe operations with `ConcurrentDictionary` and `SemaphoreSlim`
+- Automatic capacity management with configurable eviction
+- Four eviction policies: LRU, LFU, FIFO, LargestFirst
+- Expiration time support (default 24 hours)
+- Stats tracking: hits, misses, evictions
+- Persists to file system with JSON metadata
+- Loads existing cache entries on startup
+- Hit rate calculation for monitoring
+
+**Usage example:**
+```csharp
+var cacheOptions = new GrainPackageCacheOptions
+{
+    MaxPackageCount = 50,
+    MaxTotalSizeBytes = 200 * 1024 * 1024,  // 200 MB
+    CacheDirectory = "/var/cache/orleans-packages",
+    ExpirationTime = TimeSpan.FromHours(12),
+    EvictionPolicy = CacheEvictionPolicy.LeastRecentlyUsed
+};
+
+var cache = new FileSystemPackageCache(
+    Options.Create(cacheOptions),
+    logger);
+
+// Check if cached
+if (!cache.Contains("MyPackage", "1.0.0"))
+{
+    // Fetch from source and cache
+    var content = await packageStore.GetPackageAsync("MyPackage", "1.0.0");
+    await cache.PutAsync(content);
+}
+
+// Get from cache
+var cached = await cache.GetAsync("MyPackage", "1.0.0");
+
+// Monitor stats
+var stats = cache.GetStats();
+Console.WriteLine($"Hit rate: {stats.HitRate:P1}, Size: {stats.TotalSizeMB:N1} MB");
+```
+
+---
+
+### Phase 6: Client Integration ⬅️ NEXT
 - [ ] `IDynamicGrainClient` implementation
 - [ ] Client-side package loading
 - [ ] Integration with Orleans Client
@@ -1072,13 +1171,13 @@ src/Orleans.Core.Abstractions/
 │   └── IGrainPackageStore.cs              # ✅ Store & source interfaces
 
 src/Orleans.Core/
-├── DynamicGrains/                         # ✅ Phase 3 Complete, Phase 5-6
+├── DynamicGrains/                         # ✅ Phase 3, 5 Complete, Phase 6 Pending
 │   ├── DynamicGrainReference.cs           # ✅ DLR wrapper for dynamic invocation
 │   ├── GrainFactoryExtensions.cs          # ✅ GetGrainDynamic(), GetGrain(GrainTypeMeta)
+│   ├── IGrainPackageCache.cs              # ✅ Cache interface, stats, options, eviction policy
+│   ├── FileSystemPackageCache.cs          # ✅ File system cache with LRU/LFU/FIFO/LargestFirst
 │   ├── IDynamicGrainClient.cs             # Phase 6
-│   ├── DynamicGrainClient.cs              # Phase 6
-│   ├── IGrainPackageCache.cs              # Phase 5
-│   └── FileSystemPackageCache.cs          # Phase 5
+│   └── DynamicGrainClient.cs              # Phase 6
 
 src/Orleans.Runtime/
 ├── DynamicGrains/                         # ✅ Phase 2, 4 Complete
