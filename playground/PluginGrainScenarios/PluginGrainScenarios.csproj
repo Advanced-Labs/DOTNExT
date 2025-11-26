@@ -6,6 +6,12 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <StartupObject>PluginGrainScenarios.Program</StartupObject>
+    <!-- Required when using Orleans via project references instead of NuGet packages.
+         The source generator runs on this project and discovers all grain types from
+         transitively referenced Orleans assemblies (like Orleans.Persistence.Memory).
+         Without this, runtime assembly discovery may miss some Orleans framework grains
+         because it only follows direct (not transitive) dependencies on Orleans.Serialization. -->
+    <OrleansBuildTimeCodeGen>true</OrleansBuildTimeCodeGen>
   </PropertyGroup>
 
   <ItemGroup>

@@ -90,6 +90,42 @@ Renamed "Dynamic" to "Plugin" throughout:
 
 ---
 
+## Important: Project References vs NuGet Packages
+
+When developing Orleans itself (using project references to `src/Orleans.*` instead of NuGet packages), **host/application projects must include `<OrleansBuildTimeCodeGen>true</OrleansBuildTimeCodeGen>`** in their .csproj file.
+
+### Why This Is Required
+
+Orleans discovers grain implementations at runtime using `ReferencedAssemblyProvider`. This provider filters assemblies based on their dependency chain to `Orleans.Serialization`:
+
+```csharp
+// From ReferencedAssemblyProvider.cs - only processes assemblies with direct Orleans.Serialization dependency
+if (!lib.Name.Contains("Orleans.Serialization") &&
+    !lib.Dependencies.Any(dep => dep.Name.Contains("Orleans.Serialization")))
+{
+    continue;  // Skip assembly!
+}
+```
+
+**The issue**: `Orleans.Persistence.Memory` depends on `Orleans.Serialization` *transitively* (via `Orleans.Runtime` → `Orleans.Core`), not directly. When using project references, this can cause the `MemoryStorageGrain` (and other framework grains) to not be discovered.
+
+### The Solution
+
+Adding `OrleansBuildTimeCodeGen=true` to your application project causes the Orleans source generator to:
+1. Run at **compile-time** on your application
+2. Scan **all** transitively referenced assemblies (including `Orleans.Persistence.Memory`)
+3. Generate a **comprehensive** `TypeManifestProvider` that includes ALL grain types
+4. No runtime discovery needed - everything is baked into your generated code
+
+### NuGet Package Users
+
+When using Orleans via NuGet packages (the normal case), this is handled automatically:
+- The `Microsoft.Orleans.Sdk` package sets up code generation
+- Each Orleans package has pre-compiled generated code baked in
+- Assembly discovery works because packages have proper dependency metadata
+
+---
+
 ## Test Scenarios
 
 Located in `playground/PluginGrainScenarios/`:
