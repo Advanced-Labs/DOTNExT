@@ -54,12 +54,7 @@ public static class DynamicGrainClient
         ShowImplementationPhases();
 
         // Run tests
-        var runTests = AnsiConsole.Confirm("Run dynamic grain access tests?", defaultValue: true);
-
-        if (runTests)
-        {
-            await RunDynamicGrainTests();
-        }
+        await RunDynamicGrainTests();
 
         AnsiConsole.WriteLine();
         AnsiConsole.MarkupLine("[green]═══════════════════════════════════════════════════════[/]");
@@ -132,7 +127,7 @@ public static class DynamicGrainClient
 
                 // Reflection-style invocation
                 Task<object?> InvokeMethodAsync(string grainTypeName, string primaryKey,
-                    string methodName, object?[]? args = null);
+                    string methodName, object?[[]]? args = null);
 
                 // GTD Queries
                 Task<IReadOnlyList<GrainTypeMeta>> QueryGrainTypesAsync(

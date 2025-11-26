@@ -47,12 +47,7 @@ public static class GrainTypeDirectory
         ShowApiDesign();
 
         // Run the actual GTD tests
-        var runTests = AnsiConsole.Confirm("Run GTD implementation tests?", defaultValue: true);
-
-        if (runTests)
-        {
-            await RunGtdTests();
-        }
+        await RunGtdTests();
 
         AnsiConsole.WriteLine();
         AnsiConsole.MarkupLine("[green]═══════════════════════════════════════════════════════[/]");

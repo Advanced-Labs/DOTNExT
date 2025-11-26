@@ -35,7 +35,6 @@ public static class Program
                         "3. Multi-Silo Cluster - Manifest Propagation",
                         "4. Assembly Unload and Memory Reclaim",
                         "5. Split Grain Assemblies",
-                        "─── Future Features (Not Yet Implemented) ───",
                         "6. Grain Type Directory (GTD)",
                         "7. Dynamic Grain Client",
                         "Exit"
@@ -157,6 +156,7 @@ public static class SiloHelper
             {
                 siloBuilder
                     .UseLocalhostClustering(siloPort, gatewayPort)
+                    .AddMemoryGrainStorage("Default")
                     .Configure<ClusterOptions>(options =>
                     {
                         options.ClusterId = "scenario-test";
