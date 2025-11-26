@@ -169,7 +169,7 @@ namespace Orleans.Runtime.DynamicGrains
 
                     // Try to get content hash from metadata or compute it
                     var contentHash = "unknown";
-                    var contentType = Metadata.GrainPackageContent.Full;
+                    var contentType = GrainPackageContent.Full;
 
                     if (File.Exists(metadataPath))
                     {
@@ -263,7 +263,7 @@ namespace Orleans.Runtime.DynamicGrains
                 version,
                 contentHash,
                 ImmutableList<GrainTypeMeta>.Empty,
-                Metadata.GrainPackageContent.Full,
+                GrainPackageContent.Full,
                 assemblies.ToImmutableList(),
                 ImmutableDictionary<string, string>.Empty);
         }
@@ -337,10 +337,10 @@ namespace Orleans.Runtime.DynamicGrains
                 ? hashProp.GetString() ?? "unknown"
                 : "unknown";
 
-            var contentType = Metadata.GrainPackageContent.Full;
+            var contentType = GrainPackageContent.Full;
             if (root.TryGetProperty("contentType", out var ctProp))
             {
-                Enum.TryParse<Metadata.GrainPackageContent>(ctProp.GetString(), out contentType);
+                Enum.TryParse<GrainPackageContent>(ctProp.GetString(), out contentType);
             }
 
             var assemblies = ImmutableList<GrainPackageAssembly>.Empty;

@@ -356,7 +356,7 @@ namespace Orleans.DynamicGrains
                     metadata.Version,
                     metadata.ContentHash,
                     ImmutableList<GrainTypeMeta>.Empty,
-                    Metadata.GrainPackageContent.Full,
+                    GrainPackageContent.Full,
                     ImmutableList<GrainPackageAssembly>.Empty,
                     ImmutableDictionary<string, string>.Empty);
 

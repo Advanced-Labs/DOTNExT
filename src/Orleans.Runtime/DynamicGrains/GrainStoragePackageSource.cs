@@ -269,7 +269,7 @@ namespace Orleans.Runtime.DynamicGrains
             string version,
             string contentHash,
             int grainTypeCount,
-            Metadata.GrainPackageContent contentType,
+            GrainPackageContent contentType,
             string storageKey)
         {
             PackageId = packageId;
@@ -284,7 +284,7 @@ namespace Orleans.Runtime.DynamicGrains
         [Id(1)] public string Version { get; }
         [Id(2)] public string ContentHash { get; }
         [Id(3)] public int GrainTypeCount { get; }
-        [Id(4)] public Metadata.GrainPackageContent ContentType { get; }
+        [Id(4)] public GrainPackageContent ContentType { get; }
         [Id(5)] public string StorageKey { get; }
     }
 
