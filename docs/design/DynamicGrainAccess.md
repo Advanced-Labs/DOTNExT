@@ -800,16 +800,38 @@ if (package != null)
 ## Implementation Phases
 
 ### Phase 1: Core Types (Foundation) ✅ COMPLETE
-- [x] `GrainPackage` type - `src/Orleans.Core.Abstractions/Manifest/GrainPackage.cs`
-- [x] `GrainTypeMeta` type - `src/Orleans.Core.Abstractions/Manifest/GrainTypeMeta.cs`
-- [x] `GrainInterfaceMeta`, `GrainMethodMeta`, `GrainParameterMeta` - `src/Orleans.Core.Abstractions/Manifest/GrainInterfaceMeta.cs`
-- [x] Basic serialization support (using `[GenerateSerializer]` attributes)
 
-### Phase 2: GTD Implementation
-- [ ] `IGrainTypeDirectoryGrain` interface
-- [ ] GTD grain implementation
-- [ ] Package registration/query
-- [ ] Silo tracking
+**Implemented types in `src/Orleans.Core.Abstractions/Manifest/`:**
+
+| File | Types | Description |
+|------|-------|-------------|
+| `GrainPackage.cs` | `GrainPackage` | Distributable package with assemblies, version, hash |
+| | `GrainPackageContent` | Enum: InterfacesOnly, Full, ImplementationsOnly |
+| | `GrainPackageAssembly` | Assembly file metadata within package |
+| | `GrainAssemblyRole` | Enum: Interfaces, Implementation, Codegen, Dependency |
+| | `GrainPackageInfo` | Lightweight summary for listings |
+| `GrainTypeMeta.cs` | `GrainTypeMeta` | Full type metadata with SourcePackage back-ref |
+| | `GrainKeyType` | Enum: String, Guid, Int64, compound variants |
+| `GrainInterfaceMeta.cs` | `GrainInterfaceMeta` | Interface with method list |
+| | `GrainMethodMeta` | Method signature + Orleans MethodId |
+| | `GrainParameterMeta` | Parameter name, type, optional flag |
+
+**Key design decisions:**
+- All types use `[Serializable, GenerateSerializer, Immutable]` following Orleans patterns
+- `GrainTypeMeta.SourcePackage` enables navigation from type → package
+- `GrainTypeMeta.HostingSilos` tracks which silos can activate the grain
+- Immutable "With" methods for updates: `WithHostingSilos()`, `WithAvailability()`
+
+---
+
+### Phase 2: GTD Implementation ⬅️ CURRENT
+- [ ] `IGrainTypeDirectoryGrain` interface in `Orleans.Core.Abstractions`
+- [ ] `GrainTypeDirectoryGrain` implementation in `Orleans.Runtime`
+- [ ] Package registration (`RegisterPackageAsync`, `UnregisterPackageAsync`)
+- [ ] Type queries (`GetAllGrainTypesAsync`, `FindGrainTypesAsync`, `GetGrainTypeAsync`)
+- [ ] Silo tracking (`ReportPackageLoadedAsync`, `GetHostingSilosAsync`)
+
+---
 
 ### Phase 3: Dynamic Grain Factory Extensions
 - [ ] `GetGrainDynamic()` methods
@@ -857,14 +879,16 @@ await grain.SayHello("World");  // DLR routes the call
 
 ```
 src/Orleans.Core.Abstractions/
-├── Metadata/
-│   ├── GrainPackage.cs
-│   ├── GrainTypeMeta.cs
-│   ├── GrainInterfaceMeta.cs
-│   └── GrainMethodMeta.cs
+├── Manifest/                              # ✅ Phase 1 Complete
+│   ├── GrainPackage.cs                    # ✅ GrainPackage, enums, GrainPackageInfo
+│   ├── GrainTypeMeta.cs                   # ✅ GrainTypeMeta, GrainKeyType
+│   ├── GrainInterfaceMeta.cs              # ✅ Interface/Method/Parameter meta
+│   └── (existing Orleans manifest types)
+├── DynamicGrains/                         # Phase 2
+│   └── IGrainTypeDirectoryGrain.cs        # GTD grain interface (public API)
 
 src/Orleans.Core/
-├── DynamicGrains/
+├── DynamicGrains/                         # Phase 5-6
 │   ├── IDynamicGrainClient.cs
 │   ├── DynamicGrainClient.cs
 │   ├── IGrainPackageCache.cs
@@ -872,9 +896,8 @@ src/Orleans.Core/
 │   └── DynamicGrainReference.cs
 
 src/Orleans.Runtime/
-├── DynamicGrains/
-│   ├── IGrainTypeDirectoryGrain.cs
-│   ├── GrainTypeDirectoryGrain.cs
+├── DynamicGrains/                         # Phase 2, 4
+│   ├── GrainTypeDirectoryGrain.cs         # GTD implementation
 │   ├── IGrainPackageStore.cs
 │   ├── GrainStoragePackageSource.cs
 │   └── NuGetPackageSource.cs (optional)
