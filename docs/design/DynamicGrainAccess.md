@@ -960,13 +960,74 @@ var result = await dynRef.InvokeAsync("SayHello", "World");
 
 ---
 
-### Phase 4: Package Storage & Distribution ⬅️ NEXT
-- [ ] `IGrainPackageStore` interface
-- [ ] File system source
-- [ ] Grain storage source
-- [ ] NuGet source (optional)
+### Phase 4: Package Storage & Distribution ✅ COMPLETE
 
-### Phase 5: Package Cache
+**Implemented files:**
+
+| File | Location | Description |
+|------|----------|-------------|
+| `IGrainPackageStore.cs` | `Orleans.Core.Abstractions/DynamicGrains/` | Store & source interfaces |
+| `FileSystemPackageSource.cs` | `Orleans.Runtime/DynamicGrains/` | File system source |
+| `GrainStoragePackageSource.cs` | `Orleans.Runtime/DynamicGrains/` | Grain storage source + grains |
+| `GrainPackageStore.cs` | `Orleans.Runtime/DynamicGrains/` | Multi-source orchestrator |
+
+**Interfaces:**
+
+```csharp
+public interface IGrainPackageStore
+{
+    Task<GrainPackageContent?> GetPackageAsync(string packageId, string? version = null);
+    Task<IReadOnlyList<GrainPackageInfo>> ListPackagesAsync();
+    Task<bool> PublishPackageAsync(GrainPackage package, GrainPackageContent content);
+    void RegisterSource(IGrainPackageSource source);
+    IReadOnlyList<IGrainPackageSource> Sources { get; }
+}
+
+public interface IGrainPackageSource
+{
+    string Name { get; }
+    int Priority { get; }           // Lower = checked first
+    bool IsWritable { get; }
+    Task<GrainPackageContent?> FetchAsync(string packageId, string? version = null);
+    Task<IReadOnlyList<GrainPackageInfo>> ListAsync();
+    Task<bool> PublishAsync(GrainPackage package, GrainPackageContent content);
+}
+
+public sealed class GrainPackageContent  // Package + assembly bytes
+{
+    public GrainPackage Package { get; }
+    public IReadOnlyDictionary<string, byte[]> Assemblies { get; }
+}
+```
+
+**Source implementations:**
+
+| Source | Priority | Writable | Description |
+|--------|----------|----------|-------------|
+| `FileSystemPackageSource` | 100 | Yes | Local disk storage with JSON metadata |
+| `GrainStoragePackageSource` | 200 | Yes | Orleans grain storage (no external deps) |
+
+**FileSystemPackageSource directory structure:**
+```
+{basePath}/{packageId}/{version}/
+├── package.json    # Metadata
+├── assembly1.dll
+└── assembly2.dll
+```
+
+**GrainStoragePackageSource grains:**
+- `IPackageIndexGrain` - Tracks all stored packages
+- `IPackageStorageGrain` - Stores package chunks (256KB)
+
+**Key features:**
+- Multi-source with priority ordering
+- Chunked uploads for large assemblies
+- Automatic hash computation
+- JSON serialization for metadata
+
+---
+
+### Phase 5: Package Cache ⬅️ NEXT
 - [ ] `IGrainPackageCache` interface
 - [ ] File system cache implementation
 - [ ] Cache eviction policies
@@ -1006,8 +1067,9 @@ src/Orleans.Core.Abstractions/
 │   ├── GrainTypeMeta.cs                   # ✅ GrainTypeMeta, GrainKeyType
 │   ├── GrainInterfaceMeta.cs              # ✅ Interface/Method/Parameter meta
 │   └── (existing Orleans manifest types)
-├── DynamicGrains/                         # ✅ Phase 2 Complete
-│   └── IGrainTypeDirectoryGrain.cs        # ✅ GTD grain interface (public API)
+├── DynamicGrains/                         # ✅ Phase 2, 4 Complete
+│   ├── IGrainTypeDirectoryGrain.cs        # ✅ GTD grain interface (public API)
+│   └── IGrainPackageStore.cs              # ✅ Store & source interfaces
 
 src/Orleans.Core/
 ├── DynamicGrains/                         # ✅ Phase 3 Complete, Phase 5-6
@@ -1019,9 +1081,10 @@ src/Orleans.Core/
 │   └── FileSystemPackageCache.cs          # Phase 5
 
 src/Orleans.Runtime/
-├── DynamicGrains/                         # ✅ Phase 2 Complete, Phase 4
+├── DynamicGrains/                         # ✅ Phase 2, 4 Complete
 │   ├── GrainTypeDirectoryGrain.cs         # ✅ GTD implementation + state
-│   ├── IGrainPackageStore.cs              # Phase 4
-│   ├── GrainStoragePackageSource.cs       # Phase 4
-│   └── NuGetPackageSource.cs              # Phase 4 (optional)
+│   ├── FileSystemPackageSource.cs         # ✅ File system package source
+│   ├── GrainStoragePackageSource.cs       # ✅ Grain storage source + grains
+│   ├── GrainPackageStore.cs               # ✅ Multi-source orchestrator
+│   └── NuGetPackageSource.cs              # (optional, not implemented)
 ```
