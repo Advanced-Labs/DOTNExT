@@ -1215,7 +1215,7 @@ public sealed class GrainPackageHandle : IAsyncDisposable
     public dynamic GetGrain(string grainTypeName, long primaryKey);
 
     // Strongly-typed access
-    public TGrainInterface GetGrain<TGrainInterface>(string primaryKey) where TGrainInterface : IGrain;
+    public TGrainInterface GetGrain<TGrainInterface>(string primaryKey) where TGrainInterface : IGrainWithStringKey;
 
     // Type resolution
     public bool TryGetType(string grainTypeName, out Type? type);

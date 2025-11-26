@@ -165,7 +165,7 @@ namespace Orleans.DynamicGrains
         /// <param name="primaryKey">The string primary key.</param>
         /// <returns>The strongly-typed grain reference.</returns>
         public TGrainInterface GetGrain<TGrainInterface>(string primaryKey)
-            where TGrainInterface : IGrain
+            where TGrainInterface : IGrainWithStringKey
         {
             ThrowIfDisposed();
             return _grainFactory.GetGrain<TGrainInterface>(primaryKey);
