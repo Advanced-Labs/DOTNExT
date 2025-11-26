@@ -9,6 +9,8 @@ using Orleans.DynamicGrains;
 using Orleans.Metadata;
 using Orleans.Providers;
 
+#nullable enable
+
 namespace Orleans.Runtime.DynamicGrains
 {
     /// <summary>
@@ -54,7 +56,7 @@ namespace Orleans.Runtime.DynamicGrains
         public bool IsWritable => true;
 
         /// <inheritdoc />
-        public async Task<GrainPackageContent?> FetchAsync(
+        public async Task<LoadedGrainPackage?> FetchAsync(
             string packageId,
             string? version = null,
             CancellationToken cancellationToken = default)
@@ -129,7 +131,7 @@ namespace Orleans.Runtime.DynamicGrains
                     "Fetched package {PackageId} v{Version} with {AssemblyCount} assemblies from grain storage",
                     packageId, entry.Version, assemblies.Count);
 
-                return new GrainPackageContent(metadata.Package, assemblies);
+                return new LoadedGrainPackage(metadata.Package, assemblies);
             }
             catch (Exception ex)
             {
@@ -165,7 +167,7 @@ namespace Orleans.Runtime.DynamicGrains
         /// <inheritdoc />
         public async Task<bool> PublishAsync(
             GrainPackage package,
-            GrainPackageContent content,
+            LoadedGrainPackage content,
             CancellationToken cancellationToken = default)
         {
             try

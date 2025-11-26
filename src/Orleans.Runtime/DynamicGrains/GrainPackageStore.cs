@@ -7,6 +7,8 @@ using Microsoft.Extensions.Logging;
 using Orleans.DynamicGrains;
 using Orleans.Metadata;
 
+#nullable enable
+
 namespace Orleans.Runtime.DynamicGrains
 {
     /// <summary>
@@ -76,7 +78,7 @@ namespace Orleans.Runtime.DynamicGrains
         }
 
         /// <inheritdoc />
-        public async Task<GrainPackageContent?> GetPackageAsync(
+        public async Task<LoadedGrainPackage?> GetPackageAsync(
             string packageId,
             string? version = null,
             CancellationToken cancellationToken = default)
@@ -148,7 +150,7 @@ namespace Orleans.Runtime.DynamicGrains
         /// <inheritdoc />
         public async Task<bool> PublishPackageAsync(
             GrainPackage package,
-            GrainPackageContent content,
+            LoadedGrainPackage content,
             CancellationToken cancellationToken = default)
         {
             var sources = Sources;
@@ -188,7 +190,7 @@ namespace Orleans.Runtime.DynamicGrains
         public async Task<bool> PublishToSourceAsync(
             string sourceName,
             GrainPackage package,
-            GrainPackageContent content,
+            LoadedGrainPackage content,
             CancellationToken cancellationToken = default)
         {
             var source = Sources.FirstOrDefault(s =>

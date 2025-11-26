@@ -71,7 +71,7 @@ namespace Orleans.DynamicGrains
         }
 
         /// <inheritdoc />
-        public async Task<GrainPackageContent?> GetAsync(
+        public async Task<LoadedGrainPackage?> GetAsync(
             string packageId,
             string? version = null,
             CancellationToken cancellationToken = default)
@@ -120,7 +120,7 @@ namespace Orleans.DynamicGrains
 
         /// <inheritdoc />
         public async Task<bool> PutAsync(
-            GrainPackageContent content,
+            LoadedGrainPackage content,
             CancellationToken cancellationToken = default)
         {
             ArgumentNullException.ThrowIfNull(content);
@@ -321,7 +321,7 @@ namespace Orleans.DynamicGrains
             }
         }
 
-        private async Task<GrainPackageContent?> LoadFromDiskAsync(
+        private async Task<LoadedGrainPackage?> LoadFromDiskAsync(
             CacheEntry entry,
             CancellationToken cancellationToken)
         {
@@ -356,11 +356,11 @@ namespace Orleans.DynamicGrains
                     metadata.Version,
                     metadata.ContentHash,
                     ImmutableList<GrainTypeMeta>.Empty,
-                    Metadata.GrainPackageContent.Full,
+                    Metadata.LoadedGrainPackage.Full,
                     ImmutableList<GrainPackageAssembly>.Empty,
                     ImmutableDictionary<string, string>.Empty);
 
-                return new GrainPackageContent(package, assemblies);
+                return new LoadedGrainPackage(package, assemblies);
             }
             catch (Exception ex)
             {

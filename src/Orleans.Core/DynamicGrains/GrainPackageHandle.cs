@@ -33,7 +33,7 @@ namespace Orleans.DynamicGrains
         /// <param name="unloadCallback">Callback invoked when the handle is disposed.</param>
         internal GrainPackageHandle(
             GrainPackage package,
-            GrainPackageContent content,
+            LoadedGrainPackage content,
             IGrainFactory grainFactory,
             AssemblyLoadContext? loadContext = null,
             Func<GrainPackageHandle, Task>? unloadCallback = null)
@@ -54,7 +54,7 @@ namespace Orleans.DynamicGrains
         /// <summary>
         /// Gets the package content (assemblies).
         /// </summary>
-        public GrainPackageContent Content { get; }
+        public LoadedGrainPackage Content { get; }
 
         /// <summary>
         /// Gets the assembly load context, if available.

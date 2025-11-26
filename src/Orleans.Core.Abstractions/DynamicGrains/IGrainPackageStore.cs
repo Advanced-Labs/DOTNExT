@@ -3,6 +3,8 @@ using System.Threading;
 using System.Threading.Tasks;
 using Orleans.Metadata;
 
+#nullable enable
+
 namespace Orleans.DynamicGrains
 {
     /// <summary>
@@ -18,7 +20,7 @@ namespace Orleans.DynamicGrains
         /// <param name="version">Optional version. If null, returns the latest available.</param>
         /// <param name="cancellationToken">Cancellation token.</param>
         /// <returns>The package with its content, or null if not found.</returns>
-        Task<GrainPackageContent?> GetPackageAsync(
+        Task<LoadedGrainPackage?> GetPackageAsync(
             string packageId,
             string? version = null,
             CancellationToken cancellationToken = default);
@@ -40,7 +42,7 @@ namespace Orleans.DynamicGrains
         /// <returns>True if published successfully.</returns>
         Task<bool> PublishPackageAsync(
             GrainPackage package,
-            GrainPackageContent content,
+            LoadedGrainPackage content,
             CancellationToken cancellationToken = default);
 
         /// <summary>
@@ -82,7 +84,7 @@ namespace Orleans.DynamicGrains
         /// <param name="version">Optional version. If null, returns the latest.</param>
         /// <param name="cancellationToken">Cancellation token.</param>
         /// <returns>The package content, or null if not found.</returns>
-        Task<GrainPackageContent?> FetchAsync(
+        Task<LoadedGrainPackage?> FetchAsync(
             string packageId,
             string? version = null,
             CancellationToken cancellationToken = default);
@@ -105,21 +107,21 @@ namespace Orleans.DynamicGrains
         /// <exception cref="System.NotSupportedException">Thrown if the source is not writable.</exception>
         Task<bool> PublishAsync(
             GrainPackage package,
-            GrainPackageContent content,
+            LoadedGrainPackage content,
             CancellationToken cancellationToken = default);
     }
 
     /// <summary>
-    /// Content of a grain package, including assembly bytes.
+    /// A loaded grain package with its assembly bytes.
     /// </summary>
-    public sealed class GrainPackageContent
+    public sealed class LoadedGrainPackage
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="GrainPackageContent"/> class.
+        /// Initializes a new instance of the <see cref="LoadedGrainPackage"/> class.
         /// </summary>
         /// <param name="package">The package metadata.</param>
         /// <param name="assemblies">The assembly files.</param>
-        public GrainPackageContent(GrainPackage package, IReadOnlyDictionary<string, byte[]> assemblies)
+        public LoadedGrainPackage(GrainPackage package, IReadOnlyDictionary<string, byte[]> assemblies)
         {
             Package = package ?? throw new System.ArgumentNullException(nameof(package));
             Assemblies = assemblies ?? throw new System.ArgumentNullException(nameof(assemblies));

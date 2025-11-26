@@ -21,7 +21,7 @@ namespace Orleans.DynamicGrains
         /// <param name="version">Optional version. If null, returns the latest cached version.</param>
         /// <param name="cancellationToken">Cancellation token.</param>
         /// <returns>The cached package content, or null if not found.</returns>
-        Task<GrainPackageContent?> GetAsync(
+        Task<LoadedGrainPackage?> GetAsync(
             string packageId,
             string? version = null,
             CancellationToken cancellationToken = default);
@@ -33,7 +33,7 @@ namespace Orleans.DynamicGrains
         /// <param name="cancellationToken">Cancellation token.</param>
         /// <returns>True if cached successfully.</returns>
         Task<bool> PutAsync(
-            GrainPackageContent content,
+            LoadedGrainPackage content,
             CancellationToken cancellationToken = default);
 
         /// <summary>

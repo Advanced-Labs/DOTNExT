@@ -8,6 +8,8 @@ using Microsoft.Extensions.Logging;
 using Orleans.DynamicGrains;
 using Orleans.Metadata;
 
+#nullable enable
+
 namespace Orleans.Runtime.DynamicGrains
 {
     /// <summary>

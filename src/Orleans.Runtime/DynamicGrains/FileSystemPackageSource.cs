@@ -11,6 +11,8 @@ using Microsoft.Extensions.Logging;
 using Orleans.DynamicGrains;
 using Orleans.Metadata;
 
+#nullable enable
+
 namespace Orleans.Runtime.DynamicGrains
 {
     /// <summary>
@@ -71,7 +73,7 @@ namespace Orleans.Runtime.DynamicGrains
         public bool IsWritable => true;
 
         /// <inheritdoc />
-        public async Task<GrainPackageContent?> FetchAsync(
+        public async Task<LoadedGrainPackage?> FetchAsync(
             string packageId,
             string? version = null,
             CancellationToken cancellationToken = default)
@@ -139,7 +141,7 @@ namespace Orleans.Runtime.DynamicGrains
                 "Loaded package {PackageId} v{Version} with {AssemblyCount} assemblies from {Path}",
                 packageId, package.Version, assemblies.Count, versionDir);
 
-            return new GrainPackageContent(package, assemblies);
+            return new LoadedGrainPackage(package, assemblies);
         }
 
         /// <inheritdoc />
@@ -167,7 +169,7 @@ namespace Orleans.Runtime.DynamicGrains
 
                     // Try to get content hash from metadata or compute it
                     var contentHash = "unknown";
-                    var contentType = GrainPackageContent.Full;
+                    var contentType = Metadata.GrainPackageContent.Full;
 
                     if (File.Exists(metadataPath))
                     {
@@ -202,7 +204,7 @@ namespace Orleans.Runtime.DynamicGrains
         /// <inheritdoc />
         public async Task<bool> PublishAsync(
             GrainPackage package,
-            GrainPackageContent content,
+            LoadedGrainPackage content,
             CancellationToken cancellationToken = default)
         {
             var versionDir = Path.Combine(_basePath, package.PackageId, package.Version);
