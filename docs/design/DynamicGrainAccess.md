@@ -891,13 +891,76 @@ var silos = await gtd.GetHostingSilosAsync("MyApp.Grains.IWorkerGrain");
 
 ---
 
-### Phase 3: Dynamic Grain Factory Extensions ⬅️ CURRENT
-- [ ] `IGrainFactoryExtensions` static class with `GetGrainDynamic()` methods
-- [ ] `GetGrain(GrainTypeMeta, key)` overloads
-- [ ] `DynamicGrainReference` wrapper for DLR-based invocation
-- [ ] Integration with existing `IGrainFactory`
+### Phase 3: Dynamic Grain Factory Extensions ✅ COMPLETE
 
-### Phase 4: Package Storage & Distribution
+**Implemented files:**
+
+| File | Location | Description |
+|------|----------|-------------|
+| `DynamicGrainReference.cs` | `Orleans.Core/DynamicGrains/` | DLR wrapper for late-bound invocation |
+| `GrainFactoryExtensions.cs` | `Orleans.Core/DynamicGrains/` | Extension methods for IGrainFactory |
+
+**Types defined:**
+
+```csharp
+// DLR wrapper for dynamic method invocation
+public sealed class DynamicGrainReference : DynamicObject
+{
+    public IAddressable GrainReference { get; }
+    public Type InterfaceType { get; }
+    public GrainTypeMeta? Metadata { get; }
+    public GrainId GrainId { get; }
+
+    // DLR methods
+    public override bool TryInvokeMember(InvokeMemberBinder, object?[]?, out object?)
+    public override bool TryGetMember(GetMemberBinder, out object?)
+    public override bool TryConvert(ConvertBinder, out object?)
+
+    // Explicit invocation
+    public Task<object?> InvokeAsync(string methodName, params object?[]? args)
+}
+```
+
+**Extension methods on IGrainFactory:**
+
+| Method | Description |
+|--------|-------------|
+| `GetGrainDynamic(string typeName, string key)` | Get grain by type name (string key) |
+| `GetGrainDynamic(string typeName, Guid key)` | Get grain by type name (Guid key) |
+| `GetGrainDynamic(string typeName, long key)` | Get grain by type name (long key) |
+| `GetGrain(GrainTypeMeta, string key)` | Get grain using GTD metadata |
+| `GetGrain(GrainTypeMeta, Guid key)` | Get grain using GTD metadata |
+| `GetGrain(GrainTypeMeta, long key)` | Get grain using GTD metadata |
+| `TryGetGrainDynamic(...)` | Non-throwing variants |
+| `ClearTypeCache()` | Clear type resolution cache |
+
+**Key implementation details:**
+- `DynamicGrainReference` extends `DynamicObject` for DLR integration
+- Method calls resolved via reflection with caching
+- Type resolution searches all loaded assemblies
+- Supports both `dynamic` keyword and explicit `InvokeAsync()` invocation
+- `GrainTypeMeta` from GTD attached to reference for routing info
+
+**Usage examples:**
+```csharp
+// By type name (dynamic keyword)
+dynamic grain = grainFactory.GetGrainDynamic("MyApp.IHelloGrain", "key-1");
+string result = await grain.SayHello("World");
+
+// Using GTD metadata
+var gtd = grainFactory.GetGrain<IGrainTypeDirectoryGrain>("gtd");
+var meta = await gtd.GetGrainTypeAsync("MyApp.IHelloGrain");
+dynamic grain2 = grainFactory.GetGrain(meta, "key-2");
+await grain2.DoWork();
+
+// Explicit invocation (without dynamic keyword)
+var dynRef = (DynamicGrainReference)grain;
+var result = await dynRef.InvokeAsync("SayHello", "World");
+```
+
+---
+
+### Phase 4: Package Storage & Distribution ⬅️ NEXT
 - [ ] `IGrainPackageStore` interface
 - [ ] File system source
 - [ ] Grain storage source
@@ -947,17 +1010,18 @@ src/Orleans.Core.Abstractions/
 │   └── IGrainTypeDirectoryGrain.cs        # ✅ GTD grain interface (public API)
 
 src/Orleans.Core/
-├── DynamicGrains/                         # Phase 5-6
-│   ├── IDynamicGrainClient.cs
-│   ├── DynamicGrainClient.cs
-│   ├── IGrainPackageCache.cs
-│   ├── FileSystemPackageCache.cs
-│   └── DynamicGrainReference.cs
+├── DynamicGrains/                         # ✅ Phase 3 Complete, Phase 5-6
+│   ├── DynamicGrainReference.cs           # ✅ DLR wrapper for dynamic invocation
+│   ├── GrainFactoryExtensions.cs          # ✅ GetGrainDynamic(), GetGrain(GrainTypeMeta)
+│   ├── IDynamicGrainClient.cs             # Phase 6
+│   ├── DynamicGrainClient.cs              # Phase 6
+│   ├── IGrainPackageCache.cs              # Phase 5
+│   └── FileSystemPackageCache.cs          # Phase 5
 
 src/Orleans.Runtime/
-├── DynamicGrains/                         # ✅ Phase 2 (partial), Phase 4
+├── DynamicGrains/                         # ✅ Phase 2 Complete, Phase 4
 │   ├── GrainTypeDirectoryGrain.cs         # ✅ GTD implementation + state
-│   ├── IGrainPackageStore.cs
-│   ├── GrainStoragePackageSource.cs
-│   └── NuGetPackageSource.cs (optional)
+│   ├── IGrainPackageStore.cs              # Phase 4
+│   ├── GrainStoragePackageSource.cs       # Phase 4
+│   └── NuGetPackageSource.cs              # Phase 4 (optional)
 ```
