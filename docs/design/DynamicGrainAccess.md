@@ -799,11 +799,11 @@ if (package != null)
 
 ## Implementation Phases
 
-### Phase 1: Core Types (Foundation)
-- [ ] `GrainPackage` type
-- [ ] `GrainTypeMeta` type
-- [ ] `GrainInterfaceMeta`, `GrainMethodMeta`, `GrainParameterMeta`
-- [ ] Basic serialization support
+### Phase 1: Core Types (Foundation) ✅ COMPLETE
+- [x] `GrainPackage` type - `src/Orleans.Core.Abstractions/Manifest/GrainPackage.cs`
+- [x] `GrainTypeMeta` type - `src/Orleans.Core.Abstractions/Manifest/GrainTypeMeta.cs`
+- [x] `GrainInterfaceMeta`, `GrainMethodMeta`, `GrainParameterMeta` - `src/Orleans.Core.Abstractions/Manifest/GrainInterfaceMeta.cs`
+- [x] Basic serialization support (using `[GenerateSerializer]` attributes)
 
 ### Phase 2: GTD Implementation
 - [ ] `IGrainTypeDirectoryGrain` interface
