@@ -826,32 +826,76 @@ if (package != null)
 
 ### Phase 2: GTD Implementation ✅ COMPLETE
 
-**Implemented:**
+**Implemented files:**
 
 | File | Location | Description |
 |------|----------|-------------|
 | `IGrainTypeDirectoryGrain.cs` | `Orleans.Core.Abstractions/DynamicGrains/` | Public grain interface |
 | `GrainTypeDirectoryGrain.cs` | `Orleans.Runtime/DynamicGrains/` | Singleton grain implementation |
-| `GrainTypeDirectoryState` | (in above file) | Persisted state with packages & silo tracking |
 
-**Methods implemented:**
-- [x] Package registration: `RegisterPackageAsync`, `UnregisterPackageAsync`
-- [x] Package queries: `GetPackagesAsync`, `GetPackageAsync` (with optional version)
-- [x] Type queries: `GetAllGrainTypesAsync`, `FindGrainTypesAsync` (wildcard support), `GetGrainTypeAsync`
-- [x] Silo tracking: `ReportPackageLoadedAsync`, `ReportPackageUnloadedAsync`, `GetHostingSilosAsync`, `ReportSiloDownAsync`
+**Types defined:**
 
-**Key features:**
+```csharp
+// State persisted by GTD grain
+[GenerateSerializer]
+public sealed class GrainTypeDirectoryState
+{
+    [Id(0)] public Dictionary<string, GrainPackage> Packages { get; set; }      // key: "packageId:version"
+    [Id(1)] public Dictionary<string, HashSet<SiloAddress>> PackageSilos { get; set; }  // silo tracking
+}
+
+// GTD grain implementation
+[StorageProvider(ProviderName = ProviderConstants.DEFAULT_STORAGE_PROVIDER_NAME)]
+public class GrainTypeDirectoryGrain : Grain<GrainTypeDirectoryState>, IGrainTypeDirectoryGrain
+```
+
+**API methods:**
+
+| Category | Method | Description |
+|----------|--------|-------------|
+| **Package Registration** | `RegisterPackageAsync(GrainPackage)` | Register/update a package |
+| | `UnregisterPackageAsync(packageId, version)` | Remove a package |
+| **Package Queries** | `GetPackagesAsync()` | List all packages as `GrainPackageInfo` |
+| | `GetPackageAsync(packageId, version?)` | Get package (latest if no version) |
+| **Type Queries** | `GetAllGrainTypesAsync()` | All grain types across packages |
+| | `FindGrainTypesAsync(namespace?, pattern?)` | Filter by namespace/wildcard |
+| | `GetGrainTypeAsync(fullTypeName)` | Get specific type by CLR name |
+| **Silo Tracking** | `ReportPackageLoadedAsync(silo, id, ver)` | Silo loaded a package |
+| | `ReportPackageUnloadedAsync(silo, id, ver)` | Silo unloaded a package |
+| | `GetHostingSilosAsync(grainTypeName)` | Which silos host a type |
+| | `ReportSiloDownAsync(silo)` | Clean up dead silo |
+
+**Key implementation details:**
+- Singleton grain accessed via `grainFactory.GetGrain<IGrainTypeDirectoryGrain>("gtd")`
 - Uses `Grain<TState>` pattern with `[StorageProvider]` for persistence
-- Automatically updates `GrainTypeMeta.HostingSilos` and `IsAvailable` in queries
-- Wildcard pattern matching in `FindGrainTypesAsync` (e.g., `*Hello*`)
-- Package versioning with latest-version fallback in `GetPackageAsync`
+- State uses composite key `"packageId:version"` for package lookup
+- Automatically enriches `GrainTypeMeta` with live `HostingSilos` and `IsAvailable` on queries
+- Wildcard pattern matching via regex in `FindGrainTypesAsync` (e.g., `*Hello*` → `.*Hello.*`)
+- `GetPackageAsync` with null version returns latest by string comparison
+
+**Usage example:**
+```csharp
+var gtd = grainFactory.GetGrain<IGrainTypeDirectoryGrain>("gtd");
+
+// Register a package
+await gtd.RegisterPackageAsync(myPackage);
+
+// Find grain types
+var types = await gtd.FindGrainTypesAsync(
+    namespaceFilter: "MyApp.Grains",
+    namePattern: "*Worker*");
+
+// Check hosting silos
+var silos = await gtd.GetHostingSilosAsync("MyApp.Grains.IWorkerGrain");
+```
 
 ---
 
-### Phase 3: Dynamic Grain Factory Extensions
-- [ ] `GetGrainDynamic()` methods
+### Phase 3: Dynamic Grain Factory Extensions ⬅️ CURRENT
+- [ ] `IGrainFactoryExtensions` static class with `GetGrainDynamic()` methods
 - [ ] `GetGrain(GrainTypeMeta, key)` overloads
-- [ ] Dynamic proxy generation for runtime types
+- [ ] `DynamicGrainReference` wrapper for DLR-based invocation
+- [ ] Integration with existing `IGrainFactory`
 
 ### Phase 4: Package Storage & Distribution
 - [ ] `IGrainPackageStore` interface
