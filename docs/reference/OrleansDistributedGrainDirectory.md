@@ -1,4 +1,16 @@
-# Distributed Grain Directory - Comprehensive Documentation
+# Orleans Experimental Distributed Grain Directory
+
+> **IMPORTANT CLARIFICATION**: This document describes Orleans' **experimental Distributed Grain Directory** - a location-tracking system for grain instances (WHERE grains are activated). This is **NOT** related to the **Grain Type Directory (GTD)** implemented in this fork, which tracks grain TYPE availability (WHAT grain types exist and which silos have them loaded).
+>
+> **The naming is unfortunate but these are completely different systems:**
+> | System | Purpose | Level |
+> |--------|---------|-------|
+> | **Grain Directory** (this doc) | Track WHERE grain instances are located | Instance-level (millions of entries) |
+> | **Grain Type Directory** (GTD) | Track WHAT grain types are available | Type-level (hundreds of entries) |
+>
+> See `docs/design/` for documentation on the GTD and plugin grain architecture.
+
+---
 
 ## Table of Contents
 1. [Overview](#overview)
@@ -100,7 +112,7 @@ The distributed grain directory follows a **multi-tier partitioned architecture*
 
 Based on Amazon Dynamo and Apache Cassandra's approach:
 - Each silo owns **30 virtual nodes (partitions)** by default (`PartitionsPerSilo = 30`)
-- Partitions are distributed around a hash ring (0 to 2³²-1)
+- Partitions are distributed around a hash ring (0 to 2^32-1)
 - Grain IDs are hashed to determine which partition owns them
 - Multiple partitions per silo ensure even distribution
 
@@ -176,7 +188,7 @@ Bridges cluster membership and directory partitioning:
 Immutable snapshot of directory membership:
 - Maps hash ring positions to silos and partitions
 - Calculates which partition owns which hash ranges
-- Provides fast lookup: `TryGetOwner(GrainId)` → partition reference
+- Provides fast lookup: `TryGetOwner(GrainId)` -> partition reference
 - Manages ring boundaries and partition ranges
 - Each silo owns multiple `RingRange` instances
 
@@ -197,8 +209,8 @@ ImmutableArray<ImmutableArray<RingRange>> _rangesByMemberPartition
 **File**: `src/Orleans.Runtime/GrainDirectory/RingRange.cs`
 
 Represents a contiguous range on the hash ring:
-- Start and End points (uint values from 0 to 2³²-1)
-- Can wrap around (e.g., [2³²-100, 100])
+- Start and End points (uint values from 0 to 2^32-1)
+- Can wrap around (e.g., [2^32-100, 100])
 - Supports set operations: intersection, difference, complement
 - Efficient containment checks for grain IDs
 
@@ -252,7 +264,7 @@ When a grain activates:
 ```
 
 **Steps**:
-1. Hash the `GrainId` to a uint (0 to 2³²-1)
+1. Hash the `GrainId` to a uint (0 to 2^32-1)
 2. Binary search in the ring boundaries to find the owning partition
 3. Send `RegisterAsync()` RPC to the partition
 4. Partition verifies it owns the range and stores the address
@@ -657,8 +669,8 @@ private readonly Dictionary<GrainId, GrainAddress> _directory = [];
 **Memory usage**: O(number of grains / number of partitions)
 
 With 30 partitions per silo and even distribution:
-- 1M grains across 10 silos → ~3,333 grains per partition
-- 10M grains across 100 silos → ~3,333 grains per partition
+- 1M grains across 10 silos -> ~3,333 grains per partition
+- 10M grains across 100 silos -> ~3,333 grains per partition
 
 #### Snapshot Storage
 
@@ -681,7 +693,7 @@ record PartitionSnapshotState(
 #### Lookup Complexity
 
 1. **Hash computation**: O(1) - `GrainId.GetUniformHashCode()`
-2. **Ring search**: O(log N) - Binary search in ring boundaries (N = active silos × 30)
+2. **Ring search**: O(log N) - Binary search in ring boundaries (N = active silos x 30)
 3. **RPC to partition**: O(1) network hop
 4. **Dictionary lookup**: O(1) average
 
@@ -696,7 +708,7 @@ Same as lookup: O(log N) + O(1) dictionary insert
 For a single partition:
 - **Range release**: O(M) where M = grains in the released range
 - **Range acquisition**: O(M) for snapshot transfer
-- **Recovery**: O(S × A) where S = number of silos, A = activations per silo in range
+- **Recovery**: O(S x A) where S = number of silos, A = activations per silo in range
 
 ### Failure Handling
 
