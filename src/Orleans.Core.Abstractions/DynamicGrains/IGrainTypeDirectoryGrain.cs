@@ -112,7 +112,7 @@ namespace Orleans.DynamicGrains
         /// <returns>A task that completes when the report is recorded.</returns>
         /// <remarks>
         /// This should be called by silos when they load a grain package,
-        /// typically from <see cref="IPluginGrainLoader"/> after successful load.
+        /// typically from IPluginGrainLoader after successful load.
         /// </remarks>
         Task ReportPackageLoadedAsync(SiloAddress silo, string packageId, string version);
 
