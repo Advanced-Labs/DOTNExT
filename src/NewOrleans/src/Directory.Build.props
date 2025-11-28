@@ -1,0 +1,40 @@
+<Project>
+  <PropertyGroup>
+    <_ParentDirectoryBuildPropsPath Condition="'$(_DirectoryBuildPropsFile)' != ''">$([System.IO.Path]::Combine('..', '$(_DirectoryBuildPropsFile)'))</_ParentDirectoryBuildPropsPath>
+  </PropertyGroup>
+
+  <Import Project="$(_ParentDirectoryBuildPropsPath)" Condition="Exists('$(_ParentDirectoryBuildPropsPath)')"/>
+
+  <PropertyGroup>
+    <WarningLevel>3</WarningLevel>
+    <AnalysisLevel>preview</AnalysisLevel>
+    <Features>strict</Features>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <CompatibilityTargetFrameworks>netstandard2.0</CompatibilityTargetFrameworks>
+    <DefaultTargetFrameworks>net8.0</DefaultTargetFrameworks>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <IsPackable>true</IsPackable>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <SourceLinkCreate>true</SourceLinkCreate>
+    <SourceLinkOriginUrl>https://github.com/dotnet/orleans</SourceLinkOriginUrl>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <AssemblyAttribute Include="Orleans.Metadata.FrameworkPartAttribute" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.DotNet.GenAPI.Task" PrivateAssets="All" />
+  </ItemGroup>
+
+</Project>

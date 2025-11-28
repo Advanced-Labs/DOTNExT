@@ -1,0 +1,188 @@
+variables:
+  clusterId: '{{ "now" | date: "%s" }}'
+  serviceId: '{{ "now" | date: "%s" }}'
+  framework: net8.0
+
+jobs:
+  server:
+    source:
+      localFolder: Artifacts/DistributedTests/DistributedTests.Server/{{framework}}
+    executable: DistributedTests.Server.exe
+    readyStateText: Orleans Silo started.
+    framework: net8.0
+    arguments: "{{configurator}} --clusterId {{clusterId}} --serviceId {{serviceId}} --azureQueueUri {{azureQueueUri}} --azureTableUri {{azureTableUri}} {{configuratorOptions}}"
+    onConfigure:
+      - if (job.endpoints.Count > 0) {
+          job.endpoints.RemoveRange(job.variables.instances, job.endpoints.Count - job.variables.instances);
+        }
+  client:
+    source:
+      localFolder: Artifacts/DistributedTests/DistributedTests.Client/{{framework}}
+    executable: DistributedTests.Client.exe
+    waitForExit: true
+    framework: net8.0
+    arguments: "{{command}} --clusterId {{clusterId}} --serviceId {{serviceId}} --azureQueueUri {{azureQueueUri}} --azureTableUri {{azureTableUri}} {{commandOptions}}"
+    onConfigure:
+      - if (job.endpoints.Count > 0) {
+          job.endpoints.Reverse();
+          job.endpoints.RemoveRange(job.variables.instances, job.endpoints.Count - job.variables.instances);
+        }
+
+scenarios:
+  ping:
+    server:
+      job: server
+      variables:
+        instances: 10
+        configurator: SimpleSilo
+    client:
+      job: client
+      variables:
+        command: ping
+        instances: 1
+        numWorkers: 250
+        blocksPerWorker: 0
+        requestsPerBlock: 500
+        duration: 120
+        commandOptions: "--numWorkers {{numWorkers}} --blocksPerWorker {{blocksPerWorker}} --requestsPerBlock {{requestsPerBlock}} --duration {{duration}}"
+  fanout:
+    server:
+      job: server
+      variables:
+        instances: 10
+        configurator: SimpleSilo
+    client:
+      job: client
+      variables:
+        command: fan-out
+        instances: 1
+        numWorkers: 1
+        blocksPerWorker: 0
+        requestsPerBlock: 50
+        duration: 240
+        commandOptions: "--numWorkers {{numWorkers}} --blocksPerWorker {{blocksPerWorker}} --requestsPerBlock {{requestsPerBlock}} --duration {{duration}}"
+  streaming:
+    server:
+      job: server
+      variables:
+        instances: 10
+        configurator: EventGeneratorStreamingSilo
+        duration: 300
+        type: ExplicitGrainBasedAndImplicit
+        streamsPerQueue: 1000
+        queueCount: 8
+        wait: 20
+        configuratorOptions: "--type {{type}} --streamsPerQueue {{streamsPerQueue}} --queueCount {{queueCount}} --wait {{wait}} --duration {{duration}}"
+    client:
+      job: client
+      variables:
+        command: counter
+        instances: 1
+        commandOptions: "requests errors"
+  reliability:
+    server:
+      job: server
+      variables:
+        instances: 10
+        configurator: SimpleSilo
+    chaosagent:
+      job: client
+      waitForExit: false
+      variables:
+        command: chaosagent
+        instances: 1
+        wait: 30
+        serversPerRound: 1
+        rounds: 4
+        roundDelay: 30
+        graceful: false
+        restart: true
+        commandOptions: "--wait {{wait}} --serversPerRound {{serversPerRound}} --rounds {{rounds}} --roundDelay {{roundDelay}} --graceful {{graceful}} --restart {{restart}}"
+    client:
+      job: client
+      waitForExit: true
+      variables:
+        command: ping
+        instances: 1
+        numWorkers: 250
+        blocksPerWorker: 0
+        requestsPerBlock: 500
+        duration: 180
+        commandOptions: "--numWorkers {{numWorkers}} --blocksPerWorker {{blocksPerWorker}} --requestsPerBlock {{requestsPerBlock}} --duration {{duration}}"
+  rolling:
+    server:
+      job: server
+      variables:
+        instances: 10
+        configurator: SimpleSilo
+    chaosagent:
+      job: client
+      waitForExit: false
+      variables:
+        command: chaosagent
+        instances: 1
+        wait: 30
+        serversPerRound: 1
+        rounds: 4
+        roundDelay: 30
+        graceful: true
+        restart: true
+        commandOptions: "--wait {{wait}} --serversPerRound {{serversPerRound}} --rounds {{rounds}} --roundDelay {{roundDelay}} --graceful {{graceful}} --restart {{restart}}"
+    client:
+      job: client
+      waitForExit: true
+      variables:
+        command: ping
+        instances: 1
+        numWorkers: 250
+        blocksPerWorker: 0
+        requestsPerBlock: 500
+        duration: 180
+        commandOptions: "--numWorkers {{numWorkers}} --blocksPerWorker {{blocksPerWorker}} --requestsPerBlock {{requestsPerBlock}} --duration {{duration}}"
+
+counters:
+- provider: Microsoft.Orleans
+  values:
+  - name: app-requests
+    measurement: orleans-counter/requests-per-second
+    description: Request rate
+
+  - name: activation-count
+    measurement: orleans-counter/grain-activation-count
+    description: Total number of grains
+
+results:
+# Microsoft.Orleans counters
+- name: orleans-counter/requests-per-second
+  measurement: orleans-counter/requests-per-second
+  description: Request rate
+  format: "n0"
+  aggregate: max
+  reduce: max
+- name: orleans-counter/requests-per-second/95
+  measurement: orleans-counter/requests-per-second
+  description: Request rate
+  format: "n0"
+  aggregate: percentile95
+  reduce: max
+- name: activation-count
+  measurement: orleans-counter/grain-activation-count
+  description: Active grains
+
+profiles:
+  local:
+    variables:
+      azureQueueUri: "http://127.0.0.1:10001"
+      azureTableUri: "http://127.0.0.1:10002"
+    jobs:
+      server:
+        endpoints:
+          - http://localhost:5010
+        variables:
+          instances: 1
+      client:
+        endpoints:
+          - http://localhost:5010
+      chaosagent:
+        endpoints:
+          - http://localhost:5010

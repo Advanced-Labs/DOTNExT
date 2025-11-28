@@ -1,0 +1,38 @@
+// For format details, see https://aka.ms/devcontainer.json. For config options, see the README at:
+// https://github.com/devcontainers/images/tree/main/src/dotnet
+{
+	"name": "Orleans",
+	"image": "mcr.microsoft.com/devcontainers/dotnet:latest",
+
+	// Features to add to the dev container. More info: https://containers.dev/features
+	"features": {
+		"ghcr.io/devcontainers/features/docker-in-docker": {},
+		"ghcr.io/devcontainers/features/github-cli:1": {}
+	},
+
+	"hostRequirements": {
+		"cpus": 4,
+		"memory": "8gb",
+		"storage": "32gb"
+	},
+
+	"customizations": {
+		"vscode": {
+			"extensions": [
+				"ms-dotnettools.csdevkit",
+				"GitHub.copilot"
+			],
+			"settings": {
+				"remote.autoForwardPorts": true,
+				"remote.autoForwardPortsSource": "hybrid",
+				"remote.otherPortsAttributes": {
+					"onAutoForward": "ignore"
+				},
+				"dotnet.defaultSolution": "Orleans.slnx"
+			}
+		}
+	},
+
+	"onCreateCommand": "dotnet restore",
+	"postStartCommand": "dotnet dev-certs https --trust || true"
+}

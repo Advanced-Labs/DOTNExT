@@ -1,0 +1,28 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <PackageId>Microsoft.Orleans.Transactions.TestKit.xUnit</PackageId>
+    <Title>Microsoft Orleans Transactions test kit for xUnit</Title>
+    <Description>xUnit testkit library for transactions</Description>
+    <PackageTags>$(PackageTags) TransactionTestKit</PackageTags>
+    <TargetFrameworks>$(DefaultTargetFrameworks)</TargetFrameworks>
+    <OrleansBuildTimeCodeGen>true</OrleansBuildTimeCodeGen>
+    <IsOrleansFrameworkPart>false</IsOrleansFrameworkPart>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <AssemblyName>Orleans.Transactions.TestKit.xUnit</AssemblyName>
+    <RootNamespace>Orleans.Transactions.TestKit.xUnit</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="xunit.extensibility.core" />
+    <PackageReference Include="xunit.extensibility.execution" />
+    <PackageReference Include="xunit.assert" />
+    <PackageReference Include="Xunit.SkippableFact" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Orleans.Transactions.TestKit.Base\Orleans.Transactions.TestKit.Base.csproj" />
+  </ItemGroup>
+
+</Project>

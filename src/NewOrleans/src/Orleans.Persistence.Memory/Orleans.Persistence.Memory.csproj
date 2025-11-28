@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <PackageId>Microsoft.Orleans.Persistence.Memory</PackageId>
+    <Title>Microsoft Orleans grain persistence provider which holds state only in memory.</Title>
+    <Description>In-memory storage for Microsoft Orleans</Description>
+    <TargetFrameworks>$(DefaultTargetFrameworks)</TargetFrameworks>
+    <AssemblyName>Orleans.Persistence.Memory</AssemblyName>
+    <RootNamespace>Orleans.Persistence.Memory</RootNamespace>
+    <OrleansBuildTimeCodeGen>true</OrleansBuildTimeCodeGen>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Orleans.Runtime\Orleans.Runtime.csproj" />
+  </ItemGroup>
+</Project>
