@@ -1,0 +1,37 @@
+{
+  "sdk": {
+    "version": "9.0.100-preview.5.24307.3",
+    "rollForward": "minor",
+    "allowPrerelease": false,
+    "architecture": "x64"
+  },
+  "tools": {
+    "runtimes": {
+      "dotnet/x64": [
+        "2.1.30",
+        "3.1.32",
+        "5.0.17",
+        "6.0.32",
+        "7.0.20",
+        "8.0.7"
+      ],
+      "dotnet/x86": [
+        "2.1.30",
+        "3.1.32",
+        "5.0.17",
+        "6.0.32",
+        "7.0.20",
+        "8.0.7"
+      ]
+    },
+    "vs": {
+      "version": "17.8.0"
+    },
+    "xcopy-msbuild": "17.8.5",
+    "vswhere": "2.2.7",
+    "dotnet": "9.0.100-preview.5.24307.3"
+  },
+  "msbuild-sdks": {
+    "Microsoft.DotNet.Arcade.Sdk": "9.0.0-beta.24408.2"
+  }
+}

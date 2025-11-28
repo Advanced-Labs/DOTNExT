@@ -1,0 +1,26 @@
+{
+  "tools": {
+    "dotnet": "9.0.111",
+    "runtimes": {
+      "dotnet": [
+        "2.1.7",
+        "$(VSRedistCommonNetCoreSharedFrameworkx6490PackageVersion)"
+      ]
+    },
+    "vs": {
+      "version": "17.2"
+    }
+  },
+  "msbuild-sdks": {
+    "Microsoft.DotNet.Arcade.Sdk": "9.0.0-beta.25515.2",
+    "Microsoft.DotNet.Helix.Sdk": "9.0.0-beta.25515.2"
+  },
+  "sdk": {
+    "version": "9.0.111"
+  },
+  "native-tools": {
+    "strawberry-perl": "5.38.0.1",
+    "net-framework-48-ref-assemblies": "0.0.0.1",
+    "windows-sdk-d3d-redist": "1.0.0"
+  }
+}

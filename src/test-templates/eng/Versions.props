@@ -1,0 +1,20 @@
+<Project>
+  <PropertyGroup Label="Version settings">
+    <VersionPrefix>1.1.0</VersionPrefix>
+    <VsixVersionPrefix>17.3.2</VsixVersionPrefix>
+    <PreReleaseVersionLabel>rtm</PreReleaseVersionLabel>
+  </PropertyGroup>
+  <PropertyGroup Label="Arcade settings">
+    <!-- Opt-in to Arcade tools for building VSIX projects. -->
+    <UsingToolVSSDK>true</UsingToolVSSDK>
+  </PropertyGroup>
+  <PropertyGroup Label="Dependencies settings">
+    <MicrosoftVisualStudioCoreUtilityVersion>15.0.26201</MicrosoftVisualStudioCoreUtilityVersion>
+    <MicrosoftVSSDKBuildToolsVersion>17.4.2116</MicrosoftVSSDKBuildToolsVersion>
+  </PropertyGroup>
+  <PropertyGroup Label="Testing settings">
+    <!-- Arcade is messing up with the properties of MSTest.Sdk so we need to set explicitly MicrosoftNetTestSdkVersion and MSTestVersion -->
+    <MicrosoftNetTestSdkVersion>17.11.1</MicrosoftNetTestSdkVersion>
+    <MSTestVersion>3.6.4</MSTestVersion>
+  </PropertyGroup>
+</Project>

@@ -1,0 +1,12 @@
+<Project>
+
+  <Import Project="..\..\Directory.Build.props" />
+
+  <!-- Set up the default output and intermediate paths -->
+  <PropertyGroup>
+    <OSPlatformConfig>$(TargetRid).$(Configuration)</OSPlatformConfig>
+    <BaseOutputRootPath>$(ArtifactsBinDir)$(OSPlatformConfig)\</BaseOutputRootPath>
+    <IntermediateOutputRootPath>$(ArtifactsObjDir)$(OSPlatformConfig)\</IntermediateOutputRootPath>
+  </PropertyGroup>
+
+</Project>

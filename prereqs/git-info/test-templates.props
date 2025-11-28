@@ -1,0 +1,10 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project>
+  <PropertyGroup>
+    <GitCommitHash>47c90e140b027225b799ca8413af10ee3d5f1126</GitCommitHash>
+    <OfficialBuildId>20250512.1</OfficialBuildId>
+    <OutputPackageVersion>1.1.0-rtm.25262.1</OutputPackageVersion>
+    <PreReleaseVersionLabel>rtm</PreReleaseVersionLabel>
+    <IsStable>false</IsStable>
+  </PropertyGroup>
+</Project>

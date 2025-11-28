@@ -1,0 +1,35 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>$(TestInfraTargetFramework)</TargetFramework>
+
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="NuGet.Packaging" Version="$(NugetPackagingVersion)" />
+    <!-- Upgrade to a non-vulnerable version of Asn1 - which will be ignored in favor of the framework copy  -->
+    <PackageReference Include="System.Formats.Asn1" Version="$(SystemFormatsAsn1Version)" ExcludeAssets="All" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\TestUtils\TestUtils.csproj" />
+    <OrderProjectReference Include="@(PkgprojProjectToBuild)" />
+  </ItemGroup>
+
+  <!--
+    Ensure the packaging projects build first. Don't do this in VS: the build takes too long and
+    isn't incremental.
+  -->
+  <Target Name="EnsureOrder"
+          Condition="
+            '$(SkipBuildingSharedFrameworkTestDependencies)' != 'true' and
+            '$(BuildingInsideVisualStudio)' != 'true'"
+          BeforeTargets="Build">
+    <MSBuild
+      Projects="@(OrderProjectReference)"
+      Targets="Build"
+      BuildInParallel="$(BuildInParallel)" />
+  </Target>
+
+</Project>

@@ -1,0 +1,50 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>$(NetToolCurrent);$(NetFrameworkToolCurrent)</TargetFrameworks>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="FluentAssertions" />
+    <PackageReference Include="Microsoft.Build.Utilities.Core" />
+    <PackageReference Include="Microsoft.Build.Framework" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Common\Microsoft.Arcade.Test.Common\Microsoft.Arcade.Test.Common.csproj" />
+    <ProjectReference Include="..\Microsoft.DotNet.SignTool\Microsoft.DotNet.SignTool.csproj" />
+    <ProjectReference Include="..\Microsoft.DotNet.XUnitExtensions\src\Microsoft.DotNet.XUnitExtensions.csproj" />
+
+    <ProjectReference Include="..\Microsoft.DotNet.Tar\Microsoft.DotNet.Tar.csproj"
+                      ReferenceOutputAssembly="false"
+                      SetTargetFramework="TargetFramework=$(NetToolCurrent)"
+                      SkipGetTargetFrameworkProperties="true"
+                      Private="false"
+                      OutputItemType="_TarToolPath" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageDownload Include="Microsoft.Signed.Wix" Version="[$(MicrosoftSignedWixVersion)]" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="Resources\**"
+             CopyToOutputDirectory="Always" />
+    <Content Include="$(NuGetPackageRoot)microsoft.signed.wix\$(MicrosoftSignedWixVersion)\tools\**"
+             CopyToOutputDirectory="Always"
+             Link="tools\wix\%(RecursiveDir)%(Filename)%(Extension)" />
+  </ItemGroup>
+
+  <Target Name="_CopyTarTool" AfterTargets="ResolveProjectReferences" >
+    <PropertyGroup>
+      <_TarToolPattern>@(_TarToolPath->'%(RootDir)%(Directory)')**\*.*</_TarToolPattern>
+    </PropertyGroup>
+    <ItemGroup>
+      <_TarToolFiles Include="$(_TarToolPattern)"/>
+    </ItemGroup>
+    <ItemGroup>
+      <Content Include="@(_TarToolFiles)" CopyToOutputDirectory="PreserveNewest" Link="tools\tar\%(RecursiveDir)%(Filename)%(Extension)"/>
+    </ItemGroup>
+  </Target>
+
+</Project>
