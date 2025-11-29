@@ -222,12 +222,41 @@ This proves the Orleans integration model.
 
 ## Caveats and Gotchas
 
-### State Machine Shape Changes
+### State Machine Shape Changes (UPDATED)
 
-If you change the async method's code, the state machine type changes. You cannot deserialize old snapshots into new shapes. You need:
-- Version numbers in snapshots
-- Migration logic for version transitions
-- Possibly dual-running old and new versions
+If you change the async method's code, the state machine type changes. You cannot deserialize old snapshots into new shapes.
+
+**The correct strategy (per user clarification)**: Version drainage, not hot-swapping.
+
+```
+Version Transition Model:
+
+v1.0 code loaded, processing:
+  [SM-A]──await──[SM-A]──await──[SM-A]──complete ✓
+  [SM-B]──await──[SM-B]──await────────────abort ✗
+  [SM-C]──await──────────────────────────drain...
+
+v2.0 code deployed:
+  NEW calls → v2.0 code
+  OLD state machines → continue with v1.0 code
+
+Unload v1.0 only after:
+  - All v1.0 instances complete (drain)
+  - OR timeout/force abort
+  - OR explicit migration to v2.0
+```
+
+**Key principles**:
+1. **Old states run on old code** - Never try to deserialize v1.0 state into v2.0 state machine
+2. **New calls route to new version** - Deployment switches routing, not running instances
+3. **Drainage strategies**:
+   - COMPLETE: Let them finish naturally
+   - ABORT: Cancel at next await
+   - MIGRATE: Special transformation logic (v1 state → v2 state, explicit)
+   - TIMEOUT: Force abort after deadline
+4. **Unload after drainage** - Only GC old types when no references remain
+
+This aligns with NewOrleans' ALC isolation - different versions coexist in separate load contexts
 
 ### Awaiter State
 
