@@ -570,7 +570,12 @@ namespace Microsoft.CodeAnalysis.CSharp
             // Only if persistence types were resolved (persistenceServiceLocal was created)
             if (_enablePersistence && _persistenceServiceLocal is not null)
             {
+                System.Console.Error.WriteLine($"[DOTNExT-Roslyn] GenerateAwaitForIncompleteTask: Adding checkpoint call for state {stateNumber}");
                 blockBuilder.Add(GenerateCheckpointCall(stateNumber));
+            }
+            else if (_enablePersistence)
+            {
+                System.Console.Error.WriteLine($"[DOTNExT-Roslyn] GenerateAwaitForIncompleteTask: SKIPPING checkpoint - _persistenceServiceLocal is null!");
             }
 
             blockBuilder.Add(awaiterTemp.Type.IsDynamic()
@@ -776,18 +781,23 @@ namespace Microsoft.CodeAnalysis.CSharp
             Debug.Assert(_enablePersistence);
             Debug.Assert(_persistenceMethodId != null);
 
+            System.Console.Error.WriteLine($"[DOTNExT-Roslyn] GeneratePersistenceRestorationCheck called for {_persistenceMethodId}");
+
             var persistenceServiceType = GetPersistenceServiceType();
             if (persistenceServiceType is null)
             {
+                System.Console.Error.WriteLine($"[DOTNExT-Roslyn]   FAILED: GetPersistenceServiceType returned null");
                 // DOTNExT.Persistence types not available - skip persistence
                 return F.StatementList();
             }
+            System.Console.Error.WriteLine($"[DOTNExT-Roslyn]   Got persistenceServiceType: {persistenceServiceType.ToDisplayString()}");
 
             // Create local for persistence service
             _persistenceServiceLocal = F.SynthesizedLocal(
                 persistenceServiceType,
                 syntax: F.Syntax,
                 kind: SynthesizedLocalKind.LoweringTemp);
+            System.Console.Error.WriteLine($"[DOTNExT-Roslyn]   Created _persistenceServiceLocal");
 
             var restoredStateLocal = F.SynthesizedLocal(
                 F.SpecialType(SpecialType.System_Int32),
@@ -797,8 +807,10 @@ namespace Microsoft.CodeAnalysis.CSharp
             var asyncPersistenceContextType = GetAsyncPersistenceContextType();
             if (asyncPersistenceContextType is null)
             {
+                System.Console.Error.WriteLine($"[DOTNExT-Roslyn]   FAILED: GetAsyncPersistenceContextType returned null");
                 return F.StatementList();
             }
+            System.Console.Error.WriteLine($"[DOTNExT-Roslyn]   Got asyncPersistenceContextType: {asyncPersistenceContextType.ToDisplayString()}");
 
             // Get the Current property getter
             var currentProperty = asyncPersistenceContextType.GetMembers("Current")
@@ -807,14 +819,18 @@ namespace Microsoft.CodeAnalysis.CSharp
 
             if (currentProperty?.GetMethod is null)
             {
+                System.Console.Error.WriteLine($"[DOTNExT-Roslyn]   FAILED: Current property or getter not found");
                 return F.StatementList();
             }
+            System.Console.Error.WriteLine($"[DOTNExT-Roslyn]   Got Current property getter");
 
             var tryRestoreMethod = GetTryRestoreMethod();
             if (tryRestoreMethod is null)
             {
+                System.Console.Error.WriteLine($"[DOTNExT-Roslyn]   FAILED: TryRestore method not found");
                 return F.StatementList();
             }
+            System.Console.Error.WriteLine($"[DOTNExT-Roslyn]   Got TryRestore method - persistence restoration check will be generated");
 
             var statements = ArrayBuilder<BoundStatement>.GetInstance();
 
