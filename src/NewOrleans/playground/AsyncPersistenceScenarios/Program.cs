@@ -150,7 +150,7 @@ public static class Program
                 "• At each await point, state machine fields are serialized and saved\n" +
                 "• Can simulate interruption and demonstrate checkpoint contents\n\n" +
                 "[yellow]The workflow:[/]\n" +
-                "  input(5) → Step1: 5*2=10 → [CHECKPOINT] → Step2: 10+3=13 → [CHECKPOINT] → Result\n\n" +
+                "  input(5) → Step1: 5*2=10 → [[CHECKPOINT]] → Step2: 10+3=13 → [[CHECKPOINT]] → Result\n\n" +
                 "[yellow]Key concept:[/]\n" +
                 "• State machine fields (__state, locals) are captured and can be restored[/]")
                 .Header("[green]About This Challenge[/]")
@@ -942,7 +942,7 @@ public static class Program
                 "• Checkpoints are saved to Orleans grains with durable storage\n" +
                 "• With RavenDB: state persists across process restarts\n\n" +
                 "[yellow]The workflow:[/]\n" +
-                "  input(42) → Step1: 42*2=84 → [CHECKPOINT] → Step2: 84+10=94 → [CHECKPOINT] → Result: 94\n\n" +
+                "  input(42) → Step1: 42*2=84 → [[CHECKPOINT]] → Step2: 84+10=94 → [[CHECKPOINT]] → Result: 94\n\n" +
                 "[yellow]Prerequisites:[/]\n" +
                 "• For RavenDB: Server at http://127.0.0.1:38880 (database: AsyncPersistenceTest)\n" +
                 "• For Memory: No prerequisites (data lost on silo stop)[/]")
