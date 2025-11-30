@@ -964,7 +964,7 @@ public static class Program
                     {
                         "1. Start Silo with MemoryStorage (for testing)",
                         "2. Start Silo with RavenDB Storage",
-                        "3. Run [Persistable] Workflow on Orleans",
+                        "3. Run [[Persistable]] Workflow on Orleans",
                         "4. View Grain State",
                         "5. Stop Silo",
                         "───────────────────────────────",
