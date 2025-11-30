@@ -39,17 +39,36 @@ public static class Program
         _persistence.OnComplete += (s, e) =>
             AnsiConsole.MarkupLine($"[yellow]EVENT: Complete {e.MethodId} {(e.Faulted ? "FAULTED" : "SUCCESS")}[/]");
 
+        // Handle CTRL-C gracefully
+        Console.CancelKeyPress += async (s, e) =>
+        {
+            e.Cancel = true; // Prevent immediate termination
+            AnsiConsole.MarkupLine("\n[yellow]Shutting down gracefully...[/]");
+            if (_orleansSiloHost != null)
+            {
+                try
+                {
+                    await _orleansSiloHost.StopAsync(TimeSpan.FromSeconds(5));
+                    _orleansSiloHost.Dispose();
+                }
+                catch { }
+            }
+            Environment.Exit(0);
+        };
+
         AnsiConsole.Write(new FigletText("Async Persistence").Color(Color.Cyan1));
         AnsiConsole.MarkupLine("[grey]Testing async state machine persistence[/]");
         AnsiConsole.MarkupLine($"[grey]Persistence file: {PersistenceFile}[/]");
+        AnsiConsole.MarkupLine("[grey]Press CTRL+C to exit at any time[/]");
         AnsiConsole.WriteLine();
 
         while (true)
         {
             var challenge = AnsiConsole.Prompt(
                 new SelectionPrompt<string>()
-                    .Title("[green]Select a challenge:[/]")
-                    .PageSize(12)
+                    .Title("[green]Select a challenge (use ↑↓ arrows, Enter to select):[/]")
+                    .PageSize(15)
+                    .WrapAround(true)
                     .AddChoices(new[]
                     {
                         "1. Basic Checkpoint (SimpleWorkflow)",
@@ -62,14 +81,14 @@ public static class Program
                         "7. ★★ Dynamic Compilation (Modified Roslyn)",
                         "8. ★★★ Orleans/RavenDB Persistence",
                         "───────────────────────────────",
-                        "View Persisted State",
-                        "Clear All Persisted State",
+                        "V. View Persisted State",
+                        "C. Clear All Persisted State",
                         "───────────────────────────────",
-                        "★★★ Run All with Report",
-                        "Exit"
+                        "R. ★★★ Run All with Report",
+                        "Q. Exit"
                     }));
 
-            if (challenge == "Exit")
+            if (challenge.StartsWith("Q."))
             {
                 AnsiConsole.MarkupLine("[yellow]Goodbye![/]");
                 break;
@@ -97,120 +116,125 @@ public static class Program
 
     private static async Task RunChallengeAsync(string challenge)
     {
-        switch (challenge)
-        {
-            case "1. Basic Checkpoint (SimpleWorkflow)":
-                await RunSimpleWorkflowChallengeAsync();
-                break;
-            case "2. Multiple Types (ProcessOrderWorkflow)":
-                await RunProcessOrderChallengeAsync();
-                break;
-            case "3. Nested Async (OuterWorkflow)":
-                await RunNestedAsyncChallengeAsync();
-                break;
-            case "4. Exception Handling (WorkflowWithExceptionHandling)":
-                await RunExceptionHandlingChallengeAsync();
-                break;
-            case "5. Loops (LoopWorkflow)":
-                await RunLoopChallengeAsync();
-                break;
-            case "6. ★ Instrumented State Machine (Roslyn Demo)":
-                await RunInstrumentedWorkflowChallengeAsync();
-                break;
-            case "7. ★★ Dynamic Compilation (Modified Roslyn)":
-                await RunDynamicCompilationChallengeAsync();
-                break;
-            case "8. ★★★ Orleans/RavenDB Persistence":
-                await RunOrleansRavenDbChallengeAsync();
-                break;
-            case "View Persisted State":
-                ViewPersistedState();
-                break;
-            case "Clear All Persisted State":
-                ClearAllState();
-                break;
-            case "★★★ Run All with Report":
-                await RunAllScenariosWithReportAsync();
-                break;
-        }
+        // Match by prefix number/letter to be more flexible
+        if (challenge.StartsWith("1.")) await RunSimpleWorkflowChallengeAsync();
+        else if (challenge.StartsWith("2.")) await RunProcessOrderChallengeAsync();
+        else if (challenge.StartsWith("3.")) await RunNestedAsyncChallengeAsync();
+        else if (challenge.StartsWith("4.")) await RunExceptionHandlingChallengeAsync();
+        else if (challenge.StartsWith("5.")) await RunLoopChallengeAsync();
+        else if (challenge.StartsWith("6.")) await RunInstrumentedWorkflowChallengeAsync();
+        else if (challenge.StartsWith("7.")) await RunDynamicCompilationChallengeAsync();
+        else if (challenge.StartsWith("8.")) await RunOrleansRavenDbChallengeAsync();
+        else if (challenge.StartsWith("V.")) ViewPersistedState();
+        else if (challenge.StartsWith("C.")) ClearAllState();
+        else if (challenge.StartsWith("R.")) await RunAllScenariosWithReportAsync();
     }
 
     private static async Task RunSimpleWorkflowChallengeAsync()
     {
         const string workflowId = "simple-workflow-1";
 
-        var action = AnsiConsole.Prompt(
-            new SelectionPrompt<string>()
-                .Title("[cyan]Challenge 1: Basic Checkpoint[/]")
-                .AddChoices(new[]
-                {
-                    "Run Fresh (no persistence)",
-                    "Run with Checkpointing",
-                    "Run and Simulate Interrupt",
-                    "Resume from Checkpoint",
-                    "View Checkpoint State",
-                    "Clear Checkpoint",
-                    "Back"
-                }));
-
-        switch (action)
+        while (true)
         {
-            case "Run Fresh (no persistence)":
+            Console.Clear();
+            AnsiConsole.MarkupLine("[cyan]═══════════════════════════════════════════════════════════════════[/]");
+            AnsiConsole.MarkupLine("[cyan]    CHALLENGE 1: BASIC CHECKPOINT (SimpleWorkflow)                  [/]");
+            AnsiConsole.MarkupLine("[cyan]═══════════════════════════════════════════════════════════════════[/]");
+            AnsiConsole.WriteLine();
+
+            // Scenario explanation
+            var explanation = new Panel(
+                "[white]Tests basic async state machine checkpointing with in-memory persistence.\n\n" +
+                "[yellow]What it does:[/]\n" +
+                "• Runs a simple workflow with 3 steps\n" +
+                "• At each await point, state machine fields are serialized and saved\n" +
+                "• Can simulate interruption and demonstrate checkpoint contents\n\n" +
+                "[yellow]The workflow:[/]\n" +
+                "  input(5) → Step1: 5*2=10 → [CHECKPOINT] → Step2: 10+3=13 → [CHECKPOINT] → Result\n\n" +
+                "[yellow]Key concept:[/]\n" +
+                "• State machine fields (__state, locals) are captured and can be restored[/]")
+                .Header("[green]About This Challenge[/]")
+                .BorderColor(Color.Grey);
+            AnsiConsole.Write(explanation);
+            AnsiConsole.WriteLine();
+
+            // Show checkpoint status
+            var hasState = _persistence.HasPersistedState(workflowId);
+            var stateStatus = hasState ? "[green]● Has checkpoint[/]" : "[grey]○ No checkpoint[/]";
+            AnsiConsole.MarkupLine($"Workflow Status: {stateStatus}");
+            AnsiConsole.WriteLine();
+
+            var action = AnsiConsole.Prompt(
+                new SelectionPrompt<string>()
+                    .Title("[cyan]Select an action:[/]")
+                    .WrapAround(true)
+                    .AddChoices(new[]
+                    {
+                        "1. Run Fresh (no persistence)",
+                        "2. Run with Checkpointing",
+                        "3. Run and Simulate Interrupt",
+                        "4. Resume from Checkpoint",
+                        "5. View Checkpoint State",
+                        "6. Clear Checkpoint",
+                        "───────────────────────────────",
+                        "B. Back to Main Menu"
+                    }));
+
+            if (action.StartsWith("B.") || action.StartsWith("───"))
+                break;
+
+            if (action.StartsWith("1."))
+            {
                 _persistence.Clear(workflowId);
                 await _workflows.SimpleWorkflow(5, workflowId);
-                break;
-
-            case "Run with Checkpointing":
+            }
+            else if (action.StartsWith("2."))
+            {
                 await _workflows.SimpleWorkflow(5, workflowId);
-                break;
-
-            case "Run and Simulate Interrupt":
+            }
+            else if (action.StartsWith("3."))
+            {
                 AnsiConsole.MarkupLine("[yellow]Starting workflow... will interrupt after first checkpoint[/]");
                 _persistence.Clear(workflowId);
 
-                // Run until first checkpoint, then cancel
-                var cts = new CancellationTokenSource();
                 var runTask = Task.Run(async () =>
                 {
                     await _workflows.SimpleWorkflow(5, workflowId);
                 });
 
-                // Wait for first checkpoint
                 await Task.Delay(700);
                 AnsiConsole.MarkupLine("[red]INTERRUPT! Simulating crash...[/]");
-
-                // Don't actually cancel - just show the state
                 AnsiConsole.MarkupLine("[grey]Workflow would be interrupted here. State is persisted.[/]");
                 ViewSnapshotDetails(workflowId);
-                break;
-
-            case "Resume from Checkpoint":
+            }
+            else if (action.StartsWith("4."))
+            {
                 if (_persistence.HasPersistedState(workflowId))
                 {
                     AnsiConsole.MarkupLine("[green]Found persisted state, resuming...[/]");
                     var snapshot = _persistence.GetSnapshot(workflowId);
                     AnsiConsole.MarkupLine($"[grey]Resuming from state {snapshot?.State}[/]");
-
-                    // In real impl, we'd restore the state machine and call MoveNext
-                    // For now, just show what would happen
                     AnsiConsole.MarkupLine("[yellow]NOTE: Actual resume requires Roslyn modification[/]");
-                    AnsiConsole.MarkupLine("[grey]The persisted state contains:[/]");
                     ViewSnapshotDetails(workflowId);
                 }
                 else
                 {
                     AnsiConsole.MarkupLine("[red]No persisted state found[/]");
                 }
-                break;
-
-            case "View Checkpoint State":
+            }
+            else if (action.StartsWith("5."))
+            {
                 ViewSnapshotDetails(workflowId);
-                break;
-
-            case "Clear Checkpoint":
+            }
+            else if (action.StartsWith("6."))
+            {
                 _persistence.Clear(workflowId);
                 AnsiConsole.MarkupLine("[green]Cleared[/]");
-                break;
+            }
+
+            AnsiConsole.WriteLine();
+            AnsiConsole.MarkupLine("[grey]Press any key to continue...[/]");
+            Console.ReadKey(true);
         }
     }
 
@@ -901,54 +925,72 @@ public static class Program
     /// </summary>
     private static async Task RunOrleansRavenDbChallengeAsync()
     {
-        AnsiConsole.MarkupLine("[cyan]═══════════════════════════════════════════════════════════════════[/]");
-        AnsiConsole.MarkupLine("[cyan]         ORLEANS/RAVENDB PERSISTENCE (NewOrleans.AsyncPlus)         [/]");
-        AnsiConsole.MarkupLine("[cyan]═══════════════════════════════════════════════════════════════════[/]");
-        AnsiConsole.MarkupLine("[grey]This uses Orleans grains with RavenDB storage for durable async persistence.[/]");
-        AnsiConsole.MarkupLine("[grey]NOTE: RavenDB must be running on 127.0.0.1:38880.[/]");
-        AnsiConsole.MarkupLine("[grey]For in-memory testing, use 'Start with MemoryStorage' option.[/]");
-        AnsiConsole.WriteLine();
-
-        var action = AnsiConsole.Prompt(
-            new SelectionPrompt<string>()
-                .Title("[cyan]Challenge 8: Orleans Persistence[/]")
-                .AddChoices(new[]
-                {
-                    "Start Silo with MemoryStorage (for testing)",
-                    "Start Silo with RavenDB Storage",
-                    "Run [[Persistable]] Workflow on Orleans",
-                    "View Grain State",
-                    "Stop Silo",
-                    "Back"
-                }));
-
-        switch (action)
+        while (true)
         {
-            case "Start Silo with MemoryStorage (for testing)":
-                await StartOrleansSiloAsync(useRavenDb: false);
+            Console.Clear();
+            AnsiConsole.MarkupLine("[cyan]═══════════════════════════════════════════════════════════════════[/]");
+            AnsiConsole.MarkupLine("[cyan]    CHALLENGE 8: ORLEANS/RAVENDB PERSISTENCE (NewOrleans.AsyncPlus)[/]");
+            AnsiConsole.MarkupLine("[cyan]═══════════════════════════════════════════════════════════════════[/]");
+            AnsiConsole.WriteLine();
+
+            // Scenario explanation
+            var explanation = new Panel(
+                "[white]This challenge demonstrates Async+ persistence with Orleans distributed actors.\n\n" +
+                "[yellow]What it does:[/]\n" +
+                "• Runs an InstrumentedSimpleWorkflow (simulating Roslyn-generated code)\n" +
+                "• The workflow has 2 await points where state is checkpointed\n" +
+                "• Checkpoints are saved to Orleans grains with durable storage\n" +
+                "• With RavenDB: state persists across process restarts\n\n" +
+                "[yellow]The workflow:[/]\n" +
+                "  input(42) → Step1: 42*2=84 → [CHECKPOINT] → Step2: 84+10=94 → [CHECKPOINT] → Result: 94\n\n" +
+                "[yellow]Prerequisites:[/]\n" +
+                "• For RavenDB: Server at http://127.0.0.1:38880 (database: AsyncPersistenceTest)\n" +
+                "• For Memory: No prerequisites (data lost on silo stop)[/]")
+                .Header("[green]About This Challenge[/]")
+                .BorderColor(Color.Grey);
+            AnsiConsole.Write(explanation);
+            AnsiConsole.WriteLine();
+
+            // Show silo status
+            var siloStatus = _orleansSiloHost != null ? "[green]● Running[/]" : "[grey]○ Stopped[/]";
+            AnsiConsole.MarkupLine($"Silo Status: {siloStatus}");
+            AnsiConsole.WriteLine();
+
+            var action = AnsiConsole.Prompt(
+                new SelectionPrompt<string>()
+                    .Title("[cyan]Select an action:[/]")
+                    .WrapAround(true)
+                    .AddChoices(new[]
+                    {
+                        "1. Start Silo with MemoryStorage (for testing)",
+                        "2. Start Silo with RavenDB Storage",
+                        "3. Run [Persistable] Workflow on Orleans",
+                        "4. View Grain State",
+                        "5. Stop Silo",
+                        "───────────────────────────────",
+                        "B. Back to Main Menu"
+                    }));
+
+            if (action.StartsWith("B.") || action.StartsWith("───"))
                 break;
 
-            case "Start Silo with RavenDB Storage":
-                await StartOrleansSiloAsync(useRavenDb: true);
-                break;
+            if (action.StartsWith("1.")) await StartOrleansSiloAsync(useRavenDb: false);
+            else if (action.StartsWith("2.")) await StartOrleansSiloAsync(useRavenDb: true);
+            else if (action.StartsWith("3.")) await RunPersistableOnOrleansAsync();
+            else if (action.StartsWith("4.")) await ViewOrleansGrainStateAsync();
+            else if (action.StartsWith("5.")) await StopOrleansSiloAsync();
 
-            case "Run [[Persistable]] Workflow on Orleans":
-                await RunPersistableOnOrleansAsync();
-                break;
-
-            case "View Grain State":
-                await ViewOrleansGrainStateAsync();
-                break;
-
-            case "Stop Silo":
-                await StopOrleansSiloAsync();
-                break;
+            AnsiConsole.WriteLine();
+            AnsiConsole.MarkupLine("[grey]Press any key to continue...[/]");
+            Console.ReadKey(true);
         }
     }
 
     // Static fields for Orleans silo management
     private static IHost? _orleansSiloHost;
     private static NewOrleansAsyncPersistenceService? _orleansPersistence;
+    private static EventHandler<DOTNExT.Persistence.CheckpointEventArgs>? _checkpointHandler;
+    private static EventHandler<DOTNExT.Persistence.CompleteEventArgs>? _completeHandler;
 
     private static async Task StartOrleansSiloAsync(bool useRavenDb)
     {
@@ -1029,19 +1071,28 @@ public static class Program
         // Track checkpoints
         int checkpointCount = 0;
 
-        // Subscribe to events from the Orleans persistence service
+        // Unsubscribe any previous handlers first to avoid accumulation
         if (_orleansPersistence is IAsyncPersistenceService persistenceWithEvents)
         {
-            persistenceWithEvents.OnCheckpoint += (s, e) =>
+            if (_checkpointHandler != null)
+                persistenceWithEvents.OnCheckpoint -= _checkpointHandler;
+            if (_completeHandler != null)
+                persistenceWithEvents.OnComplete -= _completeHandler;
+
+            // Create and store new handlers
+            _checkpointHandler = (s, e) =>
             {
                 checkpointCount++;
                 AnsiConsole.MarkupLine($"[blue]Orleans Checkpoint: {e.MethodId} at state {e.StateNumber}[/]");
             };
-
-            persistenceWithEvents.OnComplete += (s, e) =>
+            _completeHandler = (s, e) =>
             {
                 AnsiConsole.MarkupLine($"[green]Orleans Complete: {e.MethodId}[/]");
             };
+
+            // Subscribe
+            persistenceWithEvents.OnCheckpoint += _checkpointHandler;
+            persistenceWithEvents.OnComplete += _completeHandler;
         }
 
         try
