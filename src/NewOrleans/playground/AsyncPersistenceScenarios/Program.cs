@@ -162,15 +162,15 @@ public static class Program
                 }
                 else if (isSelected)
                 {
-                    AnsiConsole.MarkupLine($"[cyan]> [{key}] {label}[/]");
+                    AnsiConsole.MarkupLine($"[cyan]> [[{key}]] {Markup.Escape(label)}[/]");
                 }
                 else if (!string.IsNullOrEmpty(key))
                 {
-                    AnsiConsole.MarkupLine($"  [yellow][[{key}]][/] {label}");
+                    AnsiConsole.MarkupLine($"  [yellow][[{key}]][/] {Markup.Escape(label)}");
                 }
                 else
                 {
-                    AnsiConsole.MarkupLine($"  {label}");
+                    AnsiConsole.MarkupLine($"  {Markup.Escape(label)}");
                 }
             }
 
