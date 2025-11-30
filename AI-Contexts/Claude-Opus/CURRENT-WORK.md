@@ -61,8 +61,9 @@ See: `NewOrleans-AsyncPlus-Integration.md` for full design
 
 **Key Components**:
 1. `IAsyncStatePersistenceGrain` - Orleans grain for state storage
-2. `OrleansAsyncPersistenceService` - implements `IAsyncPersistenceService` using grains
+2. `NewOrleansAsyncPersistenceService` - implements `IAsyncPersistenceService` using grains
 3. `UseAsyncPlusPersistence()` - silo builder extension
+4. **RavenDB storage** - real durable persistence (in-memory defeats the purpose)
 
 ---
 
@@ -101,7 +102,7 @@ See: `NewOrleans-AsyncPlus-Integration.md` for full design
    - `Orleans/AsyncStatePersistenceGrain.cs`
 
 3. **Create Orleans persistence service**:
-   - `Services/OrleansAsyncPersistenceService.cs`
+   - `Services/NewOrleansAsyncPersistenceService.cs`
 
 4. **Add Challenge 8**: Orleans-backed persistence test
    - Start Orleans silo

@@ -69,7 +69,7 @@ Replace the in-memory persistence with Orleans-backed persistence that:
 ┌─────────────────────────────────────────────────────────────────────────────┐
 │                      NewOrleans.AsyncPlus.Driver                             │
 │                                                                             │
-│   OrleansAsyncPersistenceService : IAsyncPersistenceService                  │
+│   NewOrleansAsyncPersistenceService : IAsyncPersistenceService                  │
 │   - Wraps IAsyncStatePersistenceGrain calls                                 │
 │   - DI-injectable into Orleans silo/client                                  │
 │   - Configurable storage provider name                                       │
@@ -90,6 +90,28 @@ Replace the in-memory persistence with Orleans-backed persistence that:
 │   Uses Orleans storage provider (Memory, ADO.NET, Azure, etc.)              │
 └─────────────────────────────────────────────────────────────────────────────┘
 ```
+
+---
+
+## Storage Provider: RavenDB (Recommended)
+
+**Why RavenDB over in-memory?**
+- In-memory Orleans persistence loses state on silo restart - defeats the purpose
+- RavenDB provides real durable storage that survives process crashes
+- Official Orleans persistence provider available for RavenDB
+- User has RavenDB running on standard ports, ready to use
+
+**Configuration:**
+```csharp
+siloBuilder
+    .AddRavenDbGrainStorage("AsyncPlusStorage", options =>
+    {
+        options.Urls = new[] { "http://localhost:8080" };
+        options.DatabaseName = "DOTNExT_AsyncPlus";
+    });
+```
+
+This gives us real persistence testing - checkpoint → kill process → restart → restore from RavenDB.
 
 ---
 
@@ -228,14 +250,14 @@ namespace NewOrleans.AsyncPlus;
 /// Orleans-backed implementation of IAsyncPersistenceService.
 /// Bridges the Async+ abstraction to Orleans grains.
 /// </summary>
-public class OrleansAsyncPersistenceService : IAsyncPersistenceService
+public class NewOrleansAsyncPersistenceService : IAsyncPersistenceService
 {
     private readonly IGrainFactory _grainFactory;
-    private readonly ILogger<OrleansAsyncPersistenceService> _logger;
+    private readonly ILogger<NewOrleansAsyncPersistenceService> _logger;
 
-    public OrleansAsyncPersistenceService(
+    public NewOrleansAsyncPersistenceService(
         IGrainFactory grainFactory,
-        ILogger<OrleansAsyncPersistenceService> logger)
+        ILogger<NewOrleansAsyncPersistenceService> logger)
     {
         _grainFactory = grainFactory;
         _logger = logger;
@@ -343,7 +365,7 @@ public static class AsyncPlusHostingExtensions
         siloBuilder.ConfigureServices(services =>
         {
             // Register the Orleans-backed persistence service
-            services.AddSingleton<IAsyncPersistenceService, OrleansAsyncPersistenceService>();
+            services.AddSingleton<IAsyncPersistenceService, NewOrleansAsyncPersistenceService>();
 
             // Optionally configure storage name
             services.Configure<AsyncPlusOptions>(options =>
@@ -362,7 +384,7 @@ public static class AsyncPlusHostingExtensions
     {
         clientBuilder.ConfigureServices(services =>
         {
-            services.AddSingleton<IAsyncPersistenceService, OrleansAsyncPersistenceService>();
+            services.AddSingleton<IAsyncPersistenceService, NewOrleansAsyncPersistenceService>();
         });
 
         return clientBuilder;
@@ -391,7 +413,7 @@ AsyncPersistenceScenarios/
 ├── Services/
 │   ├── IAsyncPersistenceService.cs       # Existing
 │   ├── InMemoryAsyncPersistenceService.cs # Existing
-│   └── OrleansAsyncPersistenceService.cs  # NEW
+│   └── NewOrleansAsyncPersistenceService.cs  # NEW
 ├── Orleans/
 │   ├── IAsyncStatePersistenceGrain.cs     # NEW
 │   ├── AsyncStatePersistenceGrain.cs      # NEW
@@ -453,7 +475,7 @@ This triggers the Orleans source generator for serializers and grain references.
 ### Phase 1: Basic Orleans Integration
 1. Add Orleans references to AsyncPersistenceScenarios
 2. Implement `IAsyncStatePersistenceGrain` and grain
-3. Implement `OrleansAsyncPersistenceService`
+3. Implement `NewOrleansAsyncPersistenceService`
 4. Add Challenge 8: Orleans-backed persistence test
 
 ### Phase 2: Configuration & Polish
