@@ -8,9 +8,9 @@ namespace NewOrleans.AsyncPlus.Storage;
 public class RavenDbStorageOptions
 {
     /// <summary>
-    /// RavenDB server URLs. Default: http://localhost:8080
+    /// RavenDB server URLs. Default: http://127.0.0.1:38880
     /// </summary>
-    public string[] Urls { get; set; } = new[] { "http://localhost:8080" };
+    public string[] Urls { get; set; } = new[] { "http://127.0.0.1:38880" };
 
     /// <summary>
     /// Database name for grain storage. Default: "OrleansGrainState"

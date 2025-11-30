@@ -905,7 +905,7 @@ public static class Program
         AnsiConsole.MarkupLine("[cyan]         ORLEANS/RAVENDB PERSISTENCE (NewOrleans.AsyncPlus)         [/]");
         AnsiConsole.MarkupLine("[cyan]═══════════════════════════════════════════════════════════════════[/]");
         AnsiConsole.MarkupLine("[grey]This uses Orleans grains with RavenDB storage for durable async persistence.[/]");
-        AnsiConsole.MarkupLine("[grey]NOTE: RavenDB must be running on localhost:8080 (standard port).[/]");
+        AnsiConsole.MarkupLine("[grey]NOTE: RavenDB must be running on 127.0.0.1:38880.[/]");
         AnsiConsole.MarkupLine("[grey]For in-memory testing, use 'Start with MemoryStorage' option.[/]");
         AnsiConsole.WriteLine();
 
@@ -976,7 +976,7 @@ public static class Program
                             // RavenDB storage with Async+ persistence
                             silo.UseAsyncPlusPersistenceWithRavenDb(options =>
                             {
-                                options.Urls = new[] { "http://localhost:8080" };
+                                options.Urls = new[] { "http://127.0.0.1:38880" };
                                 options.DatabaseName = "AsyncPersistenceTest";
                                 options.CreateDatabaseIfNotExists = true;
                             });
