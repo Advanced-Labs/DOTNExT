@@ -163,15 +163,15 @@ public static class Program
 
                 if (label.StartsWith("───"))
                 {
-                    AnsiConsole.MarkupLine($"[grey]{label}[/]");
+                    AnsiConsole.MarkupLine($"[grey]{Markup.Escape(label)}[/]");
                 }
                 else if (isSelected)
                 {
-                    AnsiConsole.MarkupLine($"[cyan]> [[{key}]] {Markup.Escape(label)}[/]");
+                    AnsiConsole.MarkupLine($"[cyan]> [{Markup.Escape(key)}] {Markup.Escape(label)}[/]");
                 }
                 else if (!string.IsNullOrEmpty(key))
                 {
-                    AnsiConsole.MarkupLine($"  [yellow][[{key}]][/] {Markup.Escape(label)}");
+                    AnsiConsole.MarkupLine($"  [yellow][{Markup.Escape(key)}][/] {Markup.Escape(label)}");
                 }
                 else
                 {
