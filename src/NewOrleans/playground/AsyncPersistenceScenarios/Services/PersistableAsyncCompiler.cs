@@ -90,8 +90,22 @@ public class PersistableAsyncCompiler
     {
         // Add reference to our persistence types
         // These are in the current assembly (AsyncPersistenceScenarios)
-        _references.Add(MetadataReference.CreateFromFile(typeof(DOTNExT.Persistence.AsyncPersistenceContext).Assembly.Location));
-        _references.Add(MetadataReference.CreateFromFile(typeof(DOTNExT.Persistence.PersistableAttribute).Assembly.Location));
+        var persistenceAssembly = typeof(DOTNExT.Persistence.AsyncPersistenceContext).Assembly;
+        var persistenceLocation = persistenceAssembly.Location;
+
+        Console.WriteLine($"[Compiler] Persistence assembly: {persistenceAssembly.FullName}");
+        Console.WriteLine($"[Compiler] Persistence location: {(string.IsNullOrEmpty(persistenceLocation) ? "<empty>" : persistenceLocation)}");
+
+        if (!string.IsNullOrEmpty(persistenceLocation))
+        {
+            _references.Add(MetadataReference.CreateFromFile(persistenceLocation));
+            Console.WriteLine($"[Compiler] Added persistence reference from: {persistenceLocation}");
+        }
+        else
+        {
+            // Fallback: try to add from memory if file location is empty
+            Console.WriteLine("[Compiler] WARNING: Persistence assembly has no file location!");
+        }
     }
 
     /// <summary>
