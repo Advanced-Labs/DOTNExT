@@ -1,4 +1,6 @@
 using System.Net;
+using AsyncPersistenceScenarios.Helpers;
+using AsyncPersistenceScenarios.Scenarios;
 using AsyncPersistenceScenarios.Services;
 using AsyncPersistenceScenarios.TestWorkflows;
 using DOTNExT.Persistence;
@@ -77,7 +79,9 @@ public static class Program
                 ("", "───────────────────────────────"),
                 ("6", "★ Instrumented State Machine (Roslyn Demo)"),
                 ("7", "★★ Dynamic Compilation (Modified Roslyn)"),
-                ("8", "★★★ Orleans/RavenDB Persistence"),
+                ("8", "★★★ Orleans/RavenDB Persistence (Manual)"),
+                ("", "───────────────────────────────"),
+                ("S", "★★★★ SELF-MANAGING SCENARIOS →"),
                 ("", "───────────────────────────────"),
                 ("V", "View Persisted State"),
                 ("C", "Clear All Persisted State"),
@@ -124,6 +128,7 @@ public static class Program
             case "6": await RunInstrumentedWorkflowChallengeAsync(); break;
             case "7": await RunDynamicCompilationChallengeAsync(); break;
             case "8": await RunOrleansRavenDbChallengeAsync(); break;
+            case "S": await RunSelfManagingScenariosMenuAsync(); break;
             case "V": ViewPersistedState(); break;
             case "C": ClearAllState(); break;
             case "R": await RunAllScenariosWithReportAsync(); break;
@@ -1063,6 +1068,89 @@ public static class Program
             else if (action == "4") await ViewOrleansGrainStateAsync();
             else if (action == "5") await StopOrleansSiloAsync();
             else if (action == "S") ViewInstrumentedWorkflowSource();
+
+            AnsiConsole.WriteLine();
+            AnsiConsole.MarkupLine("[grey]Press any key to continue...[/]");
+            Console.ReadKey(true);
+        }
+    }
+
+    /// <summary>
+    /// Self-Managing Scenarios Menu
+    /// These scenarios auto-start and auto-stop their own silos.
+    /// They follow the patterns from PluginGrainScenarios.
+    /// </summary>
+    private static async Task RunSelfManagingScenariosMenuAsync()
+    {
+        while (true)
+        {
+            Console.Clear();
+            AnsiConsole.MarkupLine("[cyan]═══════════════════════════════════════════════════════════════════[/]");
+            AnsiConsole.MarkupLine("[cyan]           SELF-MANAGING ASYNC+ SCENARIOS                          [/]");
+            AnsiConsole.MarkupLine("[cyan]═══════════════════════════════════════════════════════════════════[/]");
+            AnsiConsole.WriteLine();
+
+            var explanation = new Panel(
+                "[white]These scenarios are fully self-contained:\n" +
+                "• Auto-start Orleans silos with RavenDB\n" +
+                "• Auto-stop silos when done\n" +
+                "• Run [[Persistable]] workflows using the InstrumentedWorkflow state machine\n" +
+                "• Produce structured output with Spectre.Console tables\n\n" +
+                "[yellow]Prerequisites:[/]\n" +
+                "• RavenDB running at http://127.0.0.1:38880\n\n" +
+                "[grey]Pattern source: PluginGrainScenarios project[/][/]")
+                .Header("[green]About Self-Managing Scenarios[/]")
+                .BorderColor(Color.Grey);
+            AnsiConsole.Write(explanation);
+            AnsiConsole.WriteLine();
+
+            var scenario = ShowMenu("[cyan]Select a scenario:[/]", new[]
+            {
+                ("", "─── Tier 1: Core Functionality ───"),
+                ("1", "C1: Cross-Session Persistence"),
+                ("2", "C2: Multiple Concurrent Workflows (coming soon)"),
+                ("3", "C3: Nested Async Calls (coming soon)"),
+                ("4", "C4: Exception Recovery (coming soon)"),
+                ("", "─── Tier 2: Robustness ───────────"),
+                ("5", "C5: Large State Serialization (coming soon)"),
+                ("6", "C6: Silo Failover (coming soon)"),
+                ("7", "C7: Version Migration (coming soon)"),
+                ("", "─── Tier 3: Multi-Node ───────────"),
+                ("8", "C8: Multi-Silo Visibility (coming soon)"),
+                ("9", "C9: Grain Mobility (coming soon)"),
+                ("", "───────────────────────────────"),
+                ("B", "Back to Main Menu")
+            });
+
+            if (scenario == "B" || string.IsNullOrEmpty(scenario))
+                break;
+
+            Console.Clear();
+            try
+            {
+                switch (scenario)
+                {
+                    case "1":
+                        await CrossSessionPersistence.RunAsync();
+                        break;
+                    case "2":
+                    case "3":
+                    case "4":
+                    case "5":
+                    case "6":
+                    case "7":
+                    case "8":
+                    case "9":
+                        AnsiConsole.MarkupLine("[yellow]This scenario is not yet implemented.[/]");
+                        AnsiConsole.MarkupLine("[grey]Check .ai-contexts/async-plus-challenge-scenarios.md for the design.[/]");
+                        break;
+                }
+            }
+            catch (Exception ex)
+            {
+                AnsiConsole.MarkupLine($"[red]Scenario failed: {ex.Message}[/]");
+                AnsiConsole.WriteException(ex);
+            }
 
             AnsiConsole.WriteLine();
             AnsiConsole.MarkupLine("[grey]Press any key to continue...[/]");
