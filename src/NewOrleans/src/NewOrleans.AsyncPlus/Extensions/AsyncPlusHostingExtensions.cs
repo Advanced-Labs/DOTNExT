@@ -148,6 +148,7 @@ public static class RavenDbServiceCollectionExtensions
 {
     /// <summary>
     /// Adds RavenDB grain storage to the service collection.
+    /// Uses the proper Orleans lifecycle pattern - storage participates before silo starts.
     /// </summary>
     public static IServiceCollection AddRavenDbGrainStorage(
         this IServiceCollection services,
@@ -158,7 +159,7 @@ public static class RavenDbServiceCollectionExtensions
         services.AddOptions<RavenDbStorageOptions>(name)
             .Configure(configureOptions);
 
-        // Register the storage provider
+        // Register the storage provider as a keyed singleton
         services.AddKeyedSingleton<IGrainStorage>(name, (sp, key) =>
         {
             var optionsMonitor = sp.GetRequiredService<IOptionsMonitor<RavenDbStorageOptions>>();
@@ -168,14 +169,14 @@ public static class RavenDbServiceCollectionExtensions
             var logger = sp.GetRequiredService<ILogger<RavenDbGrainStorage>>();
             var serializer = sp.GetRequiredService<IGrainStorageSerializer>();
 
-            var storage = new RavenDbGrainStorage(name, options, serializer, clusterOptions, logger);
-
-            // Participate in lifecycle
-            var lifecycle = sp.GetRequiredService<ISiloLifecycle>();
-            storage.Participate(lifecycle);
-
-            return storage;
+            return new RavenDbGrainStorage(name, options, serializer, clusterOptions, logger);
         });
+
+        // CRITICAL: Also register as lifecycle participant so Participate() is called BEFORE silo starts
+        // This is the Orleans pattern - without this, storage.Participate() would be called lazily
+        // when the first grain requests storage, by which time the lifecycle has already started.
+        services.AddSingleton<ILifecycleParticipant<ISiloLifecycle>>(sp =>
+            (ILifecycleParticipant<ISiloLifecycle>)sp.GetRequiredKeyedService<IGrainStorage>(name));
 
         return services;
     }
