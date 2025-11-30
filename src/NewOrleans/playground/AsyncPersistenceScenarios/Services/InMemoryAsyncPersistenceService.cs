@@ -19,6 +19,7 @@ namespace AsyncPersistenceScenarios.Services;
 public class InMemoryAsyncPersistenceService : IAsyncPersistenceService, DOTNExT.Persistence.IAsyncPersistenceService
 {
     private readonly ConcurrentDictionary<string, StateMachineSnapshot> _snapshots = new();
+    private readonly HashSet<string> _frozenMethods = new();
     private readonly string? _persistenceFilePath;
     private readonly bool _verbose;
 
@@ -83,6 +84,16 @@ public class InMemoryAsyncPersistenceService : IAsyncPersistenceService, DOTNExT
         string methodId)
         where TStateMachine : IAsyncStateMachine
     {
+        // If frozen, ignore this checkpoint (simulating process crash)
+        if (IsFrozen(methodId))
+        {
+            if (_verbose)
+            {
+                Console.WriteLine($"[Persistence] CHECKPOINT IGNORED (frozen): {methodId}");
+            }
+            return;
+        }
+
         var snapshot = SerializeStateMachine(ref stateMachine, stateNumber);
         _snapshots[methodId] = snapshot;
 
@@ -127,6 +138,16 @@ public class InMemoryAsyncPersistenceService : IAsyncPersistenceService, DOTNExT
     /// <inheritdoc/>
     public void Complete(string methodId, object? result)
     {
+        // If frozen, ignore (simulating process crash - workflow never completes)
+        if (IsFrozen(methodId))
+        {
+            if (_verbose)
+            {
+                Console.WriteLine($"[Persistence] COMPLETE IGNORED (frozen): {methodId}");
+            }
+            return;
+        }
+
         _snapshots.TryRemove(methodId, out _);
 
         if (_verbose)
@@ -142,6 +163,16 @@ public class InMemoryAsyncPersistenceService : IAsyncPersistenceService, DOTNExT
     /// <inheritdoc/>
     public void Fault(string methodId, Exception exception)
     {
+        // If frozen, ignore (simulating process crash)
+        if (IsFrozen(methodId))
+        {
+            if (_verbose)
+            {
+                Console.WriteLine($"[Persistence] FAULT IGNORED (frozen): {methodId}");
+            }
+            return;
+        }
+
         // Keep the snapshot for potential retry/investigation
         if (_verbose)
         {
@@ -199,6 +230,49 @@ public class InMemoryAsyncPersistenceService : IAsyncPersistenceService, DOTNExT
     /// Gets count of persisted snapshots.
     /// </summary>
     public int Count => _snapshots.Count;
+
+    /// <summary>
+    /// Freezes a method ID, preventing any further state changes (Checkpoint, Complete, Fault).
+    /// Used to simulate a process crash where the workflow stops mid-execution.
+    /// </summary>
+    public void Freeze(string methodId)
+    {
+        lock (_frozenMethods)
+        {
+            _frozenMethods.Add(methodId);
+        }
+        if (_verbose)
+        {
+            Console.WriteLine($"[Persistence] FREEZE: {methodId} - no further state changes allowed");
+        }
+    }
+
+    /// <summary>
+    /// Unfreezes a method ID, allowing state changes again.
+    /// Call this before resuming a workflow.
+    /// </summary>
+    public void Unfreeze(string methodId)
+    {
+        lock (_frozenMethods)
+        {
+            _frozenMethods.Remove(methodId);
+        }
+        if (_verbose)
+        {
+            Console.WriteLine($"[Persistence] UNFREEZE: {methodId}");
+        }
+    }
+
+    /// <summary>
+    /// Checks if a method ID is frozen.
+    /// </summary>
+    public bool IsFrozen(string methodId)
+    {
+        lock (_frozenMethods)
+        {
+            return _frozenMethods.Contains(methodId);
+        }
+    }
 
     private StateMachineSnapshot SerializeStateMachine<T>(ref T sm, int state)
         where T : IAsyncStateMachine

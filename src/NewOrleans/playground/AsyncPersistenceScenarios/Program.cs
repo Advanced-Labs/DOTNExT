@@ -427,6 +427,9 @@ public static class Program
             case "Resume from Checkpoint (REAL RESTORE)":
                 if (_persistence.HasPersistedState(workflowId))
                 {
+                    // Unfreeze if it was frozen by a simulated interrupt
+                    _persistence.Unfreeze(workflowId);
+
                     var snapshot = _persistence.GetSnapshot(workflowId);
                     AnsiConsole.MarkupLine($"[green]Found persisted state at checkpoint {snapshot?.State}[/]");
                     AnsiConsole.MarkupLine("[yellow]Resuming workflow from checkpoint...[/]");
@@ -493,10 +496,16 @@ public static class Program
 
                 if (checkpointReached)
                 {
+                    // FREEZE the workflow state - prevents Complete() from clearing the checkpoint
+                    // This simulates what would happen in a real crash: the process dies,
+                    // so no further state changes occur
+                    _persistence.Freeze(workflowId);
+
                     AnsiConsole.WriteLine();
                     AnsiConsole.MarkupLine("[red]Workflow interrupted! State has been persisted.[/]");
                     AnsiConsole.MarkupLine("[grey]In a real scenario, this would be a process crash.[/]");
                     AnsiConsole.MarkupLine("[grey]The state is saved and can be resumed later.[/]");
+                    AnsiConsole.MarkupLine("[grey](Workflow frozen - any further state changes are ignored)[/]");
                     AnsiConsole.WriteLine();
                     ViewSnapshotDetails(workflowId);
                     AnsiConsole.WriteLine();
@@ -581,8 +590,12 @@ public static class Program
         AnsiConsole.MarkupLine("[cyan]═══════════════════════════════════════════════════════════════════[/]");
         AnsiConsole.MarkupLine("[cyan]           DYNAMIC COMPILATION WITH MODIFIED ROSLYN                 [/]");
         AnsiConsole.MarkupLine("[cyan]═══════════════════════════════════════════════════════════════════[/]");
-        AnsiConsole.MarkupLine("[grey]This compiles [[Persistable]] methods at runtime using our modified Roslyn.[/]");
-        AnsiConsole.MarkupLine("[grey]The compiler automatically injects checkpoint/restore calls.[/]");
+        AnsiConsole.MarkupLine("[grey]This compiles [[Persistable]] methods at runtime.[/]");
+        AnsiConsole.MarkupLine("[grey]With modified Roslyn, the compiler injects checkpoint/restore calls.[/]");
+        AnsiConsole.WriteLine();
+        AnsiConsole.MarkupLine("[yellow]NOTE: Currently using STOCK Roslyn from NuGet.[/]");
+        AnsiConsole.MarkupLine("[yellow]To see checkpoints, integrate modified Roslyn DLLs.[/]");
+        AnsiConsole.MarkupLine("[grey]See PersistableAsyncCompiler.cs for integration instructions.[/]");
         AnsiConsole.WriteLine();
 
         var action = AnsiConsole.Prompt(
@@ -635,7 +648,9 @@ public static class Program
         AnsiConsole.WriteLine();
 
         AnsiConsole.MarkupLine("[grey]Source code:[/]");
-        AnsiConsole.Write(new Panel(sourceCode.Trim())
+        // Escape brackets to prevent Spectre.Console from interpreting [Persistable] as markup
+        var escapedSource = sourceCode.Trim().Replace("[", "[[").Replace("]", "]]");
+        AnsiConsole.Write(new Panel(escapedSource)
             .Border(BoxBorder.Rounded)
             .BorderColor(Color.Grey));
         AnsiConsole.WriteLine();
@@ -765,9 +780,14 @@ public static class Program
         table.AddColumn("Non-Persistable");
 
         table.AddRow("Compilation", "[green]Success[/]", "[green]Success[/]");
-        table.AddRow("Assembly Size",
-            $"{new FileInfo(persistableAsm.Location).Length} bytes",
-            $"{new FileInfo(nonPersistableAsm.Location).Length} bytes");
+        // In-memory assemblies have empty Location - use "in-memory" instead
+        var persistableSize = string.IsNullOrEmpty(persistableAsm.Location)
+            ? "in-memory"
+            : $"{new FileInfo(persistableAsm.Location).Length} bytes";
+        var nonPersistableSize = string.IsNullOrEmpty(nonPersistableAsm.Location)
+            ? "in-memory"
+            : $"{new FileInfo(nonPersistableAsm.Location).Length} bytes";
+        table.AddRow("Assembly Size", persistableSize, nonPersistableSize);
 
         // Run both and check for checkpoints
         _persistence.ClearAll();

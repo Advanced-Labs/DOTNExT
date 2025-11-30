@@ -7,11 +7,26 @@ using Microsoft.CodeAnalysis.CSharp;
 namespace AsyncPersistenceScenarios.Services;
 
 /// <summary>
-/// Compiles C# source code using the modified Roslyn compiler
-/// that injects persistence calls into [Persistable] async methods.
+/// Compiles C# source code using the Roslyn compiler.
 ///
-/// This service is the bridge between our test scenarios and the
-/// modified Roslyn compiler. It allows us to:
+/// IMPORTANT: This service currently uses the STOCK Roslyn compiler from NuGet.
+/// To test automatic persistence injection, you must replace the Roslyn NuGet
+/// packages with references to our modified Roslyn DLLs:
+///
+/// Option 1: Reference modified Roslyn DLLs directly
+///   - Build src/roslyn with 'dotnet build'
+///   - Replace Microsoft.CodeAnalysis.CSharp NuGet with the built DLLs
+///   - Located in: src/roslyn/artifacts/bin/Microsoft.CodeAnalysis.CSharp/Debug/netstandard2.0/
+///
+/// Option 2: Create local NuGet package
+///   - Build Roslyn with 'dotnet pack'
+///   - Add local NuGet source pointing to artifacts
+///   - Update package reference versions
+///
+/// Until modified Roslyn is integrated, Challenge 7 shows "No checkpoints created"
+/// because the stock compiler doesn't know about [Persistable].
+///
+/// This service allows us to:
 /// 1. Compile source code with [Persistable] methods at runtime
 /// 2. Load the compiled assembly into memory
 /// 3. Execute the methods with persistence context active
