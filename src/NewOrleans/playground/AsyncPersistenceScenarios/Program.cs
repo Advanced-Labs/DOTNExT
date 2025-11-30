@@ -1094,7 +1094,7 @@ public static class Program
         {
             try
             {
-                var grain = grainFactory.GetGrain<NewOrleans.AsyncPlus.Abstractions.IAsyncStatePersistenceGrain>(id);
+                var grain = grainFactory.GetGrain<NewOrleans.AsyncPlus.IAsyncStatePersistenceGrain>(id);
                 var hasState = await grain.HasPersistedStateAsync();
                 var checkpoint = hasState ? await grain.TryGetCheckpointAsync() : null;
 
@@ -1257,12 +1257,12 @@ public static class Program
                 checkpointCounts.Clear();
 
                 var result = await _workflows.OuterWorkflow(5, wf3Id);
-                var totalCheckpoints = checkpointCounts.Values.Sum();
+                var nestedCheckpoints = checkpointCounts.Values.Sum();
 
                 Log($"  Input: 5");
                 Log($"  Result: {result}");
-                Log($"  Total checkpoints (all workflows): {totalCheckpoints}");
-                scenarioResults.Add(("Challenge 3: OuterWorkflow", true, totalCheckpoints, null));
+                Log($"  Total checkpoints (all workflows): {nestedCheckpoints}");
+                scenarioResults.Add(("Challenge 3: OuterWorkflow", true, nestedCheckpoints, null));
             }
             catch (Exception ex)
             {

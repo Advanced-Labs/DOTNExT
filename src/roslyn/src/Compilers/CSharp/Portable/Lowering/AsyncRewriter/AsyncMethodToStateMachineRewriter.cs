@@ -136,11 +136,11 @@ namespace Microsoft.CodeAnalysis.CSharp
                 var serviceType = F.Compilation.GetTypeByMetadataName("DOTNExT.Persistence.IAsyncPersistenceService");
 
                 System.Console.Error.WriteLine($"[DOTNExT-Roslyn] Found [Persistable] on: {_persistenceMethodId}");
-                System.Console.Error.WriteLine($"[DOTNExT-Roslyn] AsyncPersistenceContext resolved: {contextType != null}");
-                System.Console.Error.WriteLine($"[DOTNExT-Roslyn] IAsyncPersistenceService resolved: {serviceType != null}");
+                System.Console.Error.WriteLine($"[DOTNExT-Roslyn] AsyncPersistenceContext resolved: {contextType is not null}");
+                System.Console.Error.WriteLine($"[DOTNExT-Roslyn] IAsyncPersistenceService resolved: {serviceType is not null}");
 
                 // Also try to list what types ARE available in the DOTNExT.Persistence namespace
-                if (contextType == null || serviceType == null)
+                if (contextType is null || serviceType is null)
                 {
                     System.Console.Error.WriteLine($"[DOTNExT-Roslyn] WARNING: Persistence types not found!");
                     System.Console.Error.WriteLine($"[DOTNExT-Roslyn] Listing {F.Compilation.References.Count()} compilation references:");
@@ -900,7 +900,7 @@ namespace Microsoft.CodeAnalysis.CSharp
                         BinaryOperatorKind.ObjectNotEqual,
                         F.SpecialType(SpecialType.System_Boolean),
                         F.Local(_persistenceServiceLocal),
-                        F.Null(persistenceServiceType)),
+                        F.Null(_persistenceServiceLocal.Type)),
                     F.Binary(
                         BinaryOperatorKind.IntEqual,
                         F.SpecialType(SpecialType.System_Boolean),

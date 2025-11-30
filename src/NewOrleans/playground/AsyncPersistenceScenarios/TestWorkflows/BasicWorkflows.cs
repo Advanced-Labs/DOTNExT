@@ -1,4 +1,5 @@
 using AsyncPersistenceScenarios.Services;
+using DOTNExT.Persistence;
 
 namespace AsyncPersistenceScenarios.TestWorkflows;
 
@@ -12,9 +13,9 @@ namespace AsyncPersistenceScenarios.TestWorkflows;
 /// </summary>
 public class BasicWorkflows
 {
-    private readonly IAsyncPersistenceService? _persistence;
+    private readonly IAsyncPersistenceServiceGeneric? _persistence;
 
-    public BasicWorkflows(IAsyncPersistenceService? persistence = null)
+    public BasicWorkflows(IAsyncPersistenceServiceGeneric? persistence = null)
     {
         _persistence = persistence;
     }

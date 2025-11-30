@@ -61,22 +61,24 @@ public class RavenDbGrainStorage : IGrainStorage, ILifecycleParticipant<ISiloLif
             _logger.LogDebug("Initializing RavenDB grain storage '{Name}' for service '{ServiceId}'",
                 _name, _serviceId);
 
-            _documentStore = new DocumentStore
-            {
-                Urls = _options.Urls,
-                Database = _options.DatabaseName,
-            };
-
             // Configure certificate if provided (for secured RavenDB connections)
+            // Certificate is init-only in RavenDB 6.x, so must be set in initializer
+            System.Security.Cryptography.X509Certificates.X509Certificate2? certificate = null;
             if (!string.IsNullOrEmpty(_options.CertificatePath))
             {
-                // Use EphemeralKeySet for better security and cross-platform compatibility
                 var certFlags = System.Security.Cryptography.X509Certificates.X509KeyStorageFlags.EphemeralKeySet;
-                _documentStore.Certificate = new System.Security.Cryptography.X509Certificates.X509Certificate2(
+                certificate = new System.Security.Cryptography.X509Certificates.X509Certificate2(
                     _options.CertificatePath,
                     _options.CertificatePassword,
                     certFlags);
             }
+
+            _documentStore = new DocumentStore
+            {
+                Urls = _options.Urls,
+                Database = _options.DatabaseName,
+                Certificate = certificate
+            };
 
             _documentStore.Initialize();
 
