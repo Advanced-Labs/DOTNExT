@@ -147,7 +147,8 @@ public struct InstrumentedSimpleWorkflow_StateMachine : IAsyncStateMachine
             Console.WriteLine($"Step 1: input = {input}");
 
             // Start the first async operation
-            awaiter = Task.Delay(500).ContinueWith(_ => input * 2).GetAwaiter();
+            var inputCopy = input; // Capture for lambda (structs cannot capture 'this')
+            awaiter = Task.Delay(500).ContinueWith(_ => inputCopy * 2).GetAwaiter();
 
             if (!awaiter.IsCompleted)
             {
