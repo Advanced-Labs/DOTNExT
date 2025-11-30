@@ -139,6 +139,76 @@ User requested deep research into async/await persistence implementation - speci
 
 ---
 
+## Session: 2025-11-30 (Roslyn Working + Orleans Design)
+
+### Context
+Continued from previous session. The Roslyn modification was failing Challenge 7 (dynamic compilation) - no checkpoints were being created even though the modified Roslyn was loaded.
+
+### What Was Discussed
+
+1. **Diagnosed Challenge 7 Failure**
+   - Added diagnostic output to Roslyn code to trace execution
+   - Discovered: Types WERE being resolved correctly
+   - But: `_persistenceServiceLocal` was null when `GenerateAwaitForIncompleteTask` was called
+
+2. **Found Root Cause: Execution Order Bug**
+   - `VisitBody(body)` was called BEFORE `GeneratePersistenceRestorationCheck()`
+   - `VisitBody` processes await expressions, calling `GenerateAwaitForIncompleteTask`
+   - But `_persistenceServiceLocal` was only created later in `GeneratePersistenceRestorationCheck`
+   - Result: Checkpoint injection was skipped because local was null
+
+3. **Fixed the Bug**
+   - Added `InitializePersistenceServiceLocal()` method
+   - Called it in `GenerateMoveNext()` BEFORE `VisitBody(body)`
+   - Now `_persistenceServiceLocal` exists when await expressions are processed
+
+4. **Challenge 7 Now Working!**
+   ```
+   [[Persistable]] checkpoints created: 2
+   Non-Persistable checkpoints created: 0
+   *** MODIFIED ROSLYN VERIFIED ***
+   ```
+
+5. **New Direction: Orleans Integration**
+   - User wants to move from in-memory persistence to Orleans-backed
+   - Designed `NewOrleans Async+ Driver` architecture
+   - Uses grains for state storage, configurable via DI
+   - Driver pattern allows future Async+ augmentations
+
+### Artifacts Created/Modified
+
+| File | Purpose |
+|------|---------|
+| `NewOrleans-AsyncPlus-Integration.md` | **NEW** - Full design for Orleans integration |
+| `CURRENT-WORK.md` | Updated with Phase 2 complete, Phase 3 starting |
+| `SESSION-LOG.md` | This entry |
+| `AsyncMethodToStateMachineRewriter.cs` | Added `InitializePersistenceServiceLocal()`, fixed execution order |
+| `Program.cs` | Added "Run All with Report" feature |
+
+### Key Insights
+
+1. **Execution order matters in Roslyn**: `VisitBody` processes the body and captures info into bound nodes. Any state needed during that traversal must be initialized first.
+
+2. **Diagnostic output is essential**: The Console.Error.WriteLine statements in the Roslyn code were crucial for understanding the failure.
+
+3. **Driver pattern for Async+**: Orleans integration should be a "driver" that implements `IAsyncPersistenceService`, keeping Async+ agnostic to Orleans.
+
+### What's Next
+
+1. Add Orleans references to AsyncPersistenceScenarios
+2. Create `IAsyncStatePersistenceGrain` and grain implementation
+3. Create `OrleansAsyncPersistenceService` that wraps grain calls
+4. Add Challenge 8: Orleans-backed persistence test
+5. (Optional) Clean up diagnostic output from Roslyn code
+
+### Open Questions
+
+1. **Sync-over-async**: The `IAsyncPersistenceService` interface has sync methods (because Roslyn generates sync calls), but Orleans grains are async. Need to handle this carefully.
+
+2. **Storage provider configuration**: How to let users configure which Orleans storage provider to use for Async+ state.
+
+---
+
 ## Session Template (Copy for New Sessions)
 
 ```markdown
