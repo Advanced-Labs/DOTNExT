@@ -1,6 +1,6 @@
 # Current Work: Async State Machine Persistence
 
-**Status**: Phase 2 COMPLETE - Roslyn working! Phase 3 (Orleans Integration) starting
+**Status**: Phase 3 IN PROGRESS - NewOrleans.AsyncPlus library created, Challenge 8 ready
 **Last Updated**: 2025-11-30
 **Branch**: `claude/review-orleans-docs-01Laga2PuCwyirCKG8tmsCw3`
 
@@ -54,16 +54,24 @@ Fixed by adding `InitializePersistenceServiceLocal()` called BEFORE `VisitBody()
 - Challenge 7: Dynamic compilation with modified Roslyn (WORKING!)
 - "Run All with Report" feature for comprehensive testing
 
-### 🚧 Phase 3: Orleans Integration (STARTING)
+### 🚧 Phase 3: Orleans Integration (IN PROGRESS)
 See: `NewOrleans-AsyncPlus-Integration.md` for full design
 
 **Goal**: Replace in-memory persistence with Orleans-backed persistence
 
-**Key Components**:
-1. `IAsyncStatePersistenceGrain` - Orleans grain for state storage
-2. `NewOrleansAsyncPersistenceService` - implements `IAsyncPersistenceService` using grains
-3. `UseAsyncPlusPersistence()` - silo builder extension
-4. **RavenDB storage** - real durable persistence (in-memory defeats the purpose)
+**Completed**:
+- ✅ `NewOrleans.AsyncPlus` library created at `src/NewOrleans/src/NewOrleans.AsyncPlus/`
+- ✅ `IAsyncStatePersistenceGrain` grain interface with checkpoint/restore/complete/fault
+- ✅ `AsyncStatePersistenceGrain` implementation with `IPersistentState<T>` for RavenDB
+- ✅ `NewOrleansAsyncPersistenceService` with tracked tasks for sync-to-async bridge
+- ✅ `DOTNExT.Persistence` namespace as canonical location for Roslyn-generated code
+- ✅ `UseAsyncPlusPersistence()` silo builder extension
+- ✅ Challenge 8 added to AsyncPersistenceScenarios
+
+**Remaining**:
+- [ ] RavenDB storage provider integration (currently uses memory storage placeholder)
+- [ ] Test full workflow: Start silo → Run workflow → Verify grain persistence
+- [ ] Add restore-after-crash test (simulate process restart)
 
 ---
 
@@ -77,8 +85,18 @@ See: `NewOrleans-AsyncPlus-Integration.md` for full design
   - Added `GenerateCheckpointCall()` - checkpoint before await
   - Modified `GenerateMoveNext()` and `GenerateAwaitForIncompleteTask()`
 
+### NewOrleans.AsyncPlus Library (src/NewOrleans/src/NewOrleans.AsyncPlus/)
+- `NewOrleans.AsyncPlus.csproj` - Library project with Orleans references
+- `Abstractions/IAsyncStatePersistenceGrain.cs` - Grain interface
+- `Abstractions/AsyncStateCheckpoint.cs` - DTOs with Orleans serialization
+- `Abstractions/DOTNExTPersistence.cs` - Canonical `DOTNExT.Persistence` types
+- `Grains/AsyncStatePersistenceGrain.cs` - Grain implementation
+- `Services/NewOrleansAsyncPersistenceService.cs` - Orleans-backed persistence service
+- `Extensions/AsyncPlusHostingExtensions.cs` - DI configuration
+
 ### AsyncPersistenceScenarios (src/NewOrleans/playground/AsyncPersistenceScenarios/)
-- `Program.cs` - Menu-driven scenario runner, "Run All with Report"
+- `Program.cs` - Menu-driven scenario runner, "Run All with Report", Challenge 8
+- `AsyncPersistenceScenarios.csproj` - Added Orleans and AsyncPlus references
 - `Services/IAsyncPersistenceService.cs` - Agnostic persistence interface
 - `Services/InMemoryAsyncPersistenceService.cs` - Memory impl with events
 - `Services/AsyncPersistenceContext.cs` - Ambient context for Roslyn code
@@ -88,26 +106,22 @@ See: `NewOrleans-AsyncPlus-Integration.md` for full design
 
 ---
 
-## Next Steps (Phase 3)
+## Next Steps (Phase 3 Remaining)
 
-1. **Add Orleans references to AsyncPersistenceScenarios.csproj**:
-   ```xml
-   <ProjectReference Include="..\..\src\Orleans.Server\Orleans.Server.csproj" />
-   <ProjectReference Include="..\..\src\Orleans.Runtime\Orleans.Runtime.csproj" />
-   <OrleansBuildTimeCodeGen>true</OrleansBuildTimeCodeGen>
-   ```
+1. **RavenDB Storage Provider**:
+   - Either use existing Orleans.Persistence.RavenDB package
+   - Or create custom provider following Orleans storage provider pattern
+   - Configure with `AddRavenDbGrainStorage("AsyncPlusStorage", ...)`
 
-2. **Create grain interface and implementation**:
-   - `Orleans/IAsyncStatePersistenceGrain.cs`
-   - `Orleans/AsyncStatePersistenceGrain.cs`
+2. **End-to-End Testing**:
+   - Run Challenge 8 with memory storage first
+   - Verify checkpoints appear in grain state
+   - Switch to RavenDB and verify documents in database
 
-3. **Create Orleans persistence service**:
-   - `Services/NewOrleansAsyncPersistenceService.cs`
-
-4. **Add Challenge 8**: Orleans-backed persistence test
-   - Start Orleans silo
-   - Run `[Persistable]` workflow with Orleans persistence
-   - Verify checkpoints stored in grain state
+3. **Restore Testing**:
+   - Stop silo mid-workflow
+   - Restart silo
+   - Resume workflow from checkpoint
 
 ---
 
@@ -116,20 +130,28 @@ See: `NewOrleans-AsyncPlus-Integration.md` for full design
 **If you're a new Claude instance reading this:**
 
 1. **Roslyn modification is WORKING** - Challenge 7 verified!
-2. **Next task**: Orleans integration (Phase 3)
-3. **Read**: `NewOrleans-AsyncPlus-Integration.md` for the full design
-4. **Key insight**: User wants single-silo Orleans first, then distributed
+2. **NewOrleans.AsyncPlus library is CREATED** - All core components in place
+3. **Challenge 8 is READY** - Just needs testing
+4. **Next task**: Run Challenge 8, integrate RavenDB storage provider
+
+**Library Location**: `src/NewOrleans/src/NewOrleans.AsyncPlus/`
+
+**Key Components Already Created**:
+- `IAsyncStatePersistenceGrain` - grain interface for state storage
+- `AsyncStatePersistenceGrain` - uses `IPersistentState<T>` for Orleans storage
+- `NewOrleansAsyncPersistenceService` - implements `IAsyncPersistenceService` using grains
+- `DOTNExT.Persistence` namespace - canonical types for Roslyn-generated code
+- Challenge 8 in `AsyncPersistenceScenarios/Program.cs`
 
 **Don't**:
 - Re-implement Roslyn modification (it's done!)
-- Change the `IAsyncPersistenceService` interface (it works)
-- Forget `<OrleansBuildTimeCodeGen>true</OrleansBuildTimeCodeGen>` for Orleans
+- Re-create the AsyncPlus library (it exists!)
+- Change the core interfaces (they work)
 
 **Do**:
-- Follow the pattern in `PluginGrainScenarios/Program.cs` for Orleans host setup
-- Use `SiloHelper.BuildSingleSilo()` pattern
-- Add grain types for async state persistence
-- Keep Async+ agnostic to Orleans (driver pattern)
+- Test Challenge 8: Start silo → Run workflow → Verify checkpoints
+- Add RavenDB storage provider configuration
+- Test restore-after-crash scenario
 
 ---
 
