@@ -1,8 +1,16 @@
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using NewOrleans.AsyncPlus.Services;
+using NewOrleans.AsyncPlus.Storage;
+using Orleans.Configuration;
 using Orleans.Hosting;
+using Orleans.Providers;
+using Orleans.Runtime;
+using Orleans.Storage;
 
-namespace NewOrleans.AsyncPlus;
+namespace NewOrleans.AsyncPlus.Extensions;
 
 /// <summary>
 /// Extension methods for configuring Async+ persistence in Orleans.
@@ -69,4 +77,106 @@ public class AsyncPlusOptions
     /// Must match a configured grain storage provider name.
     /// </summary>
     public string StorageProviderName { get; set; } = "AsyncPlusStorage";
+}
+
+/// <summary>
+/// Extension methods for configuring RavenDB grain storage in Orleans.
+/// </summary>
+public static class RavenDbSiloBuilderExtensions
+{
+    /// <summary>
+    /// Configures RavenDB as the default grain storage provider.
+    /// </summary>
+    public static ISiloBuilder AddRavenDbGrainStorageAsDefault(
+        this ISiloBuilder builder,
+        Action<RavenDbStorageOptions> configureOptions)
+    {
+        return builder.AddRavenDbGrainStorage(ProviderConstants.DEFAULT_STORAGE_PROVIDER_NAME, configureOptions);
+    }
+
+    /// <summary>
+    /// Configures RavenDB as a named grain storage provider.
+    /// </summary>
+    /// <param name="builder">The silo builder.</param>
+    /// <param name="name">The name of the storage provider.</param>
+    /// <param name="configureOptions">Action to configure RavenDB options.</param>
+    public static ISiloBuilder AddRavenDbGrainStorage(
+        this ISiloBuilder builder,
+        string name,
+        Action<RavenDbStorageOptions> configureOptions)
+    {
+        return builder.ConfigureServices(services =>
+        {
+            services.AddRavenDbGrainStorage(name, configureOptions);
+        });
+    }
+
+    /// <summary>
+    /// Configures RavenDB as a named grain storage provider with default options.
+    /// Uses localhost:8080 and database "OrleansGrainState".
+    /// </summary>
+    public static ISiloBuilder AddRavenDbGrainStorage(
+        this ISiloBuilder builder,
+        string name)
+    {
+        return builder.AddRavenDbGrainStorage(name, _ => { });
+    }
+
+    /// <summary>
+    /// Adds Async+ persistence with RavenDB storage in a single call.
+    /// This is a convenience method that configures both RavenDB storage
+    /// and the Async+ persistence service.
+    /// </summary>
+    /// <param name="builder">The silo builder.</param>
+    /// <param name="configureOptions">Action to configure RavenDB options.</param>
+    /// <param name="storageName">Name of the storage provider. Default: "AsyncPlusStorage"</param>
+    public static ISiloBuilder UseAsyncPlusPersistenceWithRavenDb(
+        this ISiloBuilder builder,
+        Action<RavenDbStorageOptions>? configureOptions = null,
+        string storageName = "AsyncPlusStorage")
+    {
+        return builder
+            .AddRavenDbGrainStorage(storageName, configureOptions ?? (_ => { }))
+            .UseAsyncPlusPersistence(storageName);
+    }
+}
+
+/// <summary>
+/// Service collection extensions for RavenDB grain storage.
+/// </summary>
+public static class RavenDbServiceCollectionExtensions
+{
+    /// <summary>
+    /// Adds RavenDB grain storage to the service collection.
+    /// </summary>
+    public static IServiceCollection AddRavenDbGrainStorage(
+        this IServiceCollection services,
+        string name,
+        Action<RavenDbStorageOptions> configureOptions)
+    {
+        // Configure named options
+        services.AddOptions<RavenDbStorageOptions>(name)
+            .Configure(configureOptions);
+
+        // Register the storage provider
+        services.AddKeyedSingleton<IGrainStorage>(name, (sp, key) =>
+        {
+            var optionsMonitor = sp.GetRequiredService<IOptionsMonitor<RavenDbStorageOptions>>();
+            var options = optionsMonitor.Get(name);
+
+            var clusterOptions = sp.GetRequiredService<IOptions<ClusterOptions>>();
+            var logger = sp.GetRequiredService<ILogger<RavenDbGrainStorage>>();
+            var serializer = sp.GetRequiredService<IGrainStorageSerializer>();
+
+            var storage = new RavenDbGrainStorage(name, options, serializer, clusterOptions, logger);
+
+            // Participate in lifecycle
+            var lifecycle = sp.GetRequiredService<ISiloLifecycle>();
+            storage.Participate(lifecycle);
+
+            return storage;
+        });
+
+        return services;
+    }
 }

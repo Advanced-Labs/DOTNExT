@@ -973,20 +973,20 @@ public static class Program
 
                         if (useRavenDb)
                         {
-                            // RavenDB storage configuration
-                            // NOTE: Requires Orleans.Persistence.RavenDB package or custom implementation
-                            // For now, fallback to memory with a note
-                            AnsiConsole.MarkupLine("[yellow]RavenDB storage provider integration TODO.[/]");
-                            AnsiConsole.MarkupLine("[grey]Using memory storage for demonstration.[/]");
-                            silo.AddMemoryGrainStorage("AsyncPlusStorage");
+                            // RavenDB storage with Async+ persistence
+                            silo.UseAsyncPlusPersistenceWithRavenDb(options =>
+                            {
+                                options.Urls = new[] { "http://localhost:8080" };
+                                options.DatabaseName = "AsyncPersistenceTest";
+                                options.CreateDatabaseIfNotExists = true;
+                            });
                         }
                         else
                         {
-                            silo.AddMemoryGrainStorage("AsyncPlusStorage");
+                            // Memory storage with Async+ persistence
+                            silo.AddMemoryGrainStorage("AsyncPlusStorage")
+                                .UseAsyncPlusPersistence("AsyncPlusStorage");
                         }
-
-                        // Register Async+ persistence via extension method
-                        silo.UseAsyncPlusPersistence("AsyncPlusStorage");
                     })
                     .ConfigureLogging(logging =>
                     {
@@ -1427,6 +1427,71 @@ public static class Program
                 Log($"  ERROR: {ex.Message}");
                 Log($"  Stack: {ex.StackTrace}");
                 scenarioResults.Add(("Challenge 7: DynamicCompilation", false, 0, ex.Message));
+            }
+            Log("");
+
+            // === Challenge 8: Orleans/RavenDB Persistence ===
+            Log("--- Challenge 8: Orleans/RavenDB Persistence ---");
+            try
+            {
+                Log("  Starting Orleans silo with memory storage...");
+
+                // Start silo with memory storage for the automated test
+                await StartOrleansSiloAsync(useRavenDb: false);
+
+                if (_orleansSiloHost != null && _orleansPersistence != null)
+                {
+                    const string wf8Id = "report-orleans-workflow";
+                    checkpointCounts.Clear();
+
+                    // Subscribe to Orleans persistence events
+                    int orleansCheckpoints = 0;
+                    void CountOrleansCheckpoints(object? s, CheckpointEventArgs e)
+                    {
+                        orleansCheckpoints++;
+                    }
+                    _orleansPersistence.OnCheckpoint += CountOrleansCheckpoints;
+
+                    using (AsyncPersistenceContext.SetCurrent(_orleansPersistence))
+                    {
+                        var runner = new InstrumentedWorkflowRunner(wf8Id);
+                        var result = await runner.InstrumentedSimpleWorkflow(7);
+                        Log($"  Input: 7");
+                        Log($"  Result: {result}");
+                    }
+
+                    _orleansPersistence.OnCheckpoint -= CountOrleansCheckpoints;
+
+                    Log($"  Orleans checkpoints created: {orleansCheckpoints}");
+
+                    // Query grain state
+                    var grainFactory = _orleansSiloHost.Services.GetRequiredService<IGrainFactory>();
+                    var grain = grainFactory.GetGrain<NewOrleans.AsyncPlus.Abstractions.IAsyncStatePersistenceGrain>(wf8Id);
+                    var hasState = await grain.HasPersistedStateAsync();
+                    Log($"  Grain has persisted state: {hasState}");
+
+                    scenarioResults.Add(("Challenge 8: Orleans Persistence", true, orleansCheckpoints, null));
+
+                    // Stop silo
+                    await StopOrleansSiloAsync();
+                }
+                else
+                {
+                    Log("  ERROR: Failed to start Orleans silo");
+                    scenarioResults.Add(("Challenge 8: Orleans Persistence", false, 0, "Silo failed to start"));
+                }
+            }
+            catch (Exception ex)
+            {
+                Log($"  ERROR: {ex.Message}");
+                Log($"  Stack: {ex.StackTrace}");
+                scenarioResults.Add(("Challenge 8: Orleans Persistence", false, 0, ex.Message));
+
+                // Try to clean up silo if it was started
+                if (_orleansSiloHost != null)
+                {
+                    try { await StopOrleansSiloAsync(); } catch { }
+                }
             }
             Log("");
         }
