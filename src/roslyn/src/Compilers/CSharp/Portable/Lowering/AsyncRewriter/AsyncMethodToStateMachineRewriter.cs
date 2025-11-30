@@ -756,13 +756,13 @@ namespace Microsoft.CodeAnalysis.CSharp
                 .OfType<PropertySymbol>()
                 .FirstOrDefault();
 
-            if (currentProperty?.GetMethod == null)
+            if (currentProperty?.GetMethod is null)
             {
                 return F.StatementList();
             }
 
             var tryRestoreMethod = GetTryRestoreMethod();
-            if (tryRestoreMethod == null)
+            if (tryRestoreMethod is null)
             {
                 return F.StatementList();
             }
@@ -839,13 +839,13 @@ namespace Microsoft.CodeAnalysis.CSharp
             Debug.Assert(_persistenceMethodId != null);
 
             var checkpointMethod = GetCheckpointMethod();
-            if (checkpointMethod == null)
+            if (checkpointMethod is null)
             {
                 return F.StatementList();
             }
 
             var persistenceServiceType = GetPersistenceServiceType();
-            if (persistenceServiceType == null)
+            if (persistenceServiceType is null)
             {
                 return F.StatementList();
             }

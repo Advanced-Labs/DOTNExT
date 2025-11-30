@@ -14,11 +14,34 @@
     <PackageReference Include="System.Text.Json" Version="8.0.0" />
   </ItemGroup>
 
-  <!-- Future: Reference modified Roslyn for programmatic compilation -->
   <!--
-  <ItemGroup>
-    <ProjectReference Include="..\..\..\..\roslyn\src\Compilers\CSharp\Portable\Microsoft.CodeAnalysis.CSharp.csproj" />
+    Modified Roslyn Reference Options:
+
+    OPTION A: Project Reference (requires building Roslyn solution first)
+    Use this when developing/debugging the Roslyn modifications.
+  -->
+  <ItemGroup Condition="'$(UseRoslynProjectRef)' == 'true'">
+    <ProjectReference Include="..\..\..\roslyn\src\Compilers\CSharp\Portable\Microsoft.CodeAnalysis.CSharp.csproj" />
   </ItemGroup>
+
+  <!--
+    OPTION B: DLL Reference (default - uses pre-built artifacts)
+    Use this for testing after Roslyn has been built.
+    TAI should run: dotnet build in roslyn folder first.
+  -->
+  <ItemGroup Condition="'$(UseRoslynProjectRef)' != 'true'">
+    <!-- Use standard NuGet packages as fallback, with override capability -->
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.9.2" />
+  </ItemGroup>
+
+  <!--
+    To use the modified Roslyn DLLs instead of NuGet:
+    1. Build Roslyn: cd src/roslyn && dotnet build src/Compilers/CSharp/Portable/Microsoft.CodeAnalysis.CSharp.csproj -c Release
+    2. Copy artifacts to a local folder or use HintPath override
+
+    For production testing with modified Roslyn:
+    - Create a local NuGet package from the built artifacts
+    - Or use assembly binding redirects
   -->
 
 </Project>
