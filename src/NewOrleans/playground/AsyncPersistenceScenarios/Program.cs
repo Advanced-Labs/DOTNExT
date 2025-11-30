@@ -583,7 +583,7 @@ public static class Program
         AnsiConsole.MarkupLine("[cyan]═══════════════════════════════════════════════════════════════════[/]");
         AnsiConsole.MarkupLine("[cyan]           DYNAMIC COMPILATION WITH MODIFIED ROSLYN                 [/]");
         AnsiConsole.MarkupLine("[cyan]═══════════════════════════════════════════════════════════════════[/]");
-        AnsiConsole.MarkupLine("[grey]This compiles [Persistable] methods at runtime using our modified Roslyn.[/]");
+        AnsiConsole.MarkupLine("[grey]This compiles [[Persistable]] methods at runtime using our modified Roslyn.[/]");
         AnsiConsole.MarkupLine("[grey]The compiler automatically injects checkpoint/restore calls.[/]");
         AnsiConsole.WriteLine();
 
@@ -592,7 +592,7 @@ public static class Program
                 .Title("[cyan]Challenge 7: Dynamic Compilation[/]")
                 .AddChoices(new[]
                 {
-                    "Compile Simple [Persistable] Workflow",
+                    "Compile Simple [[Persistable]] Workflow",
                     "Compile Non-Persistable (Control)",
                     "Compile Multi-Await Workflow",
                     "Run Compiled Workflow with Persistence",
@@ -605,7 +605,7 @@ public static class Program
 
         switch (action)
         {
-            case "Compile Simple [Persistable] Workflow":
+            case "Compile Simple [[Persistable]] Workflow":
                 await CompileAndShowResultAsync(compiler, PersistableSourceTemplates.SimpleWorkflow, "SimpleWorkflow");
                 break;
 
@@ -685,7 +685,7 @@ public static class Program
     {
         const string workflowId = "dynamic-workflow-1";
 
-        AnsiConsole.MarkupLine("[yellow]Compiling and running [Persistable] workflow...[/]");
+        AnsiConsole.MarkupLine("[yellow]Compiling and running [[Persistable]] workflow...[/]");
         AnsiConsole.WriteLine();
 
         var assembly = compiler.CompileAndLoad(PersistableSourceTemplates.SimpleWorkflow, "DynamicTest");
@@ -748,7 +748,7 @@ public static class Program
 
     private static async Task CompareWorkflowsAsync(PersistableAsyncCompiler compiler)
     {
-        AnsiConsole.MarkupLine("[yellow]Comparing [Persistable] vs Non-Persistable workflows...[/]");
+        AnsiConsole.MarkupLine("[yellow]Comparing [[Persistable]] vs Non-Persistable workflows...[/]");
         AnsiConsole.WriteLine();
 
         // Compile both
@@ -763,7 +763,7 @@ public static class Program
 
         var table = new Table();
         table.AddColumn("Aspect");
-        table.AddColumn("[Persistable]");
+        table.AddColumn("[[Persistable]]");
         table.AddColumn("Non-Persistable");
 
         table.AddRow("Compilation", "[green]Success[/]", "[green]Success[/]");
@@ -811,7 +811,7 @@ public static class Program
         if (persistableCheckpoints > 0 && nonPersistableCheckpoints == 0)
         {
             AnsiConsole.WriteLine();
-            AnsiConsole.MarkupLine("[green]SUCCESS! Modified Roslyn correctly injects persistence only for [Persistable] methods.[/]");
+            AnsiConsole.MarkupLine("[green]SUCCESS! Modified Roslyn correctly injects persistence only for [[Persistable]] methods.[/]");
         }
         else if (persistableCheckpoints == 0 && nonPersistableCheckpoints == 0)
         {
