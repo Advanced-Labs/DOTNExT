@@ -206,15 +206,27 @@ public class NewOrleansAsyncPersistenceService : DOTNExT.Persistence.IAsyncPersi
         var fieldData = new Dictionary<string, object?>();
         foreach (var field in fields)
         {
-            // Skip awaiter fields (they're transient)
-            if (field.Name.Contains("__awaiter") || field.FieldType.Name.Contains("Awaiter"))
+            // Skip transient/infrastructure fields that can't or shouldn't be serialized:
+            // - Awaiter fields (TaskAwaiter, etc.)
+            // - Builder fields (AsyncTaskMethodBuilder, etc.) - these contain Tasks
+            // - Persistence service references
+            var fieldName = field.Name;
+            var typeName = field.FieldType.Name;
+
+            if (fieldName.Contains("__awaiter") || typeName.Contains("Awaiter"))
+                continue;
+            if (fieldName.Contains("__builder") || typeName.Contains("MethodBuilder"))
+                continue;
+            if (fieldName.Contains("persistenceService") || fieldName.Contains("PersistenceService"))
+                continue;
+            if (typeName.Contains("IAsyncPersistenceService"))
                 continue;
 
             try
             {
                 var value = field.GetValue(stateMachine);
-                // Only serialize if JSON-serializable
-                if (IsJsonSerializable(value))
+                // Only serialize if JSON-serializable (quick check, no test serialization)
+                if (IsSerializableType(field.FieldType, value))
                 {
                     fieldData[field.Name] = value;
                 }
@@ -230,6 +242,40 @@ public class NewOrleansAsyncPersistenceService : DOTNExT.Persistence.IAsyncPersi
             WriteIndented = false,
             IncludeFields = true
         });
+    }
+
+    /// <summary>
+    /// Fast check if a type is serializable. Avoids test serialization which can hang.
+    /// </summary>
+    private static bool IsSerializableType(Type type, object? value)
+    {
+        if (value == null) return true;
+
+        // Primitive types - always safe
+        if (type.IsPrimitive || type == typeof(string) || type == typeof(decimal) ||
+            type == typeof(DateTime) || type == typeof(DateTimeOffset) || type == typeof(Guid))
+            return true;
+
+        // Enums
+        if (type.IsEnum) return true;
+
+        // Nullable value types
+        var underlying = Nullable.GetUnderlyingType(type);
+        if (underlying != null)
+            return IsSerializableType(underlying, value);
+
+        // Skip interfaces, delegates, Task types
+        if (type.IsInterface) return false;
+        if (typeof(Delegate).IsAssignableFrom(type)) return false;
+        if (typeof(Task).IsAssignableFrom(type)) return false;
+
+        // Arrays of primitives
+        if (type.IsArray && type.GetElementType()?.IsPrimitive == true)
+            return true;
+
+        // For other types, be conservative - only allow known safe types
+        // This avoids hanging on complex object graphs
+        return false;
     }
 
     private static void DeserializeIntoStateMachine(object stateMachine, byte[] data)
@@ -265,35 +311,6 @@ public class NewOrleansAsyncPersistenceService : DOTNExT.Persistence.IAsyncPersi
         catch
         {
             return null;
-        }
-    }
-
-    private static bool IsJsonSerializable(object? value)
-    {
-        if (value == null) return true;
-
-        var type = value.GetType();
-
-        // Primitive types
-        if (type.IsPrimitive || type == typeof(string) || type == typeof(decimal) ||
-            type == typeof(DateTime) || type == typeof(DateTimeOffset) || type == typeof(Guid))
-            return true;
-
-        // Enums
-        if (type.IsEnum) return true;
-
-        // Arrays and collections of serializable types
-        if (type.IsArray) return true;
-
-        // Try to serialize and see if it works
-        try
-        {
-            JsonSerializer.Serialize(value);
-            return true;
-        }
-        catch
-        {
-            return false;
         }
     }
 

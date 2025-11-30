@@ -1466,7 +1466,7 @@ public static class Program
 
                     // Query grain state
                     var grainFactory = _orleansSiloHost.Services.GetRequiredService<IGrainFactory>();
-                    var grain = grainFactory.GetGrain<NewOrleans.AsyncPlus.Abstractions.IAsyncStatePersistenceGrain>(wf8Id);
+                    var grain = grainFactory.GetGrain<NewOrleans.AsyncPlus.IAsyncStatePersistenceGrain>(wf8Id);
                     var hasState = await grain.HasPersistedStateAsync();
                     Log($"  Grain has persisted state: {hasState}");
 
