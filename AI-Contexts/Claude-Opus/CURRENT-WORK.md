@@ -1,7 +1,7 @@
 # Current Work: Async State Machine Persistence
 
-**Status**: Phase 1 implementation complete (test framework ready)
-**Last Updated**: 2025-11-28
+**Status**: Phase 2 in progress (instrumented workflow demo complete)
+**Last Updated**: 2025-11-30
 **Branch**: `claude/review-orleans-docs-01Laga2PuCwyirCKG8tmsCw3`
 
 ---
@@ -56,6 +56,28 @@
    - Manual checkpoint instrumentation (simulates Roslyn codegen)
    - 5 scenarios: Simple, Order Processing, Nested, Exception, Loop
 
+### Completed Implementation (Phase 2)
+
+8. **Ambient Context created**: `AsyncPersistenceContext.cs`
+   - `AsyncLocal<IAsyncPersistenceService?>` for thread-safe access
+   - `SetCurrent()` returns disposable for scoped persistence
+   - No method signature changes needed
+
+9. **Roslyn-style Interface defined**: `DOTNExT.Persistence.IAsyncPersistenceService`
+   - Works with boxed state machines (object parameter)
+   - `TryRestore()` returns state number (-1 if no restore)
+   - Ready for Roslyn codegen
+
+10. **Instrumented State Machine created**: `InstrumentedWorkflow.cs`
+    - Manually written to exactly match Roslyn output
+    - Shows where checkpoint/restore calls go
+    - **ACTUALLY WORKS** - real checkpoint/restore!
+
+11. **Challenge 6 added to Program.cs**: Instrumented State Machine Demo
+    - Run with/without persistence context
+    - Simulate interrupt at checkpoint 0 or 1
+    - **Resume from checkpoint (REAL RESTORE)**
+
 ---
 
 ## What's Working Now
@@ -65,10 +87,12 @@ You can run the test project to see:
 2. State being captured at each checkpoint
 3. Persistence events being fired
 4. State persisted to JSON file
+5. **NEW: Actual checkpoint/restore with instrumented workflow**
 
-**What's NOT working yet:**
-- Automatic resume from checkpoints (requires Roslyn mod)
-- Actual state machine restoration (requires Roslyn mod)
+**What's WORKING in Phase 2:**
+- Real state machine checkpoint/restore cycle
+- Resume from any checkpoint point
+- Full demonstration of what Roslyn will generate
 
 ---
 
@@ -260,8 +284,8 @@ Each challenge has sub-menu:
 1. You are implementing async state machine persistence for DOTNExT
 2. Research is complete - see `AsyncPersistence-Research.md`
 3. Implementation approach is: Modify Roslyn AsyncRewriter
-4. **Phase 1 is DONE** - test project exists at `/src/NewOrleans/playground/AsyncPersistenceScenarios/`
-5. **Next task**: Modify Roslyn `AsyncMethodToStateMachineRewriter.cs`
+4. **Phase 1 is DONE** - test framework at `/src/NewOrleans/playground/AsyncPersistenceScenarios/`
+5. **Phase 2 MAJOR MILESTONE** - Working checkpoint/restore demonstration!
 6. User wants single-silo Orleans persistence initially, then distributed
 
 **Key context:**
@@ -271,19 +295,28 @@ Each challenge has sub-menu:
 
 **What's been built:**
 - `IAsyncPersistenceService` interface - ready to use
-- `InMemoryAsyncPersistenceService` - working with events
+- `InMemoryAsyncPersistenceService` - working with events, implements BOTH interfaces
+- `AsyncPersistenceContext` - ambient context for Roslyn-generated code
 - `BasicWorkflows` - test workflows with manual checkpoints
-- `Program.cs` - menu-driven test runner
+- `InstrumentedWorkflow.cs` - **KEY FILE: Shows exactly what Roslyn will generate**
+- `Program.cs` - menu-driven test runner with Challenge 6 for instrumented demo
+
+**What's WORKING NOW:**
+- Challenge 6 demonstrates real checkpoint/restore cycle
+- State machine serialization/deserialization
+- Resume from any checkpoint point
+- Full validation that our approach works
 
 **What to do next:**
-1. Modify Roslyn to inject checkpoint calls automatically
-2. Replace manual checkpoints with Roslyn-generated ones
-3. Implement actual resume (restore state machine, call MoveNext)
+1. Actually modify Roslyn `AsyncMethodToStateMachineRewriter.cs`
+2. Build modified Roslyn and test with real [Persistable] workflows
+3. Integrate with Orleans persistence for distributed scenarios
 
 **What NOT to do:**
 - Don't use Option A (custom builder without Roslyn mod) - too limited
 - Don't try IL rewriting - too fragile
 - Don't recreate the test framework - it's already built
+- Don't recreate InstrumentedWorkflow.cs - it's the reference implementation
 
 ---
 

@@ -2,6 +2,7 @@ using System.Collections.Concurrent;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Text.Json;
+using DOTNExT.Persistence;
 
 namespace AsyncPersistenceScenarios.Services;
 
@@ -15,7 +16,7 @@ namespace AsyncPersistenceScenarios.Services;
 /// 3. Fires events for all operations (for observability)
 /// 4. Can optionally persist to JSON file for process restart testing
 /// </summary>
-public class InMemoryAsyncPersistenceService : IAsyncPersistenceService
+public class InMemoryAsyncPersistenceService : IAsyncPersistenceService, DOTNExT.Persistence.IAsyncPersistenceService
 {
     private readonly ConcurrentDictionary<string, StateMachineSnapshot> _snapshots = new();
     private readonly string? _persistenceFilePath;
@@ -330,6 +331,183 @@ public class InMemoryAsyncPersistenceService : IAsyncPersistenceService
             if (_verbose)
             {
                 Console.WriteLine($"[Persistence] Failed to persist to file: {ex.Message}");
+            }
+        }
+    }
+
+    // ========================================================================
+    // DOTNExT.Persistence.IAsyncPersistenceService implementation
+    // These methods are called by Roslyn-generated state machines
+    // ========================================================================
+
+    /// <summary>
+    /// Checkpoint implementation for Roslyn-generated code.
+    /// Takes a boxed state machine object.
+    /// </summary>
+    void DOTNExT.Persistence.IAsyncPersistenceService.Checkpoint(object stateMachine, int stateNumber, string methodId)
+    {
+        var snapshot = SerializeStateMachineObject(stateMachine, stateNumber);
+        _snapshots[methodId] = snapshot;
+
+        if (_verbose)
+        {
+            Console.WriteLine($"[Persistence] CHECKPOINT: {methodId} at state {stateNumber}");
+            Console.WriteLine($"             Fields captured: {string.Join(", ", snapshot.Fields.Keys)}");
+        }
+
+        OnCheckpoint?.Invoke(this, new CheckpointEventArgs(methodId, stateNumber, snapshot));
+        PersistToFile();
+    }
+
+    /// <summary>
+    /// TryRestore implementation for Roslyn-generated code.
+    /// Returns the state to resume from, or -1 if no restoration needed.
+    /// Also restores field values into the state machine.
+    /// </summary>
+    int DOTNExT.Persistence.IAsyncPersistenceService.TryRestore(object stateMachine, string methodId)
+    {
+        if (!_snapshots.TryGetValue(methodId, out var snapshot))
+        {
+            return -1; // No restoration needed
+        }
+
+        // Restore fields into the state machine
+        RestoreStateMachineObject(stateMachine, snapshot);
+
+        if (_verbose)
+        {
+            Console.WriteLine($"[Persistence] RESTORE: {methodId} from state {snapshot.State}");
+            Console.WriteLine($"             Fields restored: {string.Join(", ", snapshot.Fields.Keys)}");
+        }
+
+        OnRestore?.Invoke(this, new RestoreEventArgs(methodId, snapshot.State));
+
+        // Remove the snapshot after restoration (it's been used)
+        _snapshots.TryRemove(methodId, out _);
+        PersistToFile();
+
+        return snapshot.State;
+    }
+
+    /// <summary>
+    /// Complete implementation for Roslyn-generated code.
+    /// </summary>
+    void DOTNExT.Persistence.IAsyncPersistenceService.Complete(string methodId, object? result)
+    {
+        _snapshots.TryRemove(methodId, out _);
+
+        if (_verbose)
+        {
+            Console.WriteLine($"[Persistence] COMPLETE: {methodId} with result: {result ?? "null"}");
+        }
+
+        OnComplete?.Invoke(this, new CompleteEventArgs(methodId, result));
+        PersistToFile();
+    }
+
+    /// <summary>
+    /// Fault implementation for Roslyn-generated code.
+    /// </summary>
+    void DOTNExT.Persistence.IAsyncPersistenceService.Fault(string methodId, Exception exception)
+    {
+        // Keep the snapshot for potential retry/investigation
+        if (_verbose)
+        {
+            Console.WriteLine($"[Persistence] FAULT: {methodId} with exception: {exception.Message}");
+        }
+
+        OnComplete?.Invoke(this, new CompleteEventArgs(methodId, null, faulted: true, exception));
+    }
+
+    /// <summary>
+    /// Serialize a boxed state machine object using reflection.
+    /// </summary>
+    private StateMachineSnapshot SerializeStateMachineObject(object stateMachine, int state)
+    {
+        var type = stateMachine.GetType();
+        var fields = new Dictionary<string, object?>();
+
+        foreach (var field in type.GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic))
+        {
+            var fieldName = field.Name;
+
+            // Skip awaiter fields - these are transient
+            if (fieldName.Contains("__awaiter") || fieldName.Contains("<>u__"))
+                continue;
+
+            // Skip builder field - recreated on resume
+            if (fieldName.Contains("__builder") || fieldName.Contains("<>t__builder"))
+                continue;
+
+            // Skip state field - we track this separately
+            if (fieldName.Contains("__state") || fieldName.Contains("<>1__state"))
+                continue;
+
+            // Skip persistence service field
+            if (fieldName.Contains("_persistenceService"))
+                continue;
+
+            try
+            {
+                var value = field.GetValue(stateMachine);
+                fields[fieldName] = value;
+            }
+            catch (Exception ex)
+            {
+                if (_verbose)
+                {
+                    Console.WriteLine($"[Persistence] Warning: Could not serialize field {fieldName}: {ex.Message}");
+                }
+            }
+        }
+
+        return new StateMachineSnapshot
+        {
+            State = state,
+            TypeName = type.AssemblyQualifiedName ?? type.FullName ?? type.Name,
+            Fields = fields,
+            Timestamp = DateTimeOffset.UtcNow
+        };
+    }
+
+    /// <summary>
+    /// Restore field values into a boxed state machine object.
+    /// </summary>
+    private void RestoreStateMachineObject(object stateMachine, StateMachineSnapshot snapshot)
+    {
+        var type = stateMachine.GetType();
+
+        foreach (var field in type.GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic))
+        {
+            var fieldName = field.Name;
+
+            // Set state field
+            if (fieldName.Contains("__state") || fieldName.Contains("<>1__state"))
+            {
+                field.SetValue(stateMachine, snapshot.State);
+                continue;
+            }
+
+            // Restore other fields from snapshot
+            if (snapshot.Fields.TryGetValue(fieldName, out var value))
+            {
+                try
+                {
+                    // Handle type conversion if needed (e.g., from JsonElement)
+                    if (value is JsonElement je)
+                    {
+                        value = ConvertJsonElement(je, field.FieldType);
+                    }
+
+                    field.SetValue(stateMachine, value);
+                }
+                catch (Exception ex)
+                {
+                    if (_verbose)
+                    {
+                        Console.WriteLine($"[Persistence] Warning: Could not restore field {fieldName}: {ex.Message}");
+                    }
+                }
             }
         }
     }

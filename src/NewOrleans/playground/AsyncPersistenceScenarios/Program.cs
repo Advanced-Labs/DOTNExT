@@ -1,5 +1,6 @@
 using AsyncPersistenceScenarios.Services;
 using AsyncPersistenceScenarios.TestWorkflows;
+using DOTNExT.Persistence;
 using Spectre.Console;
 
 namespace AsyncPersistenceScenarios;
@@ -47,6 +48,8 @@ public static class Program
                         "3. Nested Async (OuterWorkflow)",
                         "4. Exception Handling (WorkflowWithExceptionHandling)",
                         "5. Loops (LoopWorkflow)",
+                        "───────────────────────────────",
+                        "6. ★ Instrumented State Machine (Roslyn Demo)",
                         "───────────────────────────────",
                         "View Persisted State",
                         "Clear All Persisted State",
@@ -97,6 +100,9 @@ public static class Program
                 break;
             case "5. Loops (LoopWorkflow)":
                 await RunLoopChallengeAsync();
+                break;
+            case "6. ★ Instrumented State Machine (Roslyn Demo)":
+                await RunInstrumentedWorkflowChallengeAsync();
                 break;
             case "View Persisted State":
                 ViewPersistedState();
@@ -349,6 +355,159 @@ public static class Program
                 _persistence.Clear(workflowId);
                 AnsiConsole.MarkupLine("[green]Cleared[/]");
                 break;
+        }
+    }
+
+    private static async Task RunInstrumentedWorkflowChallengeAsync()
+    {
+        const string workflowId = "instrumented-workflow-1";
+
+        AnsiConsole.MarkupLine("[cyan]═══════════════════════════════════════════════════════════════════[/]");
+        AnsiConsole.MarkupLine("[cyan]              INSTRUMENTED STATE MACHINE DEMO                       [/]");
+        AnsiConsole.MarkupLine("[cyan]═══════════════════════════════════════════════════════════════════[/]");
+        AnsiConsole.MarkupLine("[grey]This demonstrates what Roslyn-generated code will look like.[/]");
+        AnsiConsole.MarkupLine("[grey]The state machine is manually written to match compiler output.[/]");
+        AnsiConsole.MarkupLine("[grey]Unlike other challenges, this one supports ACTUAL RESTORE.[/]");
+        AnsiConsole.WriteLine();
+
+        var action = AnsiConsole.Prompt(
+            new SelectionPrompt<string>()
+                .Title("[cyan]Challenge 6: Instrumented State Machine[/]")
+                .AddChoices(new[]
+                {
+                    "Run Fresh (no persistence context)",
+                    "Run with Persistence Context",
+                    "Simulate Interrupt at Checkpoint 0",
+                    "Simulate Interrupt at Checkpoint 1",
+                    "Resume from Checkpoint (REAL RESTORE)",
+                    "View Checkpoint State",
+                    "Clear Checkpoint",
+                    "Back"
+                }));
+
+        switch (action)
+        {
+            case "Run Fresh (no persistence context)":
+                AnsiConsole.MarkupLine("[yellow]Running WITHOUT persistence context...[/]");
+                AnsiConsole.MarkupLine("[grey]No checkpoints will be created.[/]");
+                AnsiConsole.WriteLine();
+
+                _persistence.Clear(workflowId);
+                var runner1 = new InstrumentedWorkflowRunner(workflowId);
+                var result1 = await runner1.InstrumentedSimpleWorkflow(5);
+                AnsiConsole.MarkupLine($"[green]Result: {result1}[/]");
+                break;
+
+            case "Run with Persistence Context":
+                AnsiConsole.MarkupLine("[yellow]Running WITH persistence context...[/]");
+                AnsiConsole.MarkupLine("[grey]Checkpoints will be created at each await point.[/]");
+                AnsiConsole.WriteLine();
+
+                _persistence.Clear(workflowId);
+                using (AsyncPersistenceContext.SetCurrent(_persistence))
+                {
+                    var runner2 = new InstrumentedWorkflowRunner(workflowId);
+                    var result2 = await runner2.InstrumentedSimpleWorkflow(5);
+                    AnsiConsole.MarkupLine($"[green]Result: {result2}[/]");
+                }
+                break;
+
+            case "Simulate Interrupt at Checkpoint 0":
+                await SimulateInterruptAsync(workflowId, 0, 5);
+                break;
+
+            case "Simulate Interrupt at Checkpoint 1":
+                await SimulateInterruptAsync(workflowId, 1, 5);
+                break;
+
+            case "Resume from Checkpoint (REAL RESTORE)":
+                if (_persistence.HasPersistedState(workflowId))
+                {
+                    var snapshot = _persistence.GetSnapshot(workflowId);
+                    AnsiConsole.MarkupLine($"[green]Found persisted state at checkpoint {snapshot?.State}[/]");
+                    AnsiConsole.MarkupLine("[yellow]Resuming workflow from checkpoint...[/]");
+                    AnsiConsole.WriteLine();
+
+                    using (AsyncPersistenceContext.SetCurrent(_persistence))
+                    {
+                        // Create a new workflow runner - it will restore from checkpoint
+                        var runner = new InstrumentedWorkflowRunner(workflowId);
+                        var result = await runner.InstrumentedSimpleWorkflow(999); // Input ignored if restoring
+                        AnsiConsole.MarkupLine($"[green]Resumed workflow completed with result: {result}[/]");
+                    }
+                }
+                else
+                {
+                    AnsiConsole.MarkupLine("[red]No persisted state found. Run 'Simulate Interrupt' first.[/]");
+                }
+                break;
+
+            case "View Checkpoint State":
+                ViewSnapshotDetails(workflowId);
+                break;
+
+            case "Clear Checkpoint":
+                _persistence.Clear(workflowId);
+                AnsiConsole.MarkupLine("[green]Cleared[/]");
+                break;
+        }
+    }
+
+    private static async Task SimulateInterruptAsync(string workflowId, int interruptAtState, int input)
+    {
+        _persistence.Clear(workflowId);
+
+        AnsiConsole.MarkupLine($"[yellow]Starting workflow with input={input}[/]");
+        AnsiConsole.MarkupLine($"[yellow]Will interrupt at checkpoint {interruptAtState}[/]");
+        AnsiConsole.WriteLine();
+
+        var checkpointReached = false;
+        var tcs = new TaskCompletionSource();
+
+        // Subscribe to checkpoint events to know when to interrupt
+        void OnCheckpoint(object? sender, CheckpointEventArgs e)
+        {
+            if (e.StateNumber == interruptAtState && e.MethodId == workflowId)
+            {
+                checkpointReached = true;
+                AnsiConsole.MarkupLine($"[red]>>> INTERRUPT! Checkpoint {interruptAtState} reached <<<[/]");
+                tcs.TrySetResult();
+            }
+        }
+
+        _persistence.OnCheckpoint += OnCheckpoint;
+
+        try
+        {
+            using (AsyncPersistenceContext.SetCurrent(_persistence))
+            {
+                var runner = new InstrumentedWorkflowRunner(workflowId);
+                var workflowTask = runner.InstrumentedSimpleWorkflow(input);
+
+                // Wait for either checkpoint or completion
+                var completed = await Task.WhenAny(workflowTask, tcs.Task);
+
+                if (checkpointReached)
+                {
+                    AnsiConsole.WriteLine();
+                    AnsiConsole.MarkupLine("[red]Workflow interrupted! State has been persisted.[/]");
+                    AnsiConsole.MarkupLine("[grey]In a real scenario, this would be a process crash.[/]");
+                    AnsiConsole.MarkupLine("[grey]The state is saved and can be resumed later.[/]");
+                    AnsiConsole.WriteLine();
+                    ViewSnapshotDetails(workflowId);
+                    AnsiConsole.WriteLine();
+                    AnsiConsole.MarkupLine("[cyan]Select 'Resume from Checkpoint' to continue the workflow.[/]");
+                }
+                else
+                {
+                    var result = await workflowTask;
+                    AnsiConsole.MarkupLine($"[yellow]Workflow completed before interrupt: {result}[/]");
+                }
+            }
+        }
+        finally
+        {
+            _persistence.OnCheckpoint -= OnCheckpoint;
         }
     }
 
