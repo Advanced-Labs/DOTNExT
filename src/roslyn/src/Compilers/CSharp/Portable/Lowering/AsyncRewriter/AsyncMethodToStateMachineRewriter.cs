@@ -519,7 +519,8 @@ namespace Microsoft.CodeAnalysis.CSharp
                         : F.Convert(awaiterFieldType, F.Local(awaiterTemp))));
 
             // DOTNExT: Add checkpoint call before suspension for [Persistable] methods
-            if (_enablePersistence)
+            // Only if persistence types were resolved (persistenceServiceLocal was created)
+            if (_enablePersistence && _persistenceServiceLocal is not null)
             {
                 blockBuilder.Add(GenerateCheckpointCall(stateNumber));
             }
