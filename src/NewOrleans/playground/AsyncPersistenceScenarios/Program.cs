@@ -49,7 +49,7 @@ public static class Program
                         "4. Exception Handling (WorkflowWithExceptionHandling)",
                         "5. Loops (LoopWorkflow)",
                         "───────────────────────────────",
-                        "6. ★ Instrumented State Machine (Roslyn Demo)",
+                        // "6. ★ Instrumented State Machine (Roslyn Demo)", // Commented out - requires manual state machine code
                         "7. ★★ Dynamic Compilation (Modified Roslyn)",
                         "───────────────────────────────",
                         "View Persisted State",
@@ -102,9 +102,9 @@ public static class Program
             case "5. Loops (LoopWorkflow)":
                 await RunLoopChallengeAsync();
                 break;
-            case "6. ★ Instrumented State Machine (Roslyn Demo)":
-                await RunInstrumentedWorkflowChallengeAsync();
-                break;
+            // case "6. ★ Instrumented State Machine (Roslyn Demo)":
+            //     await RunInstrumentedWorkflowChallengeAsync();
+            //     break;
             case "7. ★★ Dynamic Compilation (Modified Roslyn)":
                 await RunDynamicCompilationChallengeAsync();
                 break;
@@ -362,6 +362,7 @@ public static class Program
         }
     }
 
+    /* Commented out - requires manual state machine code that cannot compile
     private static async Task RunInstrumentedWorkflowChallengeAsync()
     {
         const string workflowId = "instrumented-workflow-1";
@@ -514,6 +515,7 @@ public static class Program
             _persistence.OnCheckpoint -= OnCheckpoint;
         }
     }
+    */ // End of commented out section
 
     private static void ViewPersistedState()
     {
@@ -675,6 +677,8 @@ public static class Program
             AnsiConsole.MarkupLine("[grey]2. Decompile with ILSpy/dnSpy/dotPeek[/]");
             AnsiConsole.MarkupLine("[grey]3. Look for AsyncPersistenceContext.Current calls in MoveNext()[/]");
         }
+
+        await Task.CompletedTask; // Satisfy async requirement
     }
 
     private static async Task RunCompiledWorkflowAsync(PersistableAsyncCompiler compiler)

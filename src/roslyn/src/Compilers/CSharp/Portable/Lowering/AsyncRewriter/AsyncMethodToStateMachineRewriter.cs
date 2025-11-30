@@ -728,7 +728,7 @@ namespace Microsoft.CodeAnalysis.CSharp
             Debug.Assert(_persistenceMethodId != null);
 
             var persistenceServiceType = GetPersistenceServiceType();
-            if (persistenceServiceType == null)
+            if (persistenceServiceType is null)
             {
                 // DOTNExT.Persistence types not available - skip persistence
                 return F.StatementList();
@@ -746,7 +746,7 @@ namespace Microsoft.CodeAnalysis.CSharp
                 kind: SynthesizedLocalKind.LoweringTemp);
 
             var asyncPersistenceContextType = GetAsyncPersistenceContextType();
-            if (asyncPersistenceContextType == null)
+            if (asyncPersistenceContextType is null)
             {
                 return F.StatementList();
             }
