@@ -591,9 +591,8 @@ public static class Program
         AnsiConsole.MarkupLine("[cyan]           DYNAMIC COMPILATION WITH MODIFIED ROSLYN                 [/]");
         AnsiConsole.MarkupLine("[cyan]═══════════════════════════════════════════════════════════════════[/]");
         AnsiConsole.MarkupLine("[grey]This compiles [[Persistable]] methods at runtime.[/]");
-        AnsiConsole.MarkupLine("[grey]The modified Roslyn compiler automatically injects checkpoint/restore calls.[/]");
-        AnsiConsole.WriteLine();
-        AnsiConsole.MarkupLine("[green]✓ Using MODIFIED Roslyn with [[Persistable]] support[/]");
+        AnsiConsole.MarkupLine("[grey]If modified Roslyn is active, it injects checkpoint/restore calls automatically.[/]");
+        AnsiConsole.MarkupLine("[grey]Run 'Compare' to verify: [[Persistable]] should show checkpoints, Non-Persistable should not.[/]");
         AnsiConsole.WriteLine();
 
         var action = AnsiConsole.Prompt(
