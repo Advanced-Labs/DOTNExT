@@ -219,6 +219,15 @@ namespace Microsoft.CodeAnalysis.CSharp
         internal void GenerateMoveNext(BoundStatement body, MethodSymbol moveNextMethod)
         {
             F.CurrentFunction = moveNextMethod;
+
+            // DOTNExT: Initialize persistence service local BEFORE processing the body
+            // This is needed because VisitBody processes await expressions, which need
+            // _persistenceServiceLocal to be set for checkpoint injection
+            if (_enablePersistence)
+            {
+                InitializePersistenceServiceLocal();
+            }
+
             BoundStatement rewrittenBody = VisitBody(body);
 
             ImmutableArray<StateMachineFieldSymbol> rootScopeHoistedLocals;
@@ -760,6 +769,30 @@ namespace Microsoft.CodeAnalysis.CSharp
 
         #region DOTNExT Persistence Methods
         /// <summary>
+        /// Initializes the persistence service local variable early, before body processing.
+        /// This must be called before VisitBody so that await expression processing can use
+        /// _persistenceServiceLocal for checkpoint injection.
+        /// </summary>
+        private void InitializePersistenceServiceLocal()
+        {
+            Debug.Assert(_enablePersistence);
+
+            var persistenceServiceType = GetPersistenceServiceType();
+            if (persistenceServiceType is null)
+            {
+                System.Console.Error.WriteLine($"[DOTNExT-Roslyn] InitializePersistenceServiceLocal: FAILED - GetPersistenceServiceType returned null");
+                return;
+            }
+
+            _persistenceServiceLocal = F.SynthesizedLocal(
+                persistenceServiceType,
+                syntax: F.Syntax,
+                kind: SynthesizedLocalKind.LoweringTemp);
+
+            System.Console.Error.WriteLine($"[DOTNExT-Roslyn] InitializePersistenceServiceLocal: Created _persistenceServiceLocal for {_persistenceMethodId}");
+        }
+
+        /// <summary>
         /// Generates code to check for and apply persisted state restoration at MoveNext start.
         ///
         /// Generated code pattern:
@@ -783,21 +816,13 @@ namespace Microsoft.CodeAnalysis.CSharp
 
             System.Console.Error.WriteLine($"[DOTNExT-Roslyn] GeneratePersistenceRestorationCheck called for {_persistenceMethodId}");
 
-            var persistenceServiceType = GetPersistenceServiceType();
-            if (persistenceServiceType is null)
+            // _persistenceServiceLocal should already be created by InitializePersistenceServiceLocal
+            if (_persistenceServiceLocal is null)
             {
-                System.Console.Error.WriteLine($"[DOTNExT-Roslyn]   FAILED: GetPersistenceServiceType returned null");
-                // DOTNExT.Persistence types not available - skip persistence
+                System.Console.Error.WriteLine($"[DOTNExT-Roslyn]   FAILED: _persistenceServiceLocal was not initialized");
                 return F.StatementList();
             }
-            System.Console.Error.WriteLine($"[DOTNExT-Roslyn]   Got persistenceServiceType: {persistenceServiceType.ToDisplayString()}");
-
-            // Create local for persistence service
-            _persistenceServiceLocal = F.SynthesizedLocal(
-                persistenceServiceType,
-                syntax: F.Syntax,
-                kind: SynthesizedLocalKind.LoweringTemp);
-            System.Console.Error.WriteLine($"[DOTNExT-Roslyn]   Created _persistenceServiceLocal");
+            System.Console.Error.WriteLine($"[DOTNExT-Roslyn]   Using pre-initialized _persistenceServiceLocal");
 
             var restoredStateLocal = F.SynthesizedLocal(
                 F.SpecialType(SpecialType.System_Int32),
