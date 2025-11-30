@@ -4,21 +4,52 @@
 
 ---
 
-## For Future Claude Instances: Read This First
+## ⚠️ CRITICAL: READ THIS BEFORE DOING ANYTHING ⚠️
 
-When you start a new session and find this document, you are continuing work on **DOTNExT** - a project to evolve .NET into a distributed, semantically-aware Meta-OS.
+**If you received a summary of a previous conversation, STOP.**
 
-### Immediate Actions on New Session
+**DO NOT proceed based on the summary alone.**
 
-1. **Read these files in order**:
-   - `/AI-Contexts/Claude-Opus/CONTINUATION-PROTOCOL.md` (this file)
-   - `/AI-Contexts/Claude-Opus/DOTNExT-Vision.md` (the grand vision)
-   - `/AI-Contexts/Claude-Opus/SESSION-LOG.md` (what was done, what's next)
-   - `/AI-Contexts/Claude-Opus/CURRENT-WORK.md` (if exists - active task details)
+**You MUST read your context files FIRST:**
 
-2. **Check the user's first message** - They may provide context about where we left off
+```
+/home/user/DOTNExT/AI-Contexts/Claude-Opus/
+```
 
-3. **Acknowledge your orientation** - Tell the user you've read the continuation docs and summarize your understanding
+The summary is insufficient. Your context files contain:
+- Detailed technical research
+- Implementation plans with code
+- Self-prompting instructions
+- State that cannot fit in a summary
+
+---
+
+## For Future Claude Instances: Mandatory First Actions
+
+When you start a new session (whether fresh or from summary), you are continuing work on **DOTNExT** - a project to evolve .NET into a distributed, semantically-aware Meta-OS.
+
+### STEP 1: Read Context Files (MANDATORY - DO THIS FIRST)
+
+**Before responding to ANYTHING, read these files in order:**
+
+```
+1. /home/user/DOTNExT/AI-Contexts/Claude-Opus/CONTINUATION-PROTOCOL.md  (this file)
+2. /home/user/DOTNExT/AI-Contexts/Claude-Opus/CURRENT-WORK.md           (active task - READ THIS)
+3. /home/user/DOTNExT/AI-Contexts/Claude-Opus/SESSION-LOG.md            (what was done)
+4. /home/user/DOTNExT/AI-Contexts/Claude-Opus/DOTNExT-Vision.md         (grand vision)
+5. /home/user/DOTNExT/AI-Contexts/Claude-Opus/AsyncPersistence-Research.md (if working on async)
+```
+
+### STEP 2: Acknowledge Orientation
+
+Tell the user:
+- "I've read my context files"
+- Summarize what you understand the current task to be
+- Confirm you're ready to continue
+
+### STEP 3: Then Proceed
+
+Only after Steps 1-2 should you respond to the user's request.
 
 ### Before Every Response
 

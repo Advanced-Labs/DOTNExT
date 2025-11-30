@@ -1,6 +1,6 @@
 # Current Work: Async State Machine Persistence
 
-**Status**: Research complete, ready for implementation
+**Status**: Phase 1 implementation complete (test framework ready)
 **Last Updated**: 2025-11-28
 **Branch**: `claude/review-orleans-docs-01Laga2PuCwyirCKG8tmsCw3`
 
@@ -39,11 +39,42 @@
 4. **Test scenario designed**: 7 progressive challenges
    - BasicCheckpoint → OrleansIntegration
 
+### Completed Implementation (Phase 1)
+
+5. **Test project created**: `AsyncPersistenceScenarios`
+   - Location: `/src/NewOrleans/playground/AsyncPersistenceScenarios/`
+   - Files: `Program.cs`, `Services/*.cs`, `TestWorkflows/*.cs`
+   - Menu-driven scenario runner with Spectre.Console
+
+6. **Persistence service implemented**:
+   - `IAsyncPersistenceService` - agnostic interface
+   - `InMemoryAsyncPersistenceService` - full observability via events
+   - JSON file backing for process restart testing
+   - Reflection-based state machine serialization
+
+7. **Test workflows created**: `BasicWorkflows`
+   - Manual checkpoint instrumentation (simulates Roslyn codegen)
+   - 5 scenarios: Simple, Order Processing, Nested, Exception, Loop
+
 ---
 
-## Immediate Next Steps
+## What's Working Now
 
-### Step 1: Create Test Project Structure
+You can run the test project to see:
+1. Workflows executing with manual checkpoints
+2. State being captured at each checkpoint
+3. Persistence events being fired
+4. State persisted to JSON file
+
+**What's NOT working yet:**
+- Automatic resume from checkpoints (requires Roslyn mod)
+- Actual state machine restoration (requires Roslyn mod)
+
+---
+
+## Next Steps (Phase 2)
+
+### Step 1: Modify Roslyn AsyncRewriter
 
 ```bash
 # In: /home/user/DOTNExT/src/NewOrleans/playground/
@@ -229,18 +260,30 @@ Each challenge has sub-menu:
 1. You are implementing async state machine persistence for DOTNExT
 2. Research is complete - see `AsyncPersistence-Research.md`
 3. Implementation approach is: Modify Roslyn AsyncRewriter
-4. Start with Step 1 above: Create test project structure
-5. User wants single-silo Orleans persistence initially, then distributed
+4. **Phase 1 is DONE** - test project exists at `/src/NewOrleans/playground/AsyncPersistenceScenarios/`
+5. **Next task**: Modify Roslyn `AsyncMethodToStateMachineRewriter.cs`
+6. User wants single-silo Orleans persistence initially, then distributed
 
 **Key context:**
 - This is part of larger DOTNExT vision (see `DOTNExT-Vision.md`)
 - The async persistence is "soft persistence" in the tiered model
 - Eventually leads to distributed workflow execution
 
+**What's been built:**
+- `IAsyncPersistenceService` interface - ready to use
+- `InMemoryAsyncPersistenceService` - working with events
+- `BasicWorkflows` - test workflows with manual checkpoints
+- `Program.cs` - menu-driven test runner
+
+**What to do next:**
+1. Modify Roslyn to inject checkpoint calls automatically
+2. Replace manual checkpoints with Roslyn-generated ones
+3. Implement actual resume (restore state machine, call MoveNext)
+
 **What NOT to do:**
 - Don't use Option A (custom builder without Roslyn mod) - too limited
 - Don't try IL rewriting - too fragile
-- Don't skip the memory-based impl - needed for testing
+- Don't recreate the test framework - it's already built
 
 ---
 
