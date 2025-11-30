@@ -69,9 +69,11 @@
    - Ready for Roslyn codegen
 
 10. **Instrumented State Machine created**: `InstrumentedWorkflow.cs`
-    - Manually written to exactly match Roslyn output
-    - Shows where checkpoint/restore calls go
-    - **ACTUALLY WORKS** - real checkpoint/restore!
+    - **IMPORTANT: This is HAND-WRITTEN C#, NOT compiler-generated!**
+    - Manually written struct that mimics what Roslyn output would look like
+    - Shows exactly WHERE checkpoint/restore calls would go
+    - Validates the approach works BEFORE modifying Roslyn
+    - **ACTUALLY WORKS** - real checkpoint/restore with manual state machine!
 
 11. **Challenge 6 added to Program.cs**: Instrumented State Machine Demo
     - Run with/without persistence context
@@ -93,6 +95,24 @@ You can run the test project to see:
 - Real state machine checkpoint/restore cycle
 - Resume from any checkpoint point
 - Full demonstration of what Roslyn will generate
+
+---
+
+## ⚠️ CRITICAL CLARIFICATION: Roslyn NOT Modified Yet
+
+**The Roslyn compiler has NOT been modified.**
+
+What exists now:
+- `InstrumentedWorkflow.cs` = **HAND-WRITTEN** state machine (not compiler output)
+- `RoslynModification-Design.md` = Design document for future Roslyn changes
+- `BasicWorkflows.cs` = Normal async methods with **manual** checkpoint calls
+
+How the current demo works:
+1. I wrote a state machine struct BY HAND that looks like compiler output
+2. I manually inserted checkpoint/restore calls where Roslyn would
+3. This validates the approach without modifying the compiler
+
+**Next step**: Actually modify Roslyn's `AsyncMethodToStateMachineRewriter.cs`
 
 ---
 
