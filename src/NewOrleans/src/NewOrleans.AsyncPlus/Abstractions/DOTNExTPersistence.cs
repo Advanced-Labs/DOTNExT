@@ -114,11 +114,13 @@ public class CheckpointEventArgs : EventArgs
 {
     public string MethodId { get; }
     public int StateNumber { get; }
+    public object? Snapshot { get; }
 
-    public CheckpointEventArgs(string methodId, int stateNumber)
+    public CheckpointEventArgs(string methodId, int stateNumber, object? snapshot = null)
     {
         MethodId = methodId;
         StateNumber = stateNumber;
+        Snapshot = snapshot;
     }
 }
 
@@ -144,13 +146,15 @@ public class CompleteEventArgs : EventArgs
 {
     public string MethodId { get; }
     public object? Result { get; }
-    public bool Success { get; }
+    public bool Faulted { get; }
+    public Exception? Exception { get; }
 
-    public CompleteEventArgs(string methodId, object? result, bool success)
+    public CompleteEventArgs(string methodId, object? result, bool faulted = false, Exception? exception = null)
     {
         MethodId = methodId;
         Result = result;
-        Success = success;
+        Faulted = faulted;
+        Exception = exception;
     }
 }
 

@@ -145,7 +145,7 @@ public class NewOrleansAsyncPersistenceService : DOTNExT.Persistence.IAsyncPersi
                 _pendingCheckpoints.Remove(methodId);
             }
 
-            OnComplete?.Invoke(this, new DOTNExT.Persistence.CompleteEventArgs(methodId, result, success: true));
+            OnComplete?.Invoke(this, new DOTNExT.Persistence.CompleteEventArgs(methodId, result, faulted: false));
         }
         catch (Exception ex)
         {

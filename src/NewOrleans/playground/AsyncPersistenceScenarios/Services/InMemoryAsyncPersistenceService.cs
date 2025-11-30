@@ -7,7 +7,7 @@ using DOTNExT.Persistence;
 namespace AsyncPersistenceScenarios.Services;
 
 /// <summary>
-/// In-memory implementation of IAsyncPersistenceService.
+/// In-memory implementation of persistence service.
 /// Used for testing and prototyping. Provides full observability via events.
 ///
 /// This implementation:
@@ -15,8 +15,12 @@ namespace AsyncPersistenceScenarios.Services;
 /// 2. Uses reflection to extract/restore field values
 /// 3. Fires events for all operations (for observability)
 /// 4. Can optionally persist to JSON file for process restart testing
+///
+/// Implements both:
+/// - IAsyncPersistenceServiceGeneric (generic, for type-safe test code)
+/// - DOTNExT.Persistence.IAsyncPersistenceService (object-based, for Roslyn codegen)
 /// </summary>
-public class InMemoryAsyncPersistenceService : IAsyncPersistenceService, DOTNExT.Persistence.IAsyncPersistenceService
+public class InMemoryAsyncPersistenceService : IAsyncPersistenceServiceGeneric, DOTNExT.Persistence.IAsyncPersistenceService
 {
     private readonly ConcurrentDictionary<string, StateMachineSnapshot> _snapshots = new();
     private readonly HashSet<string> _frozenMethods = new();
@@ -37,6 +41,11 @@ public class InMemoryAsyncPersistenceService : IAsyncPersistenceService, DOTNExT
     /// Fired when a workflow completes (success or fault).
     /// </summary>
     public event EventHandler<CompleteEventArgs>? OnComplete;
+
+    /// <summary>
+    /// Fired when a workflow faults with an exception.
+    /// </summary>
+    public event EventHandler<FaultEventArgs>? OnFault;
 
     /// <summary>
     /// Creates a new in-memory persistence service.
@@ -179,6 +188,7 @@ public class InMemoryAsyncPersistenceService : IAsyncPersistenceService, DOTNExT
             Console.WriteLine($"[Persistence] FAULT: {methodId} with exception: {exception.Message}");
         }
 
+        OnFault?.Invoke(this, new FaultEventArgs(methodId, exception));
         OnComplete?.Invoke(this, new CompleteEventArgs(methodId, null, faulted: true, exception));
     }
 
@@ -490,6 +500,7 @@ public class InMemoryAsyncPersistenceService : IAsyncPersistenceService, DOTNExT
             Console.WriteLine($"[Persistence] FAULT: {methodId} with exception: {exception.Message}");
         }
 
+        OnFault?.Invoke(this, new FaultEventArgs(methodId, exception));
         OnComplete?.Invoke(this, new CompleteEventArgs(methodId, null, faulted: true, exception));
     }
 

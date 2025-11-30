@@ -2,24 +2,23 @@ using System.Runtime.CompilerServices;
 
 namespace AsyncPersistenceScenarios.Services;
 
+// NOTE: Event args (CheckpointEventArgs, RestoreEventArgs, CompleteEventArgs) are now
+// defined in DOTNExT.Persistence namespace in the NewOrleans.AsyncPlus library.
+// Use: using DOTNExT.Persistence;
+
 /// <summary>
-/// Service interface for async state machine persistence.
-/// Injected via DI - if null/not registered, no persistence occurs.
+/// Service interface for async state machine persistence (generic version).
+/// This interface uses generic TStateMachine for type-safe access to state machine fields.
 ///
-/// This is the agnostic interface that:
-/// 1. Roslyn-generated code will call (when we modify Roslyn)
-/// 2. Can be implemented by different backends (memory, Orleans, file, etc.)
+/// For Roslyn-generated code, use DOTNExT.Persistence.IAsyncPersistenceService instead
+/// (which uses object for state machine parameter due to compiler limitations).
 /// </summary>
-public interface IAsyncPersistenceService
+public interface IAsyncPersistenceServiceGeneric
 {
     /// <summary>
     /// Called before suspending at an await point.
     /// Captures the current state of the state machine for later restoration.
     /// </summary>
-    /// <typeparam name="TStateMachine">The compiler-generated state machine type</typeparam>
-    /// <param name="stateMachine">Reference to the state machine instance</param>
-    /// <param name="stateNumber">The await point state number (0, 1, 2, ...)</param>
-    /// <param name="methodId">Unique identifier for this workflow instance</param>
     void Checkpoint<TStateMachine>(
         ref TStateMachine stateMachine,
         int stateNumber,
@@ -28,13 +27,7 @@ public interface IAsyncPersistenceService
 
     /// <summary>
     /// Called at MoveNext start to check if restoration is needed.
-    /// If returns true, the state machine fields have been populated from the snapshot.
     /// </summary>
-    /// <typeparam name="TStateMachine">The compiler-generated state machine type</typeparam>
-    /// <param name="stateMachine">Reference to the state machine instance to restore into</param>
-    /// <param name="methodId">Unique identifier for this workflow instance</param>
-    /// <param name="restoredState">The state number to resume from</param>
-    /// <returns>True if restoration occurred, false if starting fresh</returns>
     bool TryRestore<TStateMachine>(
         ref TStateMachine stateMachine,
         string methodId,
@@ -43,17 +36,12 @@ public interface IAsyncPersistenceService
 
     /// <summary>
     /// Called when async method completes successfully.
-    /// Clears persisted state (or marks as complete, depending on implementation).
     /// </summary>
-    /// <param name="methodId">Unique identifier for this workflow instance</param>
-    /// <param name="result">The result value (null for void/Task methods)</param>
     void Complete(string methodId, object? result);
 
     /// <summary>
     /// Called when async method faults with an exception.
     /// </summary>
-    /// <param name="methodId">Unique identifier for this workflow instance</param>
-    /// <param name="exception">The exception that caused the fault</param>
     void Fault(string methodId, Exception exception);
 
     /// <summary>
@@ -70,63 +58,6 @@ public interface IAsyncPersistenceService
     /// Gets all persisted method IDs.
     /// </summary>
     IEnumerable<string> GetPersistedMethodIds();
-}
-
-/// <summary>
-/// Event args for checkpoint events.
-/// </summary>
-public class CheckpointEventArgs : EventArgs
-{
-    public string MethodId { get; }
-    public int StateNumber { get; }
-    public StateMachineSnapshot Snapshot { get; }
-    public DateTimeOffset Timestamp { get; }
-
-    public CheckpointEventArgs(string methodId, int stateNumber, StateMachineSnapshot snapshot)
-    {
-        MethodId = methodId;
-        StateNumber = stateNumber;
-        Snapshot = snapshot;
-        Timestamp = DateTimeOffset.UtcNow;
-    }
-}
-
-/// <summary>
-/// Event args for restore events.
-/// </summary>
-public class RestoreEventArgs : EventArgs
-{
-    public string MethodId { get; }
-    public int RestoredState { get; }
-    public DateTimeOffset Timestamp { get; }
-
-    public RestoreEventArgs(string methodId, int restoredState)
-    {
-        MethodId = methodId;
-        RestoredState = restoredState;
-        Timestamp = DateTimeOffset.UtcNow;
-    }
-}
-
-/// <summary>
-/// Event args for completion events.
-/// </summary>
-public class CompleteEventArgs : EventArgs
-{
-    public string MethodId { get; }
-    public object? Result { get; }
-    public bool Faulted { get; }
-    public Exception? Exception { get; }
-    public DateTimeOffset Timestamp { get; }
-
-    public CompleteEventArgs(string methodId, object? result, bool faulted = false, Exception? exception = null)
-    {
-        MethodId = methodId;
-        Result = result;
-        Faulted = faulted;
-        Exception = exception;
-        Timestamp = DateTimeOffset.UtcNow;
-    }
 }
 
 /// <summary>
@@ -161,21 +92,5 @@ public class StateMachineSnapshot
     public Dictionary<string, string> Metadata { get; set; } = new();
 }
 
-/// <summary>
-/// Attribute to mark async methods as persistable.
-/// When Roslyn is modified, it will look for this attribute to enable persistence codegen.
-/// </summary>
-[AttributeUsage(AttributeTargets.Method, AllowMultiple = false)]
-public class PersistableAttribute : Attribute
-{
-    /// <summary>
-    /// Optional custom ID prefix for this workflow type.
-    /// </summary>
-    public string? IdPrefix { get; set; }
-
-    /// <summary>
-    /// If true, checkpoints at every await. If false, only at marked points.
-    /// Default is true.
-    /// </summary>
-    public bool AutoCheckpoint { get; set; } = true;
-}
+// NOTE: PersistableAttribute is now defined in DOTNExT.Persistence namespace
+// in the NewOrleans.AsyncPlus library. Use: using DOTNExT.Persistence;

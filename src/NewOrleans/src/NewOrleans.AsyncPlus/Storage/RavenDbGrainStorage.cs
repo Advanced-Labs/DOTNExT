@@ -67,12 +67,15 @@ public class RavenDbGrainStorage : IGrainStorage, ILifecycleParticipant<ISiloLif
                 Database = _options.DatabaseName,
             };
 
-            // Configure certificate if provided
+            // Configure certificate if provided (for secured RavenDB connections)
             if (!string.IsNullOrEmpty(_options.CertificatePath))
             {
+                // Use EphemeralKeySet for better security and cross-platform compatibility
+                var certFlags = System.Security.Cryptography.X509Certificates.X509KeyStorageFlags.EphemeralKeySet;
                 _documentStore.Certificate = new System.Security.Cryptography.X509Certificates.X509Certificate2(
                     _options.CertificatePath,
-                    _options.CertificatePassword);
+                    _options.CertificatePassword,
+                    certFlags);
             }
 
             _documentStore.Initialize();
