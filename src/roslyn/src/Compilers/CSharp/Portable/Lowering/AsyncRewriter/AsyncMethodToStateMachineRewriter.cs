@@ -130,6 +130,54 @@ namespace Microsoft.CodeAnalysis.CSharp
             if (_enablePersistence)
             {
                 _persistenceMethodId = $"{method.ContainingType.ToDisplayString()}.{method.Name}";
+
+                // DOTNExT: Diagnostic - try to resolve persistence types early and report
+                var contextType = F.Compilation.GetTypeByMetadataName("DOTNExT.Persistence.AsyncPersistenceContext");
+                var serviceType = F.Compilation.GetTypeByMetadataName("DOTNExT.Persistence.IAsyncPersistenceService");
+
+                System.Console.Error.WriteLine($"[DOTNExT-Roslyn] Found [Persistable] on: {_persistenceMethodId}");
+                System.Console.Error.WriteLine($"[DOTNExT-Roslyn] AsyncPersistenceContext resolved: {contextType != null}");
+                System.Console.Error.WriteLine($"[DOTNExT-Roslyn] IAsyncPersistenceService resolved: {serviceType != null}");
+
+                // Also try to list what types ARE available in the DOTNExT.Persistence namespace
+                if (contextType == null || serviceType == null)
+                {
+                    System.Console.Error.WriteLine($"[DOTNExT-Roslyn] WARNING: Persistence types not found!");
+                    System.Console.Error.WriteLine($"[DOTNExT-Roslyn] Listing {F.Compilation.References.Count()} compilation references:");
+                    foreach (var reference in F.Compilation.References)
+                    {
+                        var refSymbol = F.Compilation.GetAssemblyOrModuleSymbol(reference);
+                        if (refSymbol is AssemblySymbol asmSymbol)
+                        {
+                            System.Console.Error.WriteLine($"[DOTNExT-Roslyn]   Assembly: {asmSymbol.Name}");
+                            // Try to find DOTNExT namespace in this assembly
+                            var globalNs = asmSymbol.GlobalNamespace;
+                            var dotNextNs = globalNs.GetNamespaceMembers().FirstOrDefault(n => n.Name == "DOTNExT");
+                            if (dotNextNs != null)
+                            {
+                                System.Console.Error.WriteLine($"[DOTNExT-Roslyn]     Found DOTNExT namespace!");
+                                var persistenceNs = dotNextNs.GetNamespaceMembers().FirstOrDefault(n => n.Name == "Persistence");
+                                if (persistenceNs != null)
+                                {
+                                    System.Console.Error.WriteLine($"[DOTNExT-Roslyn]     Found DOTNExT.Persistence namespace!");
+                                    foreach (var type in persistenceNs.GetTypeMembers())
+                                    {
+                                        System.Console.Error.WriteLine($"[DOTNExT-Roslyn]       Type: {type.Name} (accessible: {type.DeclaredAccessibility})");
+                                    }
+                                }
+                            }
+                        }
+                        else
+                        {
+                            System.Console.Error.WriteLine($"[DOTNExT-Roslyn]   Reference: {reference.Display}");
+                        }
+                    }
+                    System.Console.Error.WriteLine($"[DOTNExT-Roslyn] To fix: ensure DOTNExT.Persistence types are in a referenced assembly with matching metadata name");
+                }
+                else
+                {
+                    System.Console.Error.WriteLine($"[DOTNExT-Roslyn] SUCCESS: Persistence injection will be enabled for {_persistenceMethodId}");
+                }
             }
         }
 
