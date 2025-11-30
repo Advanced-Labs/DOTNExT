@@ -54,6 +54,8 @@ public static class Program
                         "───────────────────────────────",
                         "View Persisted State",
                         "Clear All Persisted State",
+                        "───────────────────────────────",
+                        "★★★ Run All with Report",
                         "Exit"
                     }));
 
@@ -113,6 +115,9 @@ public static class Program
                 break;
             case "Clear All Persisted State":
                 ClearAllState();
+                break;
+            case "★★★ Run All with Report":
+                await RunAllScenariosWithReportAsync();
                 break;
         }
     }
@@ -874,5 +879,358 @@ public static class Program
         AnsiConsole.MarkupLine($"[grey]  ilspycmd {outputDir}/SimpleWorkflow.dll -o decompiled/[/]");
         AnsiConsole.MarkupLine("[grey]  OR open in ILSpy/dnSpy/dotPeek[/]");
         AnsiConsole.MarkupLine("[grey]  Look for AsyncPersistenceContext.Current in the state machine[/]");
+    }
+
+    /// <summary>
+    /// Runs all scenarios and generates a comprehensive diagnostic report.
+    /// Designed to produce copy-paste friendly output for debugging.
+    /// </summary>
+    private static async Task RunAllScenariosWithReportAsync()
+    {
+        var report = new List<string>();
+        var scenarioResults = new List<(string Name, bool Success, int Checkpoints, string? Error)>();
+
+        void Log(string message)
+        {
+            Console.WriteLine(message);
+            report.Add(message);
+        }
+
+        Log("╔══════════════════════════════════════════════════════════════════════════════╗");
+        Log("║             ASYNC PERSISTENCE SCENARIOS - FULL DIAGNOSTIC REPORT             ║");
+        Log("╚══════════════════════════════════════════════════════════════════════════════╝");
+        Log("");
+        Log($"Timestamp: {DateTime.Now:yyyy-MM-dd HH:mm:ss}");
+        Log($"Machine: {Environment.MachineName}");
+        Log($"OS: {Environment.OSVersion}");
+        Log($".NET Version: {Environment.Version}");
+        Log($"Base Directory: {AppContext.BaseDirectory}");
+        Log($"Persistence File: {PersistenceFile}");
+        Log("");
+
+        // Check for Roslyn compiler info
+        Log("=== COMPILER REFERENCE INFO ===");
+        var roslynAsm = typeof(Microsoft.CodeAnalysis.CSharp.CSharpCompilation).Assembly;
+        Log($"Microsoft.CodeAnalysis.CSharp Assembly: {roslynAsm.FullName}");
+        Log($"  Location: {(string.IsNullOrEmpty(roslynAsm.Location) ? "<in-memory>" : roslynAsm.Location)}");
+
+        var persistenceAsm = typeof(DOTNExT.Persistence.AsyncPersistenceContext).Assembly;
+        Log($"DOTNExT.Persistence Assembly: {persistenceAsm.FullName}");
+        Log($"  Location: {(string.IsNullOrEmpty(persistenceAsm.Location) ? "<in-memory>" : persistenceAsm.Location)}");
+        Log("");
+
+        // Clear all state before running
+        _persistence.ClearAll();
+        Log("=== STARTING SCENARIO TESTS ===");
+        Log("");
+
+        // Track checkpoints globally
+        var checkpointCounts = new Dictionary<string, int>();
+        void CountCheckpoints(object? sender, CheckpointEventArgs e)
+        {
+            if (!checkpointCounts.ContainsKey(e.MethodId))
+                checkpointCounts[e.MethodId] = 0;
+            checkpointCounts[e.MethodId]++;
+        }
+        _persistence.OnCheckpoint += CountCheckpoints;
+
+        try
+        {
+            // === Challenge 1: Basic Checkpoint ===
+            Log("--- Challenge 1: Basic Checkpoint (SimpleWorkflow) ---");
+            try
+            {
+                const string wf1Id = "report-simple-workflow";
+                _persistence.Clear(wf1Id);
+                checkpointCounts.Clear();
+
+                var result = await _workflows.SimpleWorkflow(5, wf1Id);
+                var checkpoints = checkpointCounts.GetValueOrDefault(wf1Id, 0);
+
+                Log($"  Input: 5");
+                Log($"  Result: {result}");
+                Log($"  Checkpoints created: {checkpoints}");
+                Log($"  Has persisted state: {_persistence.HasPersistedState(wf1Id)}");
+                scenarioResults.Add(("Challenge 1: SimpleWorkflow", true, checkpoints, null));
+            }
+            catch (Exception ex)
+            {
+                Log($"  ERROR: {ex.Message}");
+                scenarioResults.Add(("Challenge 1: SimpleWorkflow", false, 0, ex.Message));
+            }
+            Log("");
+
+            // === Challenge 2: Multiple Types ===
+            Log("--- Challenge 2: Multiple Types (ProcessOrderWorkflow) ---");
+            try
+            {
+                const string wf2Id = "report-order-workflow";
+                _persistence.Clear(wf2Id);
+                checkpointCounts.Clear();
+
+                var order = new Order
+                {
+                    OrderId = "ORD-REPORT",
+                    CustomerId = "CUST-REPORT",
+                    Items = new List<OrderItem>
+                    {
+                        new() { ProductId = "P1", Name = "Widget", Price = 10m, Quantity = 2 }
+                    }
+                };
+                var result = await _workflows.ProcessOrderWorkflow(order, wf2Id);
+                var checkpoints = checkpointCounts.GetValueOrDefault(wf2Id, 0);
+
+                Log($"  Order: {order.OrderId}");
+                Log($"  Result: {result.Message}, Total: {result.Total:C}");
+                Log($"  Checkpoints created: {checkpoints}");
+                scenarioResults.Add(("Challenge 2: ProcessOrderWorkflow", true, checkpoints, null));
+            }
+            catch (Exception ex)
+            {
+                Log($"  ERROR: {ex.Message}");
+                scenarioResults.Add(("Challenge 2: ProcessOrderWorkflow", false, 0, ex.Message));
+            }
+            Log("");
+
+            // === Challenge 3: Nested Async ===
+            Log("--- Challenge 3: Nested Async (OuterWorkflow) ---");
+            try
+            {
+                const string wf3Id = "report-outer-workflow";
+                _persistence.Clear(wf3Id);
+                _persistence.Clear($"{wf3Id}-inner1");
+                _persistence.Clear($"{wf3Id}-inner2");
+                checkpointCounts.Clear();
+
+                var result = await _workflows.OuterWorkflow(5, wf3Id);
+                var totalCheckpoints = checkpointCounts.Values.Sum();
+
+                Log($"  Input: 5");
+                Log($"  Result: {result}");
+                Log($"  Total checkpoints (all workflows): {totalCheckpoints}");
+                scenarioResults.Add(("Challenge 3: OuterWorkflow", true, totalCheckpoints, null));
+            }
+            catch (Exception ex)
+            {
+                Log($"  ERROR: {ex.Message}");
+                scenarioResults.Add(("Challenge 3: OuterWorkflow", false, 0, ex.Message));
+            }
+            Log("");
+
+            // === Challenge 4: Exception Handling ===
+            Log("--- Challenge 4: Exception Handling (success path) ---");
+            try
+            {
+                const string wf4Id = "report-exception-workflow";
+                _persistence.Clear(wf4Id);
+                checkpointCounts.Clear();
+
+                var result = await _workflows.WorkflowWithExceptionHandling(10, false, wf4Id);
+                var checkpoints = checkpointCounts.GetValueOrDefault(wf4Id, 0);
+
+                Log($"  Input: 10, ShouldFail: false");
+                Log($"  Result: {result}");
+                Log($"  Checkpoints created: {checkpoints}");
+                scenarioResults.Add(("Challenge 4: ExceptionHandling", true, checkpoints, null));
+            }
+            catch (Exception ex)
+            {
+                Log($"  ERROR: {ex.Message}");
+                scenarioResults.Add(("Challenge 4: ExceptionHandling", false, 0, ex.Message));
+            }
+            Log("");
+
+            // === Challenge 5: Loops ===
+            Log("--- Challenge 5: Loops (LoopWorkflow, 5 iterations) ---");
+            try
+            {
+                const string wf5Id = "report-loop-workflow";
+                _persistence.Clear(wf5Id);
+                checkpointCounts.Clear();
+
+                var result = await _workflows.LoopWorkflow(5, wf5Id);
+                var checkpoints = checkpointCounts.GetValueOrDefault(wf5Id, 0);
+
+                Log($"  Iterations: 5");
+                Log($"  Result (sum): {result}");
+                Log($"  Checkpoints created: {checkpoints}");
+                scenarioResults.Add(("Challenge 5: LoopWorkflow", true, checkpoints, null));
+            }
+            catch (Exception ex)
+            {
+                Log($"  ERROR: {ex.Message}");
+                scenarioResults.Add(("Challenge 5: LoopWorkflow", false, 0, ex.Message));
+            }
+            Log("");
+
+            // === Challenge 6: Instrumented State Machine ===
+            Log("--- Challenge 6: Instrumented State Machine ---");
+            try
+            {
+                const string wf6Id = "report-instrumented-workflow";
+                _persistence.Clear(wf6Id);
+                checkpointCounts.Clear();
+
+                int checkpoints;
+                using (AsyncPersistenceContext.SetCurrent(_persistence))
+                {
+                    var runner = new InstrumentedWorkflowRunner(wf6Id);
+                    var result = await runner.InstrumentedSimpleWorkflow(5);
+                    checkpoints = checkpointCounts.GetValueOrDefault(wf6Id, 0);
+
+                    Log($"  Input: 5");
+                    Log($"  Result: {result}");
+                    Log($"  Checkpoints created: {checkpoints}");
+                    Log($"  Has persisted state: {_persistence.HasPersistedState(wf6Id)}");
+                }
+                scenarioResults.Add(("Challenge 6: InstrumentedStateMachine", true, checkpoints, null));
+            }
+            catch (Exception ex)
+            {
+                Log($"  ERROR: {ex.Message}");
+                scenarioResults.Add(("Challenge 6: InstrumentedStateMachine", false, 0, ex.Message));
+            }
+            Log("");
+
+            // === Challenge 7: Dynamic Compilation ===
+            Log("--- Challenge 7: Dynamic Compilation (Modified Roslyn) ---");
+            try
+            {
+                var compiler = new PersistableAsyncCompiler();
+
+                // Show compiler diagnostics
+                Log("  Compiler initialization output:");
+
+                // Compile persistable workflow
+                var persistableAsm = compiler.CompileAndLoad(PersistableSourceTemplates.SimpleWorkflow, "ReportPersistable");
+                var nonPersistableAsm = compiler.CompileAndLoad(PersistableSourceTemplates.NonPersistableWorkflow, "ReportNonPersistable");
+
+                if (persistableAsm == null)
+                {
+                    Log($"  [[Persistable]] compilation FAILED:");
+                    Log($"    {compiler.GetErrorsString()}");
+                    scenarioResults.Add(("Challenge 7: [[Persistable]] Compilation", false, 0, "Compilation failed"));
+                }
+                else
+                {
+                    Log($"  [[Persistable]] compilation: SUCCESS");
+
+                    // Run and count checkpoints
+                    const string wf7PersistId = "report-dynamic-persistable";
+                    const string wf7NonPersistId = "report-dynamic-nonpersistable";
+                    _persistence.Clear(wf7PersistId);
+                    _persistence.Clear(wf7NonPersistId);
+                    checkpointCounts.Clear();
+
+                    var persistableType = persistableAsm.GetType("DynamicWorkflows.TestWorkflow")!;
+                    var persistableMethod = persistableType.GetMethod("SimpleCalculation")!;
+                    var persistableInstance = Activator.CreateInstance(persistableType);
+
+                    using (AsyncPersistenceContext.SetCurrent(_persistence))
+                    {
+                        var task = (Task<int>)persistableMethod.Invoke(persistableInstance, new object[] { 5 })!;
+                        var result = await task;
+                        Log($"  [[Persistable]] execution result: {result}");
+                    }
+
+                    var persistableCheckpoints = checkpointCounts.Values.Sum();
+                    Log($"  [[Persistable]] checkpoints created: {persistableCheckpoints}");
+
+                    // Run non-persistable
+                    if (nonPersistableAsm != null)
+                    {
+                        checkpointCounts.Clear();
+                        var nonPersistableType = nonPersistableAsm.GetType("DynamicWorkflows.NonPersistableWorkflow")!;
+                        var nonPersistableMethod = nonPersistableType.GetMethod("NormalCalculation")!;
+                        var nonPersistableInstance = Activator.CreateInstance(nonPersistableType);
+
+                        using (AsyncPersistenceContext.SetCurrent(_persistence))
+                        {
+                            var task = (Task<int>)nonPersistableMethod.Invoke(nonPersistableInstance, new object[] { 5 })!;
+                            var result = await task;
+                            Log($"  Non-Persistable execution result: {result}");
+                        }
+
+                        var nonPersistableCheckpoints = checkpointCounts.Values.Sum();
+                        Log($"  Non-Persistable checkpoints created: {nonPersistableCheckpoints}");
+
+                        // Determine if modified Roslyn is working
+                        if (persistableCheckpoints > 0 && nonPersistableCheckpoints == 0)
+                        {
+                            Log($"  *** MODIFIED ROSLYN VERIFIED: [[Persistable]] has checkpoints, Non-Persistable does not ***");
+                        }
+                        else if (persistableCheckpoints == 0)
+                        {
+                            Log($"  NOTE: No checkpoints for [[Persistable]] - likely using STOCK Roslyn");
+                        }
+                    }
+
+                    scenarioResults.Add(("Challenge 7: DynamicCompilation", true, persistableCheckpoints, null));
+                }
+            }
+            catch (Exception ex)
+            {
+                Log($"  ERROR: {ex.Message}");
+                Log($"  Stack: {ex.StackTrace}");
+                scenarioResults.Add(("Challenge 7: DynamicCompilation", false, 0, ex.Message));
+            }
+            Log("");
+        }
+        finally
+        {
+            _persistence.OnCheckpoint -= CountCheckpoints;
+        }
+
+        // === Summary ===
+        Log("╔══════════════════════════════════════════════════════════════════════════════╗");
+        Log("║                              SUMMARY                                         ║");
+        Log("╚══════════════════════════════════════════════════════════════════════════════╝");
+        Log("");
+        Log($"{"Scenario",-45} {"Status",-10} {"Checkpoints",-12}");
+        Log(new string('-', 70));
+
+        foreach (var (name, success, checkpoints, error) in scenarioResults)
+        {
+            var status = success ? "PASS" : "FAIL";
+            Log($"{name,-45} {status,-10} {checkpoints,-12}");
+            if (!success && error != null)
+            {
+                Log($"  Error: {error}");
+            }
+        }
+
+        Log("");
+        var totalPassed = scenarioResults.Count(r => r.Success);
+        var totalCheckpoints = scenarioResults.Sum(r => r.Checkpoints);
+        Log($"Total: {totalPassed}/{scenarioResults.Count} passed, {totalCheckpoints} total checkpoints created");
+        Log("");
+
+        // Final persisted state
+        Log("=== FINAL PERSISTED STATE ===");
+        var persistedIds = _persistence.GetPersistedMethodIds().ToList();
+        if (persistedIds.Count == 0)
+        {
+            Log("  (no persisted state)");
+        }
+        else
+        {
+            foreach (var id in persistedIds)
+            {
+                var snapshot = _persistence.GetSnapshot(id);
+                if (snapshot != null)
+                {
+                    Log($"  {id}: state={snapshot.State}, fields={string.Join(",", snapshot.Fields.Keys)}");
+                }
+            }
+        }
+        Log("");
+
+        Log("╔══════════════════════════════════════════════════════════════════════════════╗");
+        Log("║                           END OF REPORT                                      ║");
+        Log("╚══════════════════════════════════════════════════════════════════════════════╝");
+
+        // Option to copy
+        AnsiConsole.WriteLine();
+        AnsiConsole.MarkupLine("[cyan]Report complete. The above output can be copied for debugging.[/]");
     }
 }
