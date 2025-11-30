@@ -98,21 +98,29 @@ You can run the test project to see:
 
 ---
 
-## ⚠️ CRITICAL CLARIFICATION: Roslyn NOT Modified Yet
+## ✅ Roslyn HAS Been Modified (2025-11-30)
 
-**The Roslyn compiler has NOT been modified.**
+**The Roslyn compiler has been modified to support async persistence!**
 
-What exists now:
-- `InstrumentedWorkflow.cs` = **HAND-WRITTEN** state machine (not compiler output)
-- `RoslynModification-Design.md` = Design document for future Roslyn changes
-- `BasicWorkflows.cs` = Normal async methods with **manual** checkpoint calls
+**Modified file**: `src/roslyn/src/Compilers/CSharp/Portable/Lowering/AsyncRewriter/AsyncMethodToStateMachineRewriter.cs`
 
-How the current demo works:
-1. I wrote a state machine struct BY HAND that looks like compiler output
-2. I manually inserted checkpoint/restore calls where Roslyn would
-3. This validates the approach without modifying the compiler
+**Changes made:**
+1. Added persistence fields (`_enablePersistence`, `_persistenceMethodId`, `_persistenceServiceLocal`, etc.)
+2. Modified constructor to detect `[Persistable]` attribute on async methods
+3. Modified `GenerateMoveNext()` to inject restoration check at start
+4. Modified `GenerateAwaitForIncompleteTask()` to inject checkpoint call before suspension
+5. Added helper methods: `GeneratePersistenceRestorationCheck()`, `GenerateCheckpointCall()`, type resolution methods
 
-**Next step**: Actually modify Roslyn's `AsyncMethodToStateMachineRewriter.cs`
+**How it works now:**
+- Methods marked with `[Persistable]` attribute get automatic checkpoint/restore code
+- At MoveNext start: checks `AsyncPersistenceContext.Current` for restoration
+- Before each await suspension: calls `Checkpoint(this, stateNumber, methodId)`
+- If persistence types not available: gracefully degrades (no-op)
+
+**Test artifacts:**
+- `InstrumentedWorkflow.cs` = Hand-written reference (validates approach)
+- `BasicWorkflows.cs` = Normal async methods with manual checkpoint calls
+- Challenge 6 = Demonstrates real checkpoint/restore cycle
 
 ---
 
@@ -328,9 +336,10 @@ Each challenge has sub-menu:
 - Full validation that our approach works
 
 **What to do next:**
-1. Actually modify Roslyn `AsyncMethodToStateMachineRewriter.cs`
+1. ~~Actually modify Roslyn `AsyncMethodToStateMachineRewriter.cs`~~ ✅ DONE (2025-11-30)
 2. Build modified Roslyn and test with real [Persistable] workflows
-3. Integrate with Orleans persistence for distributed scenarios
+3. Create `[Persistable]` attribute in DOTNExT.Persistence namespace
+4. Integrate with Orleans persistence for distributed scenarios
 
 **What NOT to do:**
 - Don't use Option A (custom builder without Roslyn mod) - too limited

@@ -5,6 +5,7 @@
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics;
+using System.Linq;
 using System.Runtime.CompilerServices;
 using Microsoft.CodeAnalysis.CodeGen;
 using Microsoft.CodeAnalysis.CSharp.Symbols;
@@ -61,6 +62,33 @@ namespace Microsoft.CodeAnalysis.CSharp
 
         private readonly Dictionary<BoundValuePlaceholderBase, BoundExpression> _placeholderMap;
 
+        #region DOTNExT Persistence Support
+        /// <summary>
+        /// Local variable to cache the persistence service reference during MoveNext execution.
+        /// </summary>
+        private LocalSymbol? _persistenceServiceLocal;
+
+        /// <summary>
+        /// Whether this method should have persistence support (has [Persistable] attribute).
+        /// </summary>
+        private readonly bool _enablePersistence;
+
+        /// <summary>
+        /// The method ID used for persistence (derived from containing type + method name).
+        /// </summary>
+        private readonly string? _persistenceMethodId;
+
+        /// <summary>
+        /// Cached type reference for DOTNExT.Persistence.AsyncPersistenceContext.
+        /// </summary>
+        private NamedTypeSymbol? _asyncPersistenceContextType;
+
+        /// <summary>
+        /// Cached type reference for DOTNExT.Persistence.IAsyncPersistenceService.
+        /// </summary>
+        private NamedTypeSymbol? _persistenceServiceType;
+        #endregion
+
         internal AsyncMethodToStateMachineRewriter(
             MethodSymbol method,
             int methodOrdinal,
@@ -93,6 +121,16 @@ namespace Microsoft.CodeAnalysis.CSharp
             _nextAwaiterId = slotAllocatorOpt?.PreviousAwaiterSlotCount ?? 0;
 
             _placeholderMap = new Dictionary<BoundValuePlaceholderBase, BoundExpression>();
+
+            // DOTNExT: Check for [Persistable] attribute on the method
+            _enablePersistence = method.GetAttributes().Any(a =>
+                a.AttributeClass?.Name == "PersistableAttribute" ||
+                a.AttributeClass?.ToDisplayString() == "DOTNExT.Persistence.PersistableAttribute");
+
+            if (_enablePersistence)
+            {
+                _persistenceMethodId = $"{method.ContainingType.ToDisplayString()}.{method.Name}";
+            }
         }
 
 #nullable disable
@@ -144,6 +182,12 @@ namespace Microsoft.CodeAnalysis.CSharp
             bodyBuilder.Add(F.Assignment(F.Local(cachedState), F.Field(F.This(), stateField)));
             bodyBuilder.Add(CacheThisIfNeeded());
 
+            // DOTNExT: Add persistence restoration check for [Persistable] methods
+            if (_enablePersistence)
+            {
+                bodyBuilder.Add(GeneratePersistenceRestorationCheck());
+            }
+
             var exceptionLocal = F.SynthesizedLocal(F.WellKnownType(WellKnownType.System_Exception));
             bodyBuilder.Add(
                 GenerateTopLevelTry(
@@ -189,6 +233,8 @@ namespace Microsoft.CodeAnalysis.CSharp
             locals.Add(cachedState);
             if ((object)cachedThis != null) locals.Add(cachedThis);
             if ((object)_exprRetValue != null) locals.Add(_exprRetValue);
+            // DOTNExT: Add persistence service local
+            if (_persistenceServiceLocal != null) locals.Add(_persistenceServiceLocal);
 
             var newBody =
                 F.SequencePoint(
@@ -472,6 +518,12 @@ namespace Microsoft.CodeAnalysis.CSharp
                         ? F.Local(awaiterTemp)
                         : F.Convert(awaiterFieldType, F.Local(awaiterTemp))));
 
+            // DOTNExT: Add checkpoint call before suspension for [Persistable] methods
+            if (_enablePersistence)
+            {
+                blockBuilder.Add(GenerateCheckpointCall(stateNumber));
+            }
+
             blockBuilder.Add(awaiterTemp.Type.IsDynamic()
                 ? GenerateAwaitOnCompletedDynamic(awaiterTemp)
                 : GenerateAwaitOnCompleted(awaiterTemp.Type, awaiterTemp));
@@ -651,5 +703,207 @@ namespace Microsoft.CodeAnalysis.CSharp
             return F.Goto(_exprReturnLabel);
         }
         #endregion Visitors
+
+        #region DOTNExT Persistence Methods
+        /// <summary>
+        /// Generates code to check for and apply persisted state restoration at MoveNext start.
+        ///
+        /// Generated code pattern:
+        /// <code>
+        /// var persistenceService = AsyncPersistenceContext.Current;
+        /// if (persistenceService != null &amp;&amp; cachedState == -1)
+        /// {
+        ///     var restoredState = persistenceService.TryRestore(this, methodId);
+        ///     if (restoredState >= 0)
+        ///     {
+        ///         cachedState = restoredState;
+        ///         this.&lt;&gt;1__state = restoredState;
+        ///     }
+        /// }
+        /// </code>
+        /// </summary>
+        private BoundStatement GeneratePersistenceRestorationCheck()
+        {
+            Debug.Assert(_enablePersistence);
+            Debug.Assert(_persistenceMethodId != null);
+
+            var persistenceServiceType = GetPersistenceServiceType();
+            if (persistenceServiceType == null)
+            {
+                // DOTNExT.Persistence types not available - skip persistence
+                return F.StatementList();
+            }
+
+            // Create local for persistence service
+            _persistenceServiceLocal = F.SynthesizedLocal(
+                persistenceServiceType,
+                syntax: F.Syntax,
+                kind: SynthesizedLocalKind.LoweringTemp);
+
+            var restoredStateLocal = F.SynthesizedLocal(
+                F.SpecialType(SpecialType.System_Int32),
+                syntax: F.Syntax,
+                kind: SynthesizedLocalKind.LoweringTemp);
+
+            var asyncPersistenceContextType = GetAsyncPersistenceContextType();
+            if (asyncPersistenceContextType == null)
+            {
+                return F.StatementList();
+            }
+
+            // Get the Current property getter
+            var currentProperty = asyncPersistenceContextType.GetMembers("Current")
+                .OfType<PropertySymbol>()
+                .FirstOrDefault();
+
+            if (currentProperty?.GetMethod == null)
+            {
+                return F.StatementList();
+            }
+
+            var tryRestoreMethod = GetTryRestoreMethod();
+            if (tryRestoreMethod == null)
+            {
+                return F.StatementList();
+            }
+
+            var statements = ArrayBuilder<BoundStatement>.GetInstance();
+
+            // var persistenceService = AsyncPersistenceContext.Current;
+            statements.Add(F.Assignment(
+                F.Local(_persistenceServiceLocal),
+                F.Call(null, currentProperty.GetMethod)));
+
+            // Build the inner restore block
+            // var restoredState = persistenceService.TryRestore(this, methodId);
+            // if (restoredState >= 0) { cachedState = restoredState; this.<>1__state = restoredState; }
+            var restoreStatements = ArrayBuilder<BoundStatement>.GetInstance();
+
+            restoreStatements.Add(F.Assignment(
+                F.Local(restoredStateLocal),
+                F.Call(
+                    F.Local(_persistenceServiceLocal),
+                    tryRestoreMethod,
+                    F.Convert(F.SpecialType(SpecialType.System_Object), F.This()),
+                    F.Literal(_persistenceMethodId))));
+
+            restoreStatements.Add(F.If(
+                condition: F.Binary(
+                    BinaryOperatorKind.IntGreaterThanOrEqual,
+                    F.SpecialType(SpecialType.System_Boolean),
+                    F.Local(restoredStateLocal),
+                    F.Literal(0)),
+                thenClause: F.Block(
+                    F.Assignment(F.Local(cachedState), F.Local(restoredStateLocal)),
+                    F.Assignment(F.Field(F.This(), stateField), F.Local(restoredStateLocal)))));
+
+            var restoreBlock = F.Block(
+                ImmutableArray.Create(restoredStateLocal),
+                restoreStatements.ToImmutableAndFree());
+
+            // if (persistenceService != null && cachedState == -1) { ... }
+            statements.Add(F.If(
+                condition: F.Binary(
+                    BinaryOperatorKind.LogicalBoolAnd,
+                    F.SpecialType(SpecialType.System_Boolean),
+                    F.Binary(
+                        BinaryOperatorKind.ObjectNotEqual,
+                        F.SpecialType(SpecialType.System_Boolean),
+                        F.Local(_persistenceServiceLocal),
+                        F.Null(persistenceServiceType)),
+                    F.Binary(
+                        BinaryOperatorKind.IntEqual,
+                        F.SpecialType(SpecialType.System_Boolean),
+                        F.Local(cachedState),
+                        F.Literal(StateMachineState.NotStartedOrRunningState))),
+                thenClause: restoreBlock));
+
+            return F.Block(statements.ToImmutableAndFree());
+        }
+
+        /// <summary>
+        /// Generates checkpoint call before await suspension.
+        ///
+        /// Generated code pattern:
+        /// <code>
+        /// if (persistenceService != null)
+        /// {
+        ///     persistenceService.Checkpoint(this, stateNumber, methodId);
+        /// }
+        /// </code>
+        /// </summary>
+        private BoundStatement GenerateCheckpointCall(StateMachineState stateNumber)
+        {
+            Debug.Assert(_enablePersistence);
+            Debug.Assert(_persistenceServiceLocal != null);
+            Debug.Assert(_persistenceMethodId != null);
+
+            var checkpointMethod = GetCheckpointMethod();
+            if (checkpointMethod == null)
+            {
+                return F.StatementList();
+            }
+
+            var persistenceServiceType = GetPersistenceServiceType();
+            if (persistenceServiceType == null)
+            {
+                return F.StatementList();
+            }
+
+            return F.If(
+                condition: F.Binary(
+                    BinaryOperatorKind.ObjectNotEqual,
+                    F.SpecialType(SpecialType.System_Boolean),
+                    F.Local(_persistenceServiceLocal),
+                    F.Null(persistenceServiceType)),
+                thenClause: F.ExpressionStatement(
+                    F.Call(
+                        F.Local(_persistenceServiceLocal),
+                        checkpointMethod,
+                        F.Convert(F.SpecialType(SpecialType.System_Object), F.This()),
+                        F.Literal((int)stateNumber),
+                        F.Literal(_persistenceMethodId))));
+        }
+
+        /// <summary>
+        /// Gets the DOTNExT.Persistence.AsyncPersistenceContext type.
+        /// </summary>
+        private NamedTypeSymbol? GetAsyncPersistenceContextType()
+        {
+            return _asyncPersistenceContextType ??= F.Compilation.GetTypeByMetadataName(
+                "DOTNExT.Persistence.AsyncPersistenceContext");
+        }
+
+        /// <summary>
+        /// Gets the DOTNExT.Persistence.IAsyncPersistenceService type.
+        /// </summary>
+        private NamedTypeSymbol? GetPersistenceServiceType()
+        {
+            return _persistenceServiceType ??= F.Compilation.GetTypeByMetadataName(
+                "DOTNExT.Persistence.IAsyncPersistenceService");
+        }
+
+        /// <summary>
+        /// Gets the TryRestore method from IAsyncPersistenceService.
+        /// </summary>
+        private MethodSymbol? GetTryRestoreMethod()
+        {
+            var serviceType = GetPersistenceServiceType();
+            return serviceType?.GetMembers("TryRestore")
+                .OfType<MethodSymbol>()
+                .FirstOrDefault();
+        }
+
+        /// <summary>
+        /// Gets the Checkpoint method from IAsyncPersistenceService.
+        /// </summary>
+        private MethodSymbol? GetCheckpointMethod()
+        {
+            var serviceType = GetPersistenceServiceType();
+            return serviceType?.GetMembers("Checkpoint")
+                .OfType<MethodSymbol>()
+                .FirstOrDefault();
+        }
+        #endregion DOTNExT Persistence Methods
     }
 }
