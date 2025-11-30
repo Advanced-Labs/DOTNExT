@@ -593,7 +593,7 @@ public static class Program
         AnsiConsole.MarkupLine("[grey]This compiles [[Persistable]] methods at runtime.[/]");
         AnsiConsole.MarkupLine("[grey]The modified Roslyn compiler automatically injects checkpoint/restore calls.[/]");
         AnsiConsole.WriteLine();
-        AnsiConsole.MarkupLine("[green]✓ Using MODIFIED Roslyn with [Persistable] support[/]");
+        AnsiConsole.MarkupLine("[green]✓ Using MODIFIED Roslyn with [[Persistable]] support[/]");
         AnsiConsole.WriteLine();
 
         var action = AnsiConsole.Prompt(
