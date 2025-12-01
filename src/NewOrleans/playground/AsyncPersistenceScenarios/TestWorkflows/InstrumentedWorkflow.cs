@@ -69,8 +69,12 @@ public class InstrumentedWorkflowRunner
 ///   _step1     → &lt;step1&gt;5__1
 ///   _step2     → &lt;step2&gt;5__2
 ///   __awaiter  → &lt;&gt;u__1
+///
+/// NOTE: This is a CLASS (not struct) to allow persistence deserialization to work.
+/// Real Roslyn generates structs, but struct boxing prevents in-place field updates.
+/// A production implementation would need a more sophisticated approach.
 /// </summary>
-public struct InstrumentedSimpleWorkflow_StateMachine : IAsyncStateMachine
+public class InstrumentedSimpleWorkflow_StateMachine : IAsyncStateMachine
 {
     // ===== COMPILER-GENERATED FIELDS =====
 
