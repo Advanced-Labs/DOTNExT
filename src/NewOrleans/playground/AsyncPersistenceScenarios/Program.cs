@@ -167,11 +167,11 @@ public static class Program
                 }
                 else if (isSelected)
                 {
-                    AnsiConsole.MarkupLine($"[cyan]> [{Markup.Escape(key)}] {Markup.Escape(label)}[/]");
+                    AnsiConsole.MarkupLine($"[cyan]> [[{Markup.Escape(key)}]] {Markup.Escape(label)}[/]");
                 }
                 else if (!string.IsNullOrEmpty(key))
                 {
-                    AnsiConsole.MarkupLine($"  [yellow][{Markup.Escape(key)}][/] {Markup.Escape(label)}");
+                    AnsiConsole.MarkupLine($"  [yellow][[{Markup.Escape(key)}]][/] {Markup.Escape(label)}");
                 }
                 else
                 {
