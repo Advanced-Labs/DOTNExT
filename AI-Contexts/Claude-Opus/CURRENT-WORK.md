@@ -41,6 +41,204 @@ The cross-session persistence demonstrates:
 
 ---
 
+## ⚠️ Critical Issue: Struct Boxing in Roslyn+ (2025-12-01)
+
+**The Problem**: Bug #4 (struct boxing) was "fixed" in hand-coded test by changing struct to class. But real Roslyn generates **structs**. The same bug exists in Roslyn+ generated code.
+
+### Root Cause Analysis
+
+Current Roslyn+ generates (in `AsyncMethodToStateMachineRewriter.cs` line 877):
+```csharp
+F.Convert(F.SpecialType(SpecialType.System_Object), F.This())
+```
+
+Which produces:
+```csharp
+var restoredState = _persistenceService.TryRestore((object)this, methodId);
+```
+
+For struct state machines:
+1. `(object)this` **boxes** the struct
+2. `TryRestore` deserializes into the boxed copy
+3. Original struct fields remain **unchanged**
+4. Restoration fails silently
+
+### Three Fix Options Analyzed
+
+#### Option A: Pass by Ref (Generic Method) ✅ RECOMMENDED
+
+**Interface Change:**
+```csharp
+public interface IAsyncPersistenceService
+{
+    void Checkpoint(object stateMachine, int stateNumber, string methodId);
+    int TryRestore<TStateMachine>(ref TStateMachine stateMachine, string methodId);
+    void Complete(string methodId, object? result);
+    void Fault(string methodId, Exception exception);
+}
+```
+
+**Roslyn Would Emit:**
+```csharp
+var restoredState = _persistenceService.TryRestore(ref this, methodId);
+if (restoredState >= 0)
+{
+    __state = restoredState;
+    // 'this' is already updated by TryRestore
+}
+```
+
+**Implementation:**
+```csharp
+public int TryRestore<TStateMachine>(ref TStateMachine stateMachine, string methodId)
+{
+    var checkpoint = GetCheckpointSync(methodId);
+    if (checkpoint == null) return -1;
+
+    // Deserialize and assign directly to ref parameter
+    stateMachine = JsonSerializer.Deserialize<TStateMachine>(checkpoint.Data)!;
+    return checkpoint.StateNumber;
+}
+```
+
+| Pros | Cons |
+|------|------|
+| Most efficient - no boxing, no copying | Generic method on interface adds complexity |
+| Clean semantics - `ref` clearly indicates mutation | `ref this` works for structs but NOT for classes (CS1605) |
+| Single atomic operation | Test code using class state machines needs workaround |
+| Type-safe deserialization | Interface becomes harder to mock in tests |
+| Works naturally with struct state machines | |
+
+**Class Workaround (for hand-coded tests):**
+```csharp
+// For class-based state machines (test only):
+var sm = this;
+var restoredState = _persistenceService.TryRestore(ref sm, methodId);
+// Then copy fields from sm to this (ugly but test-only)
+```
+
+---
+
+#### Option B: Return Restored Value
+
+**Interface Change:**
+```csharp
+public interface IAsyncPersistenceService
+{
+    void Checkpoint(object stateMachine, int stateNumber, string methodId);
+    (int stateNumber, TStateMachine? restored) TryRestore<TStateMachine>(string methodId);
+    void Complete(string methodId, object? result);
+    void Fault(string methodId, Exception exception);
+}
+```
+
+**Roslyn Would Emit:**
+```csharp
+var (restoredState, restored) = _persistenceService.TryRestore<StateMachineType>(methodId);
+if (restoredState >= 0)
+{
+    this = restored!;  // Struct assignment - copies all fields
+    __state = restoredState;
+}
+```
+
+**Implementation:**
+```csharp
+public (int, TStateMachine?) TryRestore<TStateMachine>(string methodId)
+{
+    var checkpoint = GetCheckpointSync(methodId);
+    if (checkpoint == null) return (-1, default);
+
+    var restored = JsonSerializer.Deserialize<TStateMachine>(checkpoint.Data);
+    return (checkpoint.StateNumber, restored);
+}
+```
+
+| Pros | Cons |
+|------|------|
+| Clear semantics - pure function returns new value | `this = value` only works in structs, not classes |
+| No ref parameter complexity | Requires nullable return type handling |
+| Roslyn codegen is straightforward | Extra tuple allocation (minor) |
+| Type-safe | **Cannot support class state machines at all** |
+
+**Critical Limitation:** `this = value` is a compile error in class instance methods. This approach ONLY works for structs.
+
+---
+
+#### Option C: Return Field Dictionary
+
+**Interface Change:**
+```csharp
+public interface IAsyncPersistenceService
+{
+    void Checkpoint(object stateMachine, int stateNumber, string methodId);
+    (int stateNumber, IReadOnlyDictionary<string, object>? fields) TryRestore(string methodId);
+    void Complete(string methodId, object? result);
+    void Fault(string methodId, Exception exception);
+}
+```
+
+**Roslyn Would Emit:**
+```csharp
+var (restoredState, fields) = _persistenceService.TryRestore(methodId);
+if (restoredState >= 0)
+{
+    // Roslyn emits one assignment per field
+    this.input = (int)fields["input"];
+    this.<>1__state = (int)fields["<>1__state"];
+    this.<step1>5__1 = (int)fields["<step1>5__1"];
+    this.<step2>5__2 = (int)fields["<step2>5__2"];
+    // ... etc for all hoisted locals
+}
+```
+
+**Implementation:**
+```csharp
+public (int, IReadOnlyDictionary<string, object>?) TryRestore(string methodId)
+{
+    var checkpoint = GetCheckpointSync(methodId);
+    if (checkpoint == null) return (-1, null);
+
+    // Deserialize to dictionary
+    var fields = JsonSerializer.Deserialize<Dictionary<string, object>>(checkpoint.Data);
+    return (checkpoint.StateNumber, fields);
+}
+```
+
+| Pros | Cons |
+|------|------|
+| Works for both structs AND classes | Boxing for each field value |
+| No generic method needed | Runtime type casting per field |
+| Interface stays simple | Performance overhead (dictionary lookup per field) |
+| Non-generic, easier to mock | **Complex Roslyn codegen** - must emit N assignments |
+| | Field name strings must match exactly (fragile) |
+| | Compiler-generated names like `<>1__state` are tricky |
+
+---
+
+### Comparison Matrix
+
+| Criterion | Option A (ref) | Option B (return) | Option C (dict) |
+|-----------|---------------|-------------------|-----------------|
+| **Struct support** | ✅ Full | ✅ Full | ✅ Full |
+| **Class support** | ⚠️ Workaround | ❌ None | ✅ Full |
+| **Performance** | ⭐⭐⭐ Best | ⭐⭐ Good | ⭐ Worst |
+| **Interface simplicity** | ⭐⭐ Generic | ⭐⭐ Generic | ⭐⭐⭐ Simple |
+| **Roslyn codegen complexity** | ⭐⭐⭐ Simple | ⭐⭐ Moderate | ⭐ Complex |
+| **Type safety** | ⭐⭐⭐ Full | ⭐⭐⭐ Full | ⭐ Cast at runtime |
+| **Future maintenance** | ⭐⭐⭐ Easy | ⭐⭐ Medium | ⭐ Field names brittle |
+
+### Decision: Option A (Pass by ref)
+
+**Rationale:**
+1. Real Roslyn generates structs - `ref this` works perfectly
+2. Best performance - no boxing, no copying, no dictionary overhead
+3. Simplest Roslyn codegen - just change the call to use `ref this`
+4. Type-safe deserialization
+5. Class support limitation is acceptable since production code uses structs
+
+---
+
 ## 🎉 MAJOR MILESTONE: Roslyn Modification WORKING! (2025-11-30)
 
 **Challenge 7 verified:**

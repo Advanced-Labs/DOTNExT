@@ -1106,7 +1106,9 @@ public static class Program
 
             var scenario = ShowMenu("[cyan]Select a scenario:[/]", new[]
             {
-                ("", "─── Tier 1: Core Functionality ───"),
+                ("", "─── Roslyn+ Generated Code ───────"),
+                ("R", "R1: Roslyn+ Cross-Session (struct state machine)"),
+                ("", "─── Hand-Coded State Machines ────"),
                 ("1", "C1: Cross-Session Persistence"),
                 ("2", "C2: Multiple Concurrent Workflows (coming soon)"),
                 ("3", "C3: Nested Async Calls (coming soon)"),
@@ -1128,8 +1130,11 @@ public static class Program
             Console.Clear();
             try
             {
-                switch (scenario)
+                switch (scenario.ToUpperInvariant())
                 {
+                    case "R":
+                        await RoslynPlusCrossSession.RunAsync();
+                        break;
                     case "1":
                         await CrossSessionPersistence.RunAsync();
                         break;

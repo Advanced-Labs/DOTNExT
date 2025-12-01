@@ -87,6 +87,77 @@ namespace Microsoft.CodeAnalysis.CSharp
         /// Cached type reference for DOTNExT.Persistence.IAsyncPersistenceService.
         /// </summary>
         private NamedTypeSymbol? _persistenceServiceType;
+
+        /// <summary>
+        /// File-based logging for DOTNExT Roslyn+ diagnostics.
+        /// Writes to file specified by DOTNEXT_ROSLYN_LOG environment variable,
+        /// or defaults to 'dotnext-roslyn-codegen.log' in temp directory.
+        /// </summary>
+        private static void LogToFile(string message)
+        {
+            try
+            {
+                var logPath = System.Environment.GetEnvironmentVariable("DOTNEXT_ROSLYN_LOG")
+                    ?? System.IO.Path.Combine(System.IO.Path.GetTempPath(), "dotnext-roslyn-codegen.log");
+
+                var timestamp = System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff");
+                var logLine = $"[{timestamp}] {message}{System.Environment.NewLine}";
+
+                System.IO.File.AppendAllText(logPath, logLine);
+            }
+            catch
+            {
+                // Ignore logging errors - don't break compilation
+            }
+        }
+
+        /// <summary>
+        /// Log to both stderr and file for comprehensive debugging.
+        /// </summary>
+        private static void Log(string message)
+        {
+            System.Console.Error.WriteLine(message);
+            LogToFile(message);
+        }
+
+        /// <summary>
+        /// Logs a detailed description of generated code for debugging.
+        /// Since we can't easily emit source from bound nodes, this provides
+        /// a structured description that can be used to understand what was generated.
+        /// </summary>
+        private void LogGeneratedCodeDescription(string phase, string description)
+        {
+            var sb = new System.Text.StringBuilder();
+            sb.AppendLine($"=== DOTNExT-Roslyn Generated Code: {phase} ===");
+            sb.AppendLine($"Method: {_persistenceMethodId}");
+            sb.AppendLine($"State Machine Type: {stateMachineType?.Name ?? "unknown"}");
+            sb.AppendLine($"Is Struct: {stateMachineType?.IsValueType ?? false}");
+            sb.AppendLine($"Description:");
+            sb.AppendLine(description);
+            sb.AppendLine("=== End Generated Code Description ===");
+            Log(sb.ToString());
+        }
+
+        /// <summary>
+        /// Logs information about how to view the actual generated IL/code.
+        /// </summary>
+        private static void LogCodeViewingInstructions()
+        {
+            var instructions = @"
+=== How to View Generated Code ===
+1. After compilation, use ILSpy or dnSpy on the output assembly
+2. Look for the state machine type (ends with 'd__N' where N is a number)
+3. Examine the MoveNext() method for persistence calls
+4. Look for calls to:
+   - AsyncPersistenceContext.get_Current()
+   - IAsyncPersistenceService.TryRestore<T>(ref T, string)
+   - IAsyncPersistenceService.Checkpoint(object, int, string)
+5. Environment variable DOTNEXT_ROSLYN_LOG controls log file location
+6. Default log location: [TEMP]/dotnext-roslyn-codegen.log
+=== End Instructions ===
+";
+            Log(instructions);
+        }
         #endregion
 
         internal AsyncMethodToStateMachineRewriter(
@@ -135,48 +206,48 @@ namespace Microsoft.CodeAnalysis.CSharp
                 var contextType = F.Compilation.GetTypeByMetadataName("DOTNExT.Persistence.AsyncPersistenceContext");
                 var serviceType = F.Compilation.GetTypeByMetadataName("DOTNExT.Persistence.IAsyncPersistenceService");
 
-                System.Console.Error.WriteLine($"[DOTNExT-Roslyn] Found [Persistable] on: {_persistenceMethodId}");
-                System.Console.Error.WriteLine($"[DOTNExT-Roslyn] AsyncPersistenceContext resolved: {contextType is not null}");
-                System.Console.Error.WriteLine($"[DOTNExT-Roslyn] IAsyncPersistenceService resolved: {serviceType is not null}");
+                Log($"[DOTNExT-Roslyn] Found [Persistable] on: {_persistenceMethodId}");
+                Log($"[DOTNExT-Roslyn] AsyncPersistenceContext resolved: {contextType is not null}");
+                Log($"[DOTNExT-Roslyn] IAsyncPersistenceService resolved: {serviceType is not null}");
 
                 // Also try to list what types ARE available in the DOTNExT.Persistence namespace
                 if (contextType is null || serviceType is null)
                 {
-                    System.Console.Error.WriteLine($"[DOTNExT-Roslyn] WARNING: Persistence types not found!");
-                    System.Console.Error.WriteLine($"[DOTNExT-Roslyn] Listing {F.Compilation.References.Count()} compilation references:");
+                    Log($"[DOTNExT-Roslyn] WARNING: Persistence types not found!");
+                    Log($"[DOTNExT-Roslyn] Listing {F.Compilation.References.Count()} compilation references:");
                     foreach (var reference in F.Compilation.References)
                     {
                         var refSymbol = F.Compilation.GetAssemblyOrModuleSymbol(reference);
                         if (refSymbol is AssemblySymbol asmSymbol)
                         {
-                            System.Console.Error.WriteLine($"[DOTNExT-Roslyn]   Assembly: {asmSymbol.Name}");
+                            Log($"[DOTNExT-Roslyn]   Assembly: {asmSymbol.Name}");
                             // Try to find DOTNExT namespace in this assembly
                             var globalNs = asmSymbol.GlobalNamespace;
                             var dotNextNs = globalNs.GetNamespaceMembers().FirstOrDefault(n => n.Name == "DOTNExT");
                             if (dotNextNs != null)
                             {
-                                System.Console.Error.WriteLine($"[DOTNExT-Roslyn]     Found DOTNExT namespace!");
+                                Log($"[DOTNExT-Roslyn]     Found DOTNExT namespace!");
                                 var persistenceNs = dotNextNs.GetNamespaceMembers().FirstOrDefault(n => n.Name == "Persistence");
                                 if (persistenceNs != null)
                                 {
-                                    System.Console.Error.WriteLine($"[DOTNExT-Roslyn]     Found DOTNExT.Persistence namespace!");
+                                    Log($"[DOTNExT-Roslyn]     Found DOTNExT.Persistence namespace!");
                                     foreach (var type in persistenceNs.GetTypeMembers())
                                     {
-                                        System.Console.Error.WriteLine($"[DOTNExT-Roslyn]       Type: {type.Name} (accessible: {type.DeclaredAccessibility})");
+                                        Log($"[DOTNExT-Roslyn]       Type: {type.Name} (accessible: {type.DeclaredAccessibility})");
                                     }
                                 }
                             }
                         }
                         else
                         {
-                            System.Console.Error.WriteLine($"[DOTNExT-Roslyn]   Reference: {reference.Display}");
+                            Log($"[DOTNExT-Roslyn]   Reference: {reference.Display}");
                         }
                     }
-                    System.Console.Error.WriteLine($"[DOTNExT-Roslyn] To fix: ensure DOTNExT.Persistence types are in a referenced assembly with matching metadata name");
+                    Log($"[DOTNExT-Roslyn] To fix: ensure DOTNExT.Persistence types are in a referenced assembly with matching metadata name");
                 }
                 else
                 {
-                    System.Console.Error.WriteLine($"[DOTNExT-Roslyn] SUCCESS: Persistence injection will be enabled for {_persistenceMethodId}");
+                    Log($"[DOTNExT-Roslyn] SUCCESS: Persistence injection will be enabled for {_persistenceMethodId}");
                 }
             }
         }
@@ -579,12 +650,12 @@ namespace Microsoft.CodeAnalysis.CSharp
             // Only if persistence types were resolved (persistenceServiceLocal was created)
             if (_enablePersistence && _persistenceServiceLocal is not null)
             {
-                System.Console.Error.WriteLine($"[DOTNExT-Roslyn] GenerateAwaitForIncompleteTask: Adding checkpoint call for state {stateNumber}");
+                Log($"[DOTNExT-Roslyn] GenerateAwaitForIncompleteTask: Adding checkpoint call for state {stateNumber}");
                 blockBuilder.Add(GenerateCheckpointCall(stateNumber));
             }
             else if (_enablePersistence)
             {
-                System.Console.Error.WriteLine($"[DOTNExT-Roslyn] GenerateAwaitForIncompleteTask: SKIPPING checkpoint - _persistenceServiceLocal is null!");
+                Log($"[DOTNExT-Roslyn] GenerateAwaitForIncompleteTask: SKIPPING checkpoint - _persistenceServiceLocal is null!");
             }
 
             blockBuilder.Add(awaiterTemp.Type.IsDynamic()
@@ -780,7 +851,7 @@ namespace Microsoft.CodeAnalysis.CSharp
             var persistenceServiceType = GetPersistenceServiceType();
             if (persistenceServiceType is null)
             {
-                System.Console.Error.WriteLine($"[DOTNExT-Roslyn] InitializePersistenceServiceLocal: FAILED - GetPersistenceServiceType returned null");
+                Log($"[DOTNExT-Roslyn] InitializePersistenceServiceLocal: FAILED - GetPersistenceServiceType returned null");
                 return;
             }
 
@@ -789,7 +860,7 @@ namespace Microsoft.CodeAnalysis.CSharp
                 syntax: F.Syntax,
                 kind: SynthesizedLocalKind.LoweringTemp);
 
-            System.Console.Error.WriteLine($"[DOTNExT-Roslyn] InitializePersistenceServiceLocal: Created _persistenceServiceLocal for {_persistenceMethodId}");
+            Log($"[DOTNExT-Roslyn] InitializePersistenceServiceLocal: Created _persistenceServiceLocal for {_persistenceMethodId}");
         }
 
         /// <summary>
@@ -814,15 +885,15 @@ namespace Microsoft.CodeAnalysis.CSharp
             Debug.Assert(_enablePersistence);
             Debug.Assert(_persistenceMethodId != null);
 
-            System.Console.Error.WriteLine($"[DOTNExT-Roslyn] GeneratePersistenceRestorationCheck called for {_persistenceMethodId}");
+            Log($"[DOTNExT-Roslyn] GeneratePersistenceRestorationCheck called for {_persistenceMethodId}");
 
             // _persistenceServiceLocal should already be created by InitializePersistenceServiceLocal
             if (_persistenceServiceLocal is null)
             {
-                System.Console.Error.WriteLine($"[DOTNExT-Roslyn]   FAILED: _persistenceServiceLocal was not initialized");
+                Log($"[DOTNExT-Roslyn]   FAILED: _persistenceServiceLocal was not initialized");
                 return F.StatementList();
             }
-            System.Console.Error.WriteLine($"[DOTNExT-Roslyn]   Using pre-initialized _persistenceServiceLocal");
+            Log($"[DOTNExT-Roslyn]   Using pre-initialized _persistenceServiceLocal");
 
             var restoredStateLocal = F.SynthesizedLocal(
                 F.SpecialType(SpecialType.System_Int32),
@@ -832,10 +903,10 @@ namespace Microsoft.CodeAnalysis.CSharp
             var asyncPersistenceContextType = GetAsyncPersistenceContextType();
             if (asyncPersistenceContextType is null)
             {
-                System.Console.Error.WriteLine($"[DOTNExT-Roslyn]   FAILED: GetAsyncPersistenceContextType returned null");
+                Log($"[DOTNExT-Roslyn]   FAILED: GetAsyncPersistenceContextType returned null");
                 return F.StatementList();
             }
-            System.Console.Error.WriteLine($"[DOTNExT-Roslyn]   Got asyncPersistenceContextType: {asyncPersistenceContextType.ToDisplayString()}");
+            Log($"[DOTNExT-Roslyn]   Got asyncPersistenceContextType: {asyncPersistenceContextType.ToDisplayString()}");
 
             // Get the Current property getter
             var currentProperty = asyncPersistenceContextType.GetMembers("Current")
@@ -844,18 +915,38 @@ namespace Microsoft.CodeAnalysis.CSharp
 
             if (currentProperty?.GetMethod is null)
             {
-                System.Console.Error.WriteLine($"[DOTNExT-Roslyn]   FAILED: Current property or getter not found");
+                Log($"[DOTNExT-Roslyn]   FAILED: Current property or getter not found");
                 return F.StatementList();
             }
-            System.Console.Error.WriteLine($"[DOTNExT-Roslyn]   Got Current property getter");
+            Log($"[DOTNExT-Roslyn]   Got Current property getter");
 
-            var tryRestoreMethod = GetTryRestoreMethod();
+            // Try to get the generic TryRestore<T>(ref T, string) method first (preferred - no boxing)
+            var genericTryRestoreMethod = GetGenericTryRestoreMethod();
+            MethodSymbol? tryRestoreMethod;
+            bool useGenericMethod = false;
+
+            if (genericTryRestoreMethod is not null)
+            {
+                // Construct the closed generic method with the state machine type
+                tryRestoreMethod = genericTryRestoreMethod.Construct(stateMachineType);
+                useGenericMethod = true;
+                Log($"[DOTNExT-Roslyn]   Got GENERIC TryRestore<{stateMachineType.Name}> method - no struct boxing!");
+            }
+            else
+            {
+                // Fall back to old non-generic method (has boxing issues for structs)
+#pragma warning disable CS0618 // Type or member is obsolete
+                tryRestoreMethod = GetTryRestoreMethod();
+#pragma warning restore CS0618
+                Log($"[DOTNExT-Roslyn]   WARNING: Using non-generic TryRestore - struct boxing will occur!");
+            }
+
             if (tryRestoreMethod is null)
             {
-                System.Console.Error.WriteLine($"[DOTNExT-Roslyn]   FAILED: TryRestore method not found");
+                Log($"[DOTNExT-Roslyn]   FAILED: TryRestore method not found");
                 return F.StatementList();
             }
-            System.Console.Error.WriteLine($"[DOTNExT-Roslyn]   Got TryRestore method - persistence restoration check will be generated");
+            Log($"[DOTNExT-Roslyn]   Got TryRestore method - persistence restoration check will be generated");
 
             var statements = ArrayBuilder<BoundStatement>.GetInstance();
 
@@ -865,17 +956,31 @@ namespace Microsoft.CodeAnalysis.CSharp
                 F.Call(null, currentProperty.GetMethod)));
 
             // Build the inner restore block
-            // var restoredState = persistenceService.TryRestore(this, methodId);
-            // if (restoredState >= 0) { cachedState = restoredState; this.<>1__state = restoredState; }
             var restoreStatements = ArrayBuilder<BoundStatement>.GetInstance();
 
-            restoreStatements.Add(F.Assignment(
-                F.Local(restoredStateLocal),
-                F.Call(
-                    F.Local(_persistenceServiceLocal),
-                    tryRestoreMethod,
-                    F.Convert(F.SpecialType(SpecialType.System_Object), F.This()),
-                    F.Literal(_persistenceMethodId))));
+            if (useGenericMethod)
+            {
+                // Generic method: var restoredState = persistenceService.TryRestore<TStateMachine>(ref this, methodId);
+                // This avoids boxing for struct state machines
+                restoreStatements.Add(F.Assignment(
+                    F.Local(restoredStateLocal),
+                    F.Call(
+                        F.Local(_persistenceServiceLocal),
+                        tryRestoreMethod,
+                        ImmutableArray.Create<BoundExpression>(F.This(), F.Literal(_persistenceMethodId)),
+                        ImmutableArray.Create(RefKind.Ref, RefKind.None))));
+            }
+            else
+            {
+                // Old non-generic method: var restoredState = persistenceService.TryRestore((object)this, methodId);
+                restoreStatements.Add(F.Assignment(
+                    F.Local(restoredStateLocal),
+                    F.Call(
+                        F.Local(_persistenceServiceLocal),
+                        tryRestoreMethod,
+                        F.Convert(F.SpecialType(SpecialType.System_Object), F.This()),
+                        F.Literal(_persistenceMethodId))));
+            }
 
             restoreStatements.Add(F.If(
                 condition: F.Binary(
@@ -908,6 +1013,34 @@ namespace Microsoft.CodeAnalysis.CSharp
                         F.Literal(StateMachineState.NotStartedOrRunningState))),
                 thenClause: restoreBlock));
 
+            // Log detailed description of generated restoration code
+            var restorationDesc = useGenericMethod
+                ? $@"Generated GENERIC restoration check:
+  var persistenceService = AsyncPersistenceContext.Current;
+  if (persistenceService != null && cachedState == -1)
+  {{
+      var restoredState = persistenceService.TryRestore<{stateMachineType.Name}>(ref this, ""{_persistenceMethodId}"");
+      if (restoredState >= 0)
+      {{
+          cachedState = restoredState;
+          this.<>1__state = restoredState;
+      }}
+  }}
+  NOTE: Using generic TryRestore<T>(ref T) - NO STRUCT BOXING!"
+                : $@"Generated NON-GENERIC restoration check (DEPRECATED - HAS BOXING ISSUE):
+  var persistenceService = AsyncPersistenceContext.Current;
+  if (persistenceService != null && cachedState == -1)
+  {{
+      var restoredState = persistenceService.TryRestore((object)this, ""{_persistenceMethodId}"");
+      if (restoredState >= 0)
+      {{
+          cachedState = restoredState;
+          this.<>1__state = restoredState;
+      }}
+  }}
+  WARNING: Using non-generic TryRestore - struct boxing will lose restored values!";
+            LogGeneratedCodeDescription("Restoration Check", restorationDesc);
+
             return F.Block(statements.ToImmutableAndFree());
         }
 
@@ -939,6 +1072,14 @@ namespace Microsoft.CodeAnalysis.CSharp
             {
                 return F.StatementList();
             }
+
+            // Log checkpoint generation
+            LogGeneratedCodeDescription("Checkpoint", $@"Generated checkpoint call at state {(int)stateNumber}:
+  if (persistenceService != null)
+  {{
+      persistenceService.Checkpoint((object)this, {(int)stateNumber}, ""{_persistenceMethodId}"");
+  }}
+  NOTE: Checkpoint uses object boxing (acceptable for checkpoint - data is serialized)");
 
             return F.If(
                 condition: F.Binary(
@@ -974,14 +1115,30 @@ namespace Microsoft.CodeAnalysis.CSharp
         }
 
         /// <summary>
-        /// Gets the TryRestore method from IAsyncPersistenceService.
+        /// Gets the generic TryRestore&lt;TStateMachine&gt;(ref TStateMachine, string) method from IAsyncPersistenceService.
+        /// This is the preferred method that avoids struct boxing issues.
         /// </summary>
+        private MethodSymbol? GetGenericTryRestoreMethod()
+        {
+            var serviceType = GetPersistenceServiceType();
+            // Find the generic TryRestore method (has 1 type parameter, 2 parameters with first being ref)
+            return serviceType?.GetMembers("TryRestore")
+                .OfType<MethodSymbol>()
+                .FirstOrDefault(m => m.Arity == 1 && m.Parameters.Length == 2 &&
+                                     m.Parameters[0].RefKind == RefKind.Ref);
+        }
+
+        /// <summary>
+        /// Gets the old non-generic TryRestore(object, string) method from IAsyncPersistenceService.
+        /// This method has struct boxing issues and is deprecated.
+        /// </summary>
+        [System.Obsolete("Use GetGenericTryRestoreMethod instead")]
         private MethodSymbol? GetTryRestoreMethod()
         {
             var serviceType = GetPersistenceServiceType();
             return serviceType?.GetMembers("TryRestore")
                 .OfType<MethodSymbol>()
-                .FirstOrDefault();
+                .FirstOrDefault(m => m.Arity == 0); // Non-generic version
         }
 
         /// <summary>

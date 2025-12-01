@@ -83,12 +83,27 @@ public interface IAsyncPersistenceService
     void Checkpoint(object stateMachine, int stateNumber, string methodId);
 
     /// <summary>
-    /// Checks if there's persisted state to restore and applies it if so.
+    /// [DEPRECATED] Use TryRestore&lt;TStateMachine&gt;(ref TStateMachine, string) instead.
+    /// This method has a struct boxing bug - modifications are lost for value types.
+    /// Kept for backwards compatibility with hand-coded test state machines.
     /// </summary>
     /// <param name="stateMachine">The state machine instance to potentially restore into</param>
     /// <param name="methodId">Unique identifier for this workflow instance</param>
     /// <returns>The state to resume from, or -1 if no restoration</returns>
+    [Obsolete("Use TryRestore<TStateMachine>(ref TStateMachine, string) instead - this method has struct boxing issues")]
     int TryRestore(object stateMachine, string methodId);
+
+    /// <summary>
+    /// Checks if there's persisted state to restore and applies it if so.
+    /// Uses ref parameter to properly handle struct state machines without boxing issues.
+    ///
+    /// This is the preferred method for Roslyn+ generated code.
+    /// </summary>
+    /// <typeparam name="TStateMachine">The state machine type (struct or class)</typeparam>
+    /// <param name="stateMachine">Ref to the state machine instance - will be replaced with restored state</param>
+    /// <param name="methodId">Unique identifier for this workflow instance</param>
+    /// <returns>The state to resume from, or -1 if no restoration</returns>
+    int TryRestore<TStateMachine>(ref TStateMachine stateMachine, string methodId);
 
     /// <summary>
     /// Called when async method completes successfully.

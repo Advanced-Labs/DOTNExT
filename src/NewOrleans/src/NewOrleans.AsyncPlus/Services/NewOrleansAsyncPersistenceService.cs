@@ -69,12 +69,60 @@ public class NewOrleansAsyncPersistenceService : DOTNExT.Persistence.IAsyncPersi
     }
 
     /// <inheritdoc />
+    [Obsolete("Use TryRestore<TStateMachine>(ref TStateMachine, string) instead")]
     public int TryRestore(object stateMachine, string methodId)
     {
         // Ensure any pending checkpoint for this workflow completed first
         EnsurePendingCheckpointComplete(methodId);
 
         return TryRestoreInternalAsync(stateMachine, methodId).GetAwaiter().GetResult();
+    }
+
+    /// <inheritdoc />
+    /// <summary>
+    /// Type-safe restoration that properly handles struct state machines.
+    /// Deserializes checkpoint directly into the ref parameter, avoiding boxing issues.
+    /// </summary>
+    public int TryRestore<TStateMachine>(ref TStateMachine stateMachine, string methodId)
+    {
+        // Ensure any pending checkpoint for this workflow completed first
+        EnsurePendingCheckpointComplete(methodId);
+
+        return TryRestoreGenericInternalAsync(ref stateMachine, methodId).GetAwaiter().GetResult();
+    }
+
+    private int TryRestoreGenericInternalAsync<TStateMachine>(ref TStateMachine stateMachine, string methodId)
+    {
+        try
+        {
+            var grain = _grainFactory.GetGrain<IAsyncStatePersistenceGrain>(methodId);
+            var checkpoint = grain.TryGetCheckpointAsync().GetAwaiter().GetResult();
+
+            if (checkpoint == null)
+            {
+                _logger.LogDebug("[AsyncPlus] No checkpoint found for {MethodId}", methodId);
+                return -1;
+            }
+
+            // Deserialize into a new instance of the actual type
+            var restored = DeserializeStateMachine<TStateMachine>(checkpoint.SerializedStateMachine);
+
+            // Assign restored state to the ref parameter - this works for both structs and classes
+            stateMachine = restored;
+
+            _logger.LogInformation(
+                "[AsyncPlus] Restored {MethodId} to state {State} (checkpoint from {Time}) via generic TryRestore<{Type}>",
+                methodId, checkpoint.StateNumber, checkpoint.CheckpointTimeUtc, typeof(TStateMachine).Name);
+
+            OnRestore?.Invoke(this, new DOTNExT.Persistence.RestoreEventArgs(methodId, checkpoint.StateNumber));
+
+            return checkpoint.StateNumber;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "[AsyncPlus] Restore failed for {MethodId}", methodId);
+            return -1;
+        }
     }
 
     private void EnsurePendingCheckpointComplete(string methodId)
@@ -300,6 +348,57 @@ public class NewOrleansAsyncPersistenceService : DOTNExT.Persistence.IAsyncPersi
                 // Skip fields that can't be deserialized
             }
         }
+    }
+
+    /// <summary>
+    /// Type-safe deserialization that creates a new instance of the state machine type.
+    /// This is the preferred method for struct state machines (no boxing).
+    /// </summary>
+    private static TStateMachine DeserializeStateMachine<TStateMachine>(byte[] data)
+    {
+        var fieldData = JsonSerializer.Deserialize<Dictionary<string, JsonElement>>(data);
+        if (fieldData == null)
+        {
+            return default!;
+        }
+
+        var type = typeof(TStateMachine);
+
+        // Create a new instance of the state machine
+        // For structs, this creates a default-initialized struct
+        // For classes, this uses the parameterless constructor
+        TStateMachine instance;
+        if (type.IsValueType)
+        {
+            instance = default!;
+        }
+        else
+        {
+            instance = (TStateMachine)Activator.CreateInstance(type)!;
+        }
+
+        // Box the instance for field setting (needed for structs)
+        // The boxing is local to this method and we return the unboxed value
+        object boxed = instance!;
+
+        foreach (var (fieldName, jsonValue) in fieldData)
+        {
+            var field = type.GetField(fieldName, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+            if (field == null) continue;
+
+            try
+            {
+                var value = JsonSerializer.Deserialize(jsonValue.GetRawText(), field.FieldType);
+                field.SetValue(boxed, value);
+            }
+            catch
+            {
+                // Skip fields that can't be deserialized
+            }
+        }
+
+        // Unbox the modified instance (for structs)
+        return (TStateMachine)boxed;
     }
 
     private static byte[]? SerializeResult(object result)
