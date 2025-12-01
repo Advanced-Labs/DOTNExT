@@ -110,6 +110,7 @@ public struct InstrumentedSimpleWorkflow_StateMachine : IAsyncStateMachine
     {
         int num = __state;
         int result;
+        bool justRestored = false;  // Flag to distinguish restoration from normal continuation
 
         try
         {
@@ -128,6 +129,7 @@ public struct InstrumentedSimpleWorkflow_StateMachine : IAsyncStateMachine
                     // Update our state to resume from correct point
                     num = restoredState;
                     __state = restoredState;
+                    justRestored = true;  // Mark that we just restored (awaiter not available)
                     Console.WriteLine($"[SM] Restored from state {restoredState}");
                 }
             }
@@ -135,17 +137,26 @@ public struct InstrumentedSimpleWorkflow_StateMachine : IAsyncStateMachine
 
             TaskAwaiter<int> awaiter;
 
+            // When restoring, we need to re-run the async operation (awaiter wasn't serialized)
+            // When continuing normally, awaiter has the result ready
             switch (num)
             {
                 case 0:
-                    goto Label_AwaitPoint0;
+                    if (justRestored)
+                        goto Label_StartOp0;  // Re-run first async operation
+                    else
+                        goto Label_AwaitPoint0;  // Normal continuation - get awaiter result
                 case 1:
-                    goto Label_AwaitPoint1;
+                    if (justRestored)
+                        goto Label_StartOp1;  // Re-run second async operation
+                    else
+                        goto Label_AwaitPoint1;  // Normal continuation - get awaiter result
             }
 
             // ----- STATE -1: Initial execution -----
             Console.WriteLine($"Step 1: input = {input}");
 
+        Label_StartOp0:
             // Start the first async operation
             var inputCopy = input; // Capture for lambda (structs cannot capture 'this')
             awaiter = Task.Delay(500).ContinueWith(_ => inputCopy * 2).GetAwaiter();
@@ -181,6 +192,9 @@ public struct InstrumentedSimpleWorkflow_StateMachine : IAsyncStateMachine
         Label_GetResult0:
             // Get result from first await
             _step1 = awaiter.GetResult();
+
+        Label_StartOp1:
+            // When restored from state 1, _step1 is already populated from checkpoint
             Console.WriteLine($"Step 2: step1 = {_step1}");
 
             // Start the second async operation
