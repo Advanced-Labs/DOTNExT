@@ -102,7 +102,7 @@ public class InstrumentedSimpleWorkflow_StateMachine : IAsyncStateMachine
     private TaskAwaiter<int> __awaiter;
 
     // ===== PERSISTENCE FIELDS (workflow ID passed in) =====
-    public string workflowId;
+    public string workflowId = "";
 
     // ===== PERSISTENCE LOCAL (cached in MoveNext) =====
     private IAsyncPersistenceService? _persistenceService;
@@ -183,7 +183,9 @@ public class InstrumentedSimpleWorkflow_StateMachine : IAsyncStateMachine
                 }
                 // ========================================
 
-                __builder.AwaitUnsafeOnCompleted(ref awaiter, ref this);
+                // For class-based state machine, store 'this' in a variable to pass by ref
+                var stateMachine = this;
+                __builder.AwaitUnsafeOnCompleted(ref awaiter, ref stateMachine);
                 return;
             }
             goto Label_GetResult0;
@@ -221,7 +223,9 @@ public class InstrumentedSimpleWorkflow_StateMachine : IAsyncStateMachine
                 }
                 // ========================================
 
-                __builder.AwaitUnsafeOnCompleted(ref awaiter, ref this);
+                // For class-based state machine, store 'this' in a variable to pass by ref
+                var stateMachine = this;
+                __builder.AwaitUnsafeOnCompleted(ref awaiter, ref stateMachine);
                 return;
             }
             goto Label_GetResult1;
