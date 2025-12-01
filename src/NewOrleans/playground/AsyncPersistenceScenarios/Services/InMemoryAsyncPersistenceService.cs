@@ -474,6 +474,35 @@ public class InMemoryAsyncPersistenceService : IAsyncPersistenceServiceGeneric, 
     }
 
     /// <summary>
+    /// Generic TryRestore implementation for Roslyn+ generated struct state machines.
+    /// Avoids boxing by taking the state machine by ref and deserializing directly into it.
+    /// </summary>
+    int DOTNExT.Persistence.IAsyncPersistenceService.TryRestore<TStateMachine>(ref TStateMachine stateMachine, string methodId)
+    {
+        if (!_snapshots.TryGetValue(methodId, out var snapshot))
+        {
+            return -1; // No restoration needed
+        }
+
+        // Restore fields into the state machine via ref
+        RestoreStateMachineRef(ref stateMachine, snapshot);
+
+        if (_verbose)
+        {
+            Console.WriteLine($"[Persistence] RESTORE (generic): {methodId} from state {snapshot.State}");
+            Console.WriteLine($"             Type: {typeof(TStateMachine).Name}, Fields restored: {string.Join(", ", snapshot.Fields.Keys)}");
+        }
+
+        OnRestore?.Invoke(this, new RestoreEventArgs(methodId, snapshot.State));
+
+        // Remove the snapshot after restoration (it's been used)
+        _snapshots.TryRemove(methodId, out _);
+        PersistToFile();
+
+        return snapshot.State;
+    }
+
+    /// <summary>
     /// Complete implementation for Roslyn-generated code.
     /// </summary>
     void DOTNExT.Persistence.IAsyncPersistenceService.Complete(string methodId, object? result)
@@ -595,5 +624,55 @@ public class InMemoryAsyncPersistenceService : IAsyncPersistenceServiceGeneric, 
                 }
             }
         }
+    }
+
+    /// <summary>
+    /// Restore field values into a state machine via ref parameter.
+    /// This properly handles struct state machines without boxing issues.
+    /// </summary>
+    private void RestoreStateMachineRef<TStateMachine>(ref TStateMachine stateMachine, StateMachineSnapshot snapshot)
+    {
+        var type = typeof(TStateMachine);
+
+        // Box the struct temporarily for reflection (this is unavoidable for field access)
+        object boxed = stateMachine!;
+
+        foreach (var field in type.GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic))
+        {
+            var fieldName = field.Name;
+
+            // Set state field
+            if (fieldName.Contains("__state") || fieldName.Contains("<>1__state"))
+            {
+                field.SetValue(boxed, snapshot.State);
+                continue;
+            }
+
+            // Restore other fields from snapshot
+            if (snapshot.Fields.TryGetValue(fieldName, out var value))
+            {
+                try
+                {
+                    // Handle type conversion if needed (e.g., from JsonElement)
+                    if (value is JsonElement je)
+                    {
+                        value = ConvertJsonElement(je, field.FieldType);
+                    }
+
+                    field.SetValue(boxed, value);
+                }
+                catch (Exception ex)
+                {
+                    if (_verbose)
+                    {
+                        Console.WriteLine($"[Persistence] Warning: Could not restore field {fieldName}: {ex.Message}");
+                    }
+                }
+            }
+        }
+
+        // Unbox back to the ref parameter - this is the key difference from RestoreStateMachineObject
+        // The ref parameter ensures the unboxed value is written back to the caller's variable
+        stateMachine = (TStateMachine)boxed;
     }
 }
