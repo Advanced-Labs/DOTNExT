@@ -163,6 +163,17 @@ public class RavenDbGrainStorage : IGrainStorage, ILifecycleParticipant<ISiloLif
                 return;
             }
 
+            // Debug: Log raw bytes BEFORE deserialization (it's JSON, so show as string)
+            var rawJsonString = Encoding.UTF8.GetString(doc.StateData);
+            var jsonPreview = rawJsonString.Length > 800 ? rawJsonString.Substring(0, 800) + "..." : rawJsonString;
+            try
+            {
+                var logPath = Path.Combine(Path.GetTempPath(), "orleans-grain-storage-debug.log");
+                File.AppendAllText(logPath, $"[{DateTime.UtcNow:O}] ReadState BEFORE DESERIALIZE: GrainId={grainId}, ByteCount={doc.StateData.Length}, TypeT={typeof(T).FullName}" + Environment.NewLine);
+                File.AppendAllText(logPath, $"[{DateTime.UtcNow:O}] ReadState RAW JSON: {jsonPreview}" + Environment.NewLine);
+            }
+            catch { /* Ignore file write errors */ }
+
             // Deserialize state
             var stateData = new BinaryData(doc.StateData);
             grainState.State = _grainStorageSerializer.Deserialize<T>(stateData);
@@ -227,13 +238,25 @@ public class RavenDbGrainStorage : IGrainStorage, ILifecycleParticipant<ISiloLif
 
             // Serialize state
             var stateData = _grainStorageSerializer.Serialize(grainState.State);
+            var stateBytes = stateData.ToArray();
+
+            // Debug: Log raw serialized JSON (it's JSON, so show as string)
+            var rawJsonString = Encoding.UTF8.GetString(stateBytes);
+            var jsonPreview = rawJsonString.Length > 800 ? rawJsonString.Substring(0, 800) + "..." : rawJsonString;
+            try
+            {
+                var logPath = Path.Combine(Path.GetTempPath(), "orleans-grain-storage-debug.log");
+                File.AppendAllText(logPath, $"[{DateTime.UtcNow:O}] WriteState SERIALIZED: GrainId={grainId}, ByteCount={stateBytes.Length}, TypeT={typeof(T).FullName}" + Environment.NewLine);
+                File.AppendAllText(logPath, $"[{DateTime.UtcNow:O}] WriteState RAW JSON: {jsonPreview}" + Environment.NewLine);
+            }
+            catch { /* Ignore file write errors */ }
 
             var doc = new GrainStateDocument
             {
                 Id = documentId,
                 GrainType = stateName,
                 GrainId = grainId.ToString(),
-                StateData = stateData.ToArray(),
+                StateData = stateBytes,
                 ServiceId = _serviceId,
                 LastModifiedUtc = DateTime.UtcNow
             };

@@ -1,3 +1,5 @@
+using Newtonsoft.Json;
+
 namespace NewOrleans.AsyncPlus;
 
 /// <summary>
@@ -43,7 +45,12 @@ public sealed class AsyncStatePersistenceGrainState
     /// <summary>
     /// Current state number (-1 if no checkpoint).
     /// </summary>
+    /// <remarks>
+    /// JsonProperty with Include is needed because Orleans uses DefaultValueHandling.Ignore
+    /// which would skip StateNumber=0 (first await point) since 0 is the int default.
+    /// </remarks>
     [Id(0)]
+    [JsonProperty(DefaultValueHandling = DefaultValueHandling.Include)]
     public int StateNumber { get; set; } = -1;
 
     /// <summary>
