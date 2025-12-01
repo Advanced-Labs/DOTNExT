@@ -126,7 +126,13 @@ public class InstrumentedSimpleWorkflow_StateMachine : IAsyncStateMachine
             if (_persistenceService != null && num == -1)
             {
                 // Check if we should restore from a checkpoint
+                // NOTE: Using obsolete non-generic method because this is a CLASS-based state machine.
+                // The new generic TryRestore<T>(ref T, string) is designed for STRUCT state machines
+                // (which Roslyn generates). For classes, the old API works fine since objects are
+                // passed by reference anyway.
+#pragma warning disable CS0618 // Type or member is obsolete
                 int restoredState = _persistenceService.TryRestore(this, workflowId);
+#pragma warning restore CS0618
                 if (restoredState >= 0)
                 {
                     // Restoration happened - fields are now populated
