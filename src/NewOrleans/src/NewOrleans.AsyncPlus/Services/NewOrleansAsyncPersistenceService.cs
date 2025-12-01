@@ -88,10 +88,10 @@ public class NewOrleansAsyncPersistenceService : DOTNExT.Persistence.IAsyncPersi
         // Ensure any pending checkpoint for this workflow completed first
         EnsurePendingCheckpointComplete(methodId);
 
-        return TryRestoreGenericInternalAsync(ref stateMachine, methodId).GetAwaiter().GetResult();
+        return TryRestoreGenericInternal(ref stateMachine, methodId);
     }
 
-    private int TryRestoreGenericInternalAsync<TStateMachine>(ref TStateMachine stateMachine, string methodId)
+    private int TryRestoreGenericInternal<TStateMachine>(ref TStateMachine stateMachine, string methodId)
     {
         try
         {
