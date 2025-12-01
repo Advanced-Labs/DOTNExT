@@ -185,6 +185,16 @@ public class RavenDbGrainStorage : IGrainStorage, ILifecycleParticipant<ISiloLif
 
         var documentId = GetDocumentId(stateName, grainId);
 
+        // Debug: Log what we're about to write and where from
+        if (grainState.State is AsyncStatePersistenceGrainState asyncState)
+        {
+            var stackTrace = new System.Diagnostics.StackTrace(true);
+            var callerInfo = stackTrace.ToString().Split('\n').Take(8).Aggregate((a, b) => a + " | " + b);
+            _logger.LogDebug(
+                "[DEBUG] WriteState: GrainId={GrainId}, StateNumber={StateNumber}, IsCompleted={IsCompleted}, IsFaulted={IsFaulted}, HasSerializedData={HasData}, CalledFrom={CallerInfo}",
+                grainId, asyncState.StateNumber, asyncState.IsCompleted, asyncState.IsFaulted, asyncState.SerializedStateMachine != null, callerInfo);
+        }
+
         try
         {
             using var session = _documentStore!.OpenAsyncSession();
