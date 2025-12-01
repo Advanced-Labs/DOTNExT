@@ -1,6 +1,6 @@
 # Current Work: Async State Machine Persistence
 
-**Status**: Phase 3 COMPLETE - C1 Scenario Passing
+**Status**: Phase 3 COMPLETE + Option A Implemented (Awaiting Build Verification)
 **Last Updated**: 2025-12-01
 **Branch**: `claude/review-orleans-changes-01NupGvm45sCJfU1V2Newo9X`
 
@@ -41,9 +41,15 @@ The cross-session persistence demonstrates:
 
 ---
 
-## ⚠️ Critical Issue: Struct Boxing in Roslyn+ (2025-12-01)
+## ✅ Struct Boxing Fix: Option A Implemented (2025-12-01)
 
-**The Problem**: Bug #4 (struct boxing) was "fixed" in hand-coded test by changing struct to class. But real Roslyn generates **structs**. The same bug exists in Roslyn+ generated code.
+**Previous Problem**: Bug #4 (struct boxing) was "fixed" in hand-coded test by changing struct to class. But real Roslyn generates **structs**.
+
+**Solution Status**: ✅ **Option A IMPLEMENTED** - Generic `TryRestore<T>(ref T, string)` method added
+- Interface updated with generic method
+- NewOrleansAsyncPersistenceService implements it
+- Roslyn codegen updated to use `F.CurrentType` for generic method construction
+- **Awaiting TAI verification** that Roslyn build succeeds
 
 ### Root Cause Analysis
 

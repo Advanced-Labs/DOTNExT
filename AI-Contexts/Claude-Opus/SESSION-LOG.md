@@ -293,6 +293,86 @@ Continued from previous session. Phase 3 (Orleans Integration) was structurally 
 
 ---
 
+## Session: 2025-12-01 (Continued - Option A Implementation)
+
+### Context
+Continuing from earlier session where C1 was working but struct boxing was identified as critical issue. User requested:
+1. Document full Option A/B/C analysis in AI-Context
+2. Implement Option A (pass by ref with generic method)
+3. Create new R1 scenario using actual Roslyn+ generated code
+4. Add extensive logging to help debugging
+
+### What Was Discussed
+
+1. **Option A Analysis Documented** - Full comparison of three approaches for fixing struct boxing:
+   - Option A: Pass by ref (generic method) - RECOMMENDED
+   - Option B: Return restored value
+   - Option C: Return field dictionary
+
+2. **Option A Implementation** - Updated interface and implementation:
+   - `IAsyncPersistenceService.TryRestore<TStateMachine>(ref TStateMachine, string)` added
+   - Old non-generic method marked `[Obsolete]`
+   - `NewOrleansAsyncPersistenceService` updated with `DeserializeStateMachine<T>`
+
+3. **Roslyn Codegen Updates** - Modified `AsyncMethodToStateMachineRewriter.cs`:
+   - Added `GetGenericTryRestoreMethod()` to find new interface method
+   - Updated `GeneratePersistenceRestorationCheck` to use generic method with `ref this`
+   - Added file-based logging (`Log()`, `LogToFile()`, `LogGeneratedCodeDescription()`)
+
+4. **R1 Scenario Created** - New `RoslynPlusCrossSession.cs`:
+   - Compiles [Persistable] workflow with actual Roslyn+ at runtime
+   - Tests struct state machine restoration (unlike C1 which used class workaround)
+   - Extensive logging to `roslyn-plus-scenario.log`
+
+5. **Roslyn Compilation Error Fix** - TAI reported 14→10 compilation errors:
+   - Error: `this.stateMachineType` doesn't exist on `AsyncMethodToStateMachineRewriter`
+   - Root cause: `stateMachineType` is defined in `StateMachineRewriter` but
+     `AsyncMethodToStateMachineRewriter : MethodToStateMachineRewriter : MethodToClassRewriter`
+   - Fix: Changed all `this.stateMachineType` to `F.CurrentType`
+   - `F.CurrentType` is the correct way to access state machine type in this class hierarchy
+
+### Artifacts Modified
+
+| File | Change |
+|------|--------|
+| `DOTNExTPersistence.cs` | Added generic `TryRestore<T>`, marked old obsolete |
+| `NewOrleansAsyncPersistenceService.cs` | Implemented generic method, added `DeserializeStateMachine<T>` |
+| `AsyncMethodToStateMachineRewriter.cs` | Added generic method support, logging, **fixed `stateMachineType` → `F.CurrentType`** |
+| `RoslynPlusCrossSession.cs` | **NEW** - R1 scenario for Roslyn+ testing |
+| `Program.cs` | Added R1 to self-managing scenarios menu |
+| `CURRENT-WORK.md` | Full Option A/B/C analysis documented |
+| `SESSION-LOG.md` | This entry |
+
+### Key Insights
+
+1. **Class Hierarchy Matters**: `AsyncMethodToStateMachineRewriter` doesn't inherit from `StateMachineRewriter`, so `stateMachineType` field isn't available. Must use `F.CurrentType` instead.
+
+2. **F.CurrentType is the Pattern**: Looking at `MethodToStateMachineRewriter.TypeMap` property confirms this:
+   ```csharp
+   get { return ((SynthesizedContainer)F.CurrentType).TypeMap; }
+   ```
+
+3. **Generic Method Construction**: To call a generic method in bound tree:
+   ```csharp
+   var constructed = genericMethod.Construct(F.CurrentType);
+   F.Call(receiver, constructed, args...);
+   ```
+
+4. **Ref Parameters in Bound Tree**: F.Call handles ref parameters automatically from method symbol definitions - no special handling needed when calling `TryRestore<T>(ref T, string)`.
+
+### What's Next
+
+1. TAI to verify Roslyn build succeeds with `F.CurrentType` fix
+2. TAI to run R1 scenario and verify struct restoration works
+3. Complete C2-C9 scenarios using Roslyn+ approach
+
+### Open Questions
+
+1. **R1 Build Verification**: Need TAI to build Roslyn and verify the fix compiles
+2. **Roslyn+ Runtime Loading**: Does R1 scenario correctly load the modified Roslyn DLLs at runtime?
+
+---
+
 ## Session Template (Copy for New Sessions)
 
 ```markdown
