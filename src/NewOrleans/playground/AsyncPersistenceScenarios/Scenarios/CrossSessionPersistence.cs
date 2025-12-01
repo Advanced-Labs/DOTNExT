@@ -92,7 +92,6 @@ public static class CrossSessionPersistence
 
         IHost? silo1 = null;
         int? checkpointState = null;
-        int? capturedStep1 = null;
         const int inputValue = 42;
 
         try
@@ -124,7 +123,7 @@ public static class CrossSessionPersistence
             // Clear any previous state for this workflow
             var grainFactory = silo1.Services.GetRequiredService<IGrainFactory>();
             var grain = grainFactory.GetGrain<IAsyncStatePersistenceGrain>(WorkflowId);
-            await grain.ClearStateAsync();
+            await grain.ClearAsync();
             AnsiConsole.MarkupLine("[grey]  Cleared any previous workflow state[/]");
 
             // Set up checkpoint tracking
@@ -173,12 +172,12 @@ public static class CrossSessionPersistence
                     if (checkpoint != null)
                     {
                         AnsiConsole.MarkupLine($"[grey]  Checkpoint state: {checkpoint.StateNumber}[/]");
-                        AnsiConsole.MarkupLine($"[grey]  Checkpoint timestamp: {checkpoint.Timestamp}[/]");
+                        AnsiConsole.MarkupLine($"[grey]  Checkpoint timestamp: {checkpoint.CheckpointTimeUtc}[/]");
 
                         // Try to extract _step1 from the serialized data
-                        if (checkpoint.SerializedFields != null)
+                        if (checkpoint.SerializedStateMachine != null)
                         {
-                            AnsiConsole.MarkupLine($"[grey]  Serialized fields size: {checkpoint.SerializedFields.Length} bytes[/]");
+                            AnsiConsole.MarkupLine($"[grey]  Serialized state machine size: {checkpoint.SerializedStateMachine.Length} bytes[/]");
                         }
                     }
                 }
@@ -264,7 +263,7 @@ public static class CrossSessionPersistence
                 if (checkpoint != null)
                 {
                     AnsiConsole.MarkupLine($"[cyan]  Resuming from checkpoint state: {checkpoint.StateNumber}[/]");
-                    AnsiConsole.MarkupLine($"[cyan]  Checkpoint timestamp: {checkpoint.Timestamp}[/]");
+                    AnsiConsole.MarkupLine($"[cyan]  Checkpoint timestamp: {checkpoint.CheckpointTimeUtc}[/]");
                 }
             }
             else
