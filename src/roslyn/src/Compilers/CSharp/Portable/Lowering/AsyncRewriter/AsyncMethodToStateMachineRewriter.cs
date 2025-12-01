@@ -130,8 +130,8 @@ namespace Microsoft.CodeAnalysis.CSharp
             var sb = new System.Text.StringBuilder();
             sb.AppendLine($"=== DOTNExT-Roslyn Generated Code: {phase} ===");
             sb.AppendLine($"Method: {_persistenceMethodId}");
-            sb.AppendLine($"State Machine Type: {stateMachineType?.Name ?? "unknown"}");
-            sb.AppendLine($"Is Struct: {stateMachineType?.IsValueType ?? false}");
+            sb.AppendLine($"State Machine Type: {this.stateMachineType?.Name ?? "unknown"}");
+            sb.AppendLine($"Is Struct: {this.stateMachineType?.IsValueType ?? false}");
             sb.AppendLine($"Description:");
             sb.AppendLine(description);
             sb.AppendLine("=== End Generated Code Description ===");
@@ -928,9 +928,9 @@ namespace Microsoft.CodeAnalysis.CSharp
             if (genericTryRestoreMethod is not null)
             {
                 // Construct the closed generic method with the state machine type
-                tryRestoreMethod = genericTryRestoreMethod.Construct(stateMachineType);
+                tryRestoreMethod = genericTryRestoreMethod.Construct(this.stateMachineType);
                 useGenericMethod = true;
-                Log($"[DOTNExT-Roslyn]   Got GENERIC TryRestore<{stateMachineType.Name}> method - no struct boxing!");
+                Log($"[DOTNExT-Roslyn]   Got GENERIC TryRestore<{this.stateMachineType.Name}> method - no struct boxing!");
             }
             else
             {
@@ -962,13 +962,14 @@ namespace Microsoft.CodeAnalysis.CSharp
             {
                 // Generic method: var restoredState = persistenceService.TryRestore<TStateMachine>(ref this, methodId);
                 // This avoids boxing for struct state machines
+                // Note: F.Call handles ref parameters automatically based on the method symbol's parameter definitions
                 restoreStatements.Add(F.Assignment(
                     F.Local(restoredStateLocal),
                     F.Call(
                         F.Local(_persistenceServiceLocal),
                         tryRestoreMethod,
-                        ImmutableArray.Create<BoundExpression>(F.This(), F.Literal(_persistenceMethodId)),
-                        ImmutableArray.Create(RefKind.Ref, RefKind.None))));
+                        F.This(),
+                        F.Literal(_persistenceMethodId))));
             }
             else
             {
@@ -1019,7 +1020,7 @@ namespace Microsoft.CodeAnalysis.CSharp
   var persistenceService = AsyncPersistenceContext.Current;
   if (persistenceService != null && cachedState == -1)
   {{
-      var restoredState = persistenceService.TryRestore<{stateMachineType.Name}>(ref this, ""{_persistenceMethodId}"");
+      var restoredState = persistenceService.TryRestore<{this.stateMachineType.Name}>(ref this, ""{_persistenceMethodId}"");
       if (restoredState >= 0)
       {{
           cachedState = restoredState;
