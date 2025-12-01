@@ -209,6 +209,90 @@ Continued from previous session. The Roslyn modification was failing Challenge 7
 
 ---
 
+## Session: 2025-12-01 (C1 Cross-Session Persistence Working)
+
+### Context
+Continued from previous session. Phase 3 (Orleans Integration) was structurally complete but the C1 Cross-Session Persistence scenario was failing. This session focused on debugging and fixing all the issues preventing successful checkpoint/restore across silo restarts.
+
+### What Was Discussed
+
+1. **C1 Scenario Testing & Bug Hunting**
+   - Ran C1 scenario repeatedly, each fix revealing the next bug
+   - Total of 5 bugs found and fixed in this session
+   - Final result: C1 passes with correct output (input=42 → result=94)
+
+2. **Bug #1: StateNumber=0 Deserialized as -1**
+   - Orleans JSON serializer uses `DefaultValueHandling.Ignore`
+   - `StateNumber=0` (first await point) was skipped because 0 is the int default
+   - Fix: Added `[JsonProperty(DefaultValueHandling = DefaultValueHandling.Include)]` to StateNumber property
+
+3. **Bug #2: NullReferenceException on Restore**
+   - Restoration jumped to `Label_AwaitPoint0` expecting awaiter result
+   - But awaiter wasn't serialized - can't serialize `TaskAwaiter<T>`
+   - Fix: Added `justRestored` flag and new `Label_StartOpN` labels to re-run async operations
+
+4. **Bug #3: Stale Checkpoint After ClearAsync**
+   - `ClearStateAsync()` only clears storage, sets `RecordExists=false`
+   - But in-memory `_state.State` object retains old values
+   - Fix: Explicitly reset all `_state.State` fields after `ClearStateAsync()`
+
+5. **Bug #4: Restored Values Lost (Struct Boxing)**
+   - `InstrumentedSimpleWorkflow_StateMachine` was a struct
+   - When passed as `object` to `TryRestore`, it gets boxed
+   - `SetValue` via reflection modifies the boxed copy, not the original
+   - Fix: Changed state machine from `struct` to `class`
+
+6. **Bug #5: Compilation Errors from #4**
+   - CS1605: `ref this` not allowed in class
+   - CS8618: Non-nullable field `workflowId` not initialized
+   - Fix: Store `this` in local variable for `ref`, initialize `workflowId = ""`
+
+### Artifacts Modified
+
+| File | Change |
+|------|--------|
+| `AsyncStateCheckpoint.cs` | Added `[JsonProperty]` to `StateNumber` |
+| `InstrumentedWorkflow.cs` | struct→class, justRestored flag, Label_StartOpN, ref fixes |
+| `AsyncStatePersistenceGrain.cs` | ClearAsync resets in-memory state |
+| `RavenDbGrainStorage.cs` | Enhanced debug logging (file-based) |
+| `CURRENT-WORK.md` | Updated with bugs table |
+
+### Key Insights
+
+1. **Orleans JSON Serialization Quirk**: `DefaultValueHandling.Ignore` is a common source of bugs when default values (0, false, null) are meaningful.
+
+2. **Struct Boxing with Reflection**: A subtle bug - structs passed as `object` get boxed, and reflection modifications affect the copy. Critical for any serialization/deserialization involving structs.
+
+3. **ClearStateAsync Semantics**: Orleans' `ClearStateAsync` is about storage, not memory. Must manually reset the `State` object if you need both cleared.
+
+4. **Awaiter Non-Serialization**: Awaiters can't be serialized. On restoration, must re-initiate the async operation rather than trying to recover the awaiter state.
+
+5. **Hand-coded vs Roslyn-generated State Machines**: The struct→class workaround works for hand-coded but real Roslyn generates structs. Production needs different approach.
+
+### What's Next
+
+1. Update AI-Context documents ✅
+2. Analyze: Continue with hand-coded state machines or switch to Roslyn+ for C2-C9?
+3. Implement scenarios C2-C9:
+   - C2: Multiple Concurrent Workflows
+   - C3: Nested Async Calls
+   - C4: Exception Recovery
+   - C5: Large State Serialization
+   - C6: Silo Failover (multi-silo)
+   - C7: Version Migration
+   - C8: Multi-Silo Visibility
+   - C9: Grain Mobility
+
+### Open Questions
+
+1. **Hand-coded vs Roslyn+**: User raised critical question - should we test with actual Roslyn+ generated code instead of hand-coded state machines? Analysis needed.
+
+2. **Struct Boxing in Production**: Real Roslyn generates structs. How will the Orleans integration handle this for real code?
+
+3. **Awaiter Re-execution**: Current approach re-runs async operations on restore. Is this semantically correct for all scenarios?
+
+---
+
 ## Session Template (Copy for New Sessions)
 
 ```markdown

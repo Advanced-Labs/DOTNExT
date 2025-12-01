@@ -1,8 +1,8 @@
 # Current Work: Async State Machine Persistence
 
-**Status**: Phase 3 COMPLETE - Ready for Testing
-**Last Updated**: 2025-11-30
-**Branch**: `claude/review-orleans-docs-01Laga2PuCwyirCKG8tmsCw3`
+**Status**: Phase 3 COMPLETE - C1 Scenario Passing
+**Last Updated**: 2025-12-01
+**Branch**: `claude/review-orleans-changes-01NupGvm45sCJfU1V2Newo9X`
 
 ---
 
@@ -14,6 +14,30 @@
 3. Distributed execution (via Orleans)
 
 **Approach**: Modify Roslyn to inject persistence calls into generated async state machines.
+
+---
+
+## 🎉 C1 Cross-Session Persistence NOW WORKING! (2025-12-01)
+
+**Scenario C1 verified:**
+- Input: 42
+- Expected result: 94 (42×2 + 10)
+- **Actual result: 94** ✅
+
+The cross-session persistence demonstrates:
+- Checkpoint survives silo restart
+- State machine fields correctly restored
+- Workflow resumes from checkpoint state
+
+### Bugs Fixed in This Session
+
+| # | Bug | Root Cause | Fix |
+|---|-----|------------|-----|
+| 1 | StateNumber=0 deserialized as -1 | Orleans JSON uses `DefaultValueHandling.Ignore`, skipping `StateNumber=0` | Added `[JsonProperty(DefaultValueHandling = DefaultValueHandling.Include)]` to `StateNumber` |
+| 2 | NullReferenceException on restore | Restoration jumped to `Label_AwaitPointN` expecting awaiter result, but awaiter wasn't serialized | Added `justRestored` flag to jump to `Label_StartOpN` and re-run async operation |
+| 3 | Stale checkpoint after ClearAsync | `ClearStateAsync()` only clears storage, leaves in-memory state intact | Reset all `_state.State` fields to defaults after `ClearStateAsync()` |
+| 4 | Restored values lost (struct boxing) | Struct passed as `object` gets boxed; `SetValue` modifies copy, not original | Changed `InstrumentedSimpleWorkflow_StateMachine` from `struct` to `class` |
+| 5 | Compilation errors from #4 | `ref this` not allowed in class, non-nullable field | Store `this` in local var for `ref`, initialize `workflowId = ""` |
 
 ---
 
