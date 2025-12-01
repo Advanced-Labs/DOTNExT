@@ -106,6 +106,21 @@ public class AsyncStatePersistenceGrain : Grain, IAsyncStatePersistenceGrain
 
         await _state.ClearStateAsync();
 
+        // CRITICAL: Also reset in-memory state to defaults!
+        // ClearStateAsync only clears storage and sets RecordExists=false,
+        // but the State object retains its old values which would cause
+        // TryGetCheckpointAsync to return stale data.
+        _state.State.StateNumber = -1;
+        _state.State.SerializedStateMachine = null;
+        _state.State.StateMachineTypeName = null;
+        _state.State.CheckpointTimeUtc = null;
+        _state.State.IsCompleted = false;
+        _state.State.IsFaulted = false;
+        _state.State.SerializedResult = null;
+        _state.State.FaultExceptionType = null;
+        _state.State.FaultMessage = null;
+        _state.State.FaultStackTrace = null;
+
         _logger.LogDebug("Cleared all state for {GrainId}", grainId);
     }
 
