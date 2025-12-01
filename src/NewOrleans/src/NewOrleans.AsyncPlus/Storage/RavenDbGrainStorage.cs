@@ -170,6 +170,22 @@ public class RavenDbGrainStorage : IGrainStorage, ILifecycleParticipant<ISiloLif
             grainState.RecordExists = true;
 
             _logger.LogDebug("[DEBUG] ReadState: Document FOUND with {ByteCount} bytes StateData for {GrainId}", doc.StateData.Length, grainId);
+
+            // Debug: Log deserialized state details if it's AsyncStatePersistenceGrainState
+            if (grainState.State is AsyncStatePersistenceGrainState asyncState)
+            {
+                var logMessage = $"[{DateTime.UtcNow:O}] ReadState DESERIALIZED: GrainId={grainId}, StateNumber={asyncState.StateNumber}, IsCompleted={asyncState.IsCompleted}, IsFaulted={asyncState.IsFaulted}, HasSerializedData={asyncState.SerializedStateMachine != null}, TypeName={asyncState.StateMachineTypeName ?? "null"}";
+                try
+                {
+                    var logPath = Path.Combine(Path.GetTempPath(), "orleans-grain-storage-debug.log");
+                    File.AppendAllText(logPath, logMessage + Environment.NewLine);
+                }
+                catch { /* Ignore file write errors */ }
+
+                _logger.LogDebug(
+                    "[DEBUG] ReadState DESERIALIZED: StateNumber={StateNumber}, IsCompleted={IsCompleted}, IsFaulted={IsFaulted}, HasSerializedData={HasData}, TypeName={TypeName}",
+                    asyncState.StateNumber, asyncState.IsCompleted, asyncState.IsFaulted, asyncState.SerializedStateMachine != null, asyncState.StateMachineTypeName ?? "null");
+            }
         }
         catch (Exception ex)
         {
@@ -185,11 +201,21 @@ public class RavenDbGrainStorage : IGrainStorage, ILifecycleParticipant<ISiloLif
 
         var documentId = GetDocumentId(stateName, grainId);
 
-        // Debug: Log what we're about to write and where from
+        // Debug: Log what we're about to write and where from - write to file to survive shutdown
         if (grainState.State is AsyncStatePersistenceGrainState asyncState)
         {
             var stackTrace = new System.Diagnostics.StackTrace(true);
             var callerInfo = stackTrace.ToString().Split('\n').Take(8).Aggregate((a, b) => a + " | " + b);
+            var logMessage = $"[{DateTime.UtcNow:O}] WriteState: GrainId={grainId}, StateNumber={asyncState.StateNumber}, IsCompleted={asyncState.IsCompleted}, IsFaulted={asyncState.IsFaulted}, HasSerializedData={asyncState.SerializedStateMachine != null}, CalledFrom={callerInfo}";
+
+            // Write to file to survive shutdown
+            try
+            {
+                var logPath = Path.Combine(Path.GetTempPath(), "orleans-grain-storage-debug.log");
+                File.AppendAllText(logPath, logMessage + Environment.NewLine);
+            }
+            catch { /* Ignore file write errors */ }
+
             _logger.LogDebug(
                 "[DEBUG] WriteState: GrainId={GrainId}, StateNumber={StateNumber}, IsCompleted={IsCompleted}, IsFaulted={IsFaulted}, HasSerializedData={HasData}, CalledFrom={CallerInfo}",
                 grainId, asyncState.StateNumber, asyncState.IsCompleted, asyncState.IsFaulted, asyncState.SerializedStateMachine != null, callerInfo);
