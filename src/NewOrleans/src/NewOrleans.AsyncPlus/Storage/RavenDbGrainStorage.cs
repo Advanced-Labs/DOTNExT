@@ -143,11 +143,22 @@ public class RavenDbGrainStorage : IGrainStorage, ILifecycleParticipant<ISiloLif
 
             var doc = await session.LoadAsync<GrainStateDocument>(documentId);
 
-            if (doc == null || doc.StateData == null)
+            if (doc == null)
             {
-                // No state found - use default
+                // Document doesn't exist
+                _logger.LogDebug("[DEBUG] ReadState: Document NOT FOUND for {GrainId}, using default state", grainId);
                 grainState.State = Activator.CreateInstance<T>();
                 grainState.ETag = null;
+                grainState.RecordExists = false;
+                return;
+            }
+
+            if (doc.StateData == null)
+            {
+                // Document exists but StateData is null (was cleared)
+                _logger.LogDebug("[DEBUG] ReadState: Document EXISTS but StateData is NULL for {GrainId}, using default state", grainId);
+                grainState.State = Activator.CreateInstance<T>();
+                grainState.ETag = session.Advanced.GetChangeVectorFor(doc);
                 grainState.RecordExists = false;
                 return;
             }
@@ -158,7 +169,7 @@ public class RavenDbGrainStorage : IGrainStorage, ILifecycleParticipant<ISiloLif
             grainState.ETag = session.Advanced.GetChangeVectorFor(doc);
             grainState.RecordExists = true;
 
-            _logger.LogDebug("Read state for grain {GrainId}, document {DocumentId}", grainId, documentId);
+            _logger.LogDebug("[DEBUG] ReadState: Document FOUND with {ByteCount} bytes StateData for {GrainId}", doc.StateData.Length, grainId);
         }
         catch (Exception ex)
         {
@@ -238,6 +249,7 @@ public class RavenDbGrainStorage : IGrainStorage, ILifecycleParticipant<ISiloLif
 
             if (_options.DeleteStateOnClear)
             {
+                _logger.LogDebug("[DEBUG] ClearState: DELETING document {DocumentId} for {GrainId}", documentId, grainId);
                 session.Delete(documentId);
             }
             else
@@ -246,8 +258,13 @@ public class RavenDbGrainStorage : IGrainStorage, ILifecycleParticipant<ISiloLif
                 var doc = await session.LoadAsync<GrainStateDocument>(documentId);
                 if (doc != null)
                 {
+                    _logger.LogDebug("[DEBUG] ClearState: Setting StateData=NULL for {DocumentId} (document exists)", documentId);
                     doc.StateData = null;
                     doc.LastModifiedUtc = DateTime.UtcNow;
+                }
+                else
+                {
+                    _logger.LogDebug("[DEBUG] ClearState: Document {DocumentId} does not exist, nothing to clear", documentId);
                 }
             }
 

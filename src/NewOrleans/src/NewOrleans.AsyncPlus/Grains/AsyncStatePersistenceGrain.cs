@@ -112,9 +112,18 @@ public class AsyncStatePersistenceGrain : Grain, IAsyncStatePersistenceGrain
     /// <inheritdoc />
     public Task<bool> HasPersistedStateAsync()
     {
-        var hasState = _state.State.StateNumber >= 0 ||
-                       _state.State.IsCompleted ||
-                       _state.State.IsFaulted;
+        var grainId = this.GetPrimaryKeyString();
+        var stateNumber = _state.State.StateNumber;
+        var isCompleted = _state.State.IsCompleted;
+        var isFaulted = _state.State.IsFaulted;
+        var hasSerializedData = _state.State.SerializedStateMachine != null;
+
+        var hasState = stateNumber >= 0 || isCompleted || isFaulted;
+
+        _logger.LogDebug(
+            "[DEBUG] HasPersistedStateAsync for {GrainId}: StateNumber={StateNumber}, IsCompleted={IsCompleted}, IsFaulted={IsFaulted}, HasSerializedData={HasData}, RecordExists={RecordExists} => Result={HasState}",
+            grainId, stateNumber, isCompleted, isFaulted, hasSerializedData, _state.RecordExists, hasState);
+
         return Task.FromResult(hasState);
     }
 }
