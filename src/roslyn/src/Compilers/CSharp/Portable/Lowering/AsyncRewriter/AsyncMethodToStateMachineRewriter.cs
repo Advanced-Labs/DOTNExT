@@ -997,6 +997,12 @@ namespace Microsoft.CodeAnalysis.CSharp
                         F.Literal(_persistenceMethodId))));
             }
 
+            // DOTNExT: After restoration, we must NOT set cachedState to the restored value.
+            // If we did, the switch statement would jump to the awaiter continuation (case N),
+            // which expects awaiter.GetResult() - but awaiters can't be serialized.
+            // Instead: reset state to -1 (not started) so workflow re-runs from beginning.
+            // The restored field values (intermediate results) are preserved, so idempotent
+            // operations will produce the same results quickly.
             restoreStatements.Add(F.If(
                 condition: F.Binary(
                     BinaryOperatorKind.IntGreaterThanOrEqual,
@@ -1004,8 +1010,9 @@ namespace Microsoft.CodeAnalysis.CSharp
                     F.Local(restoredStateLocal),
                     F.Literal(0)),
                 thenClause: F.Block(
-                    F.Assignment(F.Local(cachedState), F.Local(restoredStateLocal)),
-                    F.Assignment(F.Field(F.This(), stateField), F.Local(restoredStateLocal)))));
+                    // Reset state to -1 so workflow starts from beginning
+                    // (Don't update cachedState - leave it at -1 to trigger fresh start)
+                    F.Assignment(F.Field(F.This(), stateField), F.Literal(StateMachineState.NotStartedOrRunningState)))));
 
             var restoreBlock = F.Block(
                 ImmutableArray.Create(restoredStateLocal),
@@ -1039,11 +1046,13 @@ namespace Microsoft.CodeAnalysis.CSharp
       var restoredState = persistenceService.TryRestore<{F.CurrentType.Name}>(ref this, ""{_persistenceMethodId}"");
       if (restoredState >= 0)
       {{
-          cachedState = restoredState;
-          this.<>1__state = restoredState;
+          // Reset state to -1 so workflow re-runs from beginning
+          // (cachedState stays -1 - don't jump to awaiter continuation!)
+          this.<>1__state = -1;
       }}
   }}
-  NOTE: Using generic TryRestore<T>(ref T) - NO STRUCT BOXING!";
+  NOTE: Using generic TryRestore<T>(ref T) - NO STRUCT BOXING!
+  NOTE: Workflow re-runs from start with restored field values (awaiters can't be serialized).";
             }
             else if (isStructStateMachine)
             {
@@ -1054,11 +1063,12 @@ namespace Microsoft.CodeAnalysis.CSharp
       var restoredState = persistenceService.TryRestore((object)this, ""{_persistenceMethodId}"");
       if (restoredState >= 0)
       {{
-          cachedState = restoredState;
-          this.<>1__state = restoredState;
+          // Reset state to -1 so workflow re-runs from beginning
+          this.<>1__state = -1;
       }}
   }}
-  WARNING: Using non-generic TryRestore on STRUCT - boxing will lose restored values!";
+  WARNING: Using non-generic TryRestore on STRUCT - boxing will lose restored values!
+  NOTE: Workflow re-runs from start (awaiters can't be serialized).";
             }
             else
             {
@@ -1069,11 +1079,13 @@ namespace Microsoft.CodeAnalysis.CSharp
       var restoredState = persistenceService.TryRestore((object)this, ""{_persistenceMethodId}"");
       if (restoredState >= 0)
       {{
-          cachedState = restoredState;
-          this.<>1__state = restoredState;
+          // Reset state to -1 so workflow re-runs from beginning
+          // (cachedState stays -1 - don't jump to awaiter continuation!)
+          this.<>1__state = -1;
       }}
   }}
-  NOTE: CLASS state machines work fine with object boxing - no data loss.";
+  NOTE: CLASS state machines work fine with object boxing - no data loss.
+  NOTE: Workflow re-runs from start with restored field values (awaiters can't be serialized).";
             }
             LogGeneratedCodeDescription("Restoration Check", restorationDesc);
 
