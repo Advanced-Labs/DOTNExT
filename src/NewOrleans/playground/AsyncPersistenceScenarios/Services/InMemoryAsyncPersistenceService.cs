@@ -302,6 +302,10 @@ public class InMemoryAsyncPersistenceService : IAsyncPersistenceServiceGeneric, 
             if (fieldName.Contains("__builder") || fieldName.Contains("<>t__builder"))
                 continue;
 
+            // Skip captured outer class reference - comes from caller, can't serialize
+            if (fieldName.Contains("<>4__this"))
+                continue;
+
             // Skip state field - we track this separately
             if (fieldName.Contains("__state") || fieldName.Contains("<>1__state"))
                 continue;
@@ -551,6 +555,10 @@ public class InMemoryAsyncPersistenceService : IAsyncPersistenceServiceGeneric, 
 
             // Skip builder field - recreated on resume
             if (fieldName.Contains("__builder") || fieldName.Contains("<>t__builder"))
+                continue;
+
+            // Skip captured outer class reference - comes from caller, can't serialize
+            if (fieldName.Contains("<>4__this"))
                 continue;
 
             // Skip state field - we track this separately

@@ -257,6 +257,7 @@ public class NewOrleansAsyncPersistenceService : DOTNExT.Persistence.IAsyncPersi
             // Skip transient/infrastructure fields that can't or shouldn't be serialized:
             // - Awaiter fields (TaskAwaiter, etc.)
             // - Builder fields (AsyncTaskMethodBuilder, etc.) - these contain Tasks
+            // - Captured outer class reference (<>4__this) - can't serialize, comes from caller
             // - Persistence service references
             var fieldName = field.Name;
             var typeName = field.FieldType.Name;
@@ -264,6 +265,8 @@ public class NewOrleansAsyncPersistenceService : DOTNExT.Persistence.IAsyncPersi
             if (fieldName.Contains("__awaiter") || typeName.Contains("Awaiter"))
                 continue;
             if (fieldName.Contains("__builder") || typeName.Contains("MethodBuilder"))
+                continue;
+            if (fieldName.Contains("<>4__this"))  // Captured 'this' reference to outer class
                 continue;
             if (fieldName.Contains("persistenceService") || fieldName.Contains("PersistenceService"))
                 continue;
