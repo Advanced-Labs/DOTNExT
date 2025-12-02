@@ -921,11 +921,16 @@ namespace Microsoft.CodeAnalysis.CSharp
             Log($"[DOTNExT-Roslyn]   Got Current property getter");
 
             // Try to get the generic TryRestore<T>(ref T, string) method first (preferred - no boxing)
+            // BUT: Only use generic method for STRUCT state machines - classes don't support ref this
             var genericTryRestoreMethod = GetGenericTryRestoreMethod();
             MethodSymbol? tryRestoreMethod;
             bool useGenericMethod = false;
 
-            if (genericTryRestoreMethod is not null)
+            // Check if state machine is a value type (struct) - only then can we use ref this
+            bool isStructStateMachine = F.CurrentType.IsValueType;
+            Log($"[DOTNExT-Roslyn]   State machine is {(isStructStateMachine ? "STRUCT" : "CLASS")}");
+
+            if (genericTryRestoreMethod is not null && isStructStateMachine)
             {
                 // Construct the closed generic method with the state machine type
                 tryRestoreMethod = genericTryRestoreMethod.Construct(F.CurrentType);
@@ -934,11 +939,20 @@ namespace Microsoft.CodeAnalysis.CSharp
             }
             else
             {
-                // Fall back to old non-generic method (has boxing issues for structs)
+                // Fall back to old non-generic method
+                // For classes: this is fine - no boxing issue since classes are reference types
+                // For structs: this has boxing issues but is fallback if generic not available
 #pragma warning disable CS0618 // Type or member is obsolete
                 tryRestoreMethod = GetTryRestoreMethod();
 #pragma warning restore CS0618
-                Log($"[DOTNExT-Roslyn]   WARNING: Using non-generic TryRestore - struct boxing will occur!");
+                if (isStructStateMachine)
+                {
+                    Log($"[DOTNExT-Roslyn]   WARNING: Using non-generic TryRestore for STRUCT - boxing will occur!");
+                }
+                else
+                {
+                    Log($"[DOTNExT-Roslyn]   Using non-generic TryRestore for CLASS - no boxing issue");
+                }
             }
 
             if (tryRestoreMethod is null)
@@ -1015,8 +1029,10 @@ namespace Microsoft.CodeAnalysis.CSharp
                 thenClause: restoreBlock));
 
             // Log detailed description of generated restoration code
-            var restorationDesc = useGenericMethod
-                ? $@"Generated GENERIC restoration check:
+            string restorationDesc;
+            if (useGenericMethod)
+            {
+                restorationDesc = $@"Generated GENERIC restoration check (STRUCT state machine):
   var persistenceService = AsyncPersistenceContext.Current;
   if (persistenceService != null && cachedState == -1)
   {{
@@ -1027,8 +1043,11 @@ namespace Microsoft.CodeAnalysis.CSharp
           this.<>1__state = restoredState;
       }}
   }}
-  NOTE: Using generic TryRestore<T>(ref T) - NO STRUCT BOXING!"
-                : $@"Generated NON-GENERIC restoration check (DEPRECATED - HAS BOXING ISSUE):
+  NOTE: Using generic TryRestore<T>(ref T) - NO STRUCT BOXING!";
+            }
+            else if (isStructStateMachine)
+            {
+                restorationDesc = $@"Generated NON-GENERIC restoration check (STRUCT - BOXING ISSUE!):
   var persistenceService = AsyncPersistenceContext.Current;
   if (persistenceService != null && cachedState == -1)
   {{
@@ -1039,7 +1058,23 @@ namespace Microsoft.CodeAnalysis.CSharp
           this.<>1__state = restoredState;
       }}
   }}
-  WARNING: Using non-generic TryRestore - struct boxing will lose restored values!";
+  WARNING: Using non-generic TryRestore on STRUCT - boxing will lose restored values!";
+            }
+            else
+            {
+                restorationDesc = $@"Generated NON-GENERIC restoration check (CLASS state machine):
+  var persistenceService = AsyncPersistenceContext.Current;
+  if (persistenceService != null && cachedState == -1)
+  {{
+      var restoredState = persistenceService.TryRestore((object)this, ""{_persistenceMethodId}"");
+      if (restoredState >= 0)
+      {{
+          cachedState = restoredState;
+          this.<>1__state = restoredState;
+      }}
+  }}
+  NOTE: CLASS state machines work fine with object boxing - no data loss.";
+            }
             LogGeneratedCodeDescription("Restoration Check", restorationDesc);
 
             return F.Block(statements.ToImmutableAndFree());
