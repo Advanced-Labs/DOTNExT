@@ -46,6 +46,9 @@ public static class RoslynPlusCrossSession
     private const string WorkflowId = "roslyn-plus-test-workflow";
     private const string LogFile = "roslyn-plus-scenario.log";
 
+    // The method ID that Roslyn+ uses for persistence (fully qualified method name)
+    private const string PersistenceMethodId = "RoslynPlusWorkflows.TestWorkflow.SimpleCalculation";
+
     // Workflow source code that will be compiled with Roslyn+
     private const string WorkflowSource = @"
 using System;
@@ -286,11 +289,14 @@ namespace RoslynPlusWorkflows
                 throw new InvalidOperationException("Could not get NewOrleansAsyncPersistenceService");
             }
 
-            // Clear any previous state
+            // Clear any previous state - must clear by the method ID that Roslyn+ uses
             var grainFactory = silo1.Services.GetRequiredService<IGrainFactory>();
-            var grain = grainFactory.GetGrain<IAsyncStatePersistenceGrain>(WorkflowId);
+            var grain = grainFactory.GetGrain<IAsyncStatePersistenceGrain>(PersistenceMethodId);
             await grain.ClearAsync();
-            Log("Cleared previous workflow state");
+            // Also clear the old workflow ID in case it was used
+            var oldGrain = grainFactory.GetGrain<IAsyncStatePersistenceGrain>(WorkflowId);
+            await oldGrain.ClearAsync();
+            Log($"Cleared previous workflow state for {PersistenceMethodId}");
             AnsiConsole.MarkupLine("[grey]  Cleared any previous workflow state[/]");
 
             // Set up checkpoint tracking
@@ -299,7 +305,7 @@ namespace RoslynPlusWorkflows
 
             void OnCheckpoint(object? sender, CheckpointEventArgs e)
             {
-                if (e.MethodId == WorkflowId)
+                if (e.MethodId == PersistenceMethodId)
                 {
                     checkpointCount++;
                     checkpointState = e.StateNumber;
@@ -480,7 +486,7 @@ namespace RoslynPlusWorkflows
 
             void OnCheckpoint(object? sender, CheckpointEventArgs e)
             {
-                if (e.MethodId == WorkflowId)
+                if (e.MethodId == PersistenceMethodId)
                 {
                     resumeCheckpoints++;
                     Log($"CHECKPOINT during resume: State {e.StateNumber}");
