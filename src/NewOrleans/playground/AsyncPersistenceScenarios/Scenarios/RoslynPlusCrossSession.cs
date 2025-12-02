@@ -321,7 +321,7 @@ namespace RoslynPlusWorkflows
 
             void OnRestore(object? sender, RestoreEventArgs e)
             {
-                if (e.MethodId == WorkflowId)
+                if (e.MethodId == PersistenceMethodId)
                 {
                     Log($"RESTORE: State {e.RestoredState}");
                     AnsiConsole.MarkupLine($"[yellow]  [[RESTORE]] Restored to state {e.RestoredState}[/]");
@@ -455,9 +455,9 @@ namespace RoslynPlusWorkflows
                 throw new InvalidOperationException("Could not get NewOrleansAsyncPersistenceService");
             }
 
-            // Check for saved state
+            // Check for saved state - must use PersistenceMethodId (what Roslyn+ uses)
             var grainFactory = silo2.Services.GetRequiredService<IGrainFactory>();
-            var grain = grainFactory.GetGrain<IAsyncStatePersistenceGrain>(WorkflowId);
+            var grain = grainFactory.GetGrain<IAsyncStatePersistenceGrain>(PersistenceMethodId);
             var hasState = await grain.HasPersistedStateAsync();
 
             Log($"Persisted state found: {hasState}");
@@ -496,7 +496,7 @@ namespace RoslynPlusWorkflows
 
             void OnRestore(object? sender, RestoreEventArgs e)
             {
-                if (e.MethodId == WorkflowId)
+                if (e.MethodId == PersistenceMethodId)
                 {
                     wasRestored = true;
                     restoredState = e.RestoredState;
@@ -507,7 +507,7 @@ namespace RoslynPlusWorkflows
 
             void OnComplete(object? sender, CompleteEventArgs e)
             {
-                if (e.MethodId == WorkflowId)
+                if (e.MethodId == PersistenceMethodId)
                 {
                     Log($"COMPLETE: Result = {e.Result}");
                     AnsiConsole.MarkupLine($"[green]  [[COMPLETE]] Workflow finished with result: {e.Result}[/]");
