@@ -185,7 +185,7 @@ namespace RoslynPlusWorkflows
 
         // Show the source being compiled
         Log($"Source code:\n{WorkflowSource}");
-        AnsiConsole.MarkupLine("[grey]  Compiling [Persistable] workflow...[/]");
+        AnsiConsole.MarkupLine("[grey]  Compiling [[Persistable]] workflow...[/]");
 
         Assembly? compiledAssembly = null;
         try
