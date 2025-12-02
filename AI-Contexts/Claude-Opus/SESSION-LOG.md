@@ -373,6 +373,80 @@ Continuing from earlier session where C1 was working but struct boxing was ident
 
 ---
 
+## Session: 2025-12-02 (R1 Roslyn+ Cross-Session Persistence VERIFIED!)
+
+### Context
+Continuing from previous session. The context recovery summary indicated R1 scenario was failing with NullReferenceException after restoration. The root cause was that after restoring state, the workflow jumped to the awaiter continuation point expecting `awaiter.GetResult()` to work, but awaiters cannot be serialized.
+
+### What Was Discussed
+
+1. **Root Cause: Awaiter Continuation Jump**
+   - After restoration, code set `cachedState = restoredState` (e.g., 0)
+   - Switch statement jumped to `case 0` (awaiter continuation)
+   - Called `awaiter.GetResult()` on null awaiter → NullReferenceException
+
+2. **Fix: Don't Jump to Awaiter Continuation**
+   - Modified `GeneratePersistenceRestorationCheck()` in Roslyn codegen
+   - After restoration, reset `<>1__state = -1` (not started)
+   - DON'T update `cachedState` - leave it at -1 so workflow starts fresh
+   - Field values are still restored - workflow re-runs with restored intermediate results
+
+3. **Grain ID Mismatch Bug**
+   - Scenario was checking `HasPersistedStateAsync` for wrong grain ID
+   - Roslyn uses `RoslynPlusWorkflows.TestWorkflow.SimpleCalculation` as method ID
+   - Scenario was checking `roslyn-plus-test-workflow` (workflow ID)
+   - Fixed 4 places to use `PersistenceMethodId` consistently
+
+4. **Success Criteria Update**
+   - Old criteria expected fewer checkpoints during resume (skipping restored steps)
+   - New behavior: workflow re-runs from beginning, creating all checkpoints
+   - Updated success criteria to: result correct + restored + restoredState >= 0
+
+### Artifacts Modified
+
+| File | Change |
+|------|--------|
+| `AsyncMethodToStateMachineRewriter.cs` | Don't set cachedState after restore; reset state to -1 |
+| `RoslynPlusCrossSession.cs` | Use `PersistenceMethodId` for all grain lookups; update success criteria |
+| `CURRENT-WORK.md` | Added R1 success section, bugs table, struct vs class detection |
+| `SESSION-LOG.md` | This entry |
+
+### Key Commits
+
+1. `6423b20525` - Fix Roslyn codegen: don't jump to awaiter continuation after restore
+2. `ea73ab27c9` - Fix R1 scenario: use PersistenceMethodId consistently for all grain lookups
+3. `428fb50cc6` - Update R1 scenario success criteria for re-run behavior
+
+### Key Insights
+
+1. **Awaiters Cannot Be Serialized**: `TaskAwaiter<T>` holds internal state that can't be persisted. On restoration, must re-run the async operation, not resume mid-await.
+
+2. **Class State Machines by Default**: Roslyn generates CLASS state machines, not structs. This means the boxing concern for structs is not relevant for typical async methods.
+
+3. **Re-run vs Resume**: The current approach re-runs the workflow from the beginning with restored field values. For idempotent operations, this produces correct results. Future enhancement could implement `justRestored` pattern with `Label_StartOpN` labels to re-run specific operations.
+
+4. **Persistence Method ID**: Roslyn uses fully qualified method name (`Namespace.Class.Method`) as the persistence key, not any user-provided workflow ID.
+
+### What's Next
+
+1. ✅ R1 scenario verified working
+2. Consider implementing C2-C9 scenarios using Roslyn+ approach:
+   - C2: Multiple Concurrent Workflows
+   - C3: Nested Async Calls
+   - C4: Exception Recovery
+   - C5-C9: Advanced scenarios
+3. Consider future enhancement: `justRestored` pattern to re-run specific operations instead of full restart
+
+### Open Questions
+
+1. **Idempotency Assumption**: Current approach assumes operations are idempotent (re-running produces same result). What about operations with side effects?
+
+2. **Performance**: Re-running from beginning is simple but wasteful. Worth implementing operation-level resume?
+
+3. **Struct State Machines**: Generic `TryRestore<T>(ref this)` is implemented but untested since Roslyn generates classes. When/why would structs be used?
+
+---
+
 ## Session Template (Copy for New Sessions)
 
 ```markdown

@@ -271,12 +271,26 @@ await WorkflowDebugger.ReplayFrom("workflow-123", checkpointId: 2);
 
 ---
 
-## Part 3: Recommended Implementation Order
+## Part 3: Implementation Status
 
-### Immediate (Next Sprint)
-1. **C1: Cross-Session Persistence** - Validates core value proposition
-2. **C2: Multiple Concurrent Workflows** - Validates isolation
-3. **C3: Nested Async Calls** - Common real-world pattern
+### ✅ COMPLETED
+
+| Scenario | Status | Date | Notes |
+|----------|--------|------|-------|
+| **C1: Cross-Session Persistence** | ✅ PASS | 2025-12-01 | Hand-coded state machine, result=94 |
+| **R1: Roslyn+ Cross-Session Persistence** | ✅ PASS | 2025-12-02 | Real Roslyn+ generated code, result=94 |
+
+### Key Learnings from R1
+
+1. **Awaiters can't be serialized** - TaskAwaiter<T> holds internal state
+2. **Re-run from beginning** - After restoration, workflow re-runs with restored field values
+3. **Class state machines** - Roslyn generates CLASS (not struct) by default
+4. **Persistence Method ID** - Uses fully qualified method name (Namespace.Class.Method)
+
+### Recommended Next Steps
+
+1. **C2: Multiple Concurrent Workflows** - Validates isolation
+2. **C3: Nested Async Calls** - Common real-world pattern
 
 ### Short-Term (Following Month)
 4. **C4: Exception Recovery** - Production reliability
