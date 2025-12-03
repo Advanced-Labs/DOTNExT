@@ -342,9 +342,9 @@ namespace GrainMobilityWorkflow
 
             // Deactivate the grain - this forces Orleans to unload it
             // When accessed again, it will reactivate (possibly on a different silo)
-            await persistenceGrain.DeactivateOnIdle();
-            LogToFile("Called DeactivateOnIdle on persistence grain");
-            AnsiConsole.MarkupLine("[yellow]  Called DeactivateOnIdle on persistence grain[/]");
+            await persistenceGrain.RequestDeactivationAsync();
+            LogToFile("Called RequestDeactivationAsync on persistence grain");
+            AnsiConsole.MarkupLine("[yellow]  Called RequestDeactivationAsync on persistence grain[/]");
 
             // Wait for deactivation to complete
             await Task.Delay(3000);

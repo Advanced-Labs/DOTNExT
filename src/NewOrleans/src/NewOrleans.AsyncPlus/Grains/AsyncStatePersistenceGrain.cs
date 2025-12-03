@@ -141,4 +141,17 @@ public class AsyncStatePersistenceGrain : Grain, IAsyncStatePersistenceGrain
 
         return Task.FromResult(hasState);
     }
+
+    /// <inheritdoc />
+    public Task RequestDeactivationAsync()
+    {
+        var grainId = this.GetPrimaryKeyString();
+        _logger.LogDebug("Deactivation requested for {GrainId}", grainId);
+
+        // DeactivateOnIdle marks the grain for deactivation when the current
+        // request completes and no other requests are pending
+        this.DeactivateOnIdle();
+
+        return Task.CompletedTask;
+    }
 }

@@ -42,4 +42,10 @@ public interface IAsyncStatePersistenceGrain : IGrainWithStringKey
     /// Check if this workflow has any persisted state.
     /// </summary>
     Task<bool> HasPersistedStateAsync();
+
+    /// <summary>
+    /// Request the grain to deactivate when idle.
+    /// Used for testing grain mobility scenarios.
+    /// </summary>
+    Task RequestDeactivationAsync();
 }
