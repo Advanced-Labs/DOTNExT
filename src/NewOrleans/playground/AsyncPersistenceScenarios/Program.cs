@@ -1113,9 +1113,9 @@ public static class Program
                 ("2", "C2: Multiple Concurrent Workflows ✓"),
                 ("", ""),
                 ("8", "C8: Multi-Silo Visibility ✓"),
+                ("3", "C3: Nested Async Calls ✓"),
                 ("", ""),
                 ("", "═══ ROSLYN+ SCENARIOS (Planned) ══"),
-                ("3", "C3: Nested Async Calls"),
                 ("4", "C4: Exception Recovery"),
                 ("5", "C5: Large State Serialization"),
                 ("6", "C6: Silo Failover"),
@@ -1149,6 +1149,8 @@ public static class Program
                         await MultiSiloCheckpointVisibility.RunAsync();
                         break;
                     case "3":
+                        await NestedAsyncCalls.RunAsync();
+                        break;
                     case "4":
                     case "5":
                     case "6":
