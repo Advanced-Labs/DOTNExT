@@ -1110,9 +1110,9 @@ public static class Program
             {
                 ("", "═══ ROSLYN+ SCENARIOS (Active) ═══"),
                 ("R", "R1: Cross-Session Persistence ✓"),
+                ("2", "C2: Multiple Concurrent Workflows ✓"),
                 ("", ""),
                 ("", "═══ ROSLYN+ SCENARIOS (Planned) ══"),
-                ("2", "C2: Multiple Concurrent Workflows"),
                 ("3", "C3: Nested Async Calls"),
                 ("4", "C4: Exception Recovery"),
                 ("5", "C5: Large State Serialization"),
@@ -1142,6 +1142,8 @@ public static class Program
                         await CrossSessionPersistence.RunAsync();
                         break;
                     case "2":
+                        await MultipleConcurrentWorkflows.RunAsync();
+                        break;
                     case "3":
                     case "4":
                     case "5":

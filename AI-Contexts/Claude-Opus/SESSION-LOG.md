@@ -447,6 +447,64 @@ Continuing from previous session. The context recovery summary indicated R1 scen
 
 ---
 
+## Session: 2025-12-03 (C2 Multiple Concurrent Workflows Implementation)
+
+### Context
+User requested implementation of C2 scenario - testing parallel workflow isolation with Roslyn+ generated code. This is critical for validating production readiness where multiple workflow instances run concurrently.
+
+### What Was Discussed
+
+1. **C2 Design** - Identified key concerns for concurrent workflows:
+   - Grain ID collision if methodId isn't unique per instance
+   - `_pendingCheckpoints` dictionary race conditions under concurrent access
+   - RavenDB write contention from simultaneous checkpoints
+   - Event handler confusion (same methodId pattern)
+   - `AsyncPersistenceContext.Current` thread safety
+
+2. **Implementation Strategy**:
+   - Each workflow gets unique workflowId (`c2-concurrent-W1`, `c2-concurrent-W2`, etc.)
+   - Each workflow has different input (10, 20, 30, 40, 50)
+   - Expected results: (input*2)+10 = 30, 50, 70, 90, 110
+   - Test crashes all workflows after first checkpoint, then resumes all
+
+3. **Extensive Logging Added**:
+   - File: `c2-concurrent-workflows.log` with detailed event sequence
+   - Console: Spectre.Console tables for progress visualization
+   - Event counter for tracking checkpoint/restore sequence
+   - Timestamps on all events for debugging races
+
+### Artifacts Created/Modified
+
+| File | Change |
+|------|--------|
+| `MultipleConcurrentWorkflows.cs` | **NEW** - Complete C2 scenario implementation |
+| `Program.cs` | Added C2 to self-managing scenarios menu |
+| `CURRENT-WORK.md` | Added C2 section, updated status |
+| `SESSION-LOG.md` | This entry |
+
+### Key Insights
+
+1. **WorkflowId vs MethodId**: Roslyn+ uses the fully qualified method name as methodId. For concurrent workflows, each instance needs a unique identifier passed to the persistence service.
+
+2. **Potential Issue Identified**: The current Roslyn+ codegen uses the method name, not a workflow instance ID. This means concurrent calls to the same method may conflict. C2 will reveal if this is a real issue.
+
+3. **Dummy Input Pattern**: On resume, we pass dummy input (999) to detect if restoration failed - if result is 2008 instead of expected, restoration didn't apply.
+
+### What's Next
+
+1. TAI builds and runs C2 scenario
+2. Analyze log file for any race conditions or isolation failures
+3. If C2 passes, proceed to C3 (Nested Async Calls)
+4. If C2 fails, debug using detailed logs and fix
+
+### Open Questions
+
+1. **MethodId Uniqueness**: Does each workflow instance get a unique grain, or do concurrent calls collide? C2 will answer this.
+
+2. **AsyncPersistenceContext.Current**: Is this thread-safe for concurrent workflows? Each async flow should have its own context, but needs verification.
+
+---
+
 ## Session Template (Copy for New Sessions)
 
 ```markdown

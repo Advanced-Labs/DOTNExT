@@ -1,8 +1,8 @@
 # Current Work: Async State Machine Persistence
 
-**Status**: ✅ R1 Roslyn+ Cross-Session Persistence VERIFIED!
-**Last Updated**: 2025-12-02
-**Branch**: `claude/review-orleans-changes-01NupGvm45sCJfU1V2Newo9X`
+**Status**: 🔄 C2 Multiple Concurrent Workflows IMPLEMENTED
+**Last Updated**: 2025-12-03
+**Branch**: `claude/review-orleans-docs-012LkqxZeSYemni2gi4vYqUU`
 
 ---
 
@@ -14,6 +14,40 @@
 3. Distributed execution (via Orleans)
 
 **Approach**: Modify Roslyn to inject persistence calls into generated async state machines.
+
+---
+
+## 🔄 C2 Multiple Concurrent Workflows IMPLEMENTED (2025-12-03)
+
+**Scenario C2 tests parallel workflow isolation with Roslyn+ generated code:**
+
+**Purpose**: Validate that multiple concurrent workflow instances:
+- Each get isolated grain storage (by unique workflowId)
+- Checkpoints don't bleed between workflows
+- Each workflow restores only its own state
+- RavenDB handles concurrent writes correctly
+
+**Test Flow**:
+1. Compile `[Persistable]` workflow using Roslyn+
+2. Start silo with RavenDB
+3. Launch 5 concurrent workflows with inputs: 10, 20, 30, 40, 50
+4. Wait for all to checkpoint at state 0
+5. "Crash" silo (simulate process death)
+6. Restart silo, resume all workflows
+7. Verify each restores its own values (expected results: 30, 50, 70, 90, 110)
+
+**Potential Failure Points (Heavily Logged)**:
+1. Grain ID collision if methodId isn't unique per instance
+2. `_pendingCheckpoints` dictionary race conditions
+3. RavenDB write contention from simultaneous checkpoints
+4. Event handler confusion with overlapping methodId patterns
+5. `AsyncPersistenceContext.Current` thread safety
+
+**Log Files**:
+- `c2-concurrent-workflows.log` - detailed event sequence with timestamps
+- Console output with Spectre.Console tables
+
+**Status**: AWAITING TEST by TAI
 
 ---
 
