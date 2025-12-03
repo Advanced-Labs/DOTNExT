@@ -95,31 +95,22 @@ namespace ConcurrentWorkflows
         [Persistable]
         public async Task<int> Calculate(int input)
         {
-            Console.WriteLine($""[{_workflowId}] Starting Calculate with input={input}"");
+            // Debug output minimized - detailed logs go to file via persistence events
 
             // AWAIT POINT 0: Checkpoint state 0
-            Console.WriteLine($""[{_workflowId}] Before await #1 (state 0)"");
             var step1 = await Task.Run(async () =>
             {
                 await Task.Delay(500); // Ensure async completion, allow time for concurrent ops
-                var result = input * 2;
-                Console.WriteLine($""[{_workflowId}] Step 1: {input} * 2 = {result}"");
-                return result;
+                return input * 2;
             });
-            Console.WriteLine($""[{_workflowId}] After await #1, step1={step1}"");
 
             // AWAIT POINT 1: Checkpoint state 1
-            Console.WriteLine($""[{_workflowId}] Before await #2 (state 1)"");
             var step2 = await Task.Run(async () =>
             {
                 await Task.Delay(500); // Allow time for concurrent ops
-                var result = step1 + 10;
-                Console.WriteLine($""[{_workflowId}] Step 2: {step1} + 10 = {result}"");
-                return result;
+                return step1 + 10;
             });
-            Console.WriteLine($""[{_workflowId}] After await #2, step2={step2}"");
 
-            Console.WriteLine($""[{_workflowId}] Completed with result={step2}"");
             return step2;
         }
     }
@@ -364,7 +355,7 @@ namespace ConcurrentWorkflows
                         }
                     }
 
-                    AnsiConsole.MarkupLine($"[cyan]  [{tracker.WorkflowId}] CHECKPOINT state {e.StateNumber}[/]");
+                    // Per-event console output disabled - see log file
                 }
                 else
                 {
@@ -383,7 +374,7 @@ namespace ConcurrentWorkflows
                     tracker.RestoredFromState = e.RestoredState;
                     LogToFile($"[EVENT-{eventId}] RESTORE: {e.MethodId} state={e.RestoredState} @ {timestamp}");
                     _eventLog.Add($"[{eventId}] RESTORE {e.MethodId}:{e.RestoredState}");
-                    AnsiConsole.MarkupLine($"[yellow]  [{tracker.WorkflowId}] RESTORE from state {e.RestoredState}[/]");
+                    // Per-event console output disabled - see log file
                 }
                 else
                 {
@@ -586,7 +577,7 @@ namespace ConcurrentWorkflows
                 {
                     tracker.CheckpointStates.Add(e.StateNumber);
                     LogToFile($"[EVENT-{eventId}] RESUME-CHECKPOINT: {e.MethodId} state={e.StateNumber}");
-                    AnsiConsole.MarkupLine($"[cyan]  [{tracker.WorkflowId}] CHECKPOINT (resume) state {e.StateNumber}[/]");
+                    // Per-event console output disabled - see log file
                 }
             }
 
@@ -599,7 +590,7 @@ namespace ConcurrentWorkflows
                     tracker.RestoredFromState = e.RestoredState;
                     tracker.Phase2Resumed = true;
                     LogToFile($"[EVENT-{eventId}] RESUME-RESTORE: {e.MethodId} state={e.RestoredState}");
-                    AnsiConsole.MarkupLine($"[yellow]  [{tracker.WorkflowId}] RESTORE from state {e.RestoredState}[/]");
+                    // Per-event console output disabled - see log file
                 }
             }
 
@@ -795,11 +786,7 @@ namespace ConcurrentWorkflows
             // Ignore logging errors
         }
 
-        // Also write to console for debugging
-        if (!string.IsNullOrEmpty(message))
-        {
-            Console.WriteLine($"[C2] {message}");
-        }
+        // Debug output goes to file only - console stays clean for TAI
     }
 
     #endregion
