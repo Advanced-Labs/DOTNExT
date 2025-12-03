@@ -505,6 +505,67 @@ User requested implementation of C2 scenario - testing parallel workflow isolati
 
 ---
 
+## Session: 2025-12-03 (C2 Success + C8 Multi-Silo Visibility)
+
+### Context
+Continuing from previous session. C2 scenario was failing due to grain ID collision - all concurrent workflows were using the same grain based on method name. After fix, C2 passes. Now implementing C8 per scenario priority analysis.
+
+### What Was Discussed
+
+1. **C2 Grain ID Collision Fix** (from previous context):
+   - Root cause: All workflows used same grain ID based on method name only
+   - Fix: Added `WorkflowId` property to `AsyncPersistenceContext`
+   - Added `SetCurrent(service, workflowId)` overload
+   - Updated `NewOrleansAsyncPersistenceService.ResolveGrainId()` to use WorkflowId when set
+   - C2 now passes: All 5 workflows produce correct results (30, 50, 70, 90, 110)
+
+2. **Console Debug Output Reduction**:
+   - Changed log filter from LogLevel.Debug to LogLevel.Warning for NewOrleans.AsyncPlus
+   - Console stays clean, detailed logs go to file
+
+3. **C8 Scenario Implementation**:
+   - Next priority per AI-Contexts analysis: LOW risk, MEDIUM-HIGH value
+   - Tests that checkpoints are visible across all silos in a cluster
+   - 3-silo cluster with shared RavenDB
+   - Workflow runs on Silo1, checkpoints
+   - Query grain state from Silo2 and Silo3
+   - Verify all silos see identical checkpoint data
+   - Crash Silo1, resume workflow from Silo2
+
+### Artifacts Created/Modified
+
+| File | Change |
+|------|--------|
+| `DOTNExTPersistence.cs` | Added `WorkflowId` property, `SetCurrent(service, workflowId)` overload |
+| `NewOrleansAsyncPersistenceService.cs` | Added `ResolveGrainId()` method to use WorkflowId when set |
+| `SiloHelper.cs` | Changed log level to Warning for AsyncPlus |
+| `MultipleConcurrentWorkflows.cs` | Updated to launch workflows with unique context |
+| `MultiSiloCheckpointVisibility.cs` | **NEW** - C8 scenario implementation |
+| `Program.cs` | Added C8 to self-managing scenarios menu |
+| `SESSION-LOG.md` | This entry |
+
+### Key Insights
+
+1. **Grain ID Isolation Pattern**: `AsyncPersistenceContext.WorkflowId` provides workflow instance isolation. When set, `ResolveGrainId()` uses it instead of the Roslyn-generated methodId.
+
+2. **Multi-Silo RavenDB**: All silos share RavenDB, so checkpoints are immediately visible across the cluster without any special sync.
+
+3. **Silo Failover**: C8 tests that workflow can resume on a different silo after the original silo crashes - critical for production reliability.
+
+### What's Next
+
+1. TAI builds and tests C8 scenario
+2. If C8 passes, consider next priority: C3 (Nested Async Calls) or C9 (Grain Mobility)
+3. Update CURRENT-WORK.md after C8 verification
+
+### Open Questions
+
+1. **Cluster Formation Time**: How long does it take for silos to discover each other? C8 uses 3 second delay.
+
+2. **Checkpoint Visibility Latency**: Is there any delay between checkpoint write and visibility on other silos? RavenDB should be immediate.
+
+---
+
 ## Session Template (Copy for New Sessions)
 
 ```markdown

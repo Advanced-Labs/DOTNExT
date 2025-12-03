@@ -1112,13 +1112,14 @@ public static class Program
                 ("R", "R1: Cross-Session Persistence ✓"),
                 ("2", "C2: Multiple Concurrent Workflows ✓"),
                 ("", ""),
+                ("8", "C8: Multi-Silo Visibility ✓"),
+                ("", ""),
                 ("", "═══ ROSLYN+ SCENARIOS (Planned) ══"),
                 ("3", "C3: Nested Async Calls"),
                 ("4", "C4: Exception Recovery"),
                 ("5", "C5: Large State Serialization"),
                 ("6", "C6: Silo Failover"),
                 ("7", "C7: Version Migration"),
-                ("8", "C8: Multi-Silo Visibility"),
                 ("9", "C9: Grain Mobility"),
                 ("", ""),
                 ("", "═══ LEGACY (Hand-Coded) ══════════"),
@@ -1144,12 +1145,14 @@ public static class Program
                     case "2":
                         await MultipleConcurrentWorkflows.RunAsync();
                         break;
+                    case "8":
+                        await MultiSiloCheckpointVisibility.RunAsync();
+                        break;
                     case "3":
                     case "4":
                     case "5":
                     case "6":
                     case "7":
-                    case "8":
                     case "9":
                         AnsiConsole.MarkupLine("[yellow]This scenario is not yet implemented.[/]");
                         AnsiConsole.MarkupLine("[grey]Check AI-Contexts/Claude-Opus/AsyncPlus-Scenarios.md for the design.[/]");

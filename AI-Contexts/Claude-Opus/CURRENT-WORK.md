@@ -1,8 +1,8 @@
 # Current Work: Async State Machine Persistence
 
-**Status**: 🔄 C2 Multiple Concurrent Workflows IMPLEMENTED
+**Status**: 🔄 C8 Multi-Silo Checkpoint Visibility IMPLEMENTED
 **Last Updated**: 2025-12-03
-**Branch**: `claude/review-orleans-docs-012LkqxZeSYemni2gi4vYqUU`
+**Branch**: `claude/review-orleans-docs-01Ptn8wKKFLqknTKv8cMzyEH`
 
 ---
 
@@ -17,37 +17,53 @@
 
 ---
 
-## 🔄 C2 Multiple Concurrent Workflows IMPLEMENTED (2025-12-03)
+## 🔄 C8 Multi-Silo Checkpoint Visibility IMPLEMENTED (2025-12-03)
 
-**Scenario C2 tests parallel workflow isolation with Roslyn+ generated code:**
+**Scenario C8 tests cross-silo checkpoint visibility with RavenDB:**
 
-**Purpose**: Validate that multiple concurrent workflow instances:
-- Each get isolated grain storage (by unique workflowId)
-- Checkpoints don't bleed between workflows
-- Each workflow restores only its own state
-- RavenDB handles concurrent writes correctly
+**Purpose**: Validate that checkpoints written by one silo are immediately visible to all other silos in the cluster.
+
+**Key Validations**:
+- All silos can read checkpoint data written by any silo
+- No stale reads across silos (RavenDB provides consistency)
+- Grain state queries work from any silo in the cluster
+- Workflow can resume on a different silo after crash
 
 **Test Flow**:
-1. Compile `[Persistable]` workflow using Roslyn+
-2. Start silo with RavenDB
-3. Launch 5 concurrent workflows with inputs: 10, 20, 30, 40, 50
-4. Wait for all to checkpoint at state 0
-5. "Crash" silo (simulate process death)
-6. Restart silo, resume all workflows
-7. Verify each restores its own values (expected results: 30, 50, 70, 90, 110)
-
-**Potential Failure Points (Heavily Logged)**:
-1. Grain ID collision if methodId isn't unique per instance
-2. `_pendingCheckpoints` dictionary race conditions
-3. RavenDB write contention from simultaneous checkpoints
-4. Event handler confusion with overlapping methodId patterns
-5. `AsyncPersistenceContext.Current` thread safety
+1. Start 3-silo cluster with shared RavenDB (Silo1=primary, Silo2/3=secondary)
+2. Run workflow on Silo1, checkpoint at state 0
+3. Query checkpoint state from Silo2 and Silo3
+4. Verify all silos see identical checkpoint data
+5. Crash Silo1
+6. Resume workflow from Silo2
+7. Verify workflow completes correctly on different silo
 
 **Log Files**:
-- `c2-concurrent-workflows.log` - detailed event sequence with timestamps
-- Console output with Spectre.Console tables
+- `c8-multi-silo-visibility.log` - detailed diagnostics
 
 **Status**: AWAITING TEST by TAI
+
+---
+
+## 🎉 C2 Multiple Concurrent Workflows WORKING! (2025-12-03)
+
+**Scenario C2 verified with Roslyn+ generated code:**
+```
+═══════════════════════════════════════════════════════════════════
+  ✓ SUCCESS: Multiple Concurrent Workflows VERIFIED!
+    • All workflows restored their own state
+    • No cross-contamination between workflow instances
+    • RavenDB handled concurrent checkpoints correctly
+═══════════════════════════════════════════════════════════════════
+```
+
+**Results**: All 5 workflows produced correct results (30, 50, 70, 90, 110)
+
+**Bug Fixed**: Grain ID collision - all workflows were using the same grain based on method name.
+- Root cause: Roslyn+ uses fully qualified method name as methodId
+- Fix: Added `WorkflowId` to `AsyncPersistenceContext` for instance isolation
+- `ResolveGrainId()` now uses WorkflowId when set, otherwise falls back to methodId
+
 
 ---
 
