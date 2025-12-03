@@ -50,7 +50,8 @@ public static class SiloHelper
                 logging.ClearProviders();
                 logging.AddConsole();
                 logging.SetMinimumLevel(logLevel);
-                logging.AddFilter("NewOrleans.AsyncPlus", LogLevel.Debug);
+                // AsyncPlus debug logging goes to file only - console stays clean
+                logging.AddFilter("NewOrleans.AsyncPlus", LogLevel.Warning);
                 logging.AddFilter("Microsoft.Hosting", LogLevel.Warning);
             })
             .Build();
@@ -84,7 +85,8 @@ public static class SiloHelper
                 logging.ClearProviders();
                 logging.AddConsole();
                 logging.SetMinimumLevel(logLevel);
-                logging.AddFilter("NewOrleans.AsyncPlus", LogLevel.Debug);
+                // AsyncPlus debug logging goes to file only - console stays clean
+                logging.AddFilter("NewOrleans.AsyncPlus", LogLevel.Warning);
                 logging.AddFilter("Microsoft.Hosting", LogLevel.Warning);
             })
             .Build();
