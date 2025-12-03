@@ -566,7 +566,7 @@ Continuing from previous session. C2 scenario was failing due to grain ID collis
 
 ---
 
-## Session: 2025-12-03 (C8 ✅, C3 ✅, C4 ✅, C9 Implemented)
+## Session: 2025-12-03 (C8 ✅, C3 ✅, C4 ✅, C9 ✅)
 
 ### Context
 Continuing from previous session. TAI tested and confirmed C8 passed. Proceeded with C3, C4, and C9 implementations per priority order from AsyncPlus-Scenarios.md.
@@ -590,13 +590,12 @@ Continuing from previous session. TAI tested and confirmed C8 passed. Proceeded 
    - Verified: Exception type and message preserved after restore
    - Workflow correctly marks as faulted in persistence
 
-4. **C9 Grain Mobility** (Implemented, awaiting test)
+4. **C9 Grain Mobility** ✅ PASS
    - Created `GrainMobility.cs` scenario
    - Tests grain deactivation/reactivation cycles
    - Build error: `DeactivateOnIdle()` not available on grain interface
    - Fix: Added `RequestDeactivationAsync()` to `IAsyncStatePersistenceGrain` interface
-   - Implemented in `AsyncStatePersistenceGrain` using `DeactivateOnIdle()`
-   - Scenario updated to call `RequestDeactivationAsync()`
+   - TAI verified: State survived deactivation, workflow resumed correctly
 
 ### Artifacts Created/Modified
 
@@ -618,9 +617,8 @@ Continuing from previous session. TAI tested and confirmed C8 passed. Proceeded 
 
 3. **Exception Serialization**: The `FaultAsync` method stores exception type, message, and stack trace separately rather than serializing the full exception object.
 
-4. **Scenario Progress**: 6 of 9 core scenarios now complete:
-   - ✅ R1, C1, C2, C8, C3, C4
-   - 🔄 C9 (implemented, awaiting test)
+4. **Scenario Progress**: 7 of 9 core scenarios now complete:
+   - ✅ R1, C1, C2, C8, C3, C4, C9
    - ⏳ C5, C6, C7 remaining
 
 ### What's Next

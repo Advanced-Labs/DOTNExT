@@ -1,6 +1,6 @@
 # Current Work: Async State Machine Persistence
 
-**Status**: 🔄 C9 Grain Mobility IMPLEMENTED (6 of 9 scenarios complete)
+**Status**: ✅ C9 Grain Mobility VERIFIED (7 of 9 scenarios complete)
 **Last Updated**: 2025-12-03
 **Branch**: `claude/review-orleans-docs-01Ptn8wKKFLqknTKv8cMzyEH`
 
@@ -17,32 +17,30 @@
 
 ---
 
-## 🔄 C9 Grain Mobility IMPLEMENTED (2025-12-03)
+## 🎉 C9 Grain Mobility WORKING! (2025-12-03)
 
-**Scenario C9 tests checkpoint survival across grain deactivation/reactivation:**
+**Scenario C9 verified checkpoint survival across grain deactivation/reactivation:**
 
-**Purpose**: Validate that checkpoint state follows the grain when it's explicitly deactivated and reactivated (possibly on a different silo).
+**Test Results**:
+- 2-silo cluster with shared RavenDB
+- Workflow checkpointed at states 0 and 1 (104-105 bytes each)
+- Grain explicitly deactivated via `RequestDeactivationAsync()`
+- Grain reactivated from RavenDB (552 bytes StateData loaded)
+- Workflow resumed from state 1, completed with result=24 ✅
 
 **Key Validations**:
-- Checkpoint state persists to RavenDB during normal operation
-- State survives explicit grain deactivation
-- Grain reactivates with state loaded from storage
-- Workflow correctly resumes from restored state
+- ✅ Checkpoint state persisted to RavenDB during initial run
+- ✅ State survived grain deactivation
+- ✅ Grain reactivated with state loaded from RavenDB storage
+- ✅ Workflow correctly restored from checkpoint state 1
+- ✅ Workflow completed with correct result (24)
 
-**Test Flow**:
-1. Start 2-silo cluster with shared RavenDB
-2. Run workflow on cluster, checkpoint at state 0
-3. Explicitly deactivate the persistence grain via `RequestDeactivationAsync()`
-4. Wait for deactivation (3 seconds)
-5. Access grain again (triggers reactivation from RavenDB)
-6. Resume workflow and verify state was restored
+**Production Implications**:
+- Grains can be safely deactivated without losing checkpoint state
+- RavenDB provides durable storage across activation cycles
+- No data loss during deactivation → reactivation transitions
 
-**Implementation Notes**:
-- Added `RequestDeactivationAsync()` to `IAsyncStatePersistenceGrain` interface
-- Implemented using `DeactivateOnIdle()` in grain (only available on implementation, not interface)
-- Log file: `c9-grain-mobility.log`
-
-**Status**: AWAITING TEST by TAI
+**Status**: ✅ PASS
 
 ---
 
