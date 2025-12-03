@@ -1,6 +1,6 @@
 # Current Work: Async State Machine Persistence
 
-**Status**: 🔄 C8 Multi-Silo Checkpoint Visibility IMPLEMENTED
+**Status**: 🔄 C9 Grain Mobility IMPLEMENTED (6 of 9 scenarios complete)
 **Last Updated**: 2025-12-03
 **Branch**: `claude/review-orleans-docs-01Ptn8wKKFLqknTKv8cMzyEH`
 
@@ -17,31 +17,81 @@
 
 ---
 
-## 🔄 C8 Multi-Silo Checkpoint Visibility IMPLEMENTED (2025-12-03)
+## 🔄 C9 Grain Mobility IMPLEMENTED (2025-12-03)
 
-**Scenario C8 tests cross-silo checkpoint visibility with RavenDB:**
+**Scenario C9 tests checkpoint survival across grain deactivation/reactivation:**
 
-**Purpose**: Validate that checkpoints written by one silo are immediately visible to all other silos in the cluster.
+**Purpose**: Validate that checkpoint state follows the grain when it's explicitly deactivated and reactivated (possibly on a different silo).
 
 **Key Validations**:
-- All silos can read checkpoint data written by any silo
-- No stale reads across silos (RavenDB provides consistency)
-- Grain state queries work from any silo in the cluster
-- Workflow can resume on a different silo after crash
+- Checkpoint state persists to RavenDB during normal operation
+- State survives explicit grain deactivation
+- Grain reactivates with state loaded from storage
+- Workflow correctly resumes from restored state
 
 **Test Flow**:
-1. Start 3-silo cluster with shared RavenDB (Silo1=primary, Silo2/3=secondary)
-2. Run workflow on Silo1, checkpoint at state 0
-3. Query checkpoint state from Silo2 and Silo3
-4. Verify all silos see identical checkpoint data
-5. Crash Silo1
-6. Resume workflow from Silo2
-7. Verify workflow completes correctly on different silo
+1. Start 2-silo cluster with shared RavenDB
+2. Run workflow on cluster, checkpoint at state 0
+3. Explicitly deactivate the persistence grain via `RequestDeactivationAsync()`
+4. Wait for deactivation (3 seconds)
+5. Access grain again (triggers reactivation from RavenDB)
+6. Resume workflow and verify state was restored
 
-**Log Files**:
-- `c8-multi-silo-visibility.log` - detailed diagnostics
+**Implementation Notes**:
+- Added `RequestDeactivationAsync()` to `IAsyncStatePersistenceGrain` interface
+- Implemented using `DeactivateOnIdle()` in grain (only available on implementation, not interface)
+- Log file: `c9-grain-mobility.log`
 
 **Status**: AWAITING TEST by TAI
+
+---
+
+## 🎉 C4 Exception Recovery WORKING! (2025-12-03)
+
+**Scenario C4 verified exception preservation across checkpoint/restore:**
+
+**Key Validations**:
+- Exception type preserved after restore
+- Exception message preserved after restore
+- Workflow correctly marked as faulted in persistence
+- Stack trace available for debugging
+
+**Status**: ✅ PASS
+
+---
+
+## 🎉 C3 Nested Async Calls WORKING! (2025-12-03)
+
+**Scenario C3 verified nested [Persistable] method checkpointing:**
+```
+Outer(x):
+  a = await Inner1(x)   → checkpoint 0
+  b = await Inner2(a)   → checkpoint 1
+  c = await Combine(a,b) → checkpoint 2
+```
+
+**Key Validations**:
+- Each await point generates a checkpoint
+- Intermediate values (a, b) are hoisted and checkpointed
+- After restore, intermediate values are preserved
+- Workflow completes with correct result
+
+**Bug Fix**: `[Persistable]` escaped as `[[Persistable]]` for Spectre.Console markup
+
+**Status**: ✅ PASS
+
+---
+
+## 🎉 C8 Multi-Silo Checkpoint Visibility WORKING! (2025-12-03)
+
+**Scenario C8 verified cross-silo checkpoint visibility with RavenDB:**
+
+**Key Validations**:
+- All 3 silos can read checkpoint data written by any silo
+- No stale reads across silos (RavenDB provides consistency)
+- Workflow resumes correctly on different silo after crash
+
+**Status**: ✅ PASS
 
 ---
 

@@ -566,6 +566,77 @@ Continuing from previous session. C2 scenario was failing due to grain ID collis
 
 ---
 
+## Session: 2025-12-03 (C8 ✅, C3 ✅, C4 ✅, C9 Implemented)
+
+### Context
+Continuing from previous session. TAI tested and confirmed C8 passed. Proceeded with C3, C4, and C9 implementations per priority order from AsyncPlus-Scenarios.md.
+
+### What Was Discussed
+
+1. **C8 Multi-Silo Checkpoint Visibility** ✅ PASS
+   - 3-silo cluster with shared RavenDB verified working
+   - All silos see identical checkpoint data immediately
+   - Workflow resumes correctly on different silo after crash
+
+2. **C3 Nested Async Calls** ✅ PASS
+   - Created `NestedAsyncCalls.cs` scenario
+   - Tests: `Outer(x)` calls `Inner1(x)`, `Inner2(a)`, `Combine(a,b)`
+   - Each await point generates checkpoint with intermediate values preserved
+   - Bug fix: Escaped `[Persistable]` as `[[Persistable]]` for Spectre.Console
+
+3. **C4 Exception Recovery** ✅ PASS
+   - Created `ExceptionRecovery.cs` scenario
+   - Tests exception preservation across checkpoint/restore
+   - Verified: Exception type and message preserved after restore
+   - Workflow correctly marks as faulted in persistence
+
+4. **C9 Grain Mobility** (Implemented, awaiting test)
+   - Created `GrainMobility.cs` scenario
+   - Tests grain deactivation/reactivation cycles
+   - Build error: `DeactivateOnIdle()` not available on grain interface
+   - Fix: Added `RequestDeactivationAsync()` to `IAsyncStatePersistenceGrain` interface
+   - Implemented in `AsyncStatePersistenceGrain` using `DeactivateOnIdle()`
+   - Scenario updated to call `RequestDeactivationAsync()`
+
+### Artifacts Created/Modified
+
+| File | Change |
+|------|--------|
+| `MultiSiloCheckpointVisibility.cs` | Fixed null reference warnings with `!` operators |
+| `NestedAsyncCalls.cs` | **NEW** - C3 scenario |
+| `ExceptionRecovery.cs` | **NEW** - C4 scenario |
+| `GrainMobility.cs` | **NEW** - C9 scenario |
+| `IAsyncStatePersistenceGrain.cs` | Added `RequestDeactivationAsync()` method |
+| `AsyncStatePersistenceGrain.cs` | Implemented `RequestDeactivationAsync()` |
+| `Program.cs` | Added C3, C4, C9 to self-managing scenarios menu |
+
+### Key Insights
+
+1. **Spectre.Console Markup Escape**: Square brackets like `[Persistable]` must be escaped as `[[Persistable]]` in Spectre.Console strings.
+
+2. **Grain Interface Limitations**: `DeactivateOnIdle()` is only available on grain implementations (`IGrainBase`), not grain interfaces. Added explicit `RequestDeactivationAsync()` to the interface to expose this functionality.
+
+3. **Exception Serialization**: The `FaultAsync` method stores exception type, message, and stack trace separately rather than serializing the full exception object.
+
+4. **Scenario Progress**: 6 of 9 core scenarios now complete:
+   - ✅ R1, C1, C2, C8, C3, C4
+   - 🔄 C9 (implemented, awaiting test)
+   - ⏳ C5, C6, C7 remaining
+
+### What's Next
+
+1. TAI tests C9 Grain Mobility scenario
+2. If C9 passes, proceed with C5 (Large State Serialization) or C7 (Version Migration)
+3. C6 (Silo Failover Mid-Checkpoint) saved for last as highest complexity
+
+### Open Questions
+
+1. **Deactivation Timing**: How long does Orleans take to actually deactivate a grain after `DeactivateOnIdle()` is called? C9 uses 3-second delay.
+
+2. **Grain Affinity**: Does Orleans guarantee the reactivated grain goes to a different silo, or could it reactivate on the same silo?
+
+---
+
 ## Session Template (Copy for New Sessions)
 
 ```markdown
