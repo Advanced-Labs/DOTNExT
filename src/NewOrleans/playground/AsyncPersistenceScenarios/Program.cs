@@ -1150,7 +1150,7 @@ public static class Program
                     case "8":
                     case "9":
                         AnsiConsole.MarkupLine("[yellow]This scenario is not yet implemented.[/]");
-                        AnsiConsole.MarkupLine("[grey]Check .ai-contexts/async-plus-challenge-scenarios.md for the design.[/]");
+                        AnsiConsole.MarkupLine("[grey]Check AI-Contexts/Claude-Opus/AsyncPlus-Scenarios.md for the design.[/]");
                         break;
                 }
             }

@@ -161,8 +161,10 @@ AsyncPersistenceScenarios/
 │   ├── SiloHelper.cs          # Silo building utilities
 │   ├── RoslynHelper.cs        # Roslyn+ compilation utilities
 │   └── ReportingHelper.cs     # Spectre.Console output utilities
-└── .ai-contexts/
-    └── (this documentation)
+
+AI-Contexts/Claude-Opus/        # Consolidated documentation
+├── AsyncPlus-Scenarios.md      # Scenario definitions & analysis
+└── AsyncPlus-SiloPatterns.md   # This file
 ```
 
 ## Integration with Roslyn+
