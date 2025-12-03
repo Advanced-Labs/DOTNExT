@@ -1114,9 +1114,9 @@ public static class Program
                 ("", ""),
                 ("8", "C8: Multi-Silo Visibility ✓"),
                 ("3", "C3: Nested Async Calls ✓"),
+                ("4", "C4: Exception Recovery ✓"),
                 ("", ""),
                 ("", "═══ ROSLYN+ SCENARIOS (Planned) ══"),
-                ("4", "C4: Exception Recovery"),
                 ("5", "C5: Large State Serialization"),
                 ("6", "C6: Silo Failover"),
                 ("7", "C7: Version Migration"),
@@ -1152,6 +1152,8 @@ public static class Program
                         await NestedAsyncCalls.RunAsync();
                         break;
                     case "4":
+                        await ExceptionRecovery.RunAsync();
+                        break;
                     case "5":
                     case "6":
                     case "7":
