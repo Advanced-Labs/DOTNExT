@@ -389,10 +389,10 @@ namespace MultiSiloWorkflow
             // Verify all silos see the checkpoint
             var allVisible = checkpoint1 != null && checkpoint2 != null && checkpoint3 != null;
             var allMatch = allVisible &&
-                checkpoint1.StateNumber == checkpoint2.StateNumber &&
-                checkpoint2.StateNumber == checkpoint3.StateNumber &&
-                checkpoint1.DataSize == checkpoint2.DataSize &&
-                checkpoint2.DataSize == checkpoint3.DataSize;
+                checkpoint1!.StateNumber == checkpoint2!.StateNumber &&
+                checkpoint2!.StateNumber == checkpoint3!.StateNumber &&
+                checkpoint1!.DataSize == checkpoint2!.DataSize &&
+                checkpoint2!.DataSize == checkpoint3!.DataSize;
 
             if (!allVisible)
             {
