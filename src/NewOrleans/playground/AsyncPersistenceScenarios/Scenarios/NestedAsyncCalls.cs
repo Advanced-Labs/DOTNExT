@@ -151,7 +151,7 @@ namespace NestedAsyncWorkflow
 
         // Explanation panel
         var explanation = new Panel(
-            "[white]Tests checkpointing with nested awaits in a single [Persistable] method.\n\n" +
+            "[white]Tests checkpointing with nested awaits in a single [[Persistable]] method.\n\n" +
             "[yellow]Workflow Logic:[/]\n" +
             $"  Outer({InputValue}):\n" +
             $"    a = await Inner1({InputValue})  → a = {InputValue} * 2 = {ExpectedA}\n" +
