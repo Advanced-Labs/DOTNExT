@@ -1115,12 +1115,12 @@ public static class Program
                 ("8", "C8: Multi-Silo Visibility ✓"),
                 ("3", "C3: Nested Async Calls ✓"),
                 ("4", "C4: Exception Recovery ✓"),
+                ("9", "C9: Grain Mobility ✓"),
                 ("", ""),
                 ("", "═══ ROSLYN+ SCENARIOS (Planned) ══"),
                 ("5", "C5: Large State Serialization"),
                 ("6", "C6: Silo Failover"),
                 ("7", "C7: Version Migration"),
-                ("9", "C9: Grain Mobility"),
                 ("", ""),
                 ("", "═══ LEGACY (Hand-Coded) ══════════"),
                 ("1", "C1: Cross-Session (hand-coded state machine)"),
@@ -1154,10 +1154,12 @@ public static class Program
                     case "4":
                         await ExceptionRecovery.RunAsync();
                         break;
+                    case "9":
+                        await GrainMobility.RunAsync();
+                        break;
                     case "5":
                     case "6":
                     case "7":
-                    case "9":
                         AnsiConsole.MarkupLine("[yellow]This scenario is not yet implemented.[/]");
                         AnsiConsole.MarkupLine("[grey]Check AI-Contexts/Claude-Opus/AsyncPlus-Scenarios.md for the design.[/]");
                         break;
