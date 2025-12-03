@@ -401,70 +401,77 @@ namespace ConcurrentWorkflows
             AnsiConsole.MarkupLine($"[yellow]  Launching {WorkflowCount} concurrent workflows...[/]");
 
             // Launch all workflows concurrently
+            // IMPORTANT: Each workflow needs its own context with unique workflowId
+            // so grain isolation works correctly
             var workflowTasks = new Dictionary<string, Task<int>>();
             var launchStopwatch = Stopwatch.StartNew();
 
-            using (AsyncPersistenceContext.SetCurrent(persistence))
+            foreach (var tracker in _workflowTrackers.Values)
             {
-                foreach (var tracker in _workflowTrackers.Values)
+                tracker.StartTime = DateTime.Now;
+
+                // Create workflow instance with unique workflowId
+                var instance = Activator.CreateInstance(workflowType, tracker.WorkflowId)
+                    ?? throw new InvalidOperationException($"Failed to create instance for {tracker.WorkflowId}");
+
+                // Capture tracker.WorkflowId for the closure
+                var workflowId = tracker.WorkflowId;
+                var inputValue = tracker.InputValue;
+
+                // Launch each workflow with its own context containing the unique workflowId
+                // This ensures each workflow uses a separate grain for persistence
+                var task = Task.Run(async () =>
                 {
-                    tracker.StartTime = DateTime.Now;
-
-                    // Create workflow instance with unique workflowId
-                    var instance = Activator.CreateInstance(workflowType, tracker.WorkflowId)
-                        ?? throw new InvalidOperationException($"Failed to create instance for {tracker.WorkflowId}");
-
-                    // Note: Roslyn+ uses the method's fully qualified name as methodId
-                    // We need to ensure each workflow has a unique identifier
-                    // The workflowId is passed to the workflow but persistence uses the method name
-                    // This is a key potential issue - we may need to track by a different pattern
-
-                    var task = (Task<int>?)calculateMethod.Invoke(instance, new object[] { tracker.InputValue })
-                        ?? throw new InvalidOperationException("Method invocation returned null");
-
-                    workflowTasks[tracker.WorkflowId] = task;
-                    LogToFile($"Launched: {tracker.WorkflowId} with input={tracker.InputValue}");
-                }
-
-                LogToFile($"All {WorkflowCount} workflows launched in {launchStopwatch.ElapsedMilliseconds}ms");
-                AnsiConsole.MarkupLine($"[green]✓ All {WorkflowCount} workflows launched[/]");
-
-                // Wait for all workflows to reach first checkpoint
-                LogToFile("Waiting for all workflows to checkpoint at state 0...");
-                AnsiConsole.MarkupLine("[grey]  Waiting for all workflows to checkpoint at state 0...[/]");
-
-                var timeoutTask = Task.Delay(30000); // 30 second timeout
-                var allTasks = Task.WhenAll(workflowTasks.Values);
-                var checkpointOrTimeout = await Task.WhenAny(phase1CheckpointTcs.Task, timeoutTask, allTasks);
-
-                if (checkpointOrTimeout == timeoutTask)
-                {
-                    LogToFile("TIMEOUT waiting for checkpoints!");
-                    throw new TimeoutException("Workflows did not checkpoint in time");
-                }
-
-                if (checkpointOrTimeout == allTasks)
-                {
-                    LogToFile("WARNING: All workflows completed before checkpoint could be captured");
-                    AnsiConsole.MarkupLine("[yellow]  Workflows completed too quickly - no crash simulation possible[/]");
-
-                    // Still record results
-                    foreach (var (id, task) in workflowTasks)
+                    using (AsyncPersistenceContext.SetCurrent(persistence, workflowId))
                     {
-                        if (_workflowTrackers.TryGetValue(id, out var tracker))
-                        {
-                            tracker.ActualResult = await task;
-                        }
+                        var result = (Task<int>?)calculateMethod.Invoke(instance, new object[] { inputValue })
+                            ?? throw new InvalidOperationException("Method invocation returned null");
+                        return await result;
                     }
+                });
 
-                    // Skip to verification
-                    ShowResults(skipRestore: true);
-                    return;
+                workflowTasks[tracker.WorkflowId] = task;
+                LogToFile($"Launched: {tracker.WorkflowId} with input={tracker.InputValue}");
+            }
+
+            LogToFile($"All {WorkflowCount} workflows launched in {launchStopwatch.ElapsedMilliseconds}ms");
+            AnsiConsole.MarkupLine($"[green]✓ All {WorkflowCount} workflows launched[/]");
+
+            // Wait for all workflows to reach first checkpoint
+            LogToFile("Waiting for all workflows to checkpoint at state 0...");
+            AnsiConsole.MarkupLine("[grey]  Waiting for all workflows to checkpoint at state 0...[/]");
+
+            var timeoutTask = Task.Delay(30000); // 30 second timeout
+            var allTasks = Task.WhenAll(workflowTasks.Values);
+            var checkpointOrTimeout = await Task.WhenAny(phase1CheckpointTcs.Task, timeoutTask, allTasks);
+
+            if (checkpointOrTimeout == timeoutTask)
+            {
+                LogToFile("TIMEOUT waiting for checkpoints!");
+                throw new TimeoutException("Workflows did not checkpoint in time");
+            }
+
+            if (checkpointOrTimeout == allTasks)
+            {
+                LogToFile("WARNING: All workflows completed before checkpoint could be captured");
+                AnsiConsole.MarkupLine("[yellow]  Workflows completed too quickly - no crash simulation possible[/]");
+
+                // Still record results
+                foreach (var (id, task) in workflowTasks)
+                {
+                    if (_workflowTrackers.TryGetValue(id, out var trackerResult))
+                    {
+                        trackerResult.ActualResult = await task;
+                    }
                 }
 
-                LogToFile($"All workflows checkpointed, phase1CheckpointCount={phase1CheckpointCount}");
-                AnsiConsole.MarkupLine($"[green]✓ All {WorkflowCount} workflows checkpointed![/]");
+                // Skip to verification
+                ShowResults(skipRestore: true);
+                return;
             }
+
+            LogToFile($"All workflows checkpointed, phase1CheckpointCount={phase1CheckpointCount}");
+            AnsiConsole.MarkupLine($"[green]✓ All {WorkflowCount} workflows checkpointed![/]");
 
             // Verify checkpoints before crash
             LogToFile("Verifying checkpoint state before crash...");
@@ -601,24 +608,33 @@ namespace ConcurrentWorkflows
             AnsiConsole.MarkupLine("[yellow]  Resuming all workflows...[/]");
 
             // Resume all workflows concurrently
+            // Each workflow needs its own context with unique workflowId for grain isolation
             var resumeTasks = new Dictionary<string, Task<int>>();
 
-            using (AsyncPersistenceContext.SetCurrent(persistence2))
+            foreach (var tracker in _workflowTrackers.Values)
             {
-                foreach (var tracker in _workflowTrackers.Values)
+                // Create new instance - restoration happens in MoveNext via TryRestore
+                var instance = Activator.CreateInstance(workflowType, tracker.WorkflowId)
+                    ?? throw new InvalidOperationException($"Failed to create instance for {tracker.WorkflowId}");
+
+                // Capture for closure
+                var workflowId = tracker.WorkflowId;
+
+                // Resume each workflow with its own context containing the unique workflowId
+                var task = Task.Run(async () =>
                 {
-                    // Create new instance - restoration happens in MoveNext via TryRestore
-                    var instance = Activator.CreateInstance(workflowType, tracker.WorkflowId)
-                        ?? throw new InvalidOperationException($"Failed to create instance for {tracker.WorkflowId}");
+                    using (AsyncPersistenceContext.SetCurrent(persistence2, workflowId))
+                    {
+                        // Pass a dummy input value - should be overwritten by restoration
+                        // Using 999 so we can detect if restoration didn't happen
+                        var result = (Task<int>?)calculateMethod.Invoke(instance, new object[] { 999 })
+                            ?? throw new InvalidOperationException("Method invocation returned null");
+                        return await result;
+                    }
+                });
 
-                    // Pass a dummy input value - should be overwritten by restoration
-                    // Using 999 so we can detect if restoration didn't happen
-                    var task = (Task<int>?)calculateMethod.Invoke(instance, new object[] { 999 })
-                        ?? throw new InvalidOperationException("Method invocation returned null");
-
-                    resumeTasks[tracker.WorkflowId] = task;
-                    LogToFile($"Resume started: {tracker.WorkflowId}");
-                }
+                resumeTasks[tracker.WorkflowId] = task;
+                LogToFile($"Resume started: {tracker.WorkflowId}");
             }
 
             // Wait for all to complete

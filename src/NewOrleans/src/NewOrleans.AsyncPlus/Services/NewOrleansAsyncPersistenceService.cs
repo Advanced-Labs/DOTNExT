@@ -1,5 +1,6 @@
 using System.Reflection;
 using System.Text.Json;
+using DOTNExT.Persistence;
 using Microsoft.Extensions.Logging;
 
 namespace NewOrleans.AsyncPlus.Services;
@@ -11,13 +12,18 @@ namespace NewOrleans.AsyncPlus.Services;
 /// Uses "Tracked Tasks" pattern for async-first handling:
 /// - Checkpoint fires async grain call, tracks the task
 /// - TryRestore ensures any pending checkpoint completed first
+///
+/// IMPORTANT: Grain ID Resolution
+/// - If AsyncPersistenceContext.WorkflowId is set, it's used as the grain ID
+/// - Otherwise, the methodId (from Roslyn codegen) is used
+/// - This allows concurrent workflow instances to have isolated storage
 /// </summary>
 public class NewOrleansAsyncPersistenceService : DOTNExT.Persistence.IAsyncPersistenceService
 {
     private readonly IGrainFactory _grainFactory;
     private readonly ILogger<NewOrleansAsyncPersistenceService> _logger;
 
-    // Tracked pending operations per workflow
+    // Tracked pending operations per workflow (keyed by resolved grain ID)
     private readonly Dictionary<string, Task> _pendingCheckpoints = new();
     private readonly object _pendingLock = new();
 
@@ -29,40 +35,53 @@ public class NewOrleansAsyncPersistenceService : DOTNExT.Persistence.IAsyncPersi
         _logger = logger;
     }
 
+    /// <summary>
+    /// Resolves the grain ID to use for persistence operations.
+    /// Uses WorkflowId from context if set, otherwise falls back to methodId.
+    /// </summary>
+    private string ResolveGrainId(string methodId)
+    {
+        var workflowId = AsyncPersistenceContext.WorkflowId;
+        return workflowId ?? methodId;
+    }
+
     /// <inheritdoc />
     public void Checkpoint(object stateMachine, int stateNumber, string methodId)
     {
+        // Resolve grain ID using context workflow ID if available
+        var grainId = ResolveGrainId(methodId);
+
         // Fire async checkpoint, track the task
-        var checkpointTask = CheckpointInternalAsync(stateMachine, stateNumber, methodId);
+        var checkpointTask = CheckpointInternalAsync(stateMachine, stateNumber, grainId);
 
         lock (_pendingLock)
         {
-            _pendingCheckpoints[methodId] = checkpointTask;
+            _pendingCheckpoints[grainId] = checkpointTask;
         }
 
         // Don't await - state machine will suspend anyway
         // The task is tracked so TryRestore can ensure completion
     }
 
-    private async Task CheckpointInternalAsync(object stateMachine, int stateNumber, string methodId)
+    private async Task CheckpointInternalAsync(object stateMachine, int stateNumber, string grainId)
     {
         try
         {
-            var grain = _grainFactory.GetGrain<IAsyncStatePersistenceGrain>(methodId);
+            var grain = _grainFactory.GetGrain<IAsyncStatePersistenceGrain>(grainId);
             var serialized = SerializeStateMachine(stateMachine);
             var typeName = stateMachine.GetType().AssemblyQualifiedName!;
 
             await grain.SaveCheckpointAsync(stateNumber, serialized, typeName);
 
             _logger.LogDebug(
-                "[AsyncPlus] Checkpoint saved: {MethodId} at state {State}, {Bytes} bytes",
-                methodId, stateNumber, serialized.Length);
+                "[AsyncPlus] Checkpoint saved: {GrainId} at state {State}, {Bytes} bytes",
+                grainId, stateNumber, serialized.Length);
 
-            OnCheckpoint?.Invoke(this, new DOTNExT.Persistence.CheckpointEventArgs(methodId, stateNumber));
+            OnCheckpoint?.Invoke(this, new DOTNExT.Persistence.CheckpointEventArgs(grainId, stateNumber));
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "[AsyncPlus] Checkpoint failed for {MethodId}", methodId);
+            _logger.LogError(ex, "[AsyncPlus] Checkpoint failed for {GrainId}", grainId);
             // Don't rethrow - checkpoint failure shouldn't crash the workflow
             // The previous checkpoint is still valid for recovery
         }
@@ -72,10 +91,13 @@ public class NewOrleansAsyncPersistenceService : DOTNExT.Persistence.IAsyncPersi
     [Obsolete("Use TryRestore<TStateMachine>(ref TStateMachine, string) instead")]
     public int TryRestore(object stateMachine, string methodId)
     {
-        // Ensure any pending checkpoint for this workflow completed first
-        EnsurePendingCheckpointComplete(methodId);
+        // Resolve grain ID using context workflow ID if available
+        var grainId = ResolveGrainId(methodId);
 
-        return TryRestoreInternalAsync(stateMachine, methodId).GetAwaiter().GetResult();
+        // Ensure any pending checkpoint for this workflow completed first
+        EnsurePendingCheckpointComplete(grainId);
+
+        return TryRestoreInternalAsync(stateMachine, grainId).GetAwaiter().GetResult();
     }
 
     /// <inheritdoc />
@@ -85,22 +107,25 @@ public class NewOrleansAsyncPersistenceService : DOTNExT.Persistence.IAsyncPersi
     /// </summary>
     public int TryRestore<TStateMachine>(ref TStateMachine stateMachine, string methodId)
     {
-        // Ensure any pending checkpoint for this workflow completed first
-        EnsurePendingCheckpointComplete(methodId);
+        // Resolve grain ID using context workflow ID if available
+        var grainId = ResolveGrainId(methodId);
 
-        return TryRestoreGenericInternal(ref stateMachine, methodId);
+        // Ensure any pending checkpoint for this workflow completed first
+        EnsurePendingCheckpointComplete(grainId);
+
+        return TryRestoreGenericInternal(ref stateMachine, grainId);
     }
 
-    private int TryRestoreGenericInternal<TStateMachine>(ref TStateMachine stateMachine, string methodId)
+    private int TryRestoreGenericInternal<TStateMachine>(ref TStateMachine stateMachine, string grainId)
     {
         try
         {
-            var grain = _grainFactory.GetGrain<IAsyncStatePersistenceGrain>(methodId);
+            var grain = _grainFactory.GetGrain<IAsyncStatePersistenceGrain>(grainId);
             var checkpoint = grain.TryGetCheckpointAsync().GetAwaiter().GetResult();
 
             if (checkpoint == null)
             {
-                _logger.LogDebug("[AsyncPlus] No checkpoint found for {MethodId}", methodId);
+                _logger.LogDebug("[AsyncPlus] No checkpoint found for {GrainId}", grainId);
                 return -1;
             }
 
@@ -111,61 +136,61 @@ public class NewOrleansAsyncPersistenceService : DOTNExT.Persistence.IAsyncPersi
             stateMachine = restored;
 
             _logger.LogInformation(
-                "[AsyncPlus] Restored {MethodId} to state {State} (checkpoint from {Time}) via generic TryRestore<{Type}>",
-                methodId, checkpoint.StateNumber, checkpoint.CheckpointTimeUtc, typeof(TStateMachine).Name);
+                "[AsyncPlus] Restored {GrainId} to state {State} (checkpoint from {Time}) via generic TryRestore<{Type}>",
+                grainId, checkpoint.StateNumber, checkpoint.CheckpointTimeUtc, typeof(TStateMachine).Name);
 
-            OnRestore?.Invoke(this, new DOTNExT.Persistence.RestoreEventArgs(methodId, checkpoint.StateNumber));
+            OnRestore?.Invoke(this, new DOTNExT.Persistence.RestoreEventArgs(grainId, checkpoint.StateNumber));
 
             return checkpoint.StateNumber;
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "[AsyncPlus] Restore failed for {MethodId}", methodId);
+            _logger.LogError(ex, "[AsyncPlus] Restore failed for {GrainId}", grainId);
             return -1;
         }
     }
 
-    private void EnsurePendingCheckpointComplete(string methodId)
+    private void EnsurePendingCheckpointComplete(string grainId)
     {
         Task? pendingTask;
         lock (_pendingLock)
         {
-            _pendingCheckpoints.TryGetValue(methodId, out pendingTask);
+            _pendingCheckpoints.TryGetValue(grainId, out pendingTask);
         }
 
         if (pendingTask != null && !pendingTask.IsCompleted)
         {
-            _logger.LogDebug("[AsyncPlus] Waiting for pending checkpoint: {MethodId}", methodId);
+            _logger.LogDebug("[AsyncPlus] Waiting for pending checkpoint: {GrainId}", grainId);
             pendingTask.GetAwaiter().GetResult();
         }
     }
 
-    private async Task<int> TryRestoreInternalAsync(object stateMachine, string methodId)
+    private async Task<int> TryRestoreInternalAsync(object stateMachine, string grainId)
     {
         try
         {
-            var grain = _grainFactory.GetGrain<IAsyncStatePersistenceGrain>(methodId);
+            var grain = _grainFactory.GetGrain<IAsyncStatePersistenceGrain>(grainId);
             var checkpoint = await grain.TryGetCheckpointAsync();
 
             if (checkpoint == null)
             {
-                _logger.LogDebug("[AsyncPlus] No checkpoint found for {MethodId}", methodId);
+                _logger.LogDebug("[AsyncPlus] No checkpoint found for {GrainId}", grainId);
                 return -1;
             }
 
             DeserializeIntoStateMachine(stateMachine, checkpoint.SerializedStateMachine);
 
             _logger.LogInformation(
-                "[AsyncPlus] Restored {MethodId} to state {State} (checkpoint from {Time})",
-                methodId, checkpoint.StateNumber, checkpoint.CheckpointTimeUtc);
+                "[AsyncPlus] Restored {GrainId} to state {State} (checkpoint from {Time})",
+                grainId, checkpoint.StateNumber, checkpoint.CheckpointTimeUtc);
 
-            OnRestore?.Invoke(this, new DOTNExT.Persistence.RestoreEventArgs(methodId, checkpoint.StateNumber));
+            OnRestore?.Invoke(this, new DOTNExT.Persistence.RestoreEventArgs(grainId, checkpoint.StateNumber));
 
             return checkpoint.StateNumber;
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "[AsyncPlus] Restore failed for {MethodId}", methodId);
+            _logger.LogError(ex, "[AsyncPlus] Restore failed for {GrainId}", grainId);
             return -1;
         }
     }
@@ -173,64 +198,70 @@ public class NewOrleansAsyncPersistenceService : DOTNExT.Persistence.IAsyncPersi
     /// <inheritdoc />
     public void Complete(string methodId, object? result)
     {
-        EnsurePendingCheckpointComplete(methodId);
-        CompleteInternalAsync(methodId, result).GetAwaiter().GetResult();
+        // Resolve grain ID using context workflow ID if available
+        var grainId = ResolveGrainId(methodId);
+
+        EnsurePendingCheckpointComplete(grainId);
+        CompleteInternalAsync(grainId, result).GetAwaiter().GetResult();
     }
 
-    private async Task CompleteInternalAsync(string methodId, object? result)
+    private async Task CompleteInternalAsync(string grainId, object? result)
     {
         try
         {
-            var grain = _grainFactory.GetGrain<IAsyncStatePersistenceGrain>(methodId);
+            var grain = _grainFactory.GetGrain<IAsyncStatePersistenceGrain>(grainId);
             var serializedResult = result != null ? SerializeResult(result) : null;
             await grain.CompleteAsync(serializedResult);
 
-            _logger.LogDebug("[AsyncPlus] Workflow completed: {MethodId}", methodId);
+            _logger.LogDebug("[AsyncPlus] Workflow completed: {GrainId}", grainId);
 
             // Clean up tracked task
             lock (_pendingLock)
             {
-                _pendingCheckpoints.Remove(methodId);
+                _pendingCheckpoints.Remove(grainId);
             }
 
-            OnComplete?.Invoke(this, new DOTNExT.Persistence.CompleteEventArgs(methodId, result, faulted: false));
+            OnComplete?.Invoke(this, new DOTNExT.Persistence.CompleteEventArgs(grainId, result, faulted: false));
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "[AsyncPlus] Complete failed for {MethodId}", methodId);
+            _logger.LogError(ex, "[AsyncPlus] Complete failed for {GrainId}", grainId);
         }
     }
 
     /// <inheritdoc />
     public void Fault(string methodId, Exception exception)
     {
-        EnsurePendingCheckpointComplete(methodId);
-        FaultInternalAsync(methodId, exception).GetAwaiter().GetResult();
+        // Resolve grain ID using context workflow ID if available
+        var grainId = ResolveGrainId(methodId);
+
+        EnsurePendingCheckpointComplete(grainId);
+        FaultInternalAsync(grainId, exception).GetAwaiter().GetResult();
     }
 
-    private async Task FaultInternalAsync(string methodId, Exception exception)
+    private async Task FaultInternalAsync(string grainId, Exception exception)
     {
         try
         {
-            var grain = _grainFactory.GetGrain<IAsyncStatePersistenceGrain>(methodId);
+            var grain = _grainFactory.GetGrain<IAsyncStatePersistenceGrain>(grainId);
             await grain.FaultAsync(
                 exception.GetType().FullName ?? "Unknown",
                 exception.Message,
                 exception.StackTrace);
 
-            _logger.LogWarning(exception, "[AsyncPlus] Workflow faulted: {MethodId}", methodId);
+            _logger.LogWarning(exception, "[AsyncPlus] Workflow faulted: {GrainId}", grainId);
 
             // Clean up tracked task
             lock (_pendingLock)
             {
-                _pendingCheckpoints.Remove(methodId);
+                _pendingCheckpoints.Remove(grainId);
             }
 
-            OnFault?.Invoke(this, new DOTNExT.Persistence.FaultEventArgs(methodId, exception));
+            OnFault?.Invoke(this, new DOTNExT.Persistence.FaultEventArgs(grainId, exception));
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "[AsyncPlus] Fault recording failed for {MethodId}", methodId);
+            _logger.LogError(ex, "[AsyncPlus] Fault recording failed for {GrainId}", grainId);
         }
     }
 

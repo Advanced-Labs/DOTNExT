@@ -20,12 +20,21 @@ namespace DOTNExT.Persistence;
 public static class AsyncPersistenceContext
 {
     private static readonly AsyncLocal<IAsyncPersistenceService?> _current = new();
+    private static readonly AsyncLocal<string?> _workflowId = new();
 
     /// <summary>
     /// Gets the current persistence service for this async flow.
     /// Returns null if no persistence is configured.
     /// </summary>
     public static IAsyncPersistenceService? Current => _current.Value;
+
+    /// <summary>
+    /// Gets the current workflow instance ID for this async flow.
+    /// Used to isolate persistence for concurrent workflow instances.
+    /// If null, the method name alone is used (which can cause collisions
+    /// for concurrent calls to the same method).
+    /// </summary>
+    public static string? WorkflowId => _workflowId.Value;
 
     /// <summary>
     /// Sets the persistence service for the current async flow.
@@ -35,7 +44,23 @@ public static class AsyncPersistenceContext
     {
         var previous = _current.Value;
         _current.Value = service;
-        return new ContextScope(previous);
+        return new ContextScope(previous, null, null);
+    }
+
+    /// <summary>
+    /// Sets the persistence service and workflow ID for the current async flow.
+    /// The workflowId is used to isolate persistence for concurrent workflow instances.
+    /// Returns a disposable that restores the previous values.
+    /// </summary>
+    /// <param name="service">The persistence service to use</param>
+    /// <param name="workflowId">Unique identifier for this workflow instance</param>
+    public static IDisposable SetCurrent(IAsyncPersistenceService? service, string? workflowId)
+    {
+        var previousService = _current.Value;
+        var previousWorkflowId = _workflowId.Value;
+        _current.Value = service;
+        _workflowId.Value = workflowId;
+        return new ContextScope(previousService, previousWorkflowId, true);
     }
 
     /// <summary>
@@ -45,19 +70,27 @@ public static class AsyncPersistenceContext
 
     private sealed class ContextScope : IDisposable
     {
-        private readonly IAsyncPersistenceService? _previous;
+        private readonly IAsyncPersistenceService? _previousService;
+        private readonly string? _previousWorkflowId;
+        private readonly bool? _hasWorkflowId;
         private bool _disposed;
 
-        public ContextScope(IAsyncPersistenceService? previous)
+        public ContextScope(IAsyncPersistenceService? previousService, string? previousWorkflowId, bool? hasWorkflowId)
         {
-            _previous = previous;
+            _previousService = previousService;
+            _previousWorkflowId = previousWorkflowId;
+            _hasWorkflowId = hasWorkflowId;
         }
 
         public void Dispose()
         {
             if (!_disposed)
             {
-                _current.Value = _previous;
+                _current.Value = _previousService;
+                if (_hasWorkflowId == true)
+                {
+                    _workflowId.Value = _previousWorkflowId;
+                }
                 _disposed = true;
             }
         }
