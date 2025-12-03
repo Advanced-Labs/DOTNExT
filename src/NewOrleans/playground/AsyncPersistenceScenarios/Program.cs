@@ -1094,11 +1094,13 @@ public static class Program
                 "[white]These scenarios are fully self-contained:\n" +
                 "• Auto-start Orleans silos with RavenDB\n" +
                 "• Auto-stop silos when done\n" +
-                "• Run [[Persistable]] workflows using the InstrumentedWorkflow state machine\n" +
                 "• Produce structured output with Spectre.Console tables\n\n" +
+                "[yellow]Scenario Types:[/]\n" +
+                "• [magenta]ROSLYN+ (Active)[/]: Uses real Roslyn+ compiled [[Persistable]] code\n" +
+                "• [magenta]ROSLYN+ (Planned)[/]: Future Roslyn+ scenarios (C2-C9)\n" +
+                "• [grey]LEGACY[/]: Hand-coded state machines (C1) - kept for reference\n\n" +
                 "[yellow]Prerequisites:[/]\n" +
-                "• RavenDB running at http://127.0.0.1:38880\n\n" +
-                "[grey]Pattern source: PluginGrainScenarios project[/][/]")
+                "• RavenDB running at http://127.0.0.1:38880[/]")
                 .Header("[green]About Self-Managing Scenarios[/]")
                 .BorderColor(Color.Grey);
             AnsiConsole.Write(explanation);
@@ -1106,20 +1108,21 @@ public static class Program
 
             var scenario = ShowMenu("[cyan]Select a scenario:[/]", new[]
             {
-                ("", "─── Roslyn+ Generated Code ───────"),
-                ("R", "R1: Roslyn+ Cross-Session (struct state machine)"),
-                ("", "─── Hand-Coded State Machines ────"),
-                ("1", "C1: Cross-Session Persistence"),
-                ("2", "C2: Multiple Concurrent Workflows (coming soon)"),
-                ("3", "C3: Nested Async Calls (coming soon)"),
-                ("4", "C4: Exception Recovery (coming soon)"),
-                ("", "─── Tier 2: Robustness ───────────"),
-                ("5", "C5: Large State Serialization (coming soon)"),
-                ("6", "C6: Silo Failover (coming soon)"),
-                ("7", "C7: Version Migration (coming soon)"),
-                ("", "─── Tier 3: Multi-Node ───────────"),
-                ("8", "C8: Multi-Silo Visibility (coming soon)"),
-                ("9", "C9: Grain Mobility (coming soon)"),
+                ("", "═══ ROSLYN+ SCENARIOS (Active) ═══"),
+                ("R", "R1: Cross-Session Persistence ✓"),
+                ("", ""),
+                ("", "═══ ROSLYN+ SCENARIOS (Planned) ══"),
+                ("2", "C2: Multiple Concurrent Workflows"),
+                ("3", "C3: Nested Async Calls"),
+                ("4", "C4: Exception Recovery"),
+                ("5", "C5: Large State Serialization"),
+                ("6", "C6: Silo Failover"),
+                ("7", "C7: Version Migration"),
+                ("8", "C8: Multi-Silo Visibility"),
+                ("9", "C9: Grain Mobility"),
+                ("", ""),
+                ("", "═══ LEGACY (Hand-Coded) ══════════"),
+                ("1", "C1: Cross-Session (hand-coded state machine)"),
                 ("", "───────────────────────────────"),
                 ("B", "Back to Main Menu")
             });

@@ -277,8 +277,10 @@ await WorkflowDebugger.ReplayFrom("workflow-123", checkpointId: 2);
 
 | Scenario | Status | Date | Notes |
 |----------|--------|------|-------|
-| **C1: Cross-Session Persistence** | ✅ PASS | 2025-12-01 | Hand-coded state machine, result=94 |
 | **R1: Roslyn+ Cross-Session Persistence** | ✅ PASS | 2025-12-02 | Real Roslyn+ generated code, result=94 |
+| **C1: Cross-Session Persistence** | ✅ PASS | 2025-12-01 | Legacy hand-coded state machine |
+
+> **Note**: C1 uses a hand-coded state machine and is kept for reference only. All future development focuses on Roslyn+ generated code (R1 pattern).
 
 ### Key Learnings from R1
 
@@ -287,20 +289,116 @@ await WorkflowDebugger.ReplayFrom("workflow-123", checkpointId: 2);
 3. **Class state machines** - Roslyn generates CLASS (not struct) by default
 4. **Persistence Method ID** - Uses fully qualified method name (Namespace.Class.Method)
 
-### Recommended Next Steps
+---
 
-1. **C2: Multiple Concurrent Workflows** - Validates isolation
-2. **C3: Nested Async Calls** - Common real-world pattern
+## Part 4: Roslyn+ Planned Scenarios Analysis
 
-### Short-Term (Following Month)
-4. **C4: Exception Recovery** - Production reliability
-5. **C5: Large State Serialization** - Performance baseline
-6. **C8: Multi-Silo Visibility** - Distributed correctness
+All scenarios below use Roslyn+ generated [Persistable] code (not hand-coded state machines).
 
-### Medium-Term (Quarter)
-7. **C6: Silo Failover** - HA validation
-8. **C7: Version Migration** - Upgrade path
-9. **C9: Grain Mobility** - Cluster elasticity
+### C2: Multiple Concurrent Workflows
+
+| Aspect | Details |
+|--------|---------|
+| **Purpose** | Verify isolation between concurrent workflow instances - critical for production use where many workflows run simultaneously |
+| **Value** | HIGH - Essential for any real-world deployment; validates Orleans grain isolation works with Async+ persistence |
+| **Risk Assessment** | LOW (70% success likelihood) - R1 proves basic persistence works; main risk is grain ID collision or race conditions in checkpoint storage |
+| **Potential Failures** | 1) Grain ID conflicts if using same method ID for different instances; 2) RavenDB transaction conflicts; 3) Cross-contamination of checkpoint data |
+| **Mitigation Strategy** | 1) Ensure unique grain IDs per workflow instance; 2) Add workflow instance ID to PersistenceMethodId; 3) Verify RavenDB document isolation |
+| **Success Advancement** | Enables production deployment of parallel workflows; validates scalability; proves Orleans+RavenDB+Roslyn+ stack is ready for concurrent workloads |
+
+### C3: Nested Async Calls
+
+| Aspect | Details |
+|--------|---------|
+| **Purpose** | Verify checkpointing works with nested [Persistable] method calls - common pattern in real applications |
+| **Value** | HIGH - Real workflows often call other async methods; validates recursive persistence |
+| **Risk Assessment** | MEDIUM (55% success likelihood) - Nested state machines may have interaction issues; checkpoint ordering may be complex |
+| **Potential Failures** | 1) Inner method completion clears outer method checkpoint; 2) Nested grain activations cause deadlocks; 3) State machine field references become stale after inner restore |
+| **Mitigation Strategy** | 1) Use separate grain IDs for nested calls; 2) Track call hierarchy in persistence; 3) Ensure inner completion doesn't affect outer state; 4) Consider "call stack" tracking in persistence |
+| **Success Advancement** | Enables composition of [Persistable] methods; supports modular workflow design; proves system handles real-world complexity |
+
+### C4: Exception Recovery
+
+| Aspect | Details |
+|--------|---------|
+| **Purpose** | Verify exception state is correctly persisted and re-thrown after restoration |
+| **Value** | HIGH - Production reliability requires proper error handling across restarts |
+| **Risk Assessment** | MEDIUM (60% success likelihood) - Exception serialization is tricky; stack traces may be lost; catch blocks may re-execute incorrectly |
+| **Potential Failures** | 1) Exception not serializable; 2) Stack trace lost during serialization; 3) Catch block executed twice (once before crash, once after restore); 4) Finally blocks not executed properly |
+| **Mitigation Strategy** | 1) Serialize exception type + message + data, not full exception; 2) Store exception state in checkpoint; 3) Track whether exception was already caught; 4) Test various exception scenarios (thrown, caught, rethrown) |
+| **Success Advancement** | Production-ready error handling; enables retry patterns; supports long-running workflows with proper failure recovery |
+
+### C5: Large State Serialization
+
+| Aspect | Details |
+|--------|---------|
+| **Purpose** | Test serialization performance and limits with large state machine fields (10K+ element arrays, complex graphs) |
+| **Value** | MEDIUM - Establishes performance baseline; identifies scaling limits before production |
+| **Risk Assessment** | LOW (75% success likelihood) - JSON serialization is well-understood; main risks are timeout and memory pressure |
+| **Potential Failures** | 1) Serialization timeout (default Orleans timeout); 2) Out-of-memory during large object graph serialization; 3) RavenDB document size limits; 4) Circular reference issues |
+| **Mitigation Strategy** | 1) Configure appropriate timeouts; 2) Add chunked serialization for very large states; 3) Test RavenDB document limits (default 4MB); 4) Use [JsonIgnore] for non-essential large fields |
+| **Success Advancement** | Establishes safe working limits; provides performance benchmarks; identifies when to use selective persistence (R2.1) |
+
+### C6: Silo Failover Mid-Checkpoint
+
+| Aspect | Details |
+|--------|---------|
+| **Purpose** | Test atomicity of checkpoint operation when silo dies during write |
+| **Value** | HIGH - Critical for production HA; validates Orleans+RavenDB transaction semantics |
+| **Risk Assessment** | HIGH (40% success likelihood) - Race conditions are hard to test; depends on RavenDB transaction behavior; requires multi-silo setup |
+| **Potential Failures** | 1) Partial checkpoint written (corrupt state); 2) Other silo reads stale checkpoint; 3) Grain reactivation with inconsistent state; 4) Orleans grain directory inconsistency |
+| **Mitigation Strategy** | 1) Use RavenDB transactions for atomic writes; 2) Add checkpoint version/sequence number; 3) Implement optimistic concurrency checks; 4) Test with artificial delays during checkpoint |
+| **Success Advancement** | Production-ready HA; enables deployment in failure-prone environments; validates enterprise reliability requirements |
+
+### C7: Checkpoint Version Migration
+
+| Aspect | Details |
+|--------|---------|
+| **Purpose** | Test backward compatibility when workflow code changes between checkpoint and restore |
+| **Value** | MEDIUM - Required for production systems that evolve; enables zero-downtime upgrades |
+| **Risk Assessment** | MEDIUM (50% success likelihood) - Depends on serializer tolerance for schema changes; may require migration hooks |
+| **Potential Failures** | 1) New field not initialized (NullReferenceException); 2) Removed field causes deserialization failure; 3) Type changes break deserialization; 4) Field order changes cause data corruption |
+| **Mitigation Strategy** | 1) Use JSON serializer with default value handling; 2) Add version number to checkpoints; 3) Implement migration hooks in TryRestore; 4) Test common schema evolution scenarios |
+| **Success Advancement** | Enables production deployments with rolling updates; supports long-running workflows across code versions; reduces operational risk |
+
+### C8: Multi-Silo Checkpoint Visibility
+
+| Aspect | Details |
+|--------|---------|
+| **Purpose** | Verify all silos in cluster can see checkpoint data consistently via RavenDB |
+| **Value** | MEDIUM-HIGH - Required for distributed deployments; validates RavenDB as shared state store |
+| **Risk Assessment** | LOW (70% success likelihood) - RavenDB handles consistency; main risk is stale reads or caching |
+| **Potential Failures** | 1) Orleans grain caching returns stale checkpoint; 2) RavenDB replication lag; 3) Silo-local state not synced with storage; 4) Race between checkpoint write and grain reactivation |
+| **Mitigation Strategy** | 1) Ensure grain state is read from storage on activation; 2) Use RavenDB "WaitForIndexesAfterSaveChanges" if needed; 3) Test read-after-write from different silos |
+| **Success Advancement** | Validates distributed deployment model; enables horizontal scaling; proves Orleans+RavenDB integration is production-ready |
+
+### C9: Grain Reactivation on Different Silo
+
+| Aspect | Details |
+|--------|---------|
+| **Purpose** | Test grain mobility - deactivate on Silo1, reactivate on Silo2, verify state follows |
+| **Value** | HIGH - Essential for cluster elasticity; enables load balancing and node maintenance |
+| **Risk Assessment** | LOW-MEDIUM (65% success likelihood) - This is core Orleans behavior; main risk is Async+ state not properly tied to Orleans grain state |
+| **Potential Failures** | 1) Checkpoint not found on new silo (wrong grain ID); 2) State machine type not available on new silo; 3) Persistence context not established on reactivation; 4) Grain directory points to wrong silo |
+| **Mitigation Strategy** | 1) Verify grain ID is deterministic and cluster-wide; 2) Ensure compiled assembly available on all silos; 3) Test explicit grain deactivation followed by call from different silo |
+| **Success Advancement** | Enables elastic scaling; supports rolling deployments; validates cloud-native deployment patterns |
+
+---
+
+### Priority Order for Implementation
+
+Based on risk/value analysis:
+
+1. **C2** (LOW risk, HIGH value) - Concurrent workflows
+2. **C8** (LOW risk, MEDIUM-HIGH value) - Multi-silo visibility
+3. **C3** (MEDIUM risk, HIGH value) - Nested async calls
+4. **C9** (LOW-MEDIUM risk, HIGH value) - Grain mobility
+5. **C4** (MEDIUM risk, HIGH value) - Exception recovery
+6. **C5** (LOW risk, MEDIUM value) - Large state serialization
+7. **C7** (MEDIUM risk, MEDIUM value) - Version migration
+8. **C6** (HIGH risk, HIGH value) - Silo failover (save for last, most complex)
+
+---
 
 ### R&D Pipeline
 - **R1.2: Human-in-the-Loop** - Expands use cases significantly
