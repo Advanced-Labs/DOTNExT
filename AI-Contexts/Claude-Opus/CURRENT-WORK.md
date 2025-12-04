@@ -1,7 +1,7 @@
 # Current Work: Async State Machine Persistence
 
-**Status**: ✅ C9 Grain Mobility VERIFIED (7 of 9 scenarios complete)
-**Last Updated**: 2025-12-03
+**Status**: ✅ C9 Grain Mobility VERIFIED (7 of 9 scenarios complete) + Durable Awaiters Design Doc
+**Last Updated**: 2025-12-04
 **Branch**: `claude/review-orleans-docs-01Ptn8wKKFLqknTKv8cMzyEH`
 
 ---
@@ -14,6 +14,30 @@
 3. Distributed execution (via Orleans)
 
 **Approach**: Modify Roslyn to inject persistence calls into generated async state machines.
+
+---
+
+## 📄 Durable Awaiters Design Document (2025-12-04)
+
+**New design document created: `/Docs/Async+/Awaiters.md`**
+
+Comprehensive design for enabling true workflow resume without re-execution. Key concepts:
+
+- **Problem**: Current Async+ re-runs workflows from beginning because `TaskAwaiter<T>` cannot be serialized
+- **Solution**: `DurableAwaiter<T>` backed by `IAwaitResultGrain<T>` Orleans grains
+- **Grain Key Format**: `{workflowId}/await/{awaitIndex}`
+
+**Document Contents** (1123 lines):
+- Problem analysis with code examples
+- Architecture diagrams
+- Component designs (`DurableAwaiter<T>`, `IAwaitResultGrain<T>`, `DurableAwaiterContext`)
+- Implementation plan with file locations
+- Roslyn modification requirements
+- Test scenarios (DA1, DA2, DA3)
+- Migration strategy using `[DurablePersistable]` attribute
+- Open questions
+
+**Status**: Design complete, implementation not started (R&D phase)
 
 ---
 

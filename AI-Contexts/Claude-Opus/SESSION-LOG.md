@@ -635,6 +635,72 @@ Continuing from previous session. TAI tested and confirmed C8 passed. Proceeded 
 
 ---
 
+## Session: 2025-12-04 (Durable Awaiters Design Document)
+
+### Context
+Continuing from previous session where comprehensive Async+ and OrleansAsync+ documentation was created. User requested analysis of the re-execution limitation and design of a Durable Awaiter architecture to enable true workflow resume without re-execution.
+
+### What Was Discussed
+
+1. **Re-execution Limitation Analysis**
+   - Confirmed that current Async+ restores field values but re-runs from beginning
+   - Root cause: `TaskAwaiter<T>` cannot be serialized
+   - Roslyn codegen explicitly resets state to -1 after restoration
+   - Documented in lines 1000-1015 of `AsyncMethodToStateMachineRewriter.cs`
+
+2. **External AI's Explanation Validated**
+   - AI correctly identified that workflows re-run with restored field values
+   - Suggested idempotency keys, justRestored flags, and grain-backed awaiters
+   - User's insight: awaiters should point directly at specific grains for results
+
+3. **Durable Awaiter Architecture Design**
+   - `DurableAwaiter<T>`: Serializable awaiter struct backed by Orleans grains
+   - `IAwaitResultGrain<T>`: Stores await results durably per workflow/await point
+   - `DurableAwaiterContext`: Ambient context for grain factory access
+   - Key format: `{workflowId}/await/{awaitIndex}`
+
+4. **Comprehensive Design Document Created**
+   - Problem analysis explaining awaiter serialization impossibility
+   - Proposed solution with architecture diagrams
+   - Full component designs with code snippets
+   - Implementation plan with file locations
+   - Roslyn modification requirements
+   - Test scenarios (DA1, DA2, DA3)
+   - Migration strategy using `[DurablePersistable]` attribute
+   - Open questions for future consideration
+
+### Artifacts Created/Modified
+
+| File | Change |
+|------|--------|
+| `Docs/Async+/Awaiters.md` | **NEW** - 1123-line design document for Durable Awaiter architecture |
+| `AI-Contexts/Claude-Opus/SESSION-LOG.md` | This entry |
+| `AI-Contexts/Claude-Opus/CURRENT-WORK.md` | Updated with design doc status |
+
+### Key Insights
+
+1. **Awaiter Non-Serialization is Fundamental**: `TaskAwaiter<T>` holds runtime state (Task reference, execution context) that cannot be persisted. This is not a bug to fix but a design constraint to work around.
+
+2. **Grain-Backed Awaiters Pattern**: Azure Durable Functions uses similar approach - each await result is stored in durable storage, awaiter is just a key to look up the result.
+
+3. **Two-Attribute Strategy**: Keep `[Persistable]` (re-run model) for simple/idempotent workflows, add `[DurablePersistable]` for critical workflows needing true resume.
+
+4. **Await Index Determinism**: For true resume, await indices must be deterministic across executions. The design uses sequential counters reset from checkpoint.
+
+### What's Next
+
+1. **R&D Phase**: Implement Durable Awaiter architecture (documented but not started)
+2. **Remaining Scenarios**: C5 (Large State), C6 (Silo Failover), C7 (Version Migration)
+3. **Future Enhancement**: Integrate Durable Awaiters with existing Roslyn+ codegen
+
+### Open Questions
+
+1. **Generic Grain Registration**: How to handle `IAwaitResultGrain<T>` for arbitrary T in Orleans?
+2. **Cleanup Strategy**: When/how to clean up await result grains after workflow completion?
+3. **Non-Task Awaitables**: Support for `ValueTask<T>`, `ConfiguredTaskAwaitable<T>`?
+
+---
+
 ## Session Template (Copy for New Sessions)
 
 ```markdown
