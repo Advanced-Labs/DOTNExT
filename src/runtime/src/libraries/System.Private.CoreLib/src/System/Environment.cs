@@ -206,6 +206,15 @@ namespace System
 
         public static bool Is64BitOperatingSystem => Is64BitProcess || Is64BitOperatingSystemWhen32BitProcess;
 
+        /// <summary>
+        /// Gets a value indicating whether this is the DOTNExT custom .NET runtime.
+        /// </summary>
+        /// <remarks>
+        /// This property returns <c>true</c> only when running on the DOTNExT fork of .NET.
+        /// Standard .NET runtime does not have this property.
+        /// </remarks>
+        public static bool IsDotnext => true;
+
         public static string NewLine => NewLineConst;
 
         private static volatile OperatingSystem? s_osVersion;
