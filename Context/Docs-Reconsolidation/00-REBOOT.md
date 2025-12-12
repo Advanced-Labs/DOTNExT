@@ -7,7 +7,7 @@ Reconstruct the current vision for a "Virtual Operating System" (VOS) platform b
 STATUS: **COMPLETE** - Vision successfully consolidated
 
 ### Work Completed
-- [x] Switched to correct branch (`dotnext/analysis-1`) to read all docs
+- [x] Switched to correct branch (`dotnext/analysis-1`)
 - [x] Read all key vision documents
 - [x] Created consolidated vision document
 - [x] Identified current vs deprecated content
@@ -26,7 +26,7 @@ The vision has evolved through multiple documents. The **most authoritative** do
 
 ## Terminology Quick Reference
 - **DOTNExT**: Codename for the forked dotnet 9 runtime (not final name)
-- **VAYRON**: Codename for the complete platform stack (still used in docs)
+- **VAYRON**: Codename for the complete platform stack
 - **VOS**: Virtual Operating System - the architectural framing
 - **NewOrleans**: Fork of Microsoft Orleans
 - **VCOM**: Component-Object Model for building VARIAs
@@ -37,9 +37,9 @@ The vision has evolved through multiple documents. The **most authoritative** do
 ## Recovery Instructions
 1. Read this file FIRST
 2. Read `02-CONSOLIDATED-VISION.md` for full reconsolidation
-3. For deeper context, see documents on branch `dotnext/analysis-1` under `/Contexts/001 - 2025-12-04/Analysis/`
+3. For deeper context, read the key documents listed above in `/Contexts/001 - 2025-12-04/Analysis/`
 
-## Document Locations (on branch dotnext/analysis-1)
+## Document Locations
 - Analysis documents: `/Contexts/001 - 2025-12-04/Analysis/`
 - Async+ prototype: `/Docs/Async+/Async+.md`
 - NewOrleans docs: `/src/NewOrleans/NewOrleans.md`
