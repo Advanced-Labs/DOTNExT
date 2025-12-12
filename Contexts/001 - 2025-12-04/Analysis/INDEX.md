@@ -294,16 +294,18 @@ Located in `/Analysis/Archived/`:
 
 ---
 
-## VOS Architecture Curriculum (NEW)
+## VOS Architecture Curriculum (UPDATED 2025-12-11 Session 2)
 
 **For AI working on DOTNExT VOS design.**
 
 | Document | Status | Purpose |
 |----------|--------|---------|
-| `DOTNExT-Runtime-RnD-Primer.md` | **START** | Foundation context (v1.3) |
+| `DOTNExT-VOS-Implementation-Strategy.md` | **START HERE** | **NEW** - Foundational strategy document (v1.0) |
+| `DOTNExT-Runtime-RnD-Primer.md` | **CORE** | Runtime R&D foundation (v1.3) |
 | `DOTNExT-Process-Model.md` | **CORE** | Process/Pathway abstraction |
 | `DOTNExT-Sync-Semantics.md` | **CORE** | sync keyword specification |
 | `DOTNExT-Singularity-Midori-Research.md` | **CORE** | MS OS lessons learned |
+| `VAYRON-Architecture-Master.md` | **CORE** | Platform architecture |
 | `DOTNExT-Security-Model.md` | Stub | VOS security subsystem |
 | `DOTNExT-Scheduler-Design.md` | Stub | Scheduler questions |
 | `DOTNExT-Distribution-Levels.md` | Stub | Distribution depth |
@@ -311,4 +313,15 @@ Located in `/Analysis/Archived/`:
 
 ---
 
-*Index updated 2025-12-11 with VOS architecture documents, Process Model, Security Model, Sync Semantics, Singularity/Midori research.*
+## Key Documents Summary
+
+| Document | What It Covers |
+|----------|----------------|
+| `DOTNExT-VOS-Implementation-Strategy.md` | **Runtime as VOS kernel, universal dynamic types, security interception points, VARIA vs implementation, session verbatim quotes** |
+| `DOTNExT-Runtime-RnD-Primer.md` | Async origins, Unwinder techniques, semantic inversion, sync keyword |
+| `VAYRON-Architecture-Master.md` | Full platform stack, VNS, VCOM, NewOrleans substrate |
+| `Vision-Engrams-Cyberspace-Verbatim.md` | Distributed cyberspace vision, Engram layers |
+
+---
+
+*Index updated 2025-12-11 (Session 2) with DOTNExT-VOS-Implementation-Strategy.md - foundational document on runtime as kernel, dynamic types strategy, security interception.*

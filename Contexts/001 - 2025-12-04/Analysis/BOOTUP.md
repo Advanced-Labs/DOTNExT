@@ -1,7 +1,7 @@
 # BOOTUP - Context Recovery
 
 > **Read this first when starting a new session.**
-> **Last Updated:** 2025-12-11
+> **Last Updated:** 2025-12-11 (Session 2)
 
 ---
 
@@ -9,6 +9,7 @@
 
 | Your Focus | Read This |
 |------------|-----------|
+| **VOS Implementation Strategy** | `DOTNExT-VOS-Implementation-Strategy.md` ← **NEW: Comprehensive session record** |
 | **Runtime R&D / VOS Design** | `DOTNExT-Runtime-RnD-Primer.md` then this file's "Latest Session" section |
 | **Full Navigation** | `INDEX.md` |
 
@@ -18,67 +19,82 @@
 
 You are Claude, working with Louis on **DOTNExT** - a fork of the .NET VMR evolving toward a **Virtual Operating System (VOS)** with AI-first execution capabilities.
 
-**Current Focus:** Runtime R&D - designing the execution model, process/pathway abstractions, and VOS architecture.
+**Current Focus:** VOS architecture - the runtime as kernel, dynamic types as VARIA implementation, pluggable security drivers.
 
 ---
 
 ## The Vision (One Paragraph)
 
-DOTNExT: A Virtual Operating System running on the CLR substrate. Everything is yieldable by default (`sync` is the exception). Execution Pathways are lightweight, capturable, migratable. AI can control execution from managed space - fork, checkpoint, rollback, speculate. Security is a pluggable VOS subsystem. The platform values dynamism over static guarantees. "Slow but Smart is the new Speed" - AI is the bottleneck, not CPU.
+DOTNExT: A Virtual Operating System where the **CLR runtime IS the kernel**. VOS services (VNS, persistence, security) run in "userspace" built on NewOrleans. VARIA types embody platform virtues (distribution, persistence, security, AI-centrality) initially via "special dynamic types" + Roslyn codegen, later potentially native to the kernel. Everything is yieldable by default (`sync` is the exception). Security is a pluggable driver system. "Slow but Smart is the new Speed" - AI is the bottleneck, not CPU.
 
 ---
 
-## Latest Session Summary (2025-12-11)
+## Latest Session Summary (2025-12-11 - Session 2)
 
 ### What Was Researched
 
-**Singularity & Midori OS analysis** - Microsoft's managed-code OS experiments evaluated for DOTNExT applicability.
+**Security interception points in .NET** - comprehensive analysis of where security enforcement could hook in: compile-time (Roslyn), assembly loading, JIT, vtable dispatch, object operations, reflection, dynamic types.
 
-### Key Conclusions
+**VOS architecture framing** - the runtime as VOS kernel, VOS services in userspace, NewOrleans as infrastructure.
 
-**DOTNExT is a hosted runtime, not bare-metal.** This fundamentally limits what transfers from Singularity:
-- ❌ Exchange Heap (requires OS-level memory control)
-- ❌ Per-process heaps (GC is CLR-level)
-- ❌ Manifest/sealed processes (too static)
+**Implementation strategy** - universal dynamic types as initial VARIA implementation, progressive lowering into kernel.
 
-**DOTNExT values dynamism highly.** This conflicts with Singularity/Midori static approaches:
-- ❌ Compile-time capability enforcement
-- ❌ Sealed processes
-- ✅ Dynamic capability granting (for AI)
-- ✅ Pluggable security models
+### Key Realizations
 
-**From Midori - directly applicable:**
-- ✅ Async everywhere / sync as exception (already adopted)
-- ✅ Abandonment model for bugs (adapted for Pathways)
-- ✅ Capabilities principle (via VOS pluggable security)
-- ✅ Lightweight processes (Process/Pathway model)
+**The DOTNExT runtime IS the VOS kernel:**
+- Lowest layer - everything runs on it
+- Provides fundamental primitives (GC, JIT, types, execution)
+- Progressive lowering targets this layer
+- Clear boundary: managed = userspace, runtime internals = kernel
+
+**VOS services are "userspace" but still "part of the OS":**
+- VNS, persistence, security are VOS services
+- Built on NewOrleans (VOS infrastructure)
+- Like DNS in Unix - userspace but "part of the OS"
+- Can be lowered into kernel later if needed
+
+**Universal dynamic types as VARIA implementation:**
+- One family of types handles all cross-cutting concerns
+- Compile-time codegen wraps user types
+- Drivers for each concern (security, persistence, VNS, etc.)
+- Runtime agnostic initially - all managed-space
+- Progressive lowering when beneficial
 
 ### Decisions Made
 
 | Decision | Rationale |
 |----------|-----------|
-| Security via VOS pluggable subsystem | Not compile-time baked-in; supports multiple models (CBS, RBAC, crypto, etc.) |
-| Security cost is acceptable | 100-10000x Midori okay; AI is the bottleneck |
-| Optimization spectrum | Compile-time → JIT-resolved → Runtime cached → Full runtime check |
-| Crash isolation different | OS gives VM Node isolation; we need intra-node + inter-node resilience |
-| Gen-1 must have security hook points | Even if no-ops, to avoid retrofitting |
+| Runtime = VOS Kernel | Clear architectural framing; progressive lowering target |
+| VOS services in userspace first | Faster iteration; matches traditional OS design |
+| Universal dynamic types | One abstraction for all concerns; runtime agnostic |
+| Security as pluggable drivers | Supports multiple models (CBS, RBAC, crypto, etc.) |
+| VARIA = concept, not implementation | Dynamic types are first impl; kernel-native possible later |
 
-### Open Questions (Prioritized)
+### Questions RESOLVED This Session
+
+The original questions from previous session are now answered:
+
+1. **Security interception points** → Comprehensive list: compile-time, load-time, JIT-time, runtime (see `DOTNExT-VOS-Implementation-Strategy.md` Section 3)
+
+2. **"How are capabilities represented?"** → **Question was malformed.** Capability representation is driver-specific. Runtime provides hooks; drivers implement models.
+
+3. **"Interface between Pathway and Security?"** → **Question was malformed.** Pathways have identity; security drivers are queried at interception points: "Can X do Y to Z?"
+
+### Open Questions (Updated)
 
 **High Priority (affects Gen-1 design):**
-1. What are the security interception points in Pathway/Scheduler?
-2. How are capabilities represented and passed to Pathways?
-3. What's the interface between Pathway and Security subsystem?
+1. Dynamic types family design - base types, interfaces, generics
+2. Driver interface definitions (Security, Persistence, VNS, Distribution)
+3. Codegen transformation rules
 
 **Medium Priority:**
 4. Process granularity - one per grain? Per activation group?
 5. Failure propagation - does Pathway failure terminate Process?
-6. Cross-Pathway data sharing rules
+6. VNS anchor point management
 
-**Future (not Gen-1):**
-7. State machine generalization (beyond protocol verification)
-8. Per-process GC regions (if ever achievable on hosted runtime)
-9. Static mutation tracking for checkpoint correctness
+**Future:**
+7. Kernel lowering criteria and interface
+8. Native VARIA recognition in runtime
 
 ---
 
@@ -102,17 +118,23 @@ DOTNExT: A Virtual Operating System running on the CLR substrate. Everything is 
 
 ---
 
-## Document Updates This Session
+## Document Updates This Session (Session 2)
 
 | Document | Version | Key Changes |
 |----------|---------|-------------|
-| `DOTNExT-Singularity-Midori-Research.md` | 2.0 | Complete rewrite of applicability; hosted runtime context |
-| `DOTNExT-Security-Model.md` | 0.2 | VOS pluggable security; optimization spectrum |
-| `DOTNExT-Process-Model.md` | 1.1 | Security hook points; failure model context |
+| `BOOTUP.md` | Session 2 | Updated vision, resolved questions, new focus |
 
 ---
 
-## New Documents This Session
+## New Documents This Session (Session 2)
+
+| Document | Purpose |
+|----------|---------|
+| `DOTNExT-VOS-Implementation-Strategy.md` | **FOUNDATIONAL** - Runtime as kernel, dynamic types strategy, security interception points, session record |
+
+---
+
+## Previous Session Documents (Session 1)
 
 | Document | Purpose |
 |----------|---------|
@@ -128,22 +150,22 @@ DOTNExT: A Virtual Operating System running on the CLR substrate. Everything is 
 
 ## How to Continue
 
-**For Runtime R&D (recommended path):**
+**For VOS Implementation (current focus):**
 
-1. Read `DOTNExT-Runtime-RnD-Primer.md` (v1.3 - includes sync semantics, semantic inversion)
+1. Read `DOTNExT-VOS-Implementation-Strategy.md` - comprehensive session record
 2. Read this BOOTUP.md "Latest Session" section (you just did)
 3. For deeper detail on specific topics:
+   - Runtime R&D foundation: `DOTNExT-Runtime-RnD-Primer.md`
    - Process model: `DOTNExT-Process-Model.md`
-   - Sync keyword: `DOTNExT-Sync-Semantics.md`
-   - Security approach: `DOTNExT-Security-Model.md`
-   - Singularity/Midori lessons: `DOTNExT-Singularity-Midori-Research.md`
+   - Security model: `DOTNExT-Security-Model.md`
+   - VAYRON architecture: `VAYRON-Architecture-Master.md`
 
 4. Confirm: "I've contextualized. Ready to continue."
 
 **Next logical work:**
-- Answer security hook point questions
-- Flesh out scheduler design
-- Define capability representation
+- Design the dynamic types family (base types, interfaces)
+- Define driver interfaces (Security, Persistence, VNS, Distribution)
+- Specify codegen transformation rules
 
 ---
 
@@ -153,6 +175,7 @@ DOTNExT: A Virtual Operating System running on the CLR substrate. Everything is 
 /Analysis/
 ├── BOOTUP.md                              ← This file (start here)
 ├── INDEX.md                               ← Full navigation with tags
+├── DOTNExT-VOS-Implementation-Strategy.md ← **NEW** VOS impl strategy (v1.0)
 ├── DOTNExT-Runtime-RnD-Primer.md          ← Runtime R&D primer (v1.3)
 ├── DOTNExT-Process-Model.md               ← Process/Pathway model (v1.1)
 ├── DOTNExT-Sync-Semantics.md              ← sync keyword spec (v1.0)
@@ -162,6 +185,7 @@ DOTNExT: A Virtual Operating System running on the CLR substrate. Everything is 
 ├── DOTNExT-Scheduler-Design.md            ← Scheduler (v0.1 stub)
 ├── DOTNExT-Distribution-Levels.md         ← Distribution (v0.1 stub)
 ├── DOTNExT-VOS-Architecture.md            ← VOS framing (v0.1 stub)
+├── VAYRON-Architecture-Master.md          ← Platform architecture (v1.0)
 └── [Other research docs]
 ```
 
