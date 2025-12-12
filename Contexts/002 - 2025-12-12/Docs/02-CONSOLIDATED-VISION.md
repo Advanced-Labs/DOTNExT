@@ -126,6 +126,14 @@
    - Developers need semantic → Object (don't care about UUIDs)
    - Clear separation prevents conflation and bad design
 
+> **⚠️ Analogy Disclaimer:** The MAC/IP/DNS analogy is instructive but imperfect. Key differences:
+> - Networking layers are strictly ordered (MAC→IP→DNS); VAYRON layers can be accessed independently
+> - MAC addresses are hardware-assigned; Grain Keys are software-assigned and can change with grain migration
+> - IP addresses can change (DHCP); VCOM UUIDs are permanent by design
+> - DNS is optional in networking; VNS is the primary developer interface in VAYRON
+>
+> **Use this analogy for intuition**, not as a precise mapping. The core insight—different resolution mechanisms for different consumers—holds true.
+
 ### 3.6 WHY Semantic Inversion (sync is Exception)?
 
 **The Reasoning Chain:**
@@ -304,6 +312,8 @@ VARIA objects have these **first-class virtues**:
 ---
 
 ## 6. The Three Resolution Layers (MAC/IP/DNS Analogy)
+
+> **Note:** See Section 3.5 for WHY reasoning and analogy disclaimer.
 
 | Layer | Analogy | What | Used By |
 |-------|---------|------|---------|
@@ -1057,6 +1067,56 @@ await order.Submit();
 
 **The Strategy:** Managed-space first → prove patterns → selective lowering → runtime-native capabilities. The managed-space work is not a replacement for runtime work; it's an on-ramp that lets us iterate faster while the deeper runtime R&D continues.
 
+### 17.1 The CMS/MOM/ORION Triad: Runtime Memory Architecture Vision
+
+> **Note:** These concepts represent the runtime-level memory architecture vision. Names may evolve; the architectural intent remains.
+
+The DOTNExT runtime-level vision includes a triad of memory subsystems:
+
+| Component | Full Name | Purpose |
+|-----------|-----------|---------|
+| **CMS** | Content Memory System | The "what" - manages object content/state storage |
+| **MOM** | Managed Object Manager / Memantics Object Manager | The "who" - tracks object identity (UUID), relationships, semantic metadata |
+| **ORION** | Object Reference and Identity Observation Network | The "where" - tracks object topology across distributed nodes |
+
+**How They Relate:**
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│  ORION (Topology Layer)                                     │
+│  - Which objects exist on which nodes                       │
+│  - Cross-node reference tracking                            │
+│  - Migration/replication coordination                       │
+├─────────────────────────────────────────────────────────────┤
+│  MOM (Identity/Semantic Layer)                              │
+│  - UUID assignment and lookup                               │
+│  - Relationship graph (object A references object B)        │
+│  - Semantic embeddings (for AI-aware operations)            │
+├─────────────────────────────────────────────────────────────┤
+│  CMS (Content Layer)                                        │
+│  - Wraps GC heap for object storage                         │
+│  - Field value management                                   │
+│  - Serialization/deserialization                            │
+├─────────────────────────────────────────────────────────────┤
+│  CLR GC (Foundation)                                        │
+│  - Actual memory allocation                                 │
+│  - Reference tracking (CGCDesc)                             │
+│  - Collection and compaction                                │
+└─────────────────────────────────────────────────────────────┘
+```
+
+**Evolution Path:**
+
+1. **Current (Managed-Space):** VCOM objects + Orleans provide these capabilities at library level
+2. **Future (Runtime-Level):** CMS/MOM/ORION become runtime subsystems with native integration
+3. **Ultimate:** The CLR GC itself is aware of Engram concepts (UUID, relationships, topology)
+
+**WHY This Triad?**
+- Separation of concerns: Content vs Identity vs Topology are orthogonal
+- Each layer can evolve independently
+- Matches the Engram layers model (see Section 18.2)
+- GC is the foundation—we're not replacing it, we're wrapping and extending it
+
 ---
 
 ## 18. Engrams: The Bounded Extraction Model
@@ -1389,6 +1449,56 @@ Grain Layer (MAC):    Orleans activates grain, returns proxy
 Developer gets:       order is now a proxy to the live grain
 ```
 
+### 21.5 Graph-Native Design: Why Relationships Are First-Class
+
+> **Key Insight:** VAYRON is fundamentally a **relationship-centric** platform, not just an object-centric one. Objects don't exist in isolation—they exist in a web of relationships.
+
+**WHY Graph Storage (Neo4j/AuraDB)?**
+
+Traditional object persistence stores objects as documents:
+```
+// Document model (RavenDB)
+{
+  "id": "order-123",
+  "customerId": "customer-456",  // Just a string reference
+  "items": [...]
+}
+```
+
+Graph storage stores relationships as first-class:
+```
+// Graph model (Neo4j)
+(order:Order {id: "order-123"})
+    -[:PLACED_BY]-> (customer:Customer {id: "456"})
+    -[:CONTAINS]-> (item:OrderItem {...})
+```
+
+**VAYRON Relationship Use Cases:**
+
+| Use Case | Graph Advantage |
+|----------|-----------------|
+| **VNS Semantic Search** | "Find all orders from customers in Texas" → graph traversal |
+| **VCOM Proxy Resolution** | Follow relationship edges to find referenced objects |
+| **Engram Boundaries** | Graph traversal defines what's IN vs OUT of extraction |
+| **MOM Relationship Tracking** | Native graph storage for object relationships |
+| **AI Reasoning** | Graph embeddings for semantic similarity |
+| **Impact Analysis** | "What depends on this type?" → graph query |
+
+**The Dual Storage Strategy (VDEC-007):**
+
+| Store | Purpose | Data |
+|-------|---------|------|
+| **RavenDB** | Object content/state | Field values, source code, binaries |
+| **Neo4j/AuraDB** | Relationships/topology | Object graph, type hierarchy, VNS index |
+
+**Both stores support vector embeddings** for semantic search, but graph-native (Neo4j) is purpose-built for relationship queries that are central to VAYRON's model.
+
+**WHY Not Just Use RavenDB's Graph Features?**
+- RavenDB has graph queries, but they're document-centric with graph overlay
+- Neo4j is graph-native: relationships are stored and indexed as first-class
+- Performance difference for multi-hop traversals is significant
+- AuraDB (Neo4j cloud) provides managed scaling for distributed deployments
+
 ---
 
 ## 22. Open Questions
@@ -1481,11 +1591,11 @@ For quick reference, these are the critical insights that inform the architectur
 
 | Subsystem | Owner | DOTNExT Consideration |
 |-----------|-------|----------------------|
-| **GC Heap** (Gen0/1/2, LOH, POH) | GC | MOM wraps this, adds UUID tracking |
+| **GC Heap** (Gen0/1/2, LOH, POH) | GC | MOM (Managed Object Manager) wraps this, adds UUID tracking |
 | **Loader Heaps** | EE/Loader | Type metadata = Engram candidates |
 | **JIT Code Heap** | JIT | Memantics stores code; understand this heap |
 | **Handle Tables** | Runtime | Weak/strong handles → Engram reference types |
-| **TLABs (Thread-Local Alloc Buffers)** | GC | MOM intercepts for UUID assignment |
+| **TLABs (Thread-Local Alloc Buffers)** | GC | MOM (see Section 17.1) intercepts for UUID assignment |
 | **Thread Stacks** | Runtime/JIT | GC info tables track roots; ORION leverage |
 
 **Lazy UUID Assignment (Recommended):**
@@ -1595,8 +1705,10 @@ A 40-point questionnaire exists to test understanding at 4 levels:
 
 ---
 
-*This document consolidates the vision from ALL 52 analyzed documents. Updated December 12, 2025 (Session 5) with:*
+*This document consolidates the vision from ALL 52 analyzed documents. Updated December 12, 2025 (Session 6) with:*
 - *Session 4: WHY chains, VDEC rationale, Engram model, Process Image Persistence, VCOM specs*
 - *Session 5: Runtime modularity assessment, Extension points for Engram, Memory subsystems*
 - *Session 5: VS integration patterns, Nitra research, Understanding questionnaire reference*
+- *Session 6: CMS/MOM/ORION triad explanation, MOM acronym clarification*
+- *Session 6: Graph-native design section, MAC/IP/DNS analogy disclaimer*
 - *Complete document inventory: 52 documents read and analyzed*
