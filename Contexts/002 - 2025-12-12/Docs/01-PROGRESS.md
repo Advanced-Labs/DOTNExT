@@ -18,6 +18,51 @@
 
 ---
 
+### Session 3 - 2025-12-12 (Continuation)
+**Task:** Security deep dive, Universal Dynamic Types strategy
+
+**Status:** COMPLETE ✅
+
+**Additions:**
+- Security Architecture (Section 11)
+- Universal Dynamic Types Strategy (Section 12)
+
+---
+
+### Session 4 - 2025-12-12 (WHY Chains Augmentation)
+**Task:** Add WHY chains and reasoning to consolidated vision document
+
+**Status:** COMPLETE ✅
+
+**Work Done:**
+- Corrected DEPRECATED/DEFERRED misclassification (runtime-level R&D is NOT abandoned)
+- Added Section 3: WHY chains for 10 major decisions
+- Expanded Section 15: Full VDEC decision rationale
+- Added Section 18: Comprehensive Engram model
+- Added Section 19: Process Image Persistence
+- Expanded Section 20: Cyberspace vision with protocol stack
+- Added Section 21: VCOM/VObject/VNS specifications
+- Added Appendix A: Key insights summary
+
+**Documents Read (15 additional for deeper context):**
+- DOTNExT-Conceptual-Derivations.md (WHY chains)
+- DOTNExT-Socratic-FAQ.md (Q&A understanding)
+- DOTNExT-Engrams-Revised.md (Engram = bounded extraction)
+- DOTNExT-Execution-Pathways.md (Universal execution)
+- DOTNExT-Process-Model.md (Process/Pathway)
+- DOTNExT-Unified-SafePoints.md (Safe points convergence)
+- DOTNExT-Unwinder-Async2-Analysis.md (Unwinder techniques)
+- DOTNExT-Singularity-Midori-Research.md (WHY NOT Singularity)
+- Vision-DOTNExT-Memory-Architecture.md (Memory design)
+- VAYRON-Component-Specs.md (VObject, VCOM, VNS specs)
+- VAYRON-Decision-Log.md (8 VDEC decisions with rationale)
+- Vision-VAYRON-Verbatim.md (Original vision voice)
+- New Orleans.md (Implementation details)
+- Erlang-BEAM-Architecture-Reference.md (BEAM patterns)
+- DOTNExT-Process-Image-Persistence.md (CRIU-like)
+
+---
+
 ## Complete Document Inventory (All Documents Read)
 
 ### Most Authoritative (Dec 11, 2025)
@@ -87,7 +132,7 @@
 
 1. The vision evolved from "layered runtime" (Nov 28) to "VOS with Runtime as Kernel" (Dec 11)
 2. VARIA = concept (types with virtues), not implementation
-3. Dynamic types + codegen = first VARIA implementation
+3. Dynamic types + codegen = **first** VARIA implementation (managed-space, faster iteration)
 4. Async+ is **DEFERRED** - waiting on VCOM
 5. Two possible Async+ paths: Roslyn codegen vs Runtime-Async (Unwinder)
 6. Security is pluggable driver system, not baked-in model
@@ -98,8 +143,13 @@
 11. GC is the "secret weapon" - already tracks complete object graph
 12. Safe points converge - GC, preemption, checkpoint all need same thing
 13. DOTNExT is hosted runtime (not bare-metal like Singularity/Midori)
-14. Hybrid development path - managed prototyping first, selective lowering
+14. Hybrid development path - managed prototyping first, selective lowering **then** runtime-level
 15. NewOrleans capabilities: Plugin Grain Loading, GTD, Dynamic Grain Access
+16. **Runtime-level R&D (CMS/MOM/ORION, Engrams, distributed execution) is NOT abandoned** - it's LATER PHASE after managed-space patterns proven
+17. **"Slow but Smart is the new Speed"** - AI inference is 10^6-10^11x slower than runtime overhead; optimize for AI collaboration
+18. **BEAM patterns adapted, not copied** - lightweight processes, let-it-crash, location transparency adapted to hosted CLR
+19. **Engrams are bounded extractions** - five layers (topology, objects, execution, binaries, code)
+20. **Process Image Persistence** - CRIU-like checkpoint/restore at managed runtime level
 
 ---
 
@@ -112,11 +162,21 @@
 
 ---
 
-## Status: COMPLETE
+## Status: COMPLETE (Session 4 - WHY Chains Added)
 
-All 49 documents in the Analysis folder have been read and analyzed. The consolidated vision document (`02-CONSOLIDATED-VISION.md`) now contains all key architectural concepts, decisions, and the current vs deprecated status of all concepts.
+All 49+ documents in the Analysis folder have been read and analyzed. The consolidated vision document (`02-CONSOLIDATED-VISION.md`) now contains:
+
+- All key architectural concepts, decisions, and status classifications
+- **WHY chains explaining the reasoning behind every major decision**
+- Full VDEC decision rationale (not just summaries)
+- Comprehensive Engram model with five layers
+- Process Image Persistence (CRIU-like capabilities)
+- VCOM/VObject/VNS detailed specifications
+- Key insights summary appendix
 
 **For any future sessions:**
 - Use `02-CONSOLIDATED-VISION.md` as the single source of truth
+- Section 3 (WHY chains) is critical for understanding decisions
+- Appendix A provides quick-reference insights
 - Refer to original documents only for deeper detail on specific topics
-- The document reading order is included in the consolidated vision
+- The document reading order is included (Section 23)

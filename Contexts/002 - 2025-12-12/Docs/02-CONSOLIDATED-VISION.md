@@ -2,9 +2,9 @@
 
 > **Document Type:** Vision Reconsolidation
 > **Created:** 2025-12-12
-> **Last Updated:** 2025-12-11 (Session 3 - Security Deep Dive)
-> **Based On:** Comprehensive analysis of all 49 documents + Session 3 security research
-> **Purpose:** Single source of truth for the current vision
+> **Last Updated:** 2025-12-12 (Session 4 - WHY Chains & Reasoning Augmentation)
+> **Based On:** Comprehensive analysis of all 49 documents + 15 additional deep-dive documents
+> **Purpose:** Single source of truth for the current vision WITH reasoning chains
 
 ---
 
@@ -29,7 +29,198 @@
 
 ---
 
-## 3. Terminology (Canonical Definitions)
+## 3. WHY: The Reasoning Behind Key Decisions
+
+> **Critical for AI Collaboration:** Understanding WHY decisions were made is as important as knowing WHAT was decided. This section captures the reasoning chains that led to the current architecture.
+
+### 3.1 WHY "Slow but Smart is the new Speed"?
+
+**The Reasoning Chain:**
+1. **Traditional optimization target:** CPU cycles, memory bandwidth, latency
+2. **Reality in AI-driven development:** The AI inference is 100-10,000x slower than any runtime overhead
+3. **Therefore:** Adding managed-space abstractions (dynamic types, proxies, codegen) has negligible impact on end-to-end time
+4. **Implication:** We can choose architectures that are "slower" in traditional terms but "smarter" in terms of capabilities
+5. **Result:** Platform can offer distribution, persistence, security as automatic virtues without meaningful performance penalty
+
+**The Math:**
+- AI inference: ~100ms-10s per significant operation
+- Runtime overhead of dynamic dispatch: ~10-100ns
+- Ratio: 10^6 to 10^11 difference
+- Conclusion: Optimizing the runtime overhead is optimizing the wrong thing
+
+### 3.2 WHY Build on Orleans (NewOrleans)?
+
+**The Reasoning Chain:**
+1. **Need:** Distributed object model with location transparency
+2. **Options:** Build from scratch, use Akka.NET, use Orleans, use raw distributed primitives
+3. **Orleans provides:**
+   - Virtual actor model (grains always "exist")
+   - Automatic placement and activation
+   - Transparent persistence
+   - Cluster membership
+   - Streaming
+4. **Why fork instead of use as-is?**
+   - Need dynamic grain loading (runtime assembly load/unload)
+   - Need Grain Type Directory (cluster-wide type registry)
+   - Need DLR integration for dynamic access without compile-time references
+   - Orleans is "static" in grain types - we need "dynamic"
+5. **Why HIDE Orleans from developers?**
+   - Orleans concepts (silos, grains, cluster) are implementation details
+   - Developers should think in VCOM/VARIA/VNS terms
+   - Abstraction enables future replacement if needed
+   - Precedent: Developers don't need to understand TPL to use async/await
+
+### 3.3 WHY Runtime = Kernel (VOS Architecture)?
+
+**The Reasoning Chain:**
+1. **Goal:** A platform where distribution, persistence, security are automatic
+2. **Traditional approach:** Libraries/frameworks on top of standard runtime
+3. **Problem:** Can't intercept/transform all code paths from library level
+4. **OS Analogy:**
+   - Unix: Kernel provides primitives (processes, files, IPC)
+   - Userspace: Services built on primitives (DNS, HTTP, databases)
+   - Applications: Built on services
+5. **VOS Analogy:**
+   - DOTNExT (CLR fork): Kernel providing primitives (GC, JIT, type system)
+   - NewOrleans + VOS Services: Userspace services (VNS, persistence, security)
+   - VARIA Applications: Built on services
+6. **Why this works:**
+   - Runtime already tracks complete object graph (GC)
+   - Runtime already has safe points (GC pauses)
+   - Runtime already has type system we can leverage
+   - We're reusing existing capabilities, not inventing new ones
+
+### 3.4 WHY Dynamic Types + Codegen First (Not Runtime Changes)?
+
+**The Reasoning Chain:**
+1. **Goal:** Implement VARIA (types with platform virtues)
+2. **Options:**
+   - A) Modify runtime to natively understand VARIA types
+   - B) Use dynamic types + compile-time codegen in managed space
+3. **Why B first?**
+   - **Faster iteration:** Managed code is easier to modify/test than runtime C++
+   - **Less risk:** Mistakes in managed code don't crash the runtime
+   - **Proves patterns:** We learn what works before committing to runtime changes
+   - **Immediate value:** Get working VARIA without waiting for runtime work
+4. **Why not A forever?**
+   - Runtime-native VARIA could be faster
+   - Some capabilities (true execution control) may require runtime
+   - B is an on-ramp, not a destination
+5. **The strategy:** Managed-space proves patterns → selective lowering when beneficial
+
+### 3.5 WHY Three-Layer Resolution (MAC/IP/DNS)?
+
+**The Reasoning Chain:**
+1. **Problem:** Different operations need different addressing mechanisms
+2. **Observation:** Networking solved this with layers:
+   - MAC: Physical device address (internal routing)
+   - IP: Logical host address (infrastructure)
+   - DNS: Human-friendly names (developers)
+3. **Application to VAYRON:**
+   - Grain Key: Internal grain routing (internal only)
+   - VCOM UUID: Stable object identity (infrastructure, Async+ needs this)
+   - VNS: Semantic/human naming (developers use this)
+4. **Why separate them?**
+   - Different consumers, different needs
+   - Async+ continuation needs UUID → Object (doesn't care about names)
+   - Developers need semantic → Object (don't care about UUIDs)
+   - Clear separation prevents conflation and bad design
+
+### 3.6 WHY Semantic Inversion (sync is Exception)?
+
+**The Reasoning Chain:**
+1. **Traditional .NET:** Everything is synchronous by default, async is opt-in
+2. **Reality in distributed systems:** Almost everything is actually async (network, I/O, etc.)
+3. **Problem:** Default sync creates blocking, deadlocks, scalability issues
+4. **Insight from BEAM/Erlang:** Everything yields. Preemptive scheduling. No blocking.
+5. **DOTNExT inversion:**
+   - Default: Everything can yield at safe points
+   - `sync` keyword: Explicitly mark code that MUST NOT yield
+6. **Why this is better:**
+   - Correct by default for distributed/async world
+   - Forces developer to think about blocking
+   - Enables preemptive scheduling without special handling
+   - Matches reality of modern systems
+
+### 3.7 WHY Code-as-First-Class, Binaries-as-Cache?
+
+**The Reasoning Chain:**
+1. **Traditional approach:** Source → Compile → Binary (binary is artifact)
+2. **AI-driven development:** AI works with source code, not binaries
+3. **Self-evolving systems:** Objects that can modify their own type need access to source
+4. **Therefore:**
+   - Source code is the primary artifact
+   - VTypeGrain stores source code
+   - Compilation happens on-demand
+   - Binaries are cached for performance but are derived, not primary
+5. **Benefits:**
+   - Full debuggability (always have source)
+   - AI can introspect and modify code
+   - Version tracking at source level
+   - Hot-reload by recompiling source
+
+### 3.8 WHY NOT Singularity/Midori Approach?
+
+**The Reasoning Chain:**
+1. **Singularity/Midori:** Bare-metal managed runtime, per-process heaps, compile-time security
+2. **DOTNExT:** Hosted on existing OS, shared heap, runtime security
+3. **Why the difference?**
+   - **Practical:** We're forking .NET, not building from scratch
+   - **Hosted benefit:** OS provides process isolation, file system, networking
+   - **GC constraint:** CLR GC is runtime-level, can't have per-process heaps easily
+   - **Philosophy:** We value dynamism over static verification
+4. **What we DO take from Singularity/Midori:**
+   - Software Isolated Processes (SIP) → Process/Pathway model (logical, not physical)
+   - Channel-based communication → VCOM proxies
+   - Manifest-based security → VOS security drivers
+5. **Key insight:** DOTNExT is a VOS ON a hosted runtime, not a bare-metal OS
+
+### 3.9 WHY BEAM/Erlang Patterns Matter?
+
+**The Reasoning Chain:**
+1. **BEAM (Erlang VM) achievements:**
+   - 99.9999999% uptime (nine nines)
+   - Hot code loading
+   - Per-process GC
+   - Preemptive scheduling
+   - Location-transparent messaging
+2. **DOTNExT goals overlap:**
+   - Distribution
+   - Persistence
+   - Hot reload
+   - Fault tolerance
+3. **Patterns we adopt:**
+   - **Lightweight processes:** Process/Pathway model (not OS threads)
+   - **Let it crash:** Process failure doesn't crash node; restart with clean state
+   - **Location transparency:** VCOM doesn't care where object lives
+   - **Preemptive yielding:** sync is exception, not default
+   - **Message passing:** Actor model via Orleans grains
+4. **Patterns we adapt:**
+   - Per-process GC → Logical isolation via VCOM (GC is CLR-level)
+   - Hot code swap → Code-as-first-class with version tracking
+   - Supervision trees → VOS service monitoring (design TBD)
+
+### 3.10 WHY GC is the "Secret Weapon"?
+
+**The Reasoning Chain:**
+1. **Observation:** GC already tracks complete object graph
+2. **What GC knows:**
+   - Every object in the heap
+   - Every reference between objects
+   - Which objects are reachable
+   - Memory layout (CGCDesc)
+3. **Implication:** We don't need VCOM to track everything
+   - GC sees non-VCOM objects too
+   - Engrams can include non-VCOM objects via GC traversal
+   - VCOM adds UUID identity; GC provides serialization capability
+4. **Why this matters:**
+   - Not "everything must be VCOM" (that was deprecated)
+   - VCOM is enhancement for objects that need UUID identity
+   - GC-based traversal enables bounded extractions of any object graph
+
+---
+
+## 4. Terminology (Canonical Definitions)
 
 | Term | Definition | Status |
 |------|------------|--------|
@@ -584,16 +775,154 @@ await order.Submit();
 
 ## 15. Key Decisions Record (From VAYRON-Decision-Log.md)
 
-| ID | Decision | Date |
-|----|----------|------|
-| **VDEC-001** | Build Real Infrastructure First (No PoCs) | Dec 7 |
-| **VDEC-002** | Defer Async+ Continuation until VCOM exists | Dec 7 |
-| **VDEC-003** | NewOrleans is Hidden Infrastructure | Dec 7 |
-| **VDEC-004** | Three-Layer Resolution Model (MAC/IP/DNS) | Dec 7 |
-| **VDEC-005** | Code-as-First-Class, Binaries-as-Cache | Dec 7 |
-| **VDEC-006** | VARIA Uses Roslyn Fork for Transformation | Dec 7 |
-| **VDEC-007** | Persistence: RavenDB + Neo4j/AuraDB | Dec 7 |
-| **VDEC-008** | Single Node Default for Development | Dec 7 |
+> **Note:** Each decision includes the full reasoning chain. Understanding WHY is crucial for future decisions that build on these.
+
+### VDEC-001: Build Real Infrastructure First (No PoCs)
+**Date:** Dec 7, 2025 | **Status:** APPROVED | **Decider:** Louis
+
+**Decision:** Build VAYRON SDK, project templates, and VS2022 integration as production-quality infrastructure from the start. No "proof of concept" throwaway code.
+
+**Reasoning Chain:**
+1. Traditional wisdom: Build quick PoCs → validate → rebuild properly
+2. Our context is different:
+   - AI-assisted development velocity is high
+   - Louis has VS extension experience
+   - DOTNExT already integrates with VS2022
+   - Good tooling investment compounds across all future work
+3. With AI assistance, "build it right" is faster than "build it twice"
+4. Dogfooding: Building VAYRON with VAYRON tooling reveals problems immediately
+
+**Consequence:** All work is done with production expectation. Higher quality bar from day one.
+
+---
+
+### VDEC-002: Defer Async+ Continuation until VCOM exists
+**Date:** Dec 7, 2025 | **Status:** APPROVED | **Decider:** Louis
+
+**Decision:** Do not complete Async+ continuation (awaiter resume) until VCOM infrastructure exists. Keep analysis and partial implementation.
+
+**Reasoning Chain:**
+1. Async+ currently: ✅ persists state ✅ reloads state ❌ resumes at correct point ❌ rehydrates references
+2. Reference rehydration needs UUID → live object resolution
+3. This is exactly what VCOM.Resolve() provides
+4. Building temporary UUID resolution = waste; VCOM will do it properly
+5. Historical analogy: You don't build DCOM before COM
+
+**Consequence:** Async+ remains partial. VCOM design considers Async+ needs. Reference rehydration implemented once, properly.
+
+---
+
+### VDEC-003: NewOrleans is Hidden Infrastructure
+**Date:** Dec 7, 2025 | **Status:** APPROVED | **Decider:** Louis
+
+**Decision:** NewOrleans is completely hidden from VAYRON developers. No "silos," "grains," or "cluster" terminology exposed.
+
+**Reasoning Chain:**
+1. Goal alignment: VAYRON frees AI from boilerplate. Orleans concepts ARE boilerplate.
+2. Precedent: Developers don't need to understand TPL to use async/await
+3. Cleaner mental model: One set of concepts (VCOM/VARIA/VNS), not two overlapping
+4. Future flexibility: If we replace Orleans internals later, no API changes
+
+**Mapping:**
+- "VAYRON Node" = Orleans Silo
+- "VCOM Object" = Orleans Grain (conceptually)
+- Configuration uses VAYRON terminology
+- Power users can still access internals if needed (escape hatch)
+
+---
+
+### VDEC-004: Three-Layer Resolution Model (MAC/IP/DNS)
+**Date:** Dec 7, 2025 | **Status:** APPROVED | **Decider:** Louis + Claude
+
+**Decision:** VAYRON has three resolution layers analogous to networking.
+
+**Reasoning Chain:**
+1. Different operations need different resolution:
+   - Async+ continuation needs UUID → Object
+   - Developer queries need semantic → Object
+   - Internal grain operations need key → grain
+2. Conflating these causes confusion and poor design
+3. Networking solved this problem already (MAC/IP/DNS)
+
+**Layers:**
+| Layer | Analogy | What | Used By |
+|-------|---------|------|---------|
+| Grain-level | MAC | Direct grain key resolution | Internal only |
+| VCOM-level | IP | UUID-based object identity | Infrastructure |
+| VNS-level | DNS | Human-friendly addressing | Developers |
+
+---
+
+### VDEC-005: Code-as-First-Class, Binaries-as-Cache
+**Date:** Dec 7, 2025 | **Status:** APPROVED | **Decider:** Louis
+
+**Decision:** VCOM types "own" their source code. Code is persisted as primary artifact. Binaries are cached for performance but derived.
+
+**Reasoning Chain:**
+1. VAYRON enables self-evolving code. Objects can modify their type's code.
+2. For this to work, code must be: accessible, mutable at runtime, versioned, source of truth
+3. AI works with code, not binaries
+4. Caching is orthogonal - we still get binary performance where needed
+
+**Consequence:**
+- VTypeGrain stores source code
+- Compilation happens at runtime (on demand)
+- Binaries cached in file system / RavenDB
+- Code mutations create new versions
+- Objects can introspect their code
+
+---
+
+### VDEC-006: VARIA Uses Roslyn Fork for Transformation
+**Date:** Dec 7, 2025 | **Status:** APPROVED | **Decider:** Louis + Claude
+
+**Decision:** VARIA uses our Roslyn fork for code transformation. Not source generators, not IL weaving - full compiler control.
+
+**Reasoning Chain:**
+1. VARIA needs to transform:
+   - `new MyType()` → VCOM creation
+   - Property access → VCOM state access
+   - Method calls → grain invocations
+   - Reference types → UUID-based relationships
+2. Options considered:
+   - Source Generator: Limited transformation capability
+   - IL Weaving (Fody): Post-compile, complex
+   - Roslyn Fork: Maximum control
+3. We already have Roslyn fork (DOTNExT includes it)
+4. Async+ already modifies compiler - precedent exists
+5. If we add language features (C=), compiler control is essential
+
+---
+
+### VDEC-007: Persistence Stores Selection
+**Date:** Dec 7, 2025 | **Status:** APPROVED | **Decider:** Louis
+
+**Decision:** Initial persistence uses RavenDB (documents) + Neo4j/AuraDB (graph) + file system (binaries).
+
+**Reasoning Chain:**
+1. Needs: Document storage, graph storage, semantic search, local + cloud
+2. RavenDB: Document storage for object state, type definitions, code
+3. Neo4j (local): Graph storage for relationships, type hierarchy, semantic index
+4. AuraDB (cloud): Neo4j cloud equivalent for distributed deployments
+5. Both RavenDB and Neo4j support vectors → semantic search covered
+6. Graph-native (Neo4j) is purpose-built for relationship queries
+
+**Consequence:** Two database dependencies. Orleans storage providers needed for both.
+
+---
+
+### VDEC-008: Single Node Default for Development
+**Date:** Dec 7, 2025 | **Status:** APPROVED | **Decider:** Louis
+
+**Decision:** Default VAYRON configuration runs single node (single Orleans silo). Multi-node is opt-in.
+
+**Reasoning Chain:**
+1. Simplicity first: One node is easier to understand and debug
+2. Still distributed: Single node still uses Orleans patterns. Scaling is configuration, not code change.
+3. Development speed: Local dev doesn't need cluster setup
+4. Progressive complexity: Add nodes when needed
+
+**Consequence:** Default `vayron.config.json` creates single local node. Same code works single or multi-node.
 
 ---
 
@@ -626,7 +955,7 @@ await order.Submit();
 
 ---
 
-## 17. What's CURRENT vs DEPRECATED vs DEFERRED
+## 17. What's CURRENT vs DEPRECATED vs DEFERRED vs LATER PHASE
 
 ### CURRENT (Active)
 | Concept | Description |
@@ -646,24 +975,214 @@ await order.Submit();
 ### DEPRECATED/ABANDONED
 | Concept | Reason |
 |---------|--------|
-| VAYRON-without-runtime-changes | Can't achieve goals |
-| Full Engram at runtime level | Moved to VCOM level |
-| Complex memory redesign (CMS, MOM, ORION) | VCOM solves reference problem |
-| Everything-must-be-VCOM | GC tracks graph; VCOM is enhancement |
-| Singularity-style SIPs | DOTNExT is hosted, not bare-metal |
+| Everything-must-be-VCOM | GC tracks graph; VCOM is enhancement, not requirement |
+| Singularity-style SIPs (Software Isolated Processes) | DOTNExT is hosted runtime, not bare-metal OS |
 
-### DEFERRED (Valid but waiting)
+### DEFERRED (Valid but waiting on prerequisites)
 | Concept | Waiting On |
 |---------|------------|
-| Async+ continuation | VCOM.Resolve() |
-| C* language | VCOM + VARIA proven |
-| Per-process GC regions | Research phase |
-| Native VARIA in runtime | Phase 5 |
-| Runtime-Async/Tasklets | .NET 10+ research |
+| Async+ continuation | VCOM.Resolve() must exist first |
+| C= language | VCOM + VARIA patterns proven in C# first |
+| Native VARIA in runtime | Phase 5 - after managed-space VARIA proven |
+
+### LATER PHASE: Runtime-Level R&D (NOT Abandoned)
+
+> **Critical Clarification:** The following are NOT deprecated. They represent the deeper runtime-level capabilities that are the ultimate goal. Managed-space approaches (dynamic types + codegen) are being tried FIRST for faster iteration, but these runtime capabilities remain planned:
+
+| Concept | Status | Notes |
+|---------|--------|-------|
+| **Runtime-level Engrams** | PLANNED | Bounded extractions at runtime level, not just VCOM level |
+| **CMS/MOM/ORION (or evolved forms)** | PLANNED | Names/forms may change; concepts remain for experimentation |
+| **Distributed object graphs at runtime** | PLANNED | True runtime-level distribution, not just library-level |
+| **Execution control primitives** | PLANNED | Real pause/resume, save/load, transfer between VM nodes |
+| **Execution path distribution** | PLANNED | Distribute execution paths across nodes at runtime level |
+| **Vector encodings over object graph** | PLANNED | Semantic embeddings of objects, members, relations |
+| **Runtime-level distributed kernel** | VISION | VM nodes cooperating at low execution levels |
+| **Per-process GC regions** | RESEARCH | Long-term GC isolation research |
+| **Runtime-Async/Tasklets (Unwinder)** | RESEARCH | Universal execution capture at any safe point |
+
+**The Strategy:** Managed-space first → prove patterns → selective lowering → runtime-native capabilities. The managed-space work is not a replacement for runtime work; it's an on-ramp that lets us iterate faster while the deeper runtime R&D continues.
 
 ---
 
-## 18. Long-Term Vision: Cyberspace
+## 18. Engrams: The Bounded Extraction Model
+
+> **Definition:** An Engram is a bounded extraction from an object graph—a portable unit containing code, state, and optionally execution context.
+
+### 18.1 WHY Engrams?
+
+**The Problem:**
+- How do you move "part of a running system" to another location?
+- Traditional serialization is flat—loses execution state, relationships, context
+- Copy-paste doesn't work for living systems
+
+**The Insight:**
+- Don't serialize "an object"—extract "a capability"
+- Include everything needed to execute that capability
+- Bounded: Has edges (what's included vs what's a reference out)
+
+### 18.2 The Five Layers Model
+
+Engrams can be understood as five maps over the same territory:
+
+```
+┌────────────────────────────────────────────────────────┐
+│  TOPOLOGY LAYER                                        │
+│  Where things live in distributed space                │
+│  - Node locations                                      │
+│  - Placement decisions                                 │
+│  - Remote references (out-edges)                       │
+├────────────────────────────────────────────────────────┤
+│  OBJECTS LAYER                                         │
+│  Instance state and references                         │
+│  - Field values                                        │
+│  - Object identity (UUIDs for VCOM objects)           │
+│  - Reference graph (via GC)                            │
+├────────────────────────────────────────────────────────┤
+│  EXECUTION LAYER                                       │
+│  Current execution state                               │
+│  - Stack frames (Tasklets)                             │
+│  - Continuation points                                 │
+│  - Local variables                                     │
+│  - Register state (at safe points)                    │
+├────────────────────────────────────────────────────────┤
+│  BINARIES LAYER (Cache)                                │
+│  Compiled code for execution                           │
+│  - JITted native code                                  │
+│  - Cached per-platform                                 │
+│  - Derived from Code layer                            │
+├────────────────────────────────────────────────────────┤
+│  CODE/TYPES LAYER (Primary)                            │
+│  Type definitions, source code                         │
+│  - C# source (primary artifact)                       │
+│  - Type metadata                                       │
+│  - Version information                                 │
+└────────────────────────────────────────────────────────┘
+```
+
+### 18.3 Engram Operations
+
+| Operation | Description |
+|-----------|-------------|
+| **Extract** | Create Engram from live object graph (with boundary) |
+| **Persist** | Store Engram to durable storage |
+| **Transfer** | Send Engram to another node |
+| **Inject** | Instantiate Engram into running system |
+| **Resume** | Continue execution from captured state |
+
+### 18.4 Engram Boundaries
+
+**Key Question:** What's IN the Engram vs what's a reference OUT?
+
+**Boundary decisions:**
+- **Root set:** Starting objects for extraction
+- **Depth:** How many hops to follow
+- **Type filter:** Which types to include vs reference
+- **Execution scope:** Include calling context or just target?
+
+**GC is the tool:** GC traversal from root set determines reachable objects. Boundary is where traversal stops.
+
+### 18.5 Current vs Future Engrams
+
+| Aspect | Current (Managed-Space) | Future (Runtime-Level) |
+|--------|------------------------|------------------------|
+| Objects | VCOM objects with UUID | Any GC-tracked object |
+| Execution | Async state machines | Full stack frames (Tasklets) |
+| Boundaries | VCOM relationships | GC-based traversal |
+| Transfer | Serialization | Zero-copy (shared memory?) |
+
+---
+
+## 19. Process Image Persistence (CRIU-like Capabilities)
+
+> **Vision:** Save the complete state of a "process" (VOS sense), transfer it, resume elsewhere—like CRIU but inside the managed runtime.
+
+### 19.1 WHY Process Image Persistence?
+
+**The Scenario:**
+1. Long-running AI workflow running on Node A
+2. Node A needs to shut down (maintenance, cost, failure)
+3. Capture complete state, transfer to Node B, resume seamlessly
+
+**Traditional approaches:**
+- CRIU: Works at OS level, not VM-aware
+- Application checkpointing: Requires manual state management
+- VM migration: Heavyweight, not fine-grained
+
+**VOS approach:** Checkpoint at managed runtime level, with full knowledge of object graph and execution state.
+
+### 19.2 What Gets Captured
+
+```
+Process Image Contents:
+├── Identity
+│   ├── Process UUID
+│   ├── Pathway UUIDs
+│   └── VCOM object UUIDs
+├── Execution State (per Pathway)
+│   ├── Stack frames
+│   ├── Instruction pointer (at safe point)
+│   ├── Local variables
+│   └── Exception handlers
+├── Object State
+│   ├── All reachable objects (GC traversal)
+│   ├── Field values
+│   └── Reference relationships
+├── Type Information
+│   ├── Required types
+│   ├── Source code (primary)
+│   └── Compiled binaries (cache)
+└── External References
+    ├── Out-edges to other Processes
+    ├── VNS anchors
+    └── Resource handles (must be re-acquired)
+```
+
+### 19.3 Safe Points for Checkpointing
+
+**Key Insight from Unified Safe Points:** GC safe points, preemption points, and checkpoint points all need the same thing—a consistent state where all reference locations are known.
+
+**JIT already provides this:** GC info tables describe live references at safe points. We're reusing, not inventing.
+
+**Safe point types:**
+- **Method call boundaries:** Natural safe points
+- **Loop back-edges:** JIT inserts polling
+- **Allocation sites:** GC may trigger
+- **Explicit yields:** `await`, safe point intrinsics
+
+### 19.4 Checkpoint/Restore Flow
+
+```
+CHECKPOINT:
+1. Pause all Pathways at safe points
+2. Walk GC heap from Process roots
+3. Serialize reachable object graph
+4. Capture execution frames (Tasklets)
+5. Package as Process Image
+6. Mark Process as "Checkpointed"
+
+RESTORE:
+1. Receive Process Image
+2. Allocate objects, rebuild graph
+3. Resolve external references (VCOM UUIDs)
+4. Re-acquire resources (files, connections)
+5. Reconstruct Pathways with frames
+6. Resume execution from safe points
+```
+
+### 19.5 Implementation Status
+
+| Capability | Status | Notes |
+|------------|--------|-------|
+| Object serialization | AVAILABLE | Orleans/RavenDB already do this |
+| Async state capture | PARTIAL | Async+ captures state machine |
+| Full stack capture | RESEARCH | Unwinder techniques |
+| Safe point coordination | DESIGN | Unified safe points model |
+| Process Image format | DESIGN | Based on Engram layers |
+
+---
+
+## 20. Long-Term Vision: Cyberspace
 
 From Vision-Engrams-Cyberspace-Verbatim.md:
 
@@ -673,21 +1192,152 @@ From Vision-Engrams-Cyberspace-Verbatim.md:
 > - The network forms an "Internet of Objects" navigable via VNS
 > - AI-Objects collaborate in a Society of Minds
 
-**Engram layers** (maps over same territory):
-- Code/Types layer - Type definitions, source
-- Binaries layer - Cached compiled code
-- Execution layer - Tasklets, frames, registers
-- Objects layer - Instance state, references
-- Topology layer - Where in distributed space
+### 20.1 Nodes as Centroids
 
-**Nodes as Centroids:**
-- Dense at center (what I have)
-- Sparse at edges (what I know about)
-- Like gravity well - concentrated locally, attenuated distantly
+**Analogy:** Each node is like a gravity well in the object space.
+
+```
+Dense at center (what I have):
+- Locally activated objects
+- Cached types and binaries
+- Full object state
+
+Sparse at edges (what I know about):
+- VNS references to remote objects
+- Type stubs and interfaces
+- Proxy handles
+```
+
+**Information Density Gradient:**
+- Objects you OWN: Full state, execution, history
+- Objects you USE: Proxy, cached state, eventual consistency
+- Objects you KNOW ABOUT: VNS entry, metadata only
+
+### 20.2 Society of Minds
+
+**The Vision:**
+- AI-Objects as first-class citizens
+- Objects that can spawn other AI-Objects
+- Self-evolving types (modify their own code)
+- Collaborative problem-solving across the network
+
+**VAYRON Enablers:**
+- Code-as-first-class: AI can introspect and modify
+- VCOM identity: Objects persist across sessions
+- VNS discovery: Find capabilities semantically
+- Engram transfer: Move intelligence to where it's needed
+
+### 20.3 The Cyberspace Protocol Stack
+
+```
+Application Layer:    AI-Objects, Society of Minds
+─────────────────────────────────────────────────────
+Discovery Layer:      VNS (semantic search, naming)
+─────────────────────────────────────────────────────
+Object Layer:         VCOM (UUID identity, relationships)
+─────────────────────────────────────────────────────
+Transport Layer:      Engrams (bounded extractions)
+─────────────────────────────────────────────────────
+Infrastructure:       NewOrleans (grains, clusters)
+─────────────────────────────────────────────────────
+Kernel:               DOTNExT (CLR, GC, JIT)
+```
 
 ---
 
-## 19. Open Questions
+## 21. VCOM/VObject/VNS Detailed Specifications
+
+> **From VAYRON-Component-Specs.md:** These are the core building blocks of the VAYRON object model.
+
+### 21.1 VObject: The Universal Base
+
+**Every VCOM object inherits from VObject:**
+
+```csharp
+public abstract class VObject
+{
+    // Identity - survives serialization, restart, migration
+    public Guid UUID { get; }
+
+    // Type reference - points to VTypeGrain
+    public VTypeRef VType { get; }
+
+    // Relationships - managed by VNS
+    public VRelations Relations { get; }
+
+    // Lifecycle hooks
+    protected virtual void OnActivate() { }
+    protected virtual void OnDeactivate() { }
+    protected virtual void OnPersist() { }
+    protected virtual void OnRestore() { }
+}
+```
+
+**WHY UUID instead of regular .NET identity?**
+- .NET object identity is memory-address based—doesn't survive serialization
+- UUID survives: serialization, process restart, migration to another node
+- Enables Async+ continuation: rehydrate reference by UUID
+- Enables VNS: register object by stable identity
+
+### 21.2 VType: Runtime Type Management
+
+**VTypeGrain manages type definitions:**
+
+```
+VTypeGrain responsibilities:
+├── Store source code (primary)
+├── Store compiled binaries (cache)
+├── Track versions
+├── Handle mutations (self-evolving code)
+└── Provide type metadata to VNS
+```
+
+**Type Resolution Flow:**
+1. VARIA code references type `MyApp.Order`
+2. Roslyn transformation emits VType lookup
+3. VTypeGrain returns type metadata + binary
+4. Runtime loads assembly (if not cached)
+5. Object instantiation proceeds
+
+### 21.3 VNS: DNS for Objects
+
+**Three addressing modes:**
+
+| Mode | Format | Use Case |
+|------|--------|----------|
+| **Named** | `vayron://Orders/ORD-123` | Specific object by key |
+| **Namespace** | `vayron://MyApp.Sales/Orders` | Collection/type |
+| **Query** | `vayron://Orders?status=pending` | Filter criteria |
+| **Semantic** | `vayron://?"pending orders from last week"` | Natural language |
+
+**VNS Grain Types:**
+- `VNamespaceGrain`: Hierarchical namespace management
+- `VSearchGrain`: Semantic search (vector embeddings)
+- `VAnchorGrain`: Named anchors (stable entry points)
+
+**WHY VNS instead of direct grain access?**
+- Developer experience: Human-friendly addressing
+- Semantic search: Find objects by meaning, not just key
+- Decoupling: VNS abstraction hides grain/cluster details
+- Evolution: Change underlying storage without API changes
+
+### 21.4 VCOM Resolution (The Three Layers)
+
+```
+Developer writes:     var order = await VNS.Find<Order>("ORD-123");
+                                    │
+VNS Layer (DNS):      VNS resolves "ORD-123" → UUID (guid)
+                                    │
+VCOM Layer (IP):      VCOM resolves UUID → grain key/location
+                                    │
+Grain Layer (MAC):    Orleans activates grain, returns proxy
+                                    │
+Developer gets:       order is now a proxy to the live grain
+```
+
+---
+
+## 22. Open Questions
 
 ### High Priority (Gen-1)
 1. Dynamic types family design (base types, interfaces, generics)
@@ -708,24 +1358,72 @@ From Vision-Engrams-Cyberspace-Verbatim.md:
 
 ---
 
-## 20. Document Reading Order
+## 23. Document Reading Order
+
+**For Quick Start (this document first):**
+1. This consolidated vision document
+2. `00-REBOOT.md` for recovery context
 
 **For VOS Implementation:**
 1. `DOTNExT-VOS-Implementation-Strategy.md`
 2. `VAYRON-Architecture-Master.md`
 3. `VAYRON-Component-Specs.md`
 
+**For WHY Understanding (reasoning chains):**
+1. `DOTNExT-Conceptual-Derivations.md`
+2. `DOTNExT-Socratic-FAQ.md`
+3. `VAYRON-Decision-Log.md`
+
 **For Runtime R&D:**
 1. `DOTNExT-Runtime-RnD-Primer.md` (self-contained)
+2. `DOTNExT-Execution-Pathways.md`
+3. `DOTNExT-Process-Image-Persistence.md`
+4. `DOTNExT-Unified-SafePoints.md`
 
-**For Full Context:**
-1. `BOOTUP.md` → `INDEX.md` → follow curriculum
+**For BEAM/Erlang Patterns:**
+1. `Erlang-BEAM-Architecture-Reference.md`
 
 **For NewOrleans:**
 1. `New Orleans.md`
 2. `DynamicGrainAccess.md`
 3. `PluginGrainArchitecture.md`
 
+**For Full Context:**
+1. `BOOTUP.md` → `INDEX.md` → follow curriculum
+
 ---
 
-*This document consolidates the vision from 40+ analyzed documents. Updated December 11, 2025 (Session 3) with comprehensive Security Architecture (Section 11) and Universal Dynamic Types Strategy (Section 12).*
+## Appendix A: Key Insights Summary
+
+For quick reference, these are the critical insights that inform the architecture:
+
+1. **"Slow but Smart is the new Speed"** - AI inference is 10^6-10^11 times slower than runtime overhead. Optimize for AI collaboration, not CPU cycles.
+
+2. **GC is the Secret Weapon** - GC already tracks complete object graph. We're reusing, not inventing.
+
+3. **Safe Points Converge** - GC, preemption, and checkpointing all need the same thing: consistent state with known reference locations.
+
+4. **Runtime = Kernel, VOS Services = Userspace** - Like Unix, the kernel provides primitives; services build on them.
+
+5. **VARIA is Concept, Dynamic Types are Implementation** - The concept persists; implementations can evolve.
+
+6. **Code-as-First-Class** - AI works with source, not binaries. Self-evolving systems need access to their own code.
+
+7. **Three-Layer Resolution (MAC/IP/DNS)** - Different consumers, different needs. Don't conflate internal routing with developer addressing.
+
+8. **Managed-Space First, Runtime-Level Later** - Faster iteration proves patterns; selective lowering follows.
+
+9. **BEAM Patterns Adapted, Not Copied** - Lightweight processes, let-it-crash, location transparency—adapted to hosted CLR reality.
+
+10. **Engrams are Bounded Extractions** - Not flat serialization; capability-centric extractions with clear boundaries.
+
+---
+
+*This document consolidates the vision from 49+ analyzed documents. Updated December 12, 2025 (Session 4) with:*
+- *Section 3: WHY chains for all major decisions*
+- *Section 15: Full VDEC decision rationale*
+- *Section 18: Comprehensive Engram model*
+- *Section 19: Process Image Persistence*
+- *Section 20: Expanded Cyberspace vision*
+- *Section 21: VCOM/VObject/VNS specifications*
+- *Appendix A: Key insights summary*
