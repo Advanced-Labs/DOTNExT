@@ -2,8 +2,9 @@
 
 > **Document Type:** Vision Reconsolidation
 > **Created:** 2025-12-12
-> **Based On:** Analysis of all documents on branch `dotnext/analysis-1`
-> **Purpose:** Single source of truth for the current vision after analyzing document evolution
+> **Last Updated:** 2025-12-12 (Session 2)
+> **Based On:** Analysis of 18+ documents on branch `dotnext/analysis-1`
+> **Purpose:** Single source of truth for the current vision
 
 ---
 
@@ -20,56 +21,75 @@
 
 ---
 
-## 2. Terminology (Canonical Definitions)
+## 2. Core Vision (One Paragraph)
+
+**DOTNExT** is a Virtual Operating System where the CLR runtime IS the kernel. VOS services (VNS, persistence, security) run in "userspace" built on NewOrleans (Orleans fork). VARIA types embody platform virtues (distribution, persistence, security, AI-centrality) initially implemented via "special dynamic types" + Roslyn codegen. Security is a pluggable driver system supporting multiple models. "Slow but Smart is the new Speed" - AI is the bottleneck, not CPU. The long-term vision is a "cyberspace" where code, execution state, and objects are all persistable and transferable across a distributed network of nodes.
+
+---
+
+## 3. Terminology (Canonical Definitions)
 
 | Term | Definition | Status |
 |------|------------|--------|
 | **DOTNExT** | Codename for forked .NET 9 VMR (runtime, Roslyn, SDK) | ACTIVE |
-| **VAYRON** | Codename for the complete platform stack | ACTIVE (in docs) |
+| **VAYRON** | Codename for the complete platform stack | ACTIVE |
 | **VOS** | Virtual Operating System - the overall architectural framing | CURRENT |
 | **NewOrleans** | Fork of Microsoft Orleans with dynamic grain loading, GTD | ACTIVE |
 | **VCOM** | VAYRON Component-Object Model - the object model layer | ACTIVE |
 | **VARIA** | Types/objects with platform virtues (concept, not implementation) | ACTIVE |
-| **VNS** | Virtual/VAYRON/VARIA Name System - "DNS for Objects" | ACTIVE |
+| **VNS** | Virtual/VAYRON Name System - "DNS for Objects" | ACTIVE |
+| **VObject** | Base type for all VCOM objects (UUID, VType, Relations) | DESIGN |
 | **Async+** | Roslyn-based async state machine persistence | DEFERRED |
-| **Engrams** | Distributed object memory/identity concept | REPOSITIONED (VCOM level) |
-| **VAYRON Kernel** | Grain types that ARE the kernel services (VCOMPodGrain, etc.) | ACTIVE |
+| **Engrams** | Bounded extraction from object graph (layers model) | REPOSITIONED |
+| **VAYRON Kernel** | Grain types providing kernel services | ACTIVE |
+| **Process** | Isolation boundary with identity; contains Pathways | DESIGN |
+| **Pathway** | Execution flow; the scheduling unit (frames) | DESIGN |
+| **Tasklet** | Captured stack frame (method token, IP, locals) | RESEARCH |
 
 ---
 
-## 3. Architecture Stack (Most Recent - Dec 11, 2025)
+## 4. Architecture Stack (Dec 11, 2025)
 
 ```
 ┌─────────────────────────────────────────────────────────────────────┐
 │  VARIA / SDK (developer surface)                                    │
 │  "Shell/UI layer" - what developers interact with                   │
+│  - Write regular C# (no grains/silos visible)                       │
+│  - Objects automatically persist                                    │
+│  - Full IntelliSense for dynamic/distributed types                  │
 ├─────────────────────────────────────────────────────────────────────┤
 │                                                                     │
 │  VOS Services Layer ("Userspace")                                   │
 │  ├── VNS (naming, discovery, resolution)                            │
-│  ├── Persistence Services                                           │
-│  ├── Security Services (pluggable drivers)                          │
+│  ├── Persistence Services (RavenDB, Neo4j/AuraDB)                   │
+│  ├── Security Services (pluggable CBS/RBAC/crypto drivers)          │
 │  ├── Distribution/Orchestration                                     │
-│  └── ... (other VOS services)                                       │
+│  └── VCOM Resolution (UUID → live object)                           │
 │                                                                     │
 │  All built ON NewOrleans substrate                                  │
 │  Managed-space implementations                                      │
 │                                                                     │
 ├─────────────────────────────────────────────────────────────────────┤
 │  NewOrleans (grain infrastructure) ─── VOS Infrastructure           │
-│  Foundational but not kernel-level                                  │
+│  ├── VCOMPodGrain (hosts VCOM instances)                            │
+│  ├── VTypeGrain (manages type definitions)                          │
+│  ├── VNamespaceGrain (VNS resolution)                               │
+│  └── VCompilerGrain (runtime compilation)                           │
 ├─────────────────────────────────────────────────────────────────────┤
 │  DOTNExT Runtime (CLR fork) ─────────── VOS KERNEL                  │
 │  GC, JIT, type system, execution primitives                         │
 │  "Lowered into the kernel" means changes here                       │
+│  - Unified safe points (GC/preemption/checkpoint)                   │
+│  - Unwinder techniques for universal capture                        │
+│  - Semantic inversion (sync is exception)                           │
 └─────────────────────────────────────────────────────────────────────┘
 ```
 
 ---
 
-## 4. VARIA: The Platform Virtues
+## 5. VARIA: The Platform Virtues
 
-VARIA objects have these **first-class virtues** (from Dec 11 session):
+VARIA objects have these **first-class virtues**:
 
 | Virtue | Description |
 |--------|-------------|
@@ -86,155 +106,266 @@ VARIA objects have these **first-class virtues** (from Dec 11 session):
 
 ---
 
-## 5. Document Timeline & Evolution
+## 6. The Three Resolution Layers (MAC/IP/DNS Analogy)
 
-| Date | Document | Key Contribution | Status |
-|------|----------|------------------|--------|
-| Nov 28, 2025 | `DOTNExT-Vision.md` | Early layer model, memory redesign, C* concept | SUPERSEDED |
-| Dec 7, 2025 | `VAYRON-Architecture-Master.md` | Seminal architecture clarity, component definitions | FOUNDATIONAL |
-| Dec 8, 2025 | `Vision-Async+-Solution.md` | VCOM solution for continuation, Runtime-Async option | DEFERRED |
-| Dec 11, 2025 | `DOTNExT-VOS-Implementation-Strategy.md` | Runtime=Kernel, dynamic types strategy, security drivers | **MOST CURRENT** |
-| Dec 11, 2025 | `BOOTUP.md` | Latest context recovery, session summary | **MOST CURRENT** |
+| Layer | Analogy | What | Used By |
+|-------|---------|------|---------|
+| **Grain-level** | MAC | Direct grain key resolution | Internal only |
+| **VCOM-level** | IP | UUID-based object identity | Infrastructure (Async+, relationships) |
+| **VNS-level** | DNS | Human-friendly addressing | Developers |
 
-### Document Status Categories
-
-**FOUNDATIONAL** (Use these):
-- `DOTNExT-VOS-Implementation-Strategy.md` - Dec 11, 2025
-- `VAYRON-Architecture-Master.md` - Dec 7, 2025
-- `BOOTUP.md` - Dec 11, 2025
-- `INDEX.md` - Dec 11, 2025
-
-**DEFERRED** (Valid but waiting on dependencies):
-- `Vision-Async+-Solution.md` - Waiting on VCOM
-- Async+ continuation features
-
-**SUPERSEDED** (Earlier versions of the vision):
-- `DOTNExT-Vision.md` (Nov 28) - Replaced by VOS strategy doc
-- Early Engram designs - Repositioned to VCOM level
-
-**ARCHIVED** (Explicitly deprecated):
-- Files in `/Analysis/archived/`
+**VNS Address Formats:**
+```
+vayron://Orders/ORD-123              # Named
+vayron://MyApp.Sales/Orders          # Namespace
+vayron://Orders?status=pending       # Query
+vayron://?"pending orders from last week"  # Semantic
+```
 
 ---
 
-## 6. Current vs Deprecated Concepts
+## 7. Process and Pathway Model
 
-### CURRENT (Active in Latest Vision)
+### Execution Hierarchy
+```
+VM Node
+└── Process (isolation boundary, identity, resource container)
+    └── Pathway (execution flow, captured state, schedulable)
+        └── Frame (single stack frame, captured at safe point)
+```
 
-| Concept | Description |
-|---------|-------------|
-| Runtime = VOS Kernel | CLR fork is the kernel; managed space is "userspace" |
-| VOS Services in userspace | VNS, persistence, security built on NewOrleans |
-| Dynamic types as VARIA impl | Compile-time codegen wraps user types |
-| Security as pluggable drivers | Multiple models (CBS, RBAC, crypto, etc.) |
-| Semantic inversion | Default = yieldable; `sync` marks exception |
-| Progressive lowering | Battle-tested patterns lower into kernel later |
-| AI as ground-line protocol | Natural language between VARIA objects |
+### Process States
+Created → Running → Suspending → Suspended → Checkpointed → {Persisted | Migrating | Hibernated} → Terminated
 
-### DEPRECATED/ABANDONED
-
-| Concept | Reason |
-|---------|--------|
-| VAYRON-without-runtime-changes | Can't achieve goals without runtime integration |
-| Full Engram at runtime level | Moved to VCOM/NewOrleans level |
-| Async+ immediate continuation | Deferred until VCOM exists |
-
-### UNCLEAR/IN FLUX
-
-| Concept | Status |
-|---------|--------|
-| Async+ approach | Original (Roslyn codegen) vs Runtime-Async (Tasklets) |
-| C* language | Exploration deferred until VCOM + VARIA proven |
+### Isolation Model
+- **Logical isolation** via VCOM + type system (not per-process heaps)
+- Processes communicate via VCOM proxies
+- VCOM provides actor model isolation
+- Future: Per-process GC regions
 
 ---
 
-## 7. Implementation Strategy (From Dec 11 Session)
+## 8. The Semantic Inversion: `sync` is the Exception
+
+### Traditional .NET
+```
+Default = Synchronous (blocking)
+Exception = async/await
+```
+
+### DOTNExT Universal Execution
+```
+Default = Yieldable at any safe point
+Exception = sync keyword
+```
+
+### sync Keyword Usage
+```csharp
+// Declaration-site: Method NEVER yields
+sync void CriticalOperation() { ... }
+
+// Call-site: Execute call tree without yields
+var result = sync SomeMethod();
+
+// Block scope
+sync { DoA(); DoB(); DoC(); }
+```
+
+---
+
+## 9. Developer Experience Vision
+
+### What Developers Write
+```csharp
+public class Order
+{
+    public Customer Customer { get; set; }
+    public List<OrderItem> Items { get; set; }
+}
+
+// Usage - completely normal C#
+var order = new Order();
+order.Customer = customer;
+await order.Submit();
+```
+
+### What Happens Under the Hood
+- `new Order()` → UUID generated, grain activated, proxy returned
+- Property set → VCOM state persisted automatically
+- `await order.Submit()` → grain method invocation
+- All Orleans concepts hidden
+
+---
+
+## 10. Complete Document Inventory (Read)
+
+### Most Authoritative (Dec 11, 2025)
+| Document | Purpose |
+|----------|---------|
+| `DOTNExT-VOS-Implementation-Strategy.md` | Runtime=Kernel, dynamic types, security drivers |
+| `BOOTUP.md` | Context recovery, session summaries |
+| `INDEX.md` | Document navigation with tags |
+
+### Core Architecture (Dec 7-10)
+| Document | Purpose |
+|----------|---------|
+| `VAYRON-Architecture-Master.md` | Seminal architecture clarity |
+| `VAYRON-Component-Specs.md` | VObject, VCOM, VNS, VARIA specs |
+| `VAYRON-SDK-Design.md` | SDK structure, templates, VS extension |
+| `VAYRON-Decision-Log.md` | 8 recorded decisions (VDEC-001 to 008) |
+
+### Runtime R&D (Dec 10)
+| Document | Purpose |
+|----------|---------|
+| `DOTNExT-Runtime-RnD-Primer.md` | Self-contained primer for runtime work |
+| `DOTNExT-Process-Model.md` | Process/Pathway abstraction |
+| `DOTNExT-Sync-Semantics.md` | sync keyword specification |
+
+### Vision Documents (Dec 5-6)
+| Document | Purpose |
+|----------|---------|
+| `Vision-Engrams-Cyberspace-Verbatim.md` | Louis's distributed cyberspace vision |
+| `Vision-VAYRON-Platform.md` | Platform definition |
+| `Vision-VAYRON-Verbatim.md` | Original VAYRON vision verbatim |
+| `Vision-VAYRON-DevExperience.md` | Developer experience goals |
+| `Vision-Component-Details.md` | Component layer details |
+| `Vision-DOTNExT-Memory-Architecture.md` | Memory subsystem design |
+| `Vision-Glossary-and-Variants.md` | Terms and design alternatives |
+| `Vision-Async+-Solution.md` | VCOM solution for Async+ continuation |
+
+### Additional
+| Document | Purpose |
+|----------|---------|
+| `DOTNExT-Vision.md` (AI-Contexts) | Early vision (Nov 28) - SUPERSEDED |
+| `Async+.md` (Docs folder) | Roslyn prototype documentation |
+
+---
+
+## 11. Key Decisions Record (From VAYRON-Decision-Log.md)
+
+| ID | Decision | Date |
+|----|----------|------|
+| **VDEC-001** | Build Real Infrastructure First (No PoCs) | Dec 7 |
+| **VDEC-002** | Defer Async+ Continuation until VCOM exists | Dec 7 |
+| **VDEC-003** | NewOrleans is Hidden Infrastructure | Dec 7 |
+| **VDEC-004** | Three-Layer Resolution Model (MAC/IP/DNS) | Dec 7 |
+| **VDEC-005** | Code-as-First-Class, Binaries-as-Cache | Dec 7 |
+| **VDEC-006** | VARIA Uses Roslyn Fork for Transformation | Dec 7 |
+| **VDEC-007** | Persistence: RavenDB + Neo4j/AuraDB | Dec 7 |
+| **VDEC-008** | Single Node Default for Development | Dec 7 |
+
+---
+
+## 12. Implementation Phases
 
 ### Phase 1: Dynamic Types Foundation
-1. Design the "special dynamic types" family
-2. Implement compile-time codegen (Roslyn) to wrap user types
-3. Create driver interfaces for each concern (Security, Persistence, VNS, etc.)
-4. Implement basic drivers (managed-space)
-5. Everything works: managed <-> managed, runtime agnostic
+- Design "special dynamic types" family
+- Implement compile-time codegen (Roslyn)
+- Create driver interfaces (Security, Persistence, VNS)
+- Implement basic managed-space drivers
 
 ### Phase 2: VOS Services on NewOrleans
-1. Implement VNS grain types and resolution
-2. Implement Persistence grain types and Engram management
-3. Implement Security grain types and driver coordination
-4. IDE integration for VNS
+- VNS grain types and resolution
+- Persistence grain types and Engram management
+- Security grain types and driver coordination
+- IDE integration for VNS
 
 ### Phase 3: VARIA Surface
-1. Expose VOS services through VARIA developer surface
-2. Natural C# syntax for all platform virtues
+- Expose VOS services through VARIA developer surface
+- Natural C# syntax for all platform virtues
 
 ### Phase 4: Selective Kernel Lowering
-1. Profile real workloads
-2. Lower specific concerns into runtime when beneficial
+- Profile real workloads
+- Lower specific concerns into runtime when beneficial
 
 ### Phase 5 (Future): Native VARIA
-1. Runtime recognizes VARIA types natively
-2. Platform virtues provided by kernel directly
+- Runtime recognizes VARIA types natively
+- Platform virtues provided by kernel directly
 
 ---
 
-## 8. What NewOrleans Already Implements
+## 13. What's CURRENT vs DEPRECATED vs DEFERRED
 
-| Feature | Status |
+### CURRENT (Active)
+| Concept | Description |
+|---------|-------------|
+| Runtime = VOS Kernel | CLR fork is the kernel |
+| VOS Services in userspace | Built on NewOrleans |
+| Dynamic types as VARIA impl | Compile-time codegen |
+| Security as pluggable drivers | Multiple models supported |
+| Semantic inversion | sync is exception |
+| Process/Pathway model | Execution abstraction |
+| VCOM three-layer resolution | MAC/IP/DNS analogy |
+| Code-as-first-class | Source is primary artifact |
+
+### DEPRECATED/ABANDONED
+| Concept | Reason |
 |---------|--------|
-| Dynamic Grain Loading (MDCP) | ✅ Complete |
-| Grain Type Directory (GTD) | ✅ Complete |
-| Dynamic Grain Client | ✅ Complete |
-| Package Cache System | ✅ Complete |
-| Async+ State Persistence | ✅ Complete |
-| Async+ Continuation | ⏸️ Deferred (needs VCOM) |
+| VAYRON-without-runtime-changes | Can't achieve goals |
+| Full Engram at runtime level | Moved to VCOM level |
+| Complex memory redesign (CMS, MOM, ORION) | Deferred; VCOM solves reference problem |
+
+### DEFERRED (Valid but waiting)
+| Concept | Waiting On |
+|---------|------------|
+| Async+ continuation | VCOM.Resolve() |
+| C* language | VCOM + VARIA proven |
+| Per-process GC regions | Research phase |
+| Native VARIA in runtime | Phase 5 |
 
 ---
 
-## 9. Key Decisions Record
+## 14. Long-Term Vision: Cyberspace
 
-| Decision | Rationale | Date |
-|----------|-----------|------|
-| Runtime = VOS Kernel | Clear framing; progressive lowering target | Dec 11 |
-| VOS services in userspace first | Faster iteration; matches traditional OS design | Dec 11 |
-| Universal dynamic types | One abstraction for all concerns; runtime agnostic | Dec 11 |
-| Security as pluggable drivers | Supports multiple models; configurable | Dec 11 |
-| Defer Async+ continuation | Needs VCOM resolution first | Dec 7 |
+From Vision-Engrams-Cyberspace-Verbatim.md:
 
----
+> Imagine a "cyberspace" where:
+> - Code, execution state, and objects are all persistable and transferable
+> - A node can discover capabilities semantically, load them as "Engrams", execute locally
+> - The network forms an "Internet of Objects" navigable via VNS
+> - AI-Objects collaborate in a Society of Minds
 
-## 10. Reading Order for Context Recovery
-
-For **VOS Implementation** (current focus):
-1. `DOTNExT-VOS-Implementation-Strategy.md` - Comprehensive session record
-2. `BOOTUP.md` - Context recovery with session summaries
-3. `VAYRON-Architecture-Master.md` - Overall platform architecture
-4. `INDEX.md` - Full document navigation
-
-For **Runtime R&D**:
-1. `DOTNExT-Runtime-RnD-Primer.md` - Self-contained primer
-
-For **Async+ Understanding**:
-1. `Docs/Async+/Async+.md` - The prototype implementation
-2. `Vision-Async+-Solution.md` - How VCOM would solve continuation
+**Engram layers** (maps over same territory):
+- Code/Types layer - Type definitions, source
+- Binaries layer - Cached compiled code
+- Execution layer - Tasklets, frames, registers
+- Objects layer - Instance state, references
+- Topology layer - Where in distributed space
 
 ---
 
-## 11. Open Questions (From Latest Session)
+## 15. Open Questions
 
-### High Priority (affects Gen-1 design):
-1. Dynamic types family design - base types, interfaces, generics
-2. Driver interface definitions (Security, Persistence, VNS, Distribution)
-3. Codegen transformation rules
+### High Priority (Gen-1)
+1. Dynamic types family design
+2. Driver interface definitions
+3. Security interception points
 
-### Medium Priority:
-4. Process granularity - one per grain? Per activation group?
-5. Failure propagation - does Pathway failure terminate Process?
-6. VNS anchor point management
+### Medium Priority
+4. Process granularity
+5. Failure propagation
+6. VNS anchor management
 
-### Future:
-7. Kernel lowering criteria and interface
-8. Native VARIA recognition in runtime
+### Research
+7. Unwinder techniques for universal capture
+8. Generics support in Tasklets
+9. Exception handling across Tasklet boundaries
 
 ---
 
-*This document consolidates the vision from all analyzed documents as of December 12, 2025.*
+## 16. Document Reading Order
+
+**For VOS Implementation:**
+1. `DOTNExT-VOS-Implementation-Strategy.md`
+2. `VAYRON-Architecture-Master.md`
+3. `VAYRON-Component-Specs.md`
+
+**For Runtime R&D:**
+1. `DOTNExT-Runtime-RnD-Primer.md` (self-contained)
+
+**For Full Context:**
+1. `BOOTUP.md` → `INDEX.md` → follow curriculum
+
+---
+
+*This document consolidates the vision from 18+ analyzed documents as of December 12, 2025 (Session 2).*
