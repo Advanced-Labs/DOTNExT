@@ -1,0 +1,18 @@
+{
+  "profiles": {
+    "CoreRun Debug": {
+      "commandName": "Executable",
+      "executablePath": "D:\\Dev\\DOTNExT\\src\\runtime\\artifacts\\tests\\coreclr\\windows.x64.Release\\Tests\\Core_Root\\corerun.exe",
+      "commandLineArgs": "$(TargetPath)",
+      "workingDirectory": "$(ProjectDir)",
+      "environmentVariables": {
+        "CORE_ROOT": "D:\\Dev\\DOTNExT\\src\\runtime\\artifacts\\tests\\coreclr\\windows.x64.Release\\Tests\\Core_Root",
+        "DOTNET_ReadyToRun": "0",
+        "VSDebugger_ValidateDotnetDebugLibSignatures": "0"
+      }
+    },
+    "Default (System Runtime)": {
+      "commandName": "Project"
+    }
+  }
+}

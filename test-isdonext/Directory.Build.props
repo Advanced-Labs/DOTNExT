@@ -1,0 +1,11 @@
+<Project>
+  <!-- Prevent inheritance from VMR root Directory.Build.props -->
+  <PropertyGroup>
+    <!-- Skip Arcade SDK import - this is a standalone test project -->
+    <SkipArcadeSdkImport>true</SkipArcadeSdkImport>
+    <!-- Don't use VMR's package restore path -->
+    <RestorePackagesPath></RestorePackagesPath>
+    <!-- Point to our custom targeting pack -->
+    <NetCoreTargetingPackRoot>D:\Dev\DOTNExT\src\sdk\artifacts\bin\redist\Release\dotnet\packs</NetCoreTargetingPackRoot>
+  </PropertyGroup>
+</Project>
