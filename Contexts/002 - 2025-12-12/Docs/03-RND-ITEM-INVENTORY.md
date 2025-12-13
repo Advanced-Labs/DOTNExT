@@ -50,11 +50,20 @@
 │  .NET Runtime     │  Runtime B        │  Runtime C ...              │
 │  (first support)  │  (future)         │  (future)                   │
 ├───────────────────┴───────────────────┴─────────────────────────────┤
-│  Bare Metal OS Layer                                                 │
-│  Linux (Gen 1) | Others (future)                                     │
+│  Host OS Layer (Multi-OS from start)                                 │
+│  Windows (tested first - hardest) | Linux | macOS | Others           │
 ├─────────────────────────────────────────────────────────────────────┤
 │  Hardware / Architectures                                            │
 │  (Multiple supported)                                                │
+└─────────────────────────────────────────────────────────────────────┘
+
+Future: Bare-Metal Variant
+┌─────────────────────────────────────────────────────────────────────┐
+│  VOS (same as above)                                                 │
+├─────────────────────────────────────────────────────────────────────┤
+│  Linux-based foundation (distro with possible in-kernel integration) │
+├─────────────────────────────────────────────────────────────────────┤
+│  Hardware                                                            │
 └─────────────────────────────────────────────────────────────────────┘
 ```
 
@@ -63,9 +72,9 @@
 | Commitment | Description | Status |
 |------------|-------------|--------|
 | Multi-Runtime Support | VOS Kernel will support multiple runtimes, not just .NET | **CANON** |
-| Multi-OS Foundation | VOS runs over multiple bare-metal OSes (Linux first) | **CANON** |
+| Multi-OS from Start | VOS runs over multiple host OSes; Windows tested first (hardest: non-POSIX, closed) | **CANON** |
 | Multi-Architecture | Multiple hardware architectures supported | **CANON** |
-| Bare-Metal Path | Eventually gets own bare-metal foundation | **CANON** |
+| Bare-Metal Path (Future) | Eventually a bare-metal variant: Linux-based distro with possible in-kernel integrations | **CANON** |
 | Multiple Programmability Layers | Lower-level and higher-level programming | **CANON** |
 | New Languages | Starting with C= | **CANON** |
 
@@ -345,7 +354,7 @@ Example layers (illustrative, not prescriptive):
 | ID | Item | Why Canon |
 |----|------|-----------|
 | - | Multi-Runtime Support | VOS Kernel supports multiple runtimes |
-| - | Multi-OS Foundation | Runs over multiple bare-metal OSes |
+| - | Multi-OS from Start | Runs over multiple host OSes (Windows tested first - hardest) |
 | - | Multi-Architecture | Multiple hardware architectures |
 | - | Bare-Metal Path | Eventually gets own foundation |
 | - | New Languages (C=) | Starting with C= |
@@ -446,3 +455,4 @@ Example layers (illustrative, not prescriptive):
 
 *This document is a working draft. Revised 2025-12-13 after Louis review.*
 *Key changes: Added multi-runtime/multi-OS canon, reframed Engram as concept, added C= tree, marked VCOM exploratory, marked CMS/MOM/ORION placeholder, removed RavenDB/Neo4j as platform components.*
+*Clarification: Multi-OS means VOS runs over multiple host OSes from the start (Windows tested first as hardest). Bare-metal variant (Linux distro with in-kernel integrations) is a future path.*
