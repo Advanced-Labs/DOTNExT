@@ -106,15 +106,15 @@ Enable capturing complete execution state at any safe point, not just async awai
 
 ### 2.2 R&D Items
 
-| ID | Item | .NET 9 Status | Delta Required | Effort |
-|----|------|---------------|----------------|--------|
-| **A-001** | Unified Safe Points | Partial | Extend GC safe points for preemption + checkpoint | 2-3 months |
-| **A-002** | Unwinder Frame Capture | Experimental | Port/adapt from runtimelab `async2-experiment` | 3-6 months |
-| **A-003** | Tasklet/Frame Structure | Experimental | Adapt or design custom structure | 2-3 months |
-| **A-004** | Generics Support in Frame Capture | Missing | Implement (engineering gap) | 3-4 months |
-| **A-005** | Exception Handling Across Frames | Missing | Implement hybrid EH walker | 4-6 months |
-| **A-006** | Byref Preservation | In Unwinder | Verify/adapt for DOTNExT | 1-2 months |
-| **A-007** | Frame Restoration | In Unwinder | Verify/adapt for DOTNExT | 1-2 months |
+| ID | Item | .NET 9 Status | Delta Required |
+|----|------|---------------|----------------|
+| **A-001** | Unified Safe Points | Partial | Extend GC safe points for preemption + checkpoint |
+| **A-002** | Unwinder Frame Capture | Experimental | Port/adapt from runtimelab `async2-experiment` |
+| **A-003** | Tasklet/Frame Structure | Experimental | Adapt or design custom structure |
+| **A-004** | Generics Support in Frame Capture | Missing | Implement (engineering gap) |
+| **A-005** | Exception Handling Across Frames | Missing | Implement hybrid EH walker |
+| **A-006** | Byref Preservation | In Unwinder | Verify/adapt for DOTNExT |
+| **A-007** | Frame Restoration | In Unwinder | Verify/adapt for DOTNExT |
 
 ### 2.3 .NET 9 Baseline
 
@@ -195,16 +195,16 @@ Engrams are bounded extractions from a larger computation graph - portable units
 
 ### 3.2 R&D Items
 
-| ID | Item | .NET 9 Status | Delta Required | Effort |
-|----|------|---------------|----------------|--------|
-| **B-001** | Engram Extraction (Objects) | Missing | GC-powered object graph traversal | 2-3 months |
-| **B-002** | Engram Extraction (Execution) | Missing | Frame capture integration | 2-3 months |
-| **B-003** | Engram Serialization Format | Missing | Design portable format | 1-2 months |
-| **B-004** | Engram Boundary Definition | Missing | API for specifying boundaries | 1-2 months |
-| **B-005** | Engram Hydration (Objects) | Missing | Graph reconstruction with address translation | 2-3 months |
-| **B-006** | Engram Hydration (Execution) | Missing | Frame restoration and resume | 2-3 months |
-| **B-007** | Cross-Node Engram Protocol | Missing | Transfer protocol design | 2-3 months |
-| **B-008** | Engram Versioning | Missing | Type version handling | 2-3 months |
+| ID | Item | .NET 9 Status | Delta Required |
+|----|------|---------------|----------------|
+| **B-001** | Engram Extraction (Objects) | Missing | GC-powered object graph traversal |
+| **B-002** | Engram Extraction (Execution) | Missing | Frame capture integration |
+| **B-003** | Engram Serialization Format | Missing | Design portable format |
+| **B-004** | Engram Boundary Definition | Missing | API for specifying boundaries |
+| **B-005** | Engram Hydration (Objects) | Missing | Graph reconstruction with address translation |
+| **B-006** | Engram Hydration (Execution) | Missing | Frame restoration and resume |
+| **B-007** | Cross-Node Engram Protocol | Missing | Transfer protocol design |
+| **B-008** | Engram Versioning | Missing | Type version handling |
 
 ### 3.3 .NET 9 Baseline
 
@@ -297,17 +297,17 @@ A new execution model where:
 
 ### 4.2 R&D Items
 
-| ID | Item | .NET 9 Status | Delta Required | Effort |
-|----|------|---------------|----------------|--------|
-| **C-001** | Process Identity System | Missing | UUID, name, capabilities | 2-3 months |
-| **C-002** | Pathway Identity System | Missing | UUID, state, scheduling info | 2-3 months |
-| **C-003** | sync Keyword (JIT) | Missing | JIT recognizes sync, no yield points | 3-4 months |
-| **C-004** | Reduction Counting | Missing | JIT emits decrement at safe points | 2-3 months |
-| **C-005** | Process Image Capture | Missing | Full state serialization | 3-4 months |
-| **C-006** | Process Image Restore | Missing | State reconstruction and resume | 3-4 months |
-| **C-007** | Pathway Scheduler | Missing | Custom scheduler with queues | 4-6 months |
-| **C-008** | Process State Machine | Missing | Created→Running→Suspended→etc. | 2-3 months |
-| **C-009** | Pathway Supervision | Missing | Fault handling, restart strategies | 3-4 months |
+| ID | Item | .NET 9 Status | Delta Required |
+|----|------|---------------|----------------|
+| **C-001** | Process Identity System | Missing | UUID, name, capabilities |
+| **C-002** | Pathway Identity System | Missing | UUID, state, scheduling info |
+| **C-003** | sync Keyword (JIT) | Missing | JIT recognizes sync, no yield points |
+| **C-004** | Reduction Counting | Missing | JIT emits decrement at safe points |
+| **C-005** | Process Image Capture | Missing | Full state serialization |
+| **C-006** | Process Image Restore | Missing | State reconstruction and resume |
+| **C-007** | Pathway Scheduler | Missing | Custom scheduler with queues |
+| **C-008** | Process State Machine | Missing | Created→Running→Suspended→etc. |
+| **C-009** | Pathway Supervision | Missing | Fault handling, restart strategies |
 
 ### 4.3 .NET 9 Baseline
 
@@ -383,15 +383,15 @@ Security is a pluggable driver system with interception points throughout the ru
 
 ### 5.2 R&D Items
 
-| ID | Item | .NET 9 Status | Delta Required | Effort |
-|----|------|---------------|----------------|--------|
-| **D-001** | Security Interception Points | Partial (CAS removed) | Define hook architecture | 2-3 months |
-| **D-002** | Security Driver Interface | Missing | Pluggable driver contract | 1-2 months |
-| **D-003** | Compile-time Hooks | Missing | Roslyn emits security markers | 2-3 months |
-| **D-004** | JIT-time Hooks | Missing | Security preamble insertion | 2-3 months |
-| **D-005** | VTable Interception | Missing | Security wrapper for dispatch | 2-3 months |
-| **D-006** | Capability Model | Missing | Process/Pathway capabilities | 3-4 months |
-| **D-007** | Logical Isolation (VCOM) | Partial | Actor-model enforcement | 2-3 months |
+| ID | Item | .NET 9 Status | Delta Required |
+|----|------|---------------|----------------|
+| **D-001** | Security Interception Points | Partial (CAS removed) | Define hook architecture |
+| **D-002** | Security Driver Interface | Missing | Pluggable driver contract |
+| **D-003** | Compile-time Hooks | Missing | Roslyn emits security markers |
+| **D-004** | JIT-time Hooks | Missing | Security preamble insertion |
+| **D-005** | VTable Interception | Missing | Security wrapper for dispatch |
+| **D-006** | Capability Model | Missing | Process/Pathway capabilities |
+| **D-007** | Logical Isolation (VCOM) | Partial | Actor-model enforcement |
 
 ### 5.3 .NET 9 Baseline
 
@@ -441,15 +441,15 @@ Extend the memory system to support Engram concepts:
 
 ### 6.2 R&D Items
 
-| ID | Item | .NET 9 Status | Delta Required | Effort |
-|----|------|---------------|----------------|--------|
-| **E-001** | UUID Assignment (Lazy) | Missing | Side table, assigned on demand | 2-3 months |
-| **E-002** | UUID Lookup | Missing | Object → UUID resolution | 1-2 months |
-| **E-003** | Relationship Recording | Missing | Reference write interception | 3-4 months |
-| **E-004** | Type Engram Flags | Missing | MethodTable extension or attribute | 2-3 months |
-| **E-005** | JIT Helper: Field Assign | Missing | Relationship recording on write | 2-3 months |
-| **E-006** | JIT Helper: Object Create | Missing | UUID assignment hook | 2-3 months |
-| **E-007** | VM Intrinsics | Missing | System.Runtime.Engram namespace | 2-3 months |
+| ID | Item | .NET 9 Status | Delta Required |
+|----|------|---------------|----------------|
+| **E-001** | UUID Assignment (Lazy) | Missing | Side table, assigned on demand |
+| **E-002** | UUID Lookup | Missing | Object → UUID resolution |
+| **E-003** | Relationship Recording | Missing | Reference write interception |
+| **E-004** | Type Engram Flags | Missing | MethodTable extension or attribute |
+| **E-005** | JIT Helper: Field Assign | Missing | Relationship recording on write |
+| **E-006** | JIT Helper: Object Create | Missing | UUID assignment hook |
+| **E-007** | VM Intrinsics | Missing | System.Runtime.Engram namespace |
 
 ### 6.3 .NET 9 Baseline
 
@@ -509,13 +509,13 @@ Extend the memory system to support Engram concepts:
 
 ### 7.2 Key Extension Points
 
-| Extension Point | Location | Effort | Use Case |
-|-----------------|----------|--------|----------|
-| **Profiler API** | `src/coreclr/inc/corprof.idl` | 2-6 months | Hook object creation, observe GC, IL rewriting |
-| **GC Interface** | `src/coreclr/gc/gcinterface.h` | 6-12 months | Leverage reference tracking, add handle types |
-| **Type System** | `src/coreclr/vm/class.cpp` | Months | Extend MethodTable for UUID, add flags |
-| **JIT Helpers** | `src/coreclr/inc/jithelpers.h` | Days | Add ENGRAM_FIELD_ASSIGN, ENGRAM_NEW |
-| **VM Intrinsics** | `src/coreclr/vm/ecalllist.h` | Weeks | System.Runtime.CompilerServices.Engram |
+| Extension Point | Location | Use Case |
+|-----------------|----------|----------|
+| **Profiler API** | `src/coreclr/inc/corprof.idl` | Hook object creation, observe GC, IL rewriting |
+| **GC Interface** | `src/coreclr/gc/gcinterface.h` | Leverage reference tracking, add handle types |
+| **Type System** | `src/coreclr/vm/class.cpp` | Extend MethodTable for UUID, add flags |
+| **JIT Helpers** | `src/coreclr/inc/jithelpers.h` | Add ENGRAM_FIELD_ASSIGN, ENGRAM_NEW |
+| **VM Intrinsics** | `src/coreclr/vm/ecalllist.h` | System.Runtime.CompilerServices.Engram |
 
 ### 7.3 What Can Be Reused vs Must Be Built
 
@@ -600,7 +600,7 @@ From `dotnet/runtimelab` branch `feature/async2-experiment`:
 
 ## 9. Implementation Phases
 
-### Phase 1: Safe Points Foundation (3-4 months)
+### Phase 1: Safe Points Foundation
 
 | Item | Description |
 |------|-------------|
@@ -611,7 +611,7 @@ From `dotnet/runtimelab` branch `feature/async2-experiment`:
 
 **Deliverable:** Runtime with unified safe points and frame capture prototype
 
-### Phase 2: Execution Capture (4-6 months)
+### Phase 2: Execution Capture
 
 | Item | Description |
 |------|-------------|
@@ -622,7 +622,7 @@ From `dotnet/runtimelab` branch `feature/async2-experiment`:
 
 **Deliverable:** Working execution state capture and identity systems
 
-### Phase 3: Engram Infrastructure (4-6 months)
+### Phase 3: Engram Infrastructure
 
 | Item | Description |
 |------|-------------|
@@ -633,7 +633,7 @@ From `dotnet/runtimelab` branch `feature/async2-experiment`:
 
 **Deliverable:** Working Engram extraction/hydration
 
-### Phase 4: Process Model (4-6 months)
+### Phase 4: Process Model
 
 | Item | Description |
 |------|-------------|
@@ -645,7 +645,7 @@ From `dotnet/runtimelab` branch `feature/async2-experiment`:
 
 **Deliverable:** BEAM-like execution model working
 
-### Phase 5: Engineering Gaps & Polish (4-6 months)
+### Phase 5: Engineering Gaps & Polish
 
 | Item | Description |
 |------|-------------|
@@ -657,9 +657,7 @@ From `dotnet/runtimelab` branch `feature/async2-experiment`:
 
 **Deliverable:** Production-quality runtime features
 
-### Total Estimated Timeline: 18-28 months
-
-This is R&D timeline; production hardening adds more.
+*Note: No time estimates provided - work with AI assistance makes traditional time estimates unreliable.*
 
 ---
 
@@ -705,15 +703,13 @@ This is R&D timeline; production hardening adds more.
 
 ### By Cluster
 
-| Cluster | Items | Total Effort | Status |
-|---------|-------|--------------|--------|
-| A: Universal Execution Capture | 7 | 15-23 months | Foundation |
-| B: Engram Infrastructure | 8 | 15-22 months | Core Feature |
-| C: Process/Pathway Model | 9 | 24-34 months | Core Feature |
-| D: Security & Isolation | 7 | 14-20 months | Required for Gen-1 hooks |
-| E: Memory Extensions | 7 | 14-19 months | Supporting Infrastructure |
-
-*Note: Efforts overlap due to parallel work and shared dependencies.*
+| Cluster | Items | Status |
+|---------|-------|--------|
+| A: Universal Execution Capture | 7 | Foundation |
+| B: Engram Infrastructure | 8 | Core Feature |
+| C: Process/Pathway Model | 9 | Core Feature |
+| D: Security & Isolation | 7 | Required for Gen-1 hooks |
+| E: Memory Extensions | 7 | Supporting Infrastructure |
 
 ### By Priority
 
