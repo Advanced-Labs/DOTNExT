@@ -2,8 +2,8 @@
 
 > **Document Type:** Vision Reconsolidation
 > **Created:** 2025-12-12
-> **Last Updated:** 2025-12-12 (Session 5 - Complete Document Read + Augmentation)
-> **Based On:** Comprehensive analysis of ALL 52 documents in Analysis folder
+> **Last Updated:** 2025-12-15 (Session 7 - VCR Components Integration: VEE, VTS, Memantic Metadata, VCOM)
+> **Based On:** Comprehensive analysis of ALL 52 documents in Analysis folder + Louis's clarifications
 > **Purpose:** Single source of truth for the current vision WITH reasoning chains
 
 ---
@@ -235,12 +235,20 @@
 | **DOTNExT** | Codename for forked .NET 9 VMR (runtime, Roslyn, SDK) - the VOS Kernel | ACTIVE |
 | **VAYRON** | Codename for the complete platform stack | ACTIVE |
 | **VOS** | Virtual Operating System - the overall architectural framing | CURRENT |
+| **VCR** | Virtual Core Runtime - the kernel containing VEE, MMS, and CLR core | DESIGN |
+| **VEE** | Virtual Execution Engine - Unwinder-derived execution control system | DESIGN |
+| **VTS** | Virtual Type System - Universal semantic-oriented meta type system | DESIGN |
+| **MMS** | Memantic Memory System (codename: ORION) - Graph-oriented memory management | DESIGN |
+| **VSS** | Virtual Security System - Pluggable security driver system | DESIGN |
+| **Memantic Metadata** | Universal metadata fabric (UUID, relations, semantic embeddings, etc.) | DESIGN |
+| **Memantic Object** | Object with Memantic Metadata - first-class platform citizen | DESIGN |
 | **NewOrleans** | Fork of Microsoft Orleans with dynamic grain loading, GTD | ACTIVE |
-| **VCOM** | VAYRON Component-Object Model - the object model layer | ACTIVE |
+| **VCOM** | Virtual Component-Object Model - Wraps other COMs, Memantic-native | EXPLORATORY |
 | **VARIA** | Types/objects with platform virtues (concept, not implementation) | ACTIVE |
 | **VNS** | Virtual/VAYRON Name System - "DNS for Objects" | ACTIVE |
 | **VObject** | Base type for all VCOM objects (UUID, VType, Relations) | DESIGN |
-| **Async+** | Roslyn-based async state machine persistence | DEFERRED |
+| **Async+** | Roslyn-based async state machine persistence | DEPRECATED |
+| **Unwinder** | Stack frame capture technique (source for VEE) | RESEARCH |
 | **Engram** | Bounded extraction from object graph (layers model) | REPOSITIONED |
 | **VAYRON Kernel** | Grain types providing kernel services | ACTIVE |
 | **Process** | Isolation boundary with identity; contains Pathways | DESIGN |
@@ -248,9 +256,11 @@
 | **Tasklet** | Captured stack frame (method token, IP, locals) | RESEARCH |
 | **GTD** | Grain Type Directory - cluster-wide grain type registry | IMPLEMENTED |
 
+**Note on Async+:** The Roslyn experiment is **not part of the vision**. However, the **Unwinder/Async2 approach** (runtime-level stack capture) IS foundational for VEE.
+
 ---
 
-## 4. Architecture Stack (Dec 11, 2025)
+## 4. Architecture Stack (Dec 15, 2025 - Updated)
 
 ```
 ┌─────────────────────────────────────────────────────────────────────┐
@@ -259,12 +269,13 @@
 │  - Write regular C# (no grains/silos visible)                       │
 │  - Objects automatically persist                                    │
 │  - Full IntelliSense for dynamic/distributed types                  │
+│  - Code against VNS dynamically with IDE support                    │
 ├─────────────────────────────────────────────────────────────────────┤
 │                                                                     │
 │  VOS Services Layer ("Userspace")                                   │
 │  ├── VNS (naming, discovery, resolution)                            │
 │  ├── Persistence Services (RavenDB, Neo4j/AuraDB)                   │
-│  ├── Security Services (pluggable CBS/RBAC/crypto drivers)          │
+│  ├── VSS - Security Services (pluggable CBS/RBAC/crypto drivers)    │
 │  ├── Distribution/Orchestration                                     │
 │  └── VCOM Resolution (UUID → live object)                           │
 │                                                                     │
@@ -281,14 +292,40 @@
 │  ├── GTD (Grain Type Directory)                                     │
 │  └── Dynamic Grain Access (DLR-based)                               │
 ├─────────────────────────────────────────────────────────────────────┤
-│  DOTNExT Runtime (CLR fork) ─────────── VOS KERNEL                  │
-│  GC, JIT, type system, execution primitives                         │
-│  "Lowered into the kernel" means changes here                       │
-│  - Unified safe points (GC/preemption/checkpoint)                   │
-│  - Unwinder techniques for universal capture                        │
-│  - Semantic inversion (sync is exception)                           │
+│  VCR (Virtual Core Runtime) ─────────── VOS KERNEL                  │
+│  ┌───────────────────────────────────────────────────────────────┐  │
+│  │  VEE (Virtual Execution Engine) ◄── Unwinder-derived          │  │
+│  │  - Execution control & scheduling (reduction-based)           │  │
+│  │  - State capture at any safe point                            │  │
+│  │  - Preemption management                                      │  │
+│  │  - Checkpoint coordination                                    │  │
+│  ├───────────────────────────────────────────────────────────────┤  │
+│  │  VTS (Virtual Type System)                                    │  │
+│  │  - Universal meta type system                                 │  │
+│  │  - Multi-runtime type mapping                                 │  │
+│  │  - Semantic-oriented (embeddings)                             │  │
+│  ├───────────────────────────────────────────────────────────────┤  │
+│  │  MMS (Memantic Memory System) - codename: ORION               │  │
+│  │  - Object identity and relations                              │  │
+│  │  - Memantic Metadata management                               │  │
+│  │  - Graph-oriented storage integration                         │  │
+│  ├───────────────────────────────────────────────────────────────┤  │
+│  │  CLR Core (GC, JIT, Type System)                              │  │
+│  │  - Memory management                                          │  │
+│  │  - Compilation (Unified safe points)                          │  │
+│  │  - Type resolution                                            │  │
+│  └───────────────────────────────────────────────────────────────┘  │
 └─────────────────────────────────────────────────────────────────────┘
 ```
+
+### 4.1 VCR Component Details
+
+| Component | Purpose | Key Insight | See Document |
+|-----------|---------|-------------|--------------|
+| **VEE** | Execution control | Unwinder techniques enable BEAM-like preemption | WIP-04-VIRTUAL-EXECUTION-ENGINE.md |
+| **VTS** | Type universality | Memantic-native typing, multi-runtime | WIP-05-VIRTUAL-TYPE-SYSTEM.md |
+| **MMS** | Memory + identity | Objects WITH Memantic Metadata are Engrams | WIP-01-MEMANTICS-MEMORY-SYSTEM.md |
+| **Memantic Metadata** | Universal fabric | Pervades memory, wire, storage, VNS, VSS | WIP-06-MEMANTIC-METADATA.md |
 
 ---
 
@@ -1042,12 +1079,21 @@ await order.Submit();
 | Everything-must-be-VCOM | GC tracks graph; VCOM is enhancement, not requirement |
 | Singularity-style SIPs (Software Isolated Processes) | DOTNExT is hosted runtime, not bare-metal OS |
 
+### DEPRECATED (No longer part of vision)
+| Concept | Reason |
+|---------|--------|
+| **Async+ (Roslyn experiment)** | Replaced by VEE/Unwinder approach. The Roslyn state machine persistence experiment is NOT the path - but Unwinder/Async2 capabilities ARE foundational for VEE. |
+
 ### DEFERRED (Valid but waiting on prerequisites)
 | Concept | Waiting On |
 |---------|------------|
-| Async+ continuation | VCOM.Resolve() must exist first |
 | C= language | VCOM + VARIA patterns proven in C# first |
 | Native VARIA in runtime | Phase 5 - after managed-space VARIA proven |
+
+### EXPLORATORY (Necessary but form unclear)
+| Concept | Status | Notes |
+|---------|--------|-------|
+| **VCOM** | EXPLORATORY | Virtual COM that wraps other COMs, distribution binaries, potentially package systems. Closely related to VTS, VNS, Memantics. See WIP-07-VCOM-CLARIFICATION.md |
 
 ### LATER PHASE: Runtime-Level R&D (NOT Abandoned)
 
@@ -1705,10 +1751,36 @@ A 40-point questionnaire exists to test understanding at 4 levels:
 
 ---
 
-*This document consolidates the vision from ALL 52 analyzed documents. Updated December 12, 2025 (Session 6) with:*
+## Appendix F: WIP Documents Index (December 2025)
+
+These Work In Progress documents capture detailed design for specific platform components:
+
+| Document | Component | Status |
+|----------|-----------|--------|
+| **WIP-01-MEMANTICS-MEMORY-SYSTEM.md** | MMS (ORION) | Initial design |
+| **WIP-02-RUNTIME-MUTABILITY-PARADIGMS.md** | Mutability patterns | Conceptual |
+| **WIP-03-MULTI-RUNTIME-KERNEL-ARCHITECTURE.md** | Multi-runtime VCR | Research |
+| **WIP-04-VIRTUAL-EXECUTION-ENGINE.md** | VEE (Unwinder-derived) | Initial design |
+| **WIP-05-VIRTUAL-TYPE-SYSTEM.md** | VTS | Initial design |
+| **WIP-06-MEMANTIC-METADATA.md** | Universal fabric | Conceptual |
+| **WIP-07-VCOM-CLARIFICATION.md** | VCOM | Exploratory |
+
+**Reading Order for VCR Understanding:**
+1. WIP-06 (Memantic Metadata) - The foundation
+2. WIP-05 (VTS) - Type system built on Memantic
+3. WIP-04 (VEE) - Execution engine
+4. WIP-01 (MMS) - Memory system
+5. WIP-07 (VCOM) - Component model
+
+---
+
+*This document consolidates the vision from ALL 52 analyzed documents. Updated December 15, 2025 (Session 7) with:*
 - *Session 4: WHY chains, VDEC rationale, Engram model, Process Image Persistence, VCOM specs*
 - *Session 5: Runtime modularity assessment, Extension points for Engram, Memory subsystems*
 - *Session 5: VS integration patterns, Nitra research, Understanding questionnaire reference*
 - *Session 6: CMS/MOM/ORION triad explanation, MOM acronym clarification*
 - *Session 6: Graph-native design section, MAC/IP/DNS analogy disclaimer*
-- *Complete document inventory: 52 documents read and analyzed*
+- *Session 7: VCR architecture (VEE, VTS, MMS, VSS), Memantic Metadata concept*
+- *Session 7: Async+ deprecated (Unwinder is the path), VCOM clarification (exploratory)*
+- *Session 7: Updated terminology, architecture stack, WIP index*
+- *Complete document inventory: 52+ documents read and analyzed*
