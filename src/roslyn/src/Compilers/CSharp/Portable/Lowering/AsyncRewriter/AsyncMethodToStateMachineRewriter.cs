@@ -62,7 +62,14 @@ namespace Microsoft.CodeAnalysis.CSharp
 
         private readonly Dictionary<BoundValuePlaceholderBase, BoundExpression> _placeholderMap;
 
-        #region DOTNExT Persistence Support
+#if ASYNC_PLUS
+        #region DOTNExT Persistence Support (Async+)
+        // ============================================================================
+        // DOTNExT Async+ Feature - Automatic Async State Machine Persistence
+        // This code is only compiled when ASYNC_PLUS symbol is defined.
+        // Without ASYNC_PLUS, this file compiles identically to original Roslyn.
+        // ============================================================================
+
         /// <summary>
         /// Local variable to cache the persistence service reference during MoveNext execution.
         /// </summary>
@@ -159,6 +166,7 @@ namespace Microsoft.CodeAnalysis.CSharp
             Log(instructions);
         }
         #endregion
+#endif
 
         internal AsyncMethodToStateMachineRewriter(
             MethodSymbol method,
@@ -193,7 +201,8 @@ namespace Microsoft.CodeAnalysis.CSharp
 
             _placeholderMap = new Dictionary<BoundValuePlaceholderBase, BoundExpression>();
 
-            // DOTNExT: Check for [Persistable] attribute on the method
+#if ASYNC_PLUS
+            // DOTNExT Async+: Check for [Persistable] attribute on the method
             _enablePersistence = method.GetAttributes().Any(a =>
                 a.AttributeClass?.Name == "PersistableAttribute" ||
                 a.AttributeClass?.ToDisplayString() == "DOTNExT.Persistence.PersistableAttribute");
@@ -250,6 +259,7 @@ namespace Microsoft.CodeAnalysis.CSharp
                     Log($"[DOTNExT-Roslyn] SUCCESS: Persistence injection will be enabled for {_persistenceMethodId}");
                 }
             }
+#endif
         }
 
 #nullable disable
@@ -291,13 +301,15 @@ namespace Microsoft.CodeAnalysis.CSharp
         {
             F.CurrentFunction = moveNextMethod;
 
-            // DOTNExT: Initialize persistence service local BEFORE processing the body
+#if ASYNC_PLUS
+            // DOTNExT Async+: Initialize persistence service local BEFORE processing the body
             // This is needed because VisitBody processes await expressions, which need
             // _persistenceServiceLocal to be set for checkpoint injection
             if (_enablePersistence)
             {
                 InitializePersistenceServiceLocal();
             }
+#endif
 
             BoundStatement rewrittenBody = VisitBody(body);
 
@@ -310,11 +322,13 @@ namespace Microsoft.CodeAnalysis.CSharp
             bodyBuilder.Add(F.Assignment(F.Local(cachedState), F.Field(F.This(), stateField)));
             bodyBuilder.Add(CacheThisIfNeeded());
 
-            // DOTNExT: Add persistence restoration check for [Persistable] methods
+#if ASYNC_PLUS
+            // DOTNExT Async+: Add persistence restoration check for [Persistable] methods
             if (_enablePersistence)
             {
                 bodyBuilder.Add(GeneratePersistenceRestorationCheck());
             }
+#endif
 
             var exceptionLocal = F.SynthesizedLocal(F.WellKnownType(WellKnownType.System_Exception));
             bodyBuilder.Add(
@@ -361,8 +375,10 @@ namespace Microsoft.CodeAnalysis.CSharp
             locals.Add(cachedState);
             if ((object)cachedThis != null) locals.Add(cachedThis);
             if ((object)_exprRetValue != null) locals.Add(_exprRetValue);
-            // DOTNExT: Add persistence service local
+#if ASYNC_PLUS
+            // DOTNExT Async+: Add persistence service local
             if (_persistenceServiceLocal != null) locals.Add(_persistenceServiceLocal);
+#endif
 
             var newBody =
                 F.SequencePoint(
@@ -646,7 +662,8 @@ namespace Microsoft.CodeAnalysis.CSharp
                         ? F.Local(awaiterTemp)
                         : F.Convert(awaiterFieldType, F.Local(awaiterTemp))));
 
-            // DOTNExT: Add checkpoint call before suspension for [Persistable] methods
+#if ASYNC_PLUS
+            // DOTNExT Async+: Add checkpoint call before suspension for [Persistable] methods
             // Only if persistence types were resolved (persistenceServiceLocal was created)
             if (_enablePersistence && _persistenceServiceLocal is not null)
             {
@@ -657,6 +674,7 @@ namespace Microsoft.CodeAnalysis.CSharp
             {
                 Log($"[DOTNExT-Roslyn] GenerateAwaitForIncompleteTask: SKIPPING checkpoint - _persistenceServiceLocal is null!");
             }
+#endif
 
             blockBuilder.Add(awaiterTemp.Type.IsDynamic()
                 ? GenerateAwaitOnCompletedDynamic(awaiterTemp)
@@ -838,7 +856,8 @@ namespace Microsoft.CodeAnalysis.CSharp
         }
         #endregion Visitors
 
-        #region DOTNExT Persistence Methods
+#if ASYNC_PLUS
+        #region DOTNExT Persistence Methods (Async+)
         /// <summary>
         /// Initializes the persistence service local variable early, before body processing.
         /// This must be called before VisitBody so that await expression processing can use
@@ -1199,6 +1218,7 @@ namespace Microsoft.CodeAnalysis.CSharp
                 .OfType<MethodSymbol>()
                 .FirstOrDefault();
         }
-        #endregion DOTNExT Persistence Methods
+        #endregion DOTNExT Persistence Methods (Async+)
+#endif
     }
 }
