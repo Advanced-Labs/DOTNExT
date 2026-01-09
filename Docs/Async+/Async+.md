@@ -1,7 +1,30 @@
 # Async+ : Automatic Async State Machine Persistence
 
-**Version**: 1.0 (December 2025)
+**Version**: 1.1 (January 2026)
 **Status**: Proof of Concept - 7 of 9 core scenarios verified
+
+---
+
+## Conditional Compilation
+
+**IMPORTANT**: The Async+ Roslyn modifications are guarded by the `ASYNC_PLUS` conditional compilation symbol.
+
+| Build Mode | Symbol Defined | Behavior |
+|------------|----------------|----------|
+| **Standard** | No | Identical to original Roslyn - no Async+ code compiled |
+| **Async+ Enabled** | Yes (`ASYNC_PLUS`) | Full persistence codegen for `[Persistable]` methods |
+
+### To Enable Async+
+
+Add `ASYNC_PLUS` to the compiler's DefineConstants when building Roslyn:
+
+```xml
+<DefineConstants>$(DefineConstants);ASYNC_PLUS</DefineConstants>
+```
+
+### To Disable Async+ (Standard Codegen)
+
+Simply build Roslyn without defining `ASYNC_PLUS`. The compiler will be identical to upstream Roslyn.
 
 ---
 
