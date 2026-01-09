@@ -1,8 +1,54 @@
-# Stateful Grain Auto-Persistence Feature
+# Varia Grain: Auto-Persistence + Auto-Interface Feature
 
 ## Overview
 
-This document proposes a new feature for NewOrleans that enables **automatic persistence of all grain instance members** without requiring explicit state class declaration. Developers can opt-in via a base class (`StatefulGrain`) or attribute (`[Stateful]`), and Orleans will automatically persist and restore all "persistable" members on activation/deactivation.
+This document proposes **Varia**, a new grain paradigm for NewOrleans that combines:
+
+1. **Auto-persistence**: All grain fields/properties automatically persisted without separate state classes
+2. **Auto-interface generation**: Public methods auto-generate grain interface (no manual `IMyGrain` needed)
+3. **Auto-dirty tracking**: Persistence triggered automatically after mutations
+
+Developers opt-in via base class (`Varia`) or attribute (`[Auto]`), and Orleans handles all the ceremony.
+
+```csharp
+// THE DREAM: This is ALL the developer writes
+[Auto]
+public partial class PlayerGrain : Varia
+{
+    private int score;
+    private string name;
+    private List<string> achievements = new();
+
+    public void AddScore(int points) => score += points;
+    public int GetScore() => score;
+    public void UnlockAchievement(string name) => achievements.Add(name);
+}
+
+// Source generator produces:
+// - IPlayerGrain interface with AddScore, GetScore, UnlockAchievement
+// - State class with score, name, achievements
+// - Lifecycle hooks for load/save
+// - Auto-save after each public method (configurable)
+```
+
+---
+
+## Clarification: Codegen + Dynamic Grain Loading
+
+**There is NO conflict** between source generators and dynamic grain loading:
+
+| Phase | What Happens |
+|-------|--------------|
+| **Compile time** (of plugin assembly) | Source generator runs, emits `__Generated.g.cs` |
+| **Assembly output** | Contains grain class + all generated code |
+| **Runtime dynamic load** | `PluginGrainLoaderService.LoadGrainAssemblyAsync()` loads assembly with generated code already inside |
+| **Grain activation** | Normal Orleans activation - generated lifecycle hooks execute |
+
+The generated code travels with the assembly. Runtime reflection is only a fallback for:
+- Legacy assemblies compiled without the generator
+- Grains explicitly opting out of codegen
+
+---
 
 ---
 
@@ -60,37 +106,436 @@ public class MyGrain : Grain, IMyGrain
 
 ---
 
-## Design Options
+## The Fields Question: How to Track Changes Without Forcing Properties?
 
-### Option 1: Source Generator (Compile-Time) ⭐ Recommended for static grains
+### The Challenge
+
+C# has a fundamental limitation: **you cannot intercept field writes at the language level**. Properties have getters/setters; fields don't.
+
+Options to track field changes:
+
+| Approach | How It Works | Pros | Cons |
+|----------|--------------|------|------|
+| **Force properties** | Require devs to use properties | Clean, standard C# | Devs want fields |
+| **IL Weaving** | Post-compile modification (Fody/PostSharp) | Can intercept fields | Build complexity, debugging harder |
+| **Method-level tracking** | Snapshot before method, compare after | Works with fields naturally | Slight overhead |
+| **Explicit MarkDirty()** | Dev calls after mutation | Simple | Manual, error-prone |
+| **Auto-save after method** | Save after every public method | Zero ceremony | More IO, configurable |
+
+### Recommended: Method-Level Auto-Save (Codegen)
+
+The source generator wraps each public grain method to auto-save after execution:
+
+```csharp
+// User writes:
+[Auto]
+public partial class PlayerGrain : Varia
+{
+    private int score;  // Just a field!
+
+    public void AddScore(int points) => score += points;
+}
+
+// Generator produces:
+partial class PlayerGrain
+{
+    // The REAL implementation (user's code, renamed)
+    private void __AddScore_Impl(int points) => score += points;
+
+    // The public method (auto-generated wrapper)
+    public async Task AddScore(int points)
+    {
+        __AddScore_Impl(points);
+        await __AutoSaveAsync();  // Auto-persist after every mutation
+    }
+}
+```
+
+**Key insight**: We don't need to know *which* field changed. After any public method that might mutate state, we sync all fields to storage. This is simple and works perfectly with fields.
+
+### Optimization: Dirty Tracking via Snapshot Comparison
+
+For grains with large state, compare before/after to avoid unnecessary writes:
+
+```csharp
+partial class PlayerGrain
+{
+    public async Task AddScore(int points)
+    {
+        var snapshot = __TakeSnapshot();  // Capture field values
+        __AddScore_Impl(points);
+        if (__HasChanges(snapshot))       // Compare
+        {
+            await __AutoSaveAsync();
+        }
+    }
+
+    private (int score, string name, List<string> achievements) __TakeSnapshot()
+        => (score, name, achievements?.ToList());
+
+    private bool __HasChanges((int, string, List<string>) snapshot)
+        => score != snapshot.Item1 ||
+           name != snapshot.Item2 ||
+           !achievements.SequenceEqual(snapshot.Item3 ?? []);
+}
+```
+
+### Alternative: "Save on Deactivation" Mode
+
+For performance-sensitive grains, only save when grain deactivates:
+
+```csharp
+[Auto(SaveMode = SaveMode.OnDeactivation)]
+public partial class PlayerGrain : Varia
+{
+    private int score;
+
+    public void AddScore(int points) => score += points;  // No auto-save
+
+    // On deactivation, generated code syncs to storage
+}
+```
+
+### What About Property Wrapping with Same Name as Field?
+
+You asked: *"Is there a pattern for 'Property Wrapping' fields with the same name?"*
+
+**C# does not allow a field and property with the same name.** However, we have options:
+
+#### Option A: Generated Properties Shadow Fields (User Migrates to Properties)
+
+```csharp
+// NOT POSSIBLE - compiler error:
+private int score;
+public int score { get => ...; set => ...; }  // ERROR: duplicate member
+```
+
+#### Option B: Partial Properties (C# 13+)
+
+If targeting C# 13+, developers can use partial properties which the generator implements:
+
+```csharp
+// User writes:
+[Auto]
+public partial class PlayerGrain : Varia
+{
+    public partial int Score { get; set; }  // Partial property declaration
+}
+
+// Generator implements:
+partial class PlayerGrain
+{
+    private int __score_backing;
+
+    public partial int Score
+    {
+        get => __score_backing;
+        set { __score_backing = value; __MarkDirty(); }
+    }
+}
+```
+
+#### Option C: Fields Are Fine - Use Method-Level Tracking (Recommended)
+
+**Just use fields.** The method wrapper approach means we don't need property setters:
+
+```csharp
+// User writes fields naturally:
+[Auto]
+public partial class PlayerGrain : Varia
+{
+    private int score;      // Field - totally fine
+    private string name;    // Field - totally fine
+
+    public void SetScore(int value) => score = value;
+    public int GetScore() => score;
+}
+```
+
+The generator wraps `SetScore` to auto-save after. The field remains a field. No ceremony needed.
+
+---
+
+## Auto-Interface Generation
+
+The second part of Varia: **no need to manually define `IPlayerGrain`**.
+
+```csharp
+// User writes:
+[Auto]
+public partial class PlayerGrain : Varia
+{
+    public void AddScore(int points) => score += points;
+    public int GetScore() => score;
+
+    private void HelperMethod() { }  // Private - NOT in interface
+}
+
+// Generator produces interface:
+public interface IPlayerGrain : IGrainWithStringKey
+{
+    Task AddScore(int points);    // From public method
+    Task<int> GetScore();         // From public method
+    // HelperMethod NOT included (private)
+}
+
+// Generator also makes grain implement it:
+partial class PlayerGrain : IPlayerGrain { }
+```
+
+### Method Transformation Rules
+
+| User Writes | Generated Interface | Notes |
+|-------------|---------------------|-------|
+| `public void Foo()` | `Task Foo()` | void → Task |
+| `public int Foo()` | `Task<int> Foo()` | T → Task<T> |
+| `public Task Foo()` | `Task Foo()` | Already async - no change |
+| `public Task<int> Foo()` | `Task<int> Foo()` | Already async - no change |
+| `public ValueTask Foo()` | `ValueTask Foo()` | Preserved |
+| `private void Foo()` | *(not generated)* | Private excluded |
+| `protected void Foo()` | *(not generated)* | Non-public excluded |
+
+---
+
+## Complete Varia Codegen Example
+
+```csharp
+// ============================================
+// USER WRITES (PlayerGrain.cs)
+// ============================================
+[Auto]
+public partial class PlayerGrain : Varia
+{
+    private int score;
+    private string name;
+    private List<string> achievements = new();
+
+    [NonPersistent]
+    private ILogger<PlayerGrain> _logger;
+
+    public PlayerGrain(ILogger<PlayerGrain> logger) => _logger = logger;
+
+    public void AddScore(int points)
+    {
+        score += points;
+        _logger.LogInformation("Score is now {Score}", score);
+    }
+
+    public int GetScore() => score;
+
+    public void SetName(string value) => name = value;
+
+    public string GetName() => name;
+
+    public void UnlockAchievement(string achievement)
+    {
+        if (!achievements.Contains(achievement))
+            achievements.Add(achievement);
+    }
+
+    public IReadOnlyList<string> GetAchievements() => achievements;
+}
+
+// ============================================
+// GENERATOR PRODUCES (PlayerGrain__Varia.g.cs)
+// ============================================
+
+// 1. INTERFACE
+public interface IPlayerGrain : IGrainWithStringKey
+{
+    Task AddScore(int points);
+    Task<int> GetScore();
+    Task SetName(string value);
+    Task<string> GetName();
+    Task UnlockAchievement(string achievement);
+    Task<IReadOnlyList<string>> GetAchievements();
+}
+
+// 2. STATE CLASS
+[GenerateSerializer]
+internal sealed class PlayerGrain__State
+{
+    [Id(0)] public int score;
+    [Id(1)] public string name;
+    [Id(2)] public List<string> achievements;
+}
+
+// 3. PARTIAL CLASS IMPLEMENTATION
+partial class PlayerGrain : IPlayerGrain, ILifecycleParticipant<IGrainLifecycle>
+{
+    private IStorage<PlayerGrain__State> __storage;
+
+    // Lifecycle participation
+    void ILifecycleParticipant<IGrainLifecycle>.Participate(IGrainLifecycle lifecycle)
+    {
+        lifecycle.Subscribe<PlayerGrain>(
+            GrainLifecycleStage.SetupState,
+            __OnSetupStateAsync,
+            __OnTeardownStateAsync);
+    }
+
+    private async Task __OnSetupStateAsync(CancellationToken ct)
+    {
+        __storage = Runtime.GetStorage<PlayerGrain__State>(GrainContext);
+        await __storage.ReadStateAsync();
+        __SyncFromStorage();
+    }
+
+    private Task __OnTeardownStateAsync(CancellationToken ct)
+    {
+        __SyncToStorage();
+        return __storage.WriteStateAsync();
+    }
+
+    // Field ↔ Storage sync
+    private void __SyncFromStorage()
+    {
+        this.score = __storage.State.score;
+        this.name = __storage.State.name;
+        this.achievements = __storage.State.achievements ?? new();
+    }
+
+    private void __SyncToStorage()
+    {
+        __storage.State.score = this.score;
+        __storage.State.name = this.name;
+        __storage.State.achievements = this.achievements;
+    }
+
+    private async Task __AutoSaveAsync()
+    {
+        __SyncToStorage();
+        await __storage.WriteStateAsync();
+    }
+
+    // Manual save still available
+    protected Task SaveAsync() => __AutoSaveAsync();
+
+    // ============================================
+    // METHOD WRAPPERS (public methods wrapped)
+    // ============================================
+
+    // Original renamed to __Impl
+    private void __AddScore_Impl(int points)
+    {
+        score += points;
+        _logger.LogInformation("Score is now {Score}", score);
+    }
+
+    // Interface implementation with auto-save
+    async Task IPlayerGrain.AddScore(int points)
+    {
+        __AddScore_Impl(points);
+        await __AutoSaveAsync();
+    }
+
+    // GetScore - no mutation, no save needed
+    private int __GetScore_Impl() => score;
+    Task<int> IPlayerGrain.GetScore() => Task.FromResult(__GetScore_Impl());
+
+    // SetName - mutation, auto-save
+    private void __SetName_Impl(string value) => name = value;
+    async Task IPlayerGrain.SetName(string value)
+    {
+        __SetName_Impl(value);
+        await __AutoSaveAsync();
+    }
+
+    // etc. for other methods...
+}
+```
+
+---
+
+## Configuration Options
+
+```csharp
+[Auto(
+    SaveMode = SaveMode.AfterMutatingMethods,  // or OnDeactivation, Manual
+    StorageName = "PlayerStorage",              // Storage provider
+    GenerateInterface = true,                   // Auto-generate interface
+    InterfaceKeyType = typeof(string)           // IGrainWithStringKey
+)]
+public partial class PlayerGrain : Varia { }
+```
+
+### SaveMode Options
+
+| Mode | Behavior |
+|------|----------|
+| `AfterMutatingMethods` | Save after each non-readonly public method (default) |
+| `AfterAllMethods` | Save after every public method |
+| `OnDeactivation` | Only save when grain deactivates |
+| `Manual` | Developer calls `SaveAsync()` explicitly |
+
+### Detecting "Mutating" vs "Read-Only" Methods
+
+The generator can use heuristics:
+- Methods returning `void` or `Task` without result → likely mutating
+- Methods prefixed with `Get`, `Is`, `Has`, `Can` → likely read-only
+- Methods returning values (`Task<T>`) → likely read-only
+- `[ReadOnly]` attribute → explicitly read-only
+- `[Mutating]` attribute → explicitly mutating
+
+```csharp
+[Auto]
+public partial class PlayerGrain : Varia
+{
+    private int score;
+
+    public void AddScore(int points) => score += points;  // Auto-detected as mutating
+
+    [ReadOnly]
+    public int GetScore() => score;  // Explicit read-only, no save
+
+    [Mutating]
+    public int PopScore()  // Returns value but mutates
+    {
+        var result = score;
+        score = 0;
+        return result;
+    }
+}
+```
+
+---
+
+## Design Options (Updated)
+
+### Option 1: Source Generator (Compile-Time) ⭐ RECOMMENDED
 
 **Mechanism:**
-- Source generator detects `[Stateful]` attribute or `StatefulGrain` base class
-- Generates a "shadow state" class containing all persistable members
-- Generates sync code: grain ↔ shadow state
-- Hooks into `GrainLifecycleStage.SetupState` for load, manual `SaveStateAsync()` for save
+- Source generator detects `[Auto]` attribute or `Varia` base class
+- Generates interface, state class, lifecycle hooks, method wrappers
+- Zero runtime reflection
+- Works with dynamic grain loading (generated code is in the compiled assembly)
 
 **Generated code example:**
 ```csharp
 // User writes:
-[Stateful]
-public partial class MyGrain : Grain, IMyGrain
+[Auto]
+public partial class MyGrain : Varia
 {
     private int _counter;
     public string Name { get; set; }
 }
 
 // Generator produces:
+public interface IMyGrain : IGrainWithStringKey
+{
+    // ... methods ...
+}
+
 [GenerateSerializer]
-internal sealed class MyGrain__GeneratedState
+internal sealed class MyGrain__State
 {
     [Id(0)] public int _counter;
     [Id(1)] public string Name;
 }
 
-partial class MyGrain : ILifecycleParticipant<IGrainLifecycle>
+partial class MyGrain : IMyGrain, ILifecycleParticipant<IGrainLifecycle>
 {
-    private IStorage<MyGrain__GeneratedState> __storage;
+    private IStorage<MyGrain__State> __storage;
 
     void ILifecycleParticipant<IGrainLifecycle>.Participate(IGrainLifecycle lifecycle)
     {
