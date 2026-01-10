@@ -8,6 +8,221 @@ This document refines the initial Varia design based on deeper analysis of:
 - Distributed transaction concerns
 - Codegen patterns that minimize source modification
 - Orleans interface/async conventions
+- **Orleans property limitation in interfaces (CRITICAL)**
+- **C# `new` and `virtual` keyword limitations**
+
+---
+
+## CRITICAL: Orleans Blocks Properties in Grain Interfaces
+
+**Orleans has analyzer `ORLEANS0008` that BLOCKS properties in grain interfaces:**
+
+```csharp
+// This is a COMPILE ERROR in stock Orleans:
+public interface IPlayerGrain : IGrain
+{
+    int Score { get; set; }  // ERROR: ORLEANS0008
+}
+```
+
+**Rationale from Orleans:**
+> "Grain interfaces cannot have properties because grain calls are RPC-based
+> and properties would create ambiguity between local state and remote calls.
+> All grain interaction must be through explicit method calls."
+
+**File:** `src/Orleans.Analyzers/GrainInterfacePropertyDiagnosticAnalyzer.cs`
+
+### NewOrleans Options
+
+Since this is NewOrleans (our fork), we have three paths:
+
+| Option | Description | Pros | Cons |
+|--------|-------------|------|------|
+| **A. Disable analyzer** | Remove `ORLEANS0008` for `[Memory]` grains | Enables property syntax | Need to modify proxy codegen too |
+| **B. Generate methods** | Properties become `GetX()` / `SetX()` methods | Works today | Less elegant syntax |
+| **C. Modify proxy codegen** | Properties in interface → async method calls under hood | Best of both worlds | Most work |
+
+**Recommendation:** Option C long-term, Option B for MVP.
+
+---
+
+## C# Keyword Analysis: `new` and `virtual`
+
+### The `new` Keyword
+
+**Question:** Can `new` hide a member from another partial of the same class?
+
+**Answer: NO.** `new` hides members from **base classes**, not within the same class.
+
+```csharp
+// This does NOT work:
+public partial class PlayerGrain
+{
+    public void AddScore(int points) => Score += points;  // Original
+}
+
+public partial class PlayerGrain
+{
+    // ERROR: Can't use 'new' to hide member from same class
+    public new void AddScore(int points) { ... }
+}
+```
+
+**`new` only works for inheritance:**
+```csharp
+public class Base { public void Foo() { } }
+public class Derived : Base
+{
+    public new void Foo() { }  // Hides Base.Foo - this WORKS
+}
+```
+
+### The `virtual` Keyword
+
+**Question:** Can we make dev's method `virtual` and override in generated partial?
+
+**Answer: NO.** `override` requires **inheritance**, not partial classes.
+
+```csharp
+// This does NOT work:
+public partial class PlayerGrain
+{
+    public virtual void AddScore(int points) => Score += points;
+}
+
+public partial class PlayerGrain
+{
+    // ERROR: Can't override in same class, even via partial
+    public override void AddScore(int points) { ... }
+}
+```
+
+**`virtual`/`override` only works for inheritance:**
+```csharp
+public class Base { public virtual void Foo() { } }
+public class Derived : Base
+{
+    public override void Foo() { }  // Overrides Base.Foo - this WORKS
+}
+```
+
+### Summary: Neither `new` nor `virtual` Help With Partials
+
+Both keywords are for **inheritance hierarchies**, not **partial class composition**.
+
+---
+
+## The Explicit Interface Implementation Pattern (WORKS!)
+
+Despite the above, **explicit interface implementation DOES work** because:
+- The interface method and class method are **distinct members**
+- No `new` or `virtual` needed
+- Orleans calls go through interface → explicit impl is always used
+
+```csharp
+public partial class PlayerGrain : IPlayerGrain
+{
+    // Dev's method - untouched
+    public void AddScore(int points) => Score += points;
+
+    // Generated explicit interface impl - DIFFERENT member
+    async Task IPlayerGrain.AddScore(int points)
+    {
+        __BeginTransaction();
+        AddScore(points);  // Calls dev's method
+        await __EndTransaction();
+    }
+}
+```
+
+**When `grain.AddScore(10)` is called:**
+- Via `IPlayerGrain` reference → `IPlayerGrain.AddScore` (explicit impl) ✓
+- Via `PlayerGrain` reference → `PlayerGrain.AddScore` (dev's method)
+
+**Orleans always uses interface references**, so explicit impl is always invoked.
+
+---
+
+## Field + Explicit Interface Property Pattern (Your Proposal)
+
+### The Pattern
+
+**Your proposed approach:**
+```csharp
+// Dev's file (UNCHANGED):
+public int Score = 20;  // Field stays as-is
+
+// Generated interface:
+public interface IPlayerGrain : IGrainWithStringKey
+{
+    int Score { get; set; }  // Property in interface (same name as field!)
+}
+
+// Generated explicit implementation:
+partial class PlayerGrain : IPlayerGrain
+{
+    int IPlayerGrain.Score
+    {
+        get => Score;  // Reads the FIELD 'Score'
+        set { Score = value; __OnPropertyChanged(); }  // Writes FIELD + triggers
+    }
+}
+```
+
+### C# Validity Analysis
+
+**This IS valid C#.** The field `Score` and explicit interface property `IPlayerGrain.Score` are **distinct members**:
+
+| Member | Type | Access | Name Resolution |
+|--------|------|--------|-----------------|
+| `Score` | Field | `this.Score` | Direct field access |
+| `IPlayerGrain.Score` | Property (explicit) | `((IPlayerGrain)this).Score` | Interface property |
+
+```csharp
+// Both can coexist in same class:
+public class PlayerGrain : IPlayerGrain
+{
+    public int Score = 20;  // Field
+
+    int IPlayerGrain.Score  // Explicit interface property - DIFFERENT member
+    {
+        get => Score;       // Accesses the field
+        set => Score = value;
+    }
+}
+```
+
+### What Blocks This in Orleans
+
+1. **Analyzer `ORLEANS0008`** - Blocks properties in `IAddressable` interfaces
+2. **Proxy codegen** - Orleans generates proxy classes that call methods; property support would need additions
+
+### What NewOrleans Needs to Enable This
+
+1. **Modify analyzer** - Allow properties in interfaces for `[Memory]` grains (or entirely)
+2. **Modify proxy codegen** - Generate async method calls for property get/set:
+   ```csharp
+   // Generated proxy for IPlayerGrain.Score getter:
+   int IPlayerGrain.Score
+   {
+       get => __GetPropertyAsync<int>("Score").Result;  // Or async pattern
+   }
+   ```
+3. **Grain method invoker** - Handle property invocation in RPC layer
+
+### Recommendation: Two-Phase Approach
+
+**Phase 1 (MVP):** Generate methods instead of properties
+```csharp
+// Instead of: int Score { get; set; }
+Task<int> GetScore();
+Task SetScore(int value);
+```
+
+**Phase 2:** Enable property syntax
+- Modify `ORLEANS0008` analyzer
+- Add property support to Orleans proxy codegen
+- Properties translate to method calls under the hood
 
 ---
 
