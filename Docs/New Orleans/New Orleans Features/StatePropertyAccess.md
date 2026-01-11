@@ -14,7 +14,7 @@ This document tracks the implementation of property-based state access for Orlea
 | Class generation | Complete | Generates Get/Set method implementations |
 | Proxy generation | Complete | Generates StateTask properties on proxies |
 | Partial properties | Complete | Phase 3 - backing field generation |
-| Persistence mapping | Pending | Phase 4 - IPersistentState integration |
+| Persistence mapping | Complete | Phase 4 - IPersistentState integration |
 
 ---
 
@@ -25,7 +25,7 @@ This document tracks the implementation of property-based state access for Orlea
 | Phase 1: Core Infrastructure | **Complete** | `claude/orleans-property-state-access-Oq9Xb` |
 | Phase 2: Code Generation | **Complete** | `claude/orleans-property-state-access-Oq9Xb` |
 | Phase 3: Partial Properties | **Complete** | `claude/merge-orleans-property-access-9dKa9` |
-| Phase 4: Persistence | Pending | - |
+| Phase 4: Persistence | **Complete** | `claude/merge-orleans-property-access-9dKa9` |
 
 **Last Updated:** 2026-01-11
 
@@ -50,6 +50,22 @@ The implementation is **property-driven**: developers define properties on grain
 ---
 
 ## Implementation History
+
+### 2026-01-11: Phase 4 Complete
+
+**Branch:** `claude/merge-orleans-property-access-9dKa9`
+
+Implemented:
+- `IPersistentState_1` type reference in LibraryTypes
+- Persistence detection in StatePropertyDescription (`IsPersisted`, `StateFieldName`, `AutoSave`)
+- `DetectPersistentStateFields()` - Scans grain class for IPersistentState<T> fields
+- `GetPersistenceSettings()` - Extracts `[State(Persisted, StateProperty, AutoSave)]` attributes
+- `GeneratePersistedPropertyImpl()` - Generates property implementations mapping to persistent state
+- AutoSave support with fire-and-forget `WriteStateAsync()` call
+
+**Key Files Modified:**
+- `LibraryTypes.cs` - Added `IPersistentState_1` type reference
+- `StatePropertyCodeGenerator.cs` - Added persistence detection, validation, and persisted property generation
 
 ### 2026-01-11: Phase 3 Complete
 
@@ -430,29 +446,97 @@ public partial class PlayerGrain : Grain, IPlayerGrain
 
 ---
 
-## Remaining Work
+## Completed Work (continued)
 
 ### Phase 4: Persistence Integration
 
 **Goal:** Map properties to Orleans `IPersistentState<T>`
 
+All tasks complete:
+
 | Task | Status | Description |
 |------|--------|-------------|
-| `[State(Persisted = true)]` support | Pending | Detect persistence attribute |
-| IPersistentState field detection | Pending | Find matching state fields |
-| Property-to-state mapping | Pending | Generate `_state.State.Property` access |
-| AutoSave implementation | Pending | Fire-and-forget `WriteStateAsync()` |
+| `[State(Persisted = true)]` support | **Complete** | Detect persistence attribute |
+| IPersistentState field detection | **Complete** | Find matching state fields |
+| Property-to-state mapping | **Complete** | Generate `_state.State.Property` access |
+| AutoSave implementation | **Complete** | Fire-and-forget `WriteStateAsync()` |
 
-**Expected usage:**
+#### 4.1 LibraryTypes Extension
+
+**Location:** `/src/NewOrleans/src/Orleans.CodeGenerator/LibraryTypes.cs`
+
+Added:
+- `IPersistentState_1` - Type reference for `Orleans.Runtime.IPersistentState<T>`
+
+#### 4.2 Persistence Detection
+
+**Location:** `/src/NewOrleans/src/Orleans.CodeGenerator/StatePropertyCodeGenerator.cs`
+
+New methods:
+
+| Method | Purpose |
+|--------|---------|
+| `DetectPersistentStateFields(...)` | Scans grain class for `IPersistentState<T>` fields |
+| `GetPersistenceSettings(...)` | Extracts `Persisted`, `StateProperty`, `AutoSave` from `[State]` attribute |
+| `GeneratePersistedPropertyImpl(...)` | Generates property implementation mapping to persistent state |
+
+#### 4.3 StatePropertyDescription Extensions
+
+Added fields to `StatePropertyDescription`:
+- `IsPersisted` - Whether property maps to `IPersistentState`
+- `StateFieldName` - Name of the `IPersistentState<T>` field (e.g., `"_state"`)
+- `AutoSave` - Whether to auto-save after each set operation
+
+#### 4.4 Generated Code Examples
+
+**Developer writes:**
 ```csharp
 public partial class PlayerGrain : Grain, IPlayerGrain
 {
     private readonly IPersistentState<PlayerData> _state;
 
-    [State(Persisted = true, StateProperty = nameof(_state), AutoSave = true)]
+    [State(Persisted = true, StateProperty = nameof(_state))]
     public partial int Score { get; set; }
+
+    [State(Persisted = true, StateProperty = nameof(_state), AutoSave = true)]
+    public partial int Level { get; set; }
+
+    public PlayerGrain([PersistentState("player", "store")] IPersistentState<PlayerData> state)
+    {
+        _state = state;
+    }
 }
 ```
+
+**Generated (for Score - manual save):**
+```csharp
+public partial int Score
+{
+    get => _state.State.Score;
+    set => _state.State.Score = value;
+}
+```
+
+**Generated (for Level - auto save):**
+```csharp
+public partial int Level
+{
+    get => _state.State.Level;
+    set { _state.State.Level = value; _ = _state.WriteStateAsync(); }
+}
+```
+
+---
+
+## Future Work
+
+Potential enhancements (not currently planned):
+
+1. **Batch persistence** - Batch multiple property changes into a single `WriteStateAsync()` call
+2. **Async property getters** - Support properties that need async loading
+3. **Computed properties** - Read-only properties derived from other state
+4. **Property change events** - Notify when property values change
+5. **Reactive state** - `IObservable<T>` integration for reactive patterns
 
 ---
 
@@ -473,10 +557,12 @@ The full design specification is in `/Docs/New Orleans/New Orleans Features/` (o
 
 ## How to Continue Development
 
-1. Read this file and the design spec for context
-2. Check the "Remaining Work" section above
-3. For Phase 4: Add `IPersistentState` field detection, modify property implementation generation to use state mapping
-   - In `StatePropertyCodeGenerator.cs`, add detection for `[State(Persisted = true)]`
-   - Modify `GeneratePartialPropertyImpl()` to generate `_state.State.PropertyName` access
-   - Add `AutoSave` support to call `WriteStateAsync()` on set
+All four phases are complete. To extend this feature:
+
+1. Read this file and the original design spec for context
+2. Check the "Future Work" section for potential enhancements
+3. Key files to modify:
+   - `StatePropertyCodeGenerator.cs` - Core code generation logic
+   - `StateAttribute.cs` - Add new attribute properties if needed
+   - `LibraryTypes.cs` - Add type references for new runtime types
 4. Update this document as work progresses

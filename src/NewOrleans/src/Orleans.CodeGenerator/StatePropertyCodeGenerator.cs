@@ -40,7 +40,10 @@ namespace Orleans.CodeGenerator
                 INamedTypeSymbol grainInterface,
                 string methodName,
                 bool canSet,
-                bool isPartial)
+                bool isPartial,
+                bool isPersisted = false,
+                string? stateFieldName = null,
+                bool autoSave = false)
             {
                 Property = property;
                 GrainClass = grainClass;
@@ -48,6 +51,9 @@ namespace Orleans.CodeGenerator
                 MethodName = methodName;
                 CanSet = canSet;
                 IsPartial = isPartial;
+                IsPersisted = isPersisted;
+                StateFieldName = stateFieldName;
+                AutoSave = autoSave;
             }
 
             /// <summary>The property symbol on the grain class.</summary>
@@ -67,6 +73,15 @@ namespace Orleans.CodeGenerator
 
             /// <summary>Whether the property is declared as partial (needs backing field generation).</summary>
             public bool IsPartial { get; }
+
+            /// <summary>Whether this property maps to IPersistentState.</summary>
+            public bool IsPersisted { get; }
+
+            /// <summary>Name of the IPersistentState field (e.g., "_state").</summary>
+            public string? StateFieldName { get; }
+
+            /// <summary>Whether to auto-save after each set operation.</summary>
+            public bool AutoSave { get; }
 
             /// <summary>The property type.</summary>
             public ITypeSymbol PropertyType => Property.Type;
@@ -96,6 +111,9 @@ namespace Orleans.CodeGenerator
                 return properties;
             }
 
+            // Detect IPersistentState fields in the grain class for persistence mapping
+            var persistentStateFields = DetectPersistentStateFields(grainClass);
+
             // Scan public properties on the grain class
             foreach (var member in grainClass.GetMembers())
             {
@@ -123,16 +141,111 @@ namespace Orleans.CodeGenerator
                 // Check if property is partial (syntax-level check)
                 var isPartial = IsPartialProperty(property);
 
+                // Get persistence settings from [State] attribute
+                var (isPersisted, stateFieldName, autoSave) = GetPersistenceSettings(property, persistentStateFields);
+
                 properties.Add(new StatePropertyDescription(
                     property,
                     grainClass,
                     grainInterface,
                     methodName,
                     canSet,
-                    isPartial));
+                    isPartial,
+                    isPersisted,
+                    stateFieldName,
+                    autoSave));
             }
 
             return properties;
+        }
+
+        /// <summary>
+        /// Detects IPersistentState&lt;T&gt; fields in a grain class.
+        /// </summary>
+        private Dictionary<string, IFieldSymbol> DetectPersistentStateFields(INamedTypeSymbol grainClass)
+        {
+            var fields = new Dictionary<string, IFieldSymbol>();
+
+            if (LibraryTypes.IPersistentState_1 is null)
+            {
+                return fields;
+            }
+
+            foreach (var member in grainClass.GetMembers())
+            {
+                if (member is not IFieldSymbol field)
+                    continue;
+
+                // Check if field type is IPersistentState<T>
+                if (field.Type is INamedTypeSymbol namedType &&
+                    namedType.IsGenericType &&
+                    namedType.OriginalDefinition is not null &&
+                    SymbolEqualityComparer.Default.Equals(namedType.OriginalDefinition, LibraryTypes.IPersistentState_1))
+                {
+                    fields[field.Name] = field;
+                }
+            }
+
+            return fields;
+        }
+
+        /// <summary>
+        /// Gets persistence settings from [State] attribute.
+        /// </summary>
+        private (bool IsPersisted, string? StateFieldName, bool AutoSave) GetPersistenceSettings(
+            IPropertySymbol property,
+            Dictionary<string, IFieldSymbol> persistentStateFields)
+        {
+            if (LibraryTypes.StateAttribute is null)
+            {
+                return (false, null, false);
+            }
+
+            var stateAttr = property.GetAttributes()
+                .FirstOrDefault(attr =>
+                    SymbolEqualityComparer.Default.Equals(attr.AttributeClass, LibraryTypes.StateAttribute));
+
+            if (stateAttr is null)
+            {
+                return (false, null, false);
+            }
+
+            bool isPersisted = false;
+            string? stateFieldName = null;
+            bool autoSave = false;
+
+            foreach (var arg in stateAttr.NamedArguments)
+            {
+                switch (arg.Key)
+                {
+                    case "Persisted" when arg.Value.Value is bool persisted:
+                        isPersisted = persisted;
+                        break;
+                    case "StateProperty" when arg.Value.Value is string fieldName:
+                        stateFieldName = fieldName;
+                        break;
+                    case "AutoSave" when arg.Value.Value is bool save:
+                        autoSave = save;
+                        break;
+                }
+            }
+
+            // Validate: if Persisted is true, StateProperty must be set and the field must exist
+            if (isPersisted)
+            {
+                if (string.IsNullOrEmpty(stateFieldName))
+                {
+                    // TODO: Could emit diagnostic here
+                    isPersisted = false;
+                }
+                else if (!persistentStateFields.ContainsKey(stateFieldName))
+                {
+                    // TODO: Could emit diagnostic here - field not found
+                    isPersisted = false;
+                }
+            }
+
+            return (isPersisted, stateFieldName, autoSave);
         }
 
         /// <summary>
@@ -244,7 +357,7 @@ namespace Orleans.CodeGenerator
         /// These are added to the partial grain class to complete the partial property declarations.
         /// </summary>
         /// <remarks>
-        /// For a partial property like:
+        /// For a non-persisted partial property like:
         /// <code>public partial string Name { get; set; }</code>
         ///
         /// This generates:
@@ -254,6 +367,28 @@ namespace Orleans.CodeGenerator
         /// {
         ///     get => _name_backing;
         ///     set => _name_backing = value;
+        /// }
+        /// </code>
+        ///
+        /// For a persisted partial property like:
+        /// <code>[State(Persisted = true, StateProperty = nameof(_state))]
+        /// public partial int Score { get; set; }</code>
+        ///
+        /// This generates:
+        /// <code>
+        /// public partial int Score
+        /// {
+        ///     get => _state.State.Score;
+        ///     set => _state.State.Score = value;
+        /// }
+        /// </code>
+        ///
+        /// With AutoSave = true:
+        /// <code>
+        /// public partial int Score
+        /// {
+        ///     get => _state.State.Score;
+        ///     set { _state.State.Score = value; _ = _state.WriteStateAsync(); }
         /// }
         /// </code>
         /// </remarks>
@@ -270,14 +405,22 @@ namespace Orleans.CodeGenerator
 
             foreach (var prop in partialProperties)
             {
-                // Generate backing field: private T _propertyName_backing = default!;
-                var backingFieldName = $"_{ToCamelCase(prop.PropertyName)}_backing";
-                var backingField = GenerateBackingField(prop, backingFieldName);
-                members.Add(backingField);
+                if (prop.IsPersisted && !string.IsNullOrEmpty(prop.StateFieldName))
+                {
+                    // Persisted property: no backing field, access state directly
+                    var propertyImpl = GeneratePersistedPropertyImpl(prop);
+                    members.Add(propertyImpl);
+                }
+                else
+                {
+                    // Non-persisted property: generate backing field and simple accessors
+                    var backingFieldName = $"_{ToCamelCase(prop.PropertyName)}_backing";
+                    var backingField = GenerateBackingField(prop, backingFieldName);
+                    members.Add(backingField);
 
-                // Generate partial property implementation
-                var propertyImpl = GeneratePartialPropertyImpl(prop, backingFieldName);
-                members.Add(propertyImpl);
+                    var propertyImpl = GeneratePartialPropertyImpl(prop, backingFieldName);
+                    members.Add(propertyImpl);
+                }
             }
 
             return members.ToArray();
@@ -334,6 +477,88 @@ namespace Orleans.CodeGenerator
                             IdentifierName(backingFieldName),
                             IdentifierName("value"))))
                     .WithSemicolonToken(Token(SyntaxKind.SemicolonToken));
+                accessors.Add(setter);
+            }
+
+            return PropertyDeclaration(propertyType, Identifier(prop.PropertyName))
+                .WithModifiers(TokenList(
+                    Token(SyntaxKind.PublicKeyword),
+                    Token(SyntaxKind.PartialKeyword)))
+                .WithAccessorList(AccessorList(List(accessors)));
+        }
+
+        /// <summary>
+        /// Generates a partial property implementation that maps to IPersistentState.
+        /// </summary>
+        /// <remarks>
+        /// For a property with [State(Persisted = true, StateProperty = nameof(_state))]:
+        /// - Getter accesses: _state.State.PropertyName
+        /// - Setter assigns: _state.State.PropertyName = value
+        /// - If AutoSave = true: also calls _ = _state.WriteStateAsync() (fire-and-forget)
+        /// </remarks>
+        private PropertyDeclarationSyntax GeneratePersistedPropertyImpl(StatePropertyDescription prop)
+        {
+            var propertyType = prop.PropertyType.ToTypeSyntax();
+            var stateFieldName = prop.StateFieldName!;
+
+            // Build: _stateField.State.PropertyName
+            var stateAccess = MemberAccessExpression(
+                SyntaxKind.SimpleMemberAccessExpression,
+                MemberAccessExpression(
+                    SyntaxKind.SimpleMemberAccessExpression,
+                    IdentifierName(stateFieldName),
+                    IdentifierName("State")),
+                IdentifierName(prop.PropertyName));
+
+            // Getter: get => _stateField.State.PropertyName;
+            var getter = AccessorDeclaration(SyntaxKind.GetAccessorDeclaration)
+                .WithExpressionBody(ArrowExpressionClause(stateAccess))
+                .WithSemicolonToken(Token(SyntaxKind.SemicolonToken));
+
+            var accessors = new List<AccessorDeclarationSyntax> { getter };
+
+            // Setter (if property has one)
+            if (prop.Property.SetMethod is not null)
+            {
+                AccessorDeclarationSyntax setter;
+
+                if (prop.AutoSave)
+                {
+                    // With AutoSave: set { _stateField.State.PropertyName = value; _ = _stateField.WriteStateAsync(); }
+                    var assignStatement = ExpressionStatement(
+                        AssignmentExpression(
+                            SyntaxKind.SimpleAssignmentExpression,
+                            stateAccess,
+                            IdentifierName("value")));
+
+                    // _ = _stateField.WriteStateAsync();
+                    var writeStateCall = InvocationExpression(
+                        MemberAccessExpression(
+                            SyntaxKind.SimpleMemberAccessExpression,
+                            IdentifierName(stateFieldName),
+                            IdentifierName("WriteStateAsync")));
+
+                    var discardAssignment = ExpressionStatement(
+                        AssignmentExpression(
+                            SyntaxKind.SimpleAssignmentExpression,
+                            IdentifierName("_"),
+                            writeStateCall));
+
+                    setter = AccessorDeclaration(SyntaxKind.SetAccessorDeclaration)
+                        .WithBody(Block(assignStatement, discardAssignment));
+                }
+                else
+                {
+                    // Without AutoSave: set => _stateField.State.PropertyName = value;
+                    setter = AccessorDeclaration(SyntaxKind.SetAccessorDeclaration)
+                        .WithExpressionBody(ArrowExpressionClause(
+                            AssignmentExpression(
+                                SyntaxKind.SimpleAssignmentExpression,
+                                stateAccess,
+                                IdentifierName("value"))))
+                        .WithSemicolonToken(Token(SyntaxKind.SemicolonToken));
+                }
+
                 accessors.Add(setter);
             }
 

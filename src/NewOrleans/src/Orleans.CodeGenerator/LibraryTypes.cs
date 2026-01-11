@@ -191,6 +191,7 @@ namespace Orleans.CodeGenerator
             StateTask_1 = TypeOrDefault("Orleans.StateTask`1");
             StateAttribute = TypeOrDefault("Orleans.StateAttribute");
             NotStateAttribute = TypeOrDefault("Orleans.NotStateAttribute");
+            IPersistentState_1 = TypeOrDefault("Orleans.Runtime.IPersistentState`1");
 
             INamedTypeSymbol Type(string metadataName)
             {
@@ -322,6 +323,7 @@ namespace Orleans.CodeGenerator
         public INamedTypeSymbol? StateTask_1 { get; private set; }
         public INamedTypeSymbol? StateAttribute { get; private set; }
         public INamedTypeSymbol? NotStateAttribute { get; private set; }
+        public INamedTypeSymbol? IPersistentState_1 { get; private set; }
 
         /// <summary>
         /// Gets a value indicating whether state property code generation is available.
