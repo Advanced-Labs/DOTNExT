@@ -49,6 +49,26 @@ namespace Orleans.CodeGenerator
                 .AddMembers(ctors)
                 .AddMembers(proxyMethods);
 
+            // Add StateTask properties for state property access (Phase 2)
+            var stateProperties = _codeGenerator.GetStatePropertiesForInterface(interfaceDescription.InterfaceType);
+            if (stateProperties.Count > 0)
+            {
+                var typeParameterSubstitutions = new Dictionary<ITypeParameterSymbol, string>(SymbolEqualityComparer.Default);
+                foreach (var (name, param) in interfaceDescription.TypeParameters)
+                {
+                    typeParameterSubstitutions[param] = name;
+                }
+
+                var stateTaskProperties = _codeGenerator.StatePropertyCodeGenerator.GenerateProxyStateTaskProperties(
+                    stateProperties,
+                    typeParameterSubstitutions);
+
+                if (stateTaskProperties.Length > 0)
+                {
+                    classDeclaration = classDeclaration.AddMembers(stateTaskProperties);
+                }
+            }
+
             var typeParameters = interfaceDescription.TypeParameters;
             if (typeParameters.Count > 0)
             {

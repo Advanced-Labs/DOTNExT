@@ -187,6 +187,11 @@ namespace Orleans.CodeGenerator
             LanguageVersion = (compilation.SyntaxTrees.FirstOrDefault()?.Options as CSharpParseOptions)?.LanguageVersion;
             GenerateSerializerAttributes = options.GenerateSerializerAttributes.Select(compilation.GetTypeByMetadataName).ToArray();
 
+            // State property support types
+            StateTask_1 = TypeOrDefault("Orleans.StateTask`1");
+            StateAttribute = TypeOrDefault("Orleans.StateAttribute");
+            NotStateAttribute = TypeOrDefault("Orleans.NotStateAttribute");
+
             INamedTypeSymbol Type(string metadataName)
             {
                 var result = compilation.GetTypeByMetadataName(metadataName);
@@ -312,6 +317,16 @@ namespace Orleans.CodeGenerator
         public INamedTypeSymbol? FSharpCompilationMappingAttributeOrDefault { get; private set; }
         public INamedTypeSymbol? FSharpSourceConstructFlagsOrDefault { get; private set; }
         public INamedTypeSymbol RuntimeHelpers { get; private set; }
+
+        // State property support types
+        public INamedTypeSymbol? StateTask_1 { get; private set; }
+        public INamedTypeSymbol? StateAttribute { get; private set; }
+        public INamedTypeSymbol? NotStateAttribute { get; private set; }
+
+        /// <summary>
+        /// Gets a value indicating whether state property code generation is available.
+        /// </summary>
+        public bool SupportsStateProperties => StateTask_1 is not null && StateAttribute is not null && NotStateAttribute is not null;
 
         public LanguageVersion? LanguageVersion { get; private set; }
 
