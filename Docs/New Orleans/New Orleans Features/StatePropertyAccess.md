@@ -1,8 +1,32 @@
 # Orleans State Property Access Enhancement
 
-## Implementation Status: Phase 2 Complete
+## DOTNExT Modifications
 
-**Branch:** `claude/orleans-property-state-access-Oq9Xb`
+This document tracks the implementation of property-based state access for Orleans grains in the DOTNExT fork.
+
+| Modification | Status | Description |
+|--------------|--------|-------------|
+| StateTask<T> type | Complete | Awaitable struct for property-style remote access |
+| StateAttribute | Complete | Configuration attribute for code generation |
+| NotStateAttribute | Complete | Exclusion attribute for non-state properties |
+| Property scanning | Complete | Detects properties on grain classes |
+| Interface generation | Complete | Generates Get/Set method signatures |
+| Class generation | Complete | Generates Get/Set method implementations |
+| Proxy generation | Complete | Generates StateTask properties on proxies |
+| Partial properties | Pending | Phase 3 - backing field generation |
+| Persistence mapping | Pending | Phase 4 - IPersistentState integration |
+
+---
+
+## Implementation Status
+
+| Phase | Status | Branch |
+|-------|--------|--------|
+| Phase 1: Core Infrastructure | **Complete** | `claude/orleans-property-state-access-Oq9Xb` |
+| Phase 2: Code Generation | **Complete** | `claude/orleans-property-state-access-Oq9Xb` |
+| Phase 3: Partial Properties | Pending | - |
+| Phase 4: Persistence | Pending | - |
+
 **Last Updated:** 2026-01-11
 
 ---
@@ -25,11 +49,26 @@ The implementation is **property-driven**: developers define properties on grain
 
 ---
 
+## Implementation History
+
+### 2026-01-11: Phase 1 & 2 Complete
+
+**Commit:** `919f76126` on `claude/orleans-property-state-access-Oq9Xb`
+
+Implemented:
+- StateTask<T> struct with awaitable pattern and << operator
+- StateAttribute and NotStateAttribute
+- StatePropertyCodeGenerator for property detection and code generation
+- Integration with CodeGenerator and ProxyGenerator
+- Partial interface/class extension generation
+
+---
+
 ## Completed Work
 
 ### Phase 1: Core Infrastructure
 
-#### StateTask<T> Type (`Orleans.Core.Abstractions/State/StateTask.cs`)
+#### 1.1 StateTask<T> Type
 
 **Location:** `/src/NewOrleans/src/Orleans.Core.Abstractions/State/StateTask.cs`
 
@@ -53,63 +92,81 @@ public readonly struct StateTask<T>
 }
 ```
 
-#### StateAttribute (`Orleans.Core.Abstractions/State/StateAttribute.cs`)
+**Why `<<` operator?** C# property setters must return `void`, making them incompatible with async patterns. The `<<` operator visually suggests "pushing" a value and can return `ValueTask`.
+
+#### 1.2 StateAttribute
 
 **Location:** `/src/NewOrleans/src/Orleans.Core.Abstractions/State/StateAttribute.cs`
 
 Configures code generation behavior for grain state properties:
-- `Persisted` - Maps property to IPersistentState (Phase 4)
-- `StateProperty` - Name of the persistent state field (Phase 4)
-- `AutoSave` - Auto-call WriteStateAsync on set (Phase 4)
-- `CanSet` - Whether to generate setter method
-- `MethodName` - Custom Get/Set method names
 
-#### NotStateAttribute (`Orleans.Core.Abstractions/State/NotStateAttribute.cs`)
+| Property | Type | Default | Description |
+|----------|------|---------|-------------|
+| `Persisted` | bool | false | Maps property to IPersistentState (Phase 4) |
+| `StateProperty` | string? | null | Name of persistent state field (Phase 4) |
+| `AutoSave` | bool | false | Auto-call WriteStateAsync on set (Phase 4) |
+| `CanSet` | bool | true | Whether to generate setter method |
+| `MethodName` | string? | null | Custom Get/Set method names |
+
+#### 1.3 NotStateAttribute
 
 **Location:** `/src/NewOrleans/src/Orleans.Core.Abstractions/State/NotStateAttribute.cs`
 
 Excludes public properties from state code generation (for dependencies, loggers, etc.)
 
-#### LibraryTypes Extension (`Orleans.CodeGenerator/LibraryTypes.cs`)
+#### 1.4 LibraryTypes Extension
 
-**Modified:** Added StateTask_1, StateAttribute, NotStateAttribute type references
-**Added:** `SupportsStateProperties` property to check availability
+**Location:** `/src/NewOrleans/src/Orleans.CodeGenerator/LibraryTypes.cs`
+
+Added:
+- `StateTask_1` - Type reference for `Orleans.StateTask<T>`
+- `StateAttribute` - Type reference for `Orleans.StateAttribute`
+- `NotStateAttribute` - Type reference for `Orleans.NotStateAttribute`
+- `SupportsStateProperties` - Property to check if all types are available
 
 ---
 
 ### Phase 2: Property-to-Interface Code Generation
 
-#### StatePropertyCodeGenerator (`Orleans.CodeGenerator/StatePropertyCodeGenerator.cs`)
+#### 2.1 StatePropertyCodeGenerator
 
 **Location:** `/src/NewOrleans/src/Orleans.CodeGenerator/StatePropertyCodeGenerator.cs`
 
-The main generator that:
-1. **Scans grain classes** for public properties (respects `[NotState]`)
-2. **Generates interface method signatures** (Get/Set) on partial interface
-3. **Generates grain method implementations** that delegate to properties
-4. **Generates StateTask properties** on proxy classes
+The main generator that orchestrates all state property code generation:
 
-Key methods:
-- `ScanGrainClass(INamedTypeSymbol)` - Detects state properties
-- `GenerateInterfaceMethodSignatures(...)` - Creates Get/Set method declarations
-- `GenerateGrainMethodImplementations(...)` - Creates Get/Set method bodies
-- `GenerateProxyStateTaskProperties(...)` - Creates StateTask wrappers
+| Method | Purpose |
+|--------|---------|
+| `ScanGrainClass(INamedTypeSymbol)` | Detects public properties on grain classes |
+| `GenerateInterfaceMethodSignatures(...)` | Creates Get/Set method declarations for interface |
+| `GenerateGrainMethodImplementations(...)` | Creates Get/Set method bodies for class |
+| `GenerateProxyStateTaskProperties(...)` | Creates StateTask property wrappers for proxy |
 
-#### CodeGenerator Integration (`Orleans.CodeGenerator/CodeGenerator.cs`)
+**Detection Rules:**
+- Property must be `public`
+- Property must NOT have `[NotState]` attribute
+- Property must NOT be an indexer
+- Grain class must implement a grain interface (inherits from `IGrainWithXXXKey`)
 
-**Modified:**
-- Added `StatePropertyCodeGenerator` instance
-- Added `_statePropertiesByInterface` dictionary to track properties
-- Added grain class scanning in the type processing loop
-- Added `GetStatePropertiesForInterface()` for proxy generator access
-- Added `GeneratePartialInterfaceExtension()` and `GeneratePartialClassExtension()` helpers
+#### 2.2 CodeGenerator Integration
 
-#### ProxyGenerator Integration (`Orleans.CodeGenerator/ProxyGenerator.cs`)
+**Location:** `/src/NewOrleans/src/Orleans.CodeGenerator/CodeGenerator.cs`
 
-**Modified:**
-- Added StateTask property generation after proxy methods
-- Uses `_codeGenerator.GetStatePropertiesForInterface()` to find properties
-- Uses `StatePropertyCodeGenerator.GenerateProxyStateTaskProperties()` to create properties
+Modifications:
+- Added `StatePropertyCodeGenerator` instance in constructor
+- Added `_statePropertiesByInterface` dictionary to track properties by interface
+- Added grain class scanning in the type processing loop (line 273-311)
+- Added `GetStatePropertiesForInterface()` method for proxy generator access
+- Added `GeneratePartialInterfaceExtension()` helper
+- Added `GeneratePartialClassExtension()` helper
+
+#### 2.3 ProxyGenerator Integration
+
+**Location:** `/src/NewOrleans/src/Orleans.CodeGenerator/ProxyGenerator.cs`
+
+Modifications:
+- Added StateTask property generation after proxy methods (line 52-70)
+- Queries `_codeGenerator.GetStatePropertiesForInterface()` for properties
+- Calls `StatePropertyCodeGenerator.GenerateProxyStateTaskProperties()` to create StateTask properties
 
 ---
 
@@ -141,7 +198,7 @@ public partial class PlayerGrain : Grain, IPlayerGrain
 
 ### Generated Code Includes
 
-1. **Interface extension** (Get/Set method signatures):
+**1. Interface extension** (Get/Set method signatures):
 ```csharp
 partial interface IPlayerGrain
 {
@@ -152,7 +209,7 @@ partial interface IPlayerGrain
 }
 ```
 
-2. **Class extension** (method implementations):
+**2. Class extension** (method implementations):
 ```csharp
 partial class PlayerGrain
 {
@@ -163,11 +220,11 @@ partial class PlayerGrain
 }
 ```
 
-3. **Proxy StateTask properties**:
+**3. Proxy StateTask properties**:
 ```csharp
 internal sealed class Proxy_IPlayerGrain : GrainReference, IPlayerGrain
 {
-    // Method proxies (standard)
+    // Method proxies (standard Orleans)
     public Task<string> GetName() { ... }
     public Task SetName(string value) { ... }
 
@@ -190,11 +247,15 @@ string name = await player.GetName();
 // Property style (new)
 await (player.Name << "Louis");
 string name = await player.Name;
+
+// Both can be mixed freely
+await player.ApplyDamageAsync(10);
+int score = await player.Score;
 ```
 
 ---
 
-## Attribute Usage
+## Attribute Usage Examples
 
 ### Excluding Properties
 
@@ -207,6 +268,10 @@ public partial class PlayerGrain : Grain, IPlayerGrain
     // Excluded - not exposed remotely
     [NotState]
     public ILogger<PlayerGrain> Logger { get; }
+
+    // Also excluded - internal tracking
+    [NotState]
+    public DateTime LastAccessedInternal { get; set; }
 }
 ```
 
@@ -218,6 +283,9 @@ public partial class PlayerGrain : Grain, IPlayerGrain
     // Only GetCreatedAt() is generated, no setter
     [State(CanSet = false)]
     public DateTime CreatedAt { get; }
+
+    // Full read-write
+    public string Name { get; set; }
 }
 ```
 
@@ -251,23 +319,67 @@ public partial class PlayerGrain : Grain, IPlayerGrain
 ## Remaining Work
 
 ### Phase 3: Partial Properties and Backing Fields
-- [ ] Detect partial property declarations
-- [ ] Generate backing fields for partial properties
-- [ ] Wire up property implementations
+
+**Goal:** Support C# partial properties with generated backing fields
+
+| Task | Status | Description |
+|------|--------|-------------|
+| Detect partial property declarations | Pending | Check for `partial` modifier on properties |
+| Generate backing fields | Pending | `private T _propertyName_backing;` |
+| Wire up property implementations | Pending | Connect getter/setter to backing field |
+
+**Expected usage:**
+```csharp
+public partial class PlayerGrain : Grain, IPlayerGrain
+{
+    // Codegen generates backing field and implementation
+    public partial string Name { get; set; }
+}
+```
 
 ### Phase 4: Persistence Integration
-- [ ] `[State(Persisted = true)]` support
-- [ ] IPersistentState mapping
-- [ ] AutoSave implementation
+
+**Goal:** Map properties to Orleans `IPersistentState<T>`
+
+| Task | Status | Description |
+|------|--------|-------------|
+| `[State(Persisted = true)]` support | Pending | Detect persistence attribute |
+| IPersistentState field detection | Pending | Find matching state fields |
+| Property-to-state mapping | Pending | Generate `_state.State.Property` access |
+| AutoSave implementation | Pending | Fire-and-forget `WriteStateAsync()` |
+
+**Expected usage:**
+```csharp
+public partial class PlayerGrain : Grain, IPlayerGrain
+{
+    private readonly IPersistentState<PlayerData> _state;
+
+    [State(Persisted = true, StateProperty = nameof(_state), AutoSave = true)]
+    public partial int Score { get; set; }
+}
+```
 
 ---
 
 ## Design Reference
 
-The full design specification is available in the original task description. Key design decisions:
+The full design specification is in `/Docs/New Orleans/New Orleans Features/` (original task description).
 
-1. **Property-driven generation**: Properties on grain classes drive all code generation
+**Key Design Decisions:**
+
+1. **Property-driven generation**: Properties on grain classes drive all code generation (not interface methods)
 2. **StateTask<T> for remote access**: Enables `await grain.Name` and `await (grain.Name << value)`
-3. **Backward compatible**: Traditional Get/Set methods still work
+3. **Backward compatible**: Traditional Get/Set methods still work alongside property syntax
 4. **Attribute-based configuration**: `[State]` and `[NotState]` control behavior
-5. **Partial types required**: Both interface and class must be partial for extension
+5. **Partial types required**: Both interface and class must be `partial` for extension
+6. **Thread-safe**: Each StateTask access creates fresh delegates (no shared state)
+
+---
+
+## How to Continue Development
+
+1. Read this file and the design spec for context
+2. Check the "Remaining Work" section above
+3. For Phase 3: Modify `StatePropertyCodeGenerator.ScanGrainClass()` to detect `partial` properties, add backing field generation
+4. For Phase 4: Add `IPersistentState` field detection, modify property implementation generation to use state mapping
+5. Update this document as work progresses
