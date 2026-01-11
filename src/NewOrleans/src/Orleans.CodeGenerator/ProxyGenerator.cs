@@ -21,10 +21,12 @@ namespace Orleans.CodeGenerator
         private const string CopyContextPoolMemberName = "CopyContextPool";
         private const string CodecProviderMemberName = "CodecProvider";
         private readonly CodeGenerator _codeGenerator;
+        private readonly StatePropertyGenerator _statePropertyGenerator;
 
         public ProxyGenerator(CodeGenerator codeGenerator)
         {
             _codeGenerator = codeGenerator;
+            _statePropertyGenerator = new StatePropertyGenerator(codeGenerator);
         }
 
         private LibraryTypes LibraryTypes => _codeGenerator.LibraryTypes;
@@ -39,6 +41,15 @@ namespace Orleans.CodeGenerator
 
             var ctors = GenerateConstructors(generatedClassName, fieldDescriptions, interfaceDescription.ProxyBaseType);
 
+            // Detect state properties from Get/Set method pairs and generate StateTask properties
+            var typeParameterSubstitutions = interfaceDescription.TypeParameters
+                .ToDictionary(tp => tp.Parameter, tp => tp.Name, SymbolEqualityComparer.Default);
+            var stateProperties = _statePropertyGenerator.DetectStateProperties(interfaceDescription);
+            var stateTaskProperties = _statePropertyGenerator.GenerateStateTaskProperties(
+                interfaceDescription,
+                stateProperties,
+                typeParameterSubstitutions);
+
             var classDeclaration = ClassDeclaration(generatedClassName)
                 .AddBaseListTypes(
                     SimpleBaseType(interfaceDescription.ProxyBaseType.ToTypeSyntax()),
@@ -47,7 +58,8 @@ namespace Orleans.CodeGenerator
                 .AddAttributeLists(CodeGenerator.GetGeneratedCodeAttributes())
                 .AddMembers(fieldDeclarations)
                 .AddMembers(ctors)
-                .AddMembers(proxyMethods);
+                .AddMembers(proxyMethods)
+                .AddMembers(stateTaskProperties);
 
             var typeParameters = interfaceDescription.TypeParameters;
             if (typeParameters.Count > 0)
