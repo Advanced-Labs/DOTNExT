@@ -13,7 +13,7 @@ This document tracks the implementation of property-based state access for Orlea
 | Interface generation | Complete | Generates Get/Set method signatures |
 | Class generation | Complete | Generates Get/Set method implementations |
 | Proxy generation | Complete | Generates StateTask properties on proxies |
-| Partial properties | Pending | Phase 3 - backing field generation |
+| Partial properties | Complete | Phase 3 - backing field generation |
 | Persistence mapping | Pending | Phase 4 - IPersistentState integration |
 
 ---
@@ -24,7 +24,7 @@ This document tracks the implementation of property-based state access for Orlea
 |-------|--------|--------|
 | Phase 1: Core Infrastructure | **Complete** | `claude/orleans-property-state-access-Oq9Xb` |
 | Phase 2: Code Generation | **Complete** | `claude/orleans-property-state-access-Oq9Xb` |
-| Phase 3: Partial Properties | Pending | - |
+| Phase 3: Partial Properties | **Complete** | `claude/merge-orleans-property-access-9dKa9` |
 | Phase 4: Persistence | Pending | - |
 
 **Last Updated:** 2026-01-11
@@ -50,6 +50,21 @@ The implementation is **property-driven**: developers define properties on grain
 ---
 
 ## Implementation History
+
+### 2026-01-11: Phase 3 Complete
+
+**Branch:** `claude/merge-orleans-property-access-9dKa9`
+
+Implemented:
+- `GeneratePartialPropertyImplementations()` method in StatePropertyCodeGenerator
+- Backing field generation for partial properties (`private T _name_backing = default!;`)
+- Partial property implementation generation (getter/setter using backing field)
+- Integration with CodeGenerator to include partial property implementations in class extension
+- Support for both reference types (with `default!` initialization) and value types
+
+**Key Files Modified:**
+- `StatePropertyCodeGenerator.cs` - Added backing field and property implementation generation
+- `CodeGenerator.cs` - Updated to call `GeneratePartialPropertyImplementations()` and combine with method implementations
 
 ### 2026-01-11: Phase 1 & 2 Complete
 
@@ -170,6 +185,91 @@ Modifications:
 
 ---
 
+### Phase 3: Partial Properties and Backing Fields
+
+**Goal:** Support C# partial properties with generated backing fields and implementations
+
+#### 3.1 GeneratePartialPropertyImplementations
+
+**Location:** `/src/NewOrleans/src/Orleans.CodeGenerator/StatePropertyCodeGenerator.cs`
+
+New method that generates:
+
+| Method | Purpose |
+|--------|---------|
+| `GeneratePartialPropertyImplementations(...)` | Main orchestrator for partial property code generation |
+| `GenerateBackingField(...)` | Creates `private T _name_backing = default!;` field |
+| `GeneratePartialPropertyImpl(...)` | Creates partial property with getter/setter using backing field |
+| `ToCamelCase(...)` | Converts `PropertyName` to `propertyName` for field naming |
+
+#### 3.2 Backing Field Generation
+
+For each partial property, a backing field is generated:
+
+```csharp
+// For reference types (string, objects, etc.)
+private string _name_backing = default!;
+
+// For value types (int, bool, DateTime, etc.)
+private int _score_backing;
+```
+
+**Naming Convention:** `_{camelCaseName}_backing`
+- `Name` → `_name_backing`
+- `Score` → `_score_backing`
+- `IsActive` → `_isActive_backing`
+
+#### 3.3 Partial Property Implementation
+
+The generated property implementation uses expression-bodied accessors:
+
+```csharp
+public partial string Name
+{
+    get => _name_backing;
+    set => _name_backing = value;
+}
+```
+
+For read-only properties (no setter in source):
+
+```csharp
+public partial DateTime CreatedAt
+{
+    get => _createdAt_backing;
+}
+```
+
+#### 3.4 CodeGenerator Integration
+
+**Location:** `/src/NewOrleans/src/Orleans.CodeGenerator/CodeGenerator.cs`
+
+Modified the state property processing to:
+1. Call `GeneratePartialPropertyImplementations()` for partial property implementations
+2. Combine partial property implementations with method implementations
+3. Generate a single partial class extension with all members (backing fields first, then property implementations, then methods)
+
+**Generated Output Order:**
+```csharp
+partial class PlayerGrain
+{
+    // 1. Backing fields
+    private string _name_backing = default!;
+    private int _score_backing;
+
+    // 2. Partial property implementations
+    public partial string Name { get => _name_backing; set => _name_backing = value; }
+    public partial int Score { get => _score_backing; set => _score_backing = value; }
+
+    // 3. Interface method implementations
+    Task<string> IPlayerGrain.GetName() => Task.FromResult(Name);
+    Task IPlayerGrain.SetName(string value) { Name = value; return Task.CompletedTask; }
+    // ...
+}
+```
+
+---
+
 ## How It Works
 
 ### Developer Writes
@@ -187,8 +287,9 @@ public partial interface IPlayerGrain : IGrainWithStringKey
 ```csharp
 public partial class PlayerGrain : Grain, IPlayerGrain
 {
-    public string Name { get; set; }
-    public int Score { get; set; }
+    public partial string Name { get; set; }  // Codegen implements this
+    public partial int Score { get; set; }    // Codegen implements this
+    public int Health { get; set; }           // Already complete, codegen skips impl
 
     // Custom methods implemented by developer
     public Task<PlayerSnapshot> GetSnapshotAsync() => ...;
@@ -206,17 +307,30 @@ partial interface IPlayerGrain
     Task SetName(string value);
     Task<int> GetScore();
     Task SetScore(int value);
+    Task<int> GetHealth();
+    Task SetHealth(int value);
 }
 ```
 
-**2. Class extension** (method implementations):
+**2. Class extension** (backing fields, property implementations, and method implementations):
 ```csharp
 partial class PlayerGrain
 {
+    // Backing fields for partial properties
+    private string _name_backing = default!;
+    private int _score_backing;
+
+    // Partial property implementations
+    public partial string Name { get => _name_backing; set => _name_backing = value; }
+    public partial int Score { get => _score_backing; set => _score_backing = value; }
+
+    // Interface method implementations (for all properties)
     Task<string> IPlayerGrain.GetName() => Task.FromResult(Name);
     Task IPlayerGrain.SetName(string value) { Name = value; return Task.CompletedTask; }
     Task<int> IPlayerGrain.GetScore() => Task.FromResult(Score);
     Task IPlayerGrain.SetScore(int value) { Score = value; return Task.CompletedTask; }
+    Task<int> IPlayerGrain.GetHealth() => Task.FromResult(Health);
+    Task IPlayerGrain.SetHealth(int value) { Health = value; return Task.CompletedTask; }
 }
 ```
 
@@ -318,25 +432,6 @@ public partial class PlayerGrain : Grain, IPlayerGrain
 
 ## Remaining Work
 
-### Phase 3: Partial Properties and Backing Fields
-
-**Goal:** Support C# partial properties with generated backing fields
-
-| Task | Status | Description |
-|------|--------|-------------|
-| Detect partial property declarations | Pending | Check for `partial` modifier on properties |
-| Generate backing fields | Pending | `private T _propertyName_backing;` |
-| Wire up property implementations | Pending | Connect getter/setter to backing field |
-
-**Expected usage:**
-```csharp
-public partial class PlayerGrain : Grain, IPlayerGrain
-{
-    // Codegen generates backing field and implementation
-    public partial string Name { get; set; }
-}
-```
-
 ### Phase 4: Persistence Integration
 
 **Goal:** Map properties to Orleans `IPersistentState<T>`
@@ -380,6 +475,8 @@ The full design specification is in `/Docs/New Orleans/New Orleans Features/` (o
 
 1. Read this file and the design spec for context
 2. Check the "Remaining Work" section above
-3. For Phase 3: Modify `StatePropertyCodeGenerator.ScanGrainClass()` to detect `partial` properties, add backing field generation
-4. For Phase 4: Add `IPersistentState` field detection, modify property implementation generation to use state mapping
-5. Update this document as work progresses
+3. For Phase 4: Add `IPersistentState` field detection, modify property implementation generation to use state mapping
+   - In `StatePropertyCodeGenerator.cs`, add detection for `[State(Persisted = true)]`
+   - Modify `GeneratePartialPropertyImpl()` to generate `_state.State.PropertyName` access
+   - Add `AutoSave` support to call `WriteStateAsync()` on set
+4. Update this document as work progresses

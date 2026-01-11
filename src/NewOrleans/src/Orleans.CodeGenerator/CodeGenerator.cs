@@ -299,12 +299,16 @@ namespace Orleans.CodeGenerator
                                     AddMember(interfaceNs, interfaceDecl);
                                 }
 
-                                // Generate partial class extension (Get/Set method implementations)
+                                // Generate partial class extension (Get/Set method implementations + partial property implementations)
                                 var classNs = GetGeneratedNamespaceName(symbol);
                                 var classMethods = StatePropertyCodeGenerator.GenerateGrainMethodImplementations(stateProperties);
-                                if (classMethods.Length > 0)
+                                var partialPropertyImpls = StatePropertyCodeGenerator.GeneratePartialPropertyImplementations(stateProperties);
+
+                                // Combine all class members: backing fields, partial property impls, and method impls
+                                var allClassMembers = partialPropertyImpls.Concat(classMethods).ToArray();
+                                if (allClassMembers.Length > 0)
                                 {
-                                    var classDecl = GeneratePartialClassExtension(symbol, classMethods);
+                                    var classDecl = GeneratePartialClassExtension(symbol, allClassMembers);
                                     AddMember(classNs, classDecl);
                                 }
                             }

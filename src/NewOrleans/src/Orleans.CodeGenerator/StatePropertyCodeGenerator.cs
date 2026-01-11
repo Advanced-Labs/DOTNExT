@@ -240,6 +240,124 @@ namespace Orleans.CodeGenerator
         }
 
         /// <summary>
+        /// Generates backing fields and property implementations for partial properties.
+        /// These are added to the partial grain class to complete the partial property declarations.
+        /// </summary>
+        /// <remarks>
+        /// For a partial property like:
+        /// <code>public partial string Name { get; set; }</code>
+        ///
+        /// This generates:
+        /// <code>
+        /// private string _name_backing = default!;
+        /// public partial string Name
+        /// {
+        ///     get => _name_backing;
+        ///     set => _name_backing = value;
+        /// }
+        /// </code>
+        /// </remarks>
+        public MemberDeclarationSyntax[] GeneratePartialPropertyImplementations(
+            IEnumerable<StatePropertyDescription> properties)
+        {
+            var members = new List<MemberDeclarationSyntax>();
+            var partialProperties = properties.Where(p => p.IsPartial).ToList();
+
+            if (partialProperties.Count == 0)
+            {
+                return Array.Empty<MemberDeclarationSyntax>();
+            }
+
+            foreach (var prop in partialProperties)
+            {
+                // Generate backing field: private T _propertyName_backing = default!;
+                var backingFieldName = $"_{ToCamelCase(prop.PropertyName)}_backing";
+                var backingField = GenerateBackingField(prop, backingFieldName);
+                members.Add(backingField);
+
+                // Generate partial property implementation
+                var propertyImpl = GeneratePartialPropertyImpl(prop, backingFieldName);
+                members.Add(propertyImpl);
+            }
+
+            return members.ToArray();
+        }
+
+        private FieldDeclarationSyntax GenerateBackingField(StatePropertyDescription prop, string fieldName)
+        {
+            var propertyType = prop.PropertyType.ToTypeSyntax();
+
+            // Create the variable declarator with optional initializer
+            VariableDeclaratorSyntax declarator;
+
+            // For reference types, initialize with default! to avoid nullable warnings
+            // For value types, just use default
+            if (prop.PropertyType.IsReferenceType)
+            {
+                // default!
+                declarator = VariableDeclarator(Identifier(fieldName))
+                    .WithInitializer(EqualsValueClause(
+                        PostfixUnaryExpression(
+                            SyntaxKind.SuppressNullableWarningExpression,
+                            LiteralExpression(SyntaxKind.DefaultLiteralExpression))));
+            }
+            else
+            {
+                // No initializer needed for value types - they default to 0/false/etc
+                declarator = VariableDeclarator(Identifier(fieldName));
+            }
+
+            return FieldDeclaration(
+                VariableDeclaration(propertyType)
+                    .WithVariables(SingletonSeparatedList(declarator)))
+                .WithModifiers(TokenList(Token(SyntaxKind.PrivateKeyword)));
+        }
+
+        private PropertyDeclarationSyntax GeneratePartialPropertyImpl(StatePropertyDescription prop, string backingFieldName)
+        {
+            var propertyType = prop.PropertyType.ToTypeSyntax();
+
+            // Getter: get => _fieldName;
+            var getter = AccessorDeclaration(SyntaxKind.GetAccessorDeclaration)
+                .WithExpressionBody(ArrowExpressionClause(IdentifierName(backingFieldName)))
+                .WithSemicolonToken(Token(SyntaxKind.SemicolonToken));
+
+            var accessors = new List<AccessorDeclarationSyntax> { getter };
+
+            // Setter (if property has one): set => _fieldName = value;
+            if (prop.Property.SetMethod is not null)
+            {
+                var setter = AccessorDeclaration(SyntaxKind.SetAccessorDeclaration)
+                    .WithExpressionBody(ArrowExpressionClause(
+                        AssignmentExpression(
+                            SyntaxKind.SimpleAssignmentExpression,
+                            IdentifierName(backingFieldName),
+                            IdentifierName("value"))))
+                    .WithSemicolonToken(Token(SyntaxKind.SemicolonToken));
+                accessors.Add(setter);
+            }
+
+            return PropertyDeclaration(propertyType, Identifier(prop.PropertyName))
+                .WithModifiers(TokenList(
+                    Token(SyntaxKind.PublicKeyword),
+                    Token(SyntaxKind.PartialKeyword)))
+                .WithAccessorList(AccessorList(List(accessors)));
+        }
+
+        private static string ToCamelCase(string name)
+        {
+            if (string.IsNullOrEmpty(name))
+                return name;
+
+            // If first char is already lowercase, return as-is
+            if (char.IsLower(name[0]))
+                return name;
+
+            // Convert first character to lowercase
+            return char.ToLowerInvariant(name[0]) + name.Substring(1);
+        }
+
+        /// <summary>
         /// Generates StateTask properties for the proxy class.
         /// </summary>
         public MemberDeclarationSyntax[] GenerateProxyStateTaskProperties(
