@@ -1,14 +1,13 @@
 <Project>
-
   <PropertyGroup>
     <ManagePackageVersionsCentrally Condition="'$(ManagePackageVersionsCentrally)' == ''">true</ManagePackageVersionsCentrally>
     <CentralPackageTransitivePinningEnabled>true</CentralPackageTransitivePinningEnabled>
     <!-- Using multiple feeds isn't supported by Maestro: https://github.com/dotnet/arcade/issues/14155. -->
     <NoWarn>$(NoWarn);NU1507</NoWarn>
   </PropertyGroup>
-
   <ItemGroup>
     <!-- Command-line-api dependencies -->
+    <PackageVersion Include="Microsoft.Orleans.Sdk" Version="9.2.1" />
     <PackageVersion Include="System.CommandLine" Version="$(SystemCommandLineVersion)" />
     <!-- MSBuild dependencies -->
     <PackageVersion Include="Microsoft.Build.Tasks.Core" Version="$(MicrosoftBuildVersion)" />
@@ -24,5 +23,4 @@
     <PackageVersion Include="NuGet.Protocol" Version="$(NuGetProtocolVersion)" />
     <PackageVersion Include="Octokit" Version="$(OctokitVersion)" />
   </ItemGroup>
-
 </Project>

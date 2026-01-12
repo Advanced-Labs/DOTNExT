@@ -3,6 +3,9 @@
     <OutputType>Exe</OutputType>
     <TargetFramework>net9.0</TargetFramework>
   </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Orleans.Sdk" />
+  </ItemGroup>
 
   <!-- Override the default FrameworkReference to use our custom version -->
   <ItemGroup>
