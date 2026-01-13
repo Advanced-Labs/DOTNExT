@@ -18,11 +18,14 @@ namespace Orleans.CodeGenerator
         {
             try
             {
-                var processName = Process.GetCurrentProcess().ProcessName.ToLowerInvariant();
-                if (processName.Contains("devenv") || processName.Contains("servicehub"))
-                {
-                    return;
-                }
+                // DOTNExT: Allow generator to run in VS2022 for proper IntelliSense
+                // The original Orleans code skipped IDE execution for performance,
+                // but this causes IntelliSense errors for generated partial members.
+                // var processName = Process.GetCurrentProcess().ProcessName.ToLowerInvariant();
+                // if (processName.Contains("devenv") || processName.Contains("servicehub"))
+                // {
+                //     return;
+                // }
 
                 if (!Debugger.IsAttached &&
                     context.AnalyzerConfigOptions.GlobalOptions.TryGetValue("build_property.orleans_designtimebuild", out var isDesignTimeBuild)
@@ -76,7 +79,7 @@ namespace Orleans.CodeGenerator
                 var syntax = codeGenerator.GenerateCode(context.CancellationToken);
                 var sourceString = syntax.NormalizeWhitespace().ToFullString();
                 var sourceText = SourceText.From(sourceString, Encoding.UTF8);
-                context.AddSource($"{context.Compilation.AssemblyName ?? "assembly"}.orleans.g.cs", sourceText);
+                context.AddSource($"{context.Compilation.AssemblyName ?? "assembly"}.norleans.g.cs", sourceText);
             }
             catch (Exception exception)
             {

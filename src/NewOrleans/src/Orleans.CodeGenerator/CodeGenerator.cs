@@ -35,6 +35,12 @@ namespace Orleans.CodeGenerator
         private readonly HashSet<INamedTypeSymbol> _visitedInterfaces = new(SymbolEqualityComparer.Default);
         private readonly List<string> DisabledWarnings = new() { "CS1591", "RS0016", "RS0041" };
 
+        // State property tracking: maps grain interface to its state properties
+        private readonly Dictionary<INamedTypeSymbol, List<StatePropertyCodeGenerator.StatePropertyDescription>> _statePropertiesByInterface = new(SymbolEqualityComparer.Default);
+
+        // Interfaces to visit - deferred to ensure state properties are detected first
+        private readonly HashSet<INamedTypeSymbol> _interfacesToVisit = new(SymbolEqualityComparer.Default);
+
         public CodeGenerator(Compilation compilation, CodeGeneratorOptions options)
         {
             Compilation = compilation;
@@ -47,6 +53,7 @@ namespace Orleans.CodeGenerator
             InvokableGenerator = new InvokableGenerator(this);
             MetadataGenerator = new MetadataGenerator(this);
             ActivatorGenerator = new ActivatorGenerator(this);
+            StatePropertyCodeGenerator = new StatePropertyCodeGenerator(this);
         }
 
         public Compilation Compilation { get; }
@@ -59,6 +66,7 @@ namespace Orleans.CodeGenerator
         internal InvokableGenerator InvokableGenerator { get; }
         internal MetadataGenerator MetadataGenerator { get; }
         internal ActivatorGenerator ActivatorGenerator { get; }
+        internal StatePropertyCodeGenerator StatePropertyCodeGenerator { get; }
 
         public CompilationUnitSyntax GenerateCode(CancellationToken cancellationToken)
         {
@@ -225,7 +233,9 @@ namespace Orleans.CodeGenerator
 
                     if (symbol.TypeKind == TypeKind.Interface)
                     {
-                        VisitInterface(symbol.OriginalDefinition);
+                        // Defer interface visiting until after all classes are scanned
+                        // This ensures state properties are detected before proxies are generated
+                        _interfacesToVisit.Add(symbol.OriginalDefinition);
                     }
 
                     if ((symbol.TypeKind == TypeKind.Class || symbol.TypeKind == TypeKind.Struct)
@@ -262,6 +272,55 @@ namespace Orleans.CodeGenerator
                             {
                                 MetadataModel.InvokableInterfaceImplementations.Add(symbol);
                                 break;
+                            }
+                        }
+
+                        // Scan grain classes for state properties (Phase 2)
+                        if (LibraryTypes.SupportsStateProperties)
+                        {
+                            var stateProperties = StatePropertyCodeGenerator.ScanGrainClass(symbol);
+                            if (stateProperties.Count > 0)
+                            {
+                                // Group properties by their grain interface
+                                foreach (var prop in stateProperties)
+                                {
+                                    var iface = prop.GrainInterface;
+                                    if (!_statePropertiesByInterface.TryGetValue(iface, out var list))
+                                    {
+                                        list = new List<StatePropertyCodeGenerator.StatePropertyDescription>();
+                                        _statePropertiesByInterface[iface] = list;
+                                    }
+                                    list.Add(prop);
+                                }
+
+                                // Generate partial interface extension (Get/Set method signatures + StateTask properties)
+                                // Partial types must be in the ORIGINAL namespace (not prefixed with codegen namespace)
+                                var interfaceNs = GetOriginalNamespaceName(stateProperties[0].GrainInterface);
+                                var interfaceMethods = StatePropertyCodeGenerator.GenerateInterfaceMethodSignatures(stateProperties);
+                                var interfaceStateTaskProps = StatePropertyCodeGenerator.GenerateInterfaceStateTaskProperties(stateProperties);
+                                var interfaceMembers = interfaceMethods.Concat(interfaceStateTaskProps).ToArray();
+                                if (interfaceMembers.Length > 0)
+                                {
+                                    var interfaceDecl = GeneratePartialInterfaceExtension(
+                                        stateProperties[0].GrainInterface,
+                                        interfaceMembers);
+                                    AddMember(interfaceNs, interfaceDecl);
+                                }
+
+                                // Generate partial class extension (Get/Set method implementations + partial property implementations + StateTask property implementations)
+                                // Partial types must be in the ORIGINAL namespace (not prefixed with codegen namespace)
+                                var classNs = GetOriginalNamespaceName(symbol);
+                                var classMethods = StatePropertyCodeGenerator.GenerateGrainMethodImplementations(stateProperties);
+                                var partialPropertyImpls = StatePropertyCodeGenerator.GeneratePartialPropertyImplementations(stateProperties);
+                                var stateTaskPropertyImpls = StatePropertyCodeGenerator.GenerateGrainStateTaskPropertyImplementations(stateProperties);
+
+                                // Combine all class members: backing fields, partial property impls, method impls, and StateTask property impls
+                                var allClassMembers = partialPropertyImpls.Concat(classMethods).Concat(stateTaskPropertyImpls).ToArray();
+                                if (allClassMembers.Length > 0)
+                                {
+                                    var classDecl = GeneratePartialClassExtension(symbol, allClassMembers);
+                                    AddMember(classNs, classDecl);
+                                }
                             }
                         }
                     }
@@ -330,6 +389,13 @@ namespace Orleans.CodeGenerator
                                 properties.Any(prop => prop.Name.Equals(prm.Name, StringComparison.Ordinal) && prop.IsCompilerGenerated())));
                     }
                 }
+            }
+
+            // Visit interfaces AFTER all classes have been scanned for state properties
+            // This ensures state property methods are known when generating proxies
+            foreach (var interfaceType in _interfacesToVisit)
+            {
+                VisitInterface(interfaceType);
             }
 
             // Generate serializers.
@@ -436,6 +502,16 @@ namespace Orleans.CodeGenerator
         {
             { Length: > 0 } ns => $"{CodeGeneratorName}.{ns}",
             _ => CodeGeneratorName
+        };
+
+        /// <summary>
+        /// Gets the original namespace (without codegen prefix) for partial type extensions.
+        /// Partial types must be in the same namespace as the original declaration.
+        /// </summary>
+        public static string GetOriginalNamespaceName(ITypeSymbol type) => type.GetNamespaceAndNesting() switch
+        {
+            { Length: > 0 } ns => ns,
+            _ => string.Empty
         };
 
         public void AddMember(string ns, MemberDeclarationSyntax member)
@@ -627,6 +703,19 @@ namespace Orleans.CodeGenerator
                     .AddArgumentListArguments(
                         AttributeArgument(ParseName("global::System.ComponentModel.EditorBrowsableState").Member("Never"))),
                         Attribute(ParseName("global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute"))
+            );
+
+        // Attributes for interfaces - ExcludeFromCodeCoverageAttribute is not valid on interfaces
+        internal static AttributeListSyntax GetGeneratedCodeAttributesForInterface() => GeneratedCodeAttributeSyntaxForInterface;
+        private static readonly AttributeListSyntax GeneratedCodeAttributeSyntaxForInterface =
+            AttributeList().AddAttributes(
+                Attribute(ParseName("global::System.CodeDom.Compiler.GeneratedCodeAttribute"))
+                    .AddArgumentListArguments(
+                        AttributeArgument(CodeGeneratorName.GetLiteralExpression()),
+                        AttributeArgument(typeof(CodeGenerator).Assembly.GetName().Version.ToString().GetLiteralExpression())),
+                Attribute(ParseName("global::System.ComponentModel.EditorBrowsableAttribute"))
+                    .AddArgumentListArguments(
+                        AttributeArgument(ParseName("global::System.ComponentModel.EditorBrowsableState").Member("Never")))
             );
 
         internal static AttributeSyntax GetMethodImplAttributeSyntax() => MethodImplAttributeSyntax;
@@ -834,6 +923,67 @@ namespace Orleans.CodeGenerator
             }
 
             return proxyMethodDescription;
+        }
+
+        /// <summary>
+        /// Gets state properties associated with an interface, if any.
+        /// Used by ProxyGenerator to add StateTask properties.
+        /// </summary>
+        internal List<StatePropertyCodeGenerator.StatePropertyDescription> GetStatePropertiesForInterface(INamedTypeSymbol interfaceType)
+        {
+            if (_statePropertiesByInterface.TryGetValue(interfaceType.OriginalDefinition, out var properties))
+            {
+                return properties;
+            }
+            return new List<StatePropertyCodeGenerator.StatePropertyDescription>();
+        }
+
+        /// <summary>
+        /// Generates a partial interface extension with the given members.
+        /// </summary>
+        private InterfaceDeclarationSyntax GeneratePartialInterfaceExtension(
+            INamedTypeSymbol interfaceType,
+            MemberDeclarationSyntax[] members)
+        {
+            var interfaceDecl = InterfaceDeclaration(interfaceType.Name)
+                .WithModifiers(TokenList(
+                    Token(SyntaxKind.PartialKeyword)))
+                .AddAttributeLists(GetGeneratedCodeAttributesForInterface())
+                .AddMembers(members);
+
+            // Add type parameters if present
+            if (interfaceType.TypeParameters.Length > 0)
+            {
+                interfaceDecl = interfaceDecl.WithTypeParameterList(
+                    TypeParameterList(SeparatedList(
+                        interfaceType.TypeParameters.Select(tp => TypeParameter(tp.Name)))));
+            }
+
+            return interfaceDecl;
+        }
+
+        /// <summary>
+        /// Generates a partial class extension with the given members.
+        /// </summary>
+        private ClassDeclarationSyntax GeneratePartialClassExtension(
+            INamedTypeSymbol classType,
+            MemberDeclarationSyntax[] members)
+        {
+            var classDecl = ClassDeclaration(classType.Name)
+                .WithModifiers(TokenList(
+                    Token(SyntaxKind.PartialKeyword)))
+                .AddAttributeLists(GetGeneratedCodeAttributes())
+                .AddMembers(members);
+
+            // Add type parameters if present
+            if (classType.TypeParameters.Length > 0)
+            {
+                classDecl = classDecl.WithTypeParameterList(
+                    TypeParameterList(SeparatedList(
+                        classType.TypeParameters.Select(tp => TypeParameter(tp.Name)))));
+            }
+
+            return classDecl;
         }
     }
 }

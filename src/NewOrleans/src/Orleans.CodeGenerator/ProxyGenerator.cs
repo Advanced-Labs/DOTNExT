@@ -49,6 +49,46 @@ namespace Orleans.CodeGenerator
                 .AddMembers(ctors)
                 .AddMembers(proxyMethods);
 
+            // Add state property support (Phase 2)
+            // This includes: proxy methods (GetX/SetX), invokable classes, and StateTask properties
+            var stateProperties = _codeGenerator.GetStatePropertiesForInterface(interfaceDescription.InterfaceType);
+            if (stateProperties.Count > 0)
+            {
+                var typeParameterSubstitutions = new Dictionary<ITypeParameterSymbol, string>(SymbolEqualityComparer.Default);
+                foreach (var (name, param) in interfaceDescription.TypeParameters)
+                {
+                    typeParameterSubstitutions[param] = name;
+                }
+
+                // Generate proxy methods (GetX/SetX) and their invokables
+                var (stateProxyMethods, invokableInfos) = _codeGenerator.StatePropertyCodeGenerator.GenerateStatePropertyProxyMethodsAndInvokables(
+                    stateProperties,
+                    typeParameterSubstitutions,
+                    interfaceDescription.ProxyBaseType);
+
+                // Add proxy methods to the class
+                if (stateProxyMethods.Length > 0)
+                {
+                    classDeclaration = classDeclaration.AddMembers(stateProxyMethods);
+                }
+
+                // Emit invokable classes and register them for serialization
+                foreach (var invokableInfo in invokableInfos)
+                {
+                    _codeGenerator.AddMember(invokableInfo.Namespace, invokableInfo.ClassDeclaration);
+                }
+
+                // Generate StateTask<T> properties that wrap the proxy methods
+                var stateTaskProperties = _codeGenerator.StatePropertyCodeGenerator.GenerateProxyStateTaskProperties(
+                    stateProperties,
+                    typeParameterSubstitutions);
+
+                if (stateTaskProperties.Length > 0)
+                {
+                    classDeclaration = classDeclaration.AddMembers(stateTaskProperties);
+                }
+            }
+
             var typeParameters = interfaceDescription.TypeParameters;
             if (typeParameters.Count > 0)
             {
