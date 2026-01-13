@@ -407,10 +407,10 @@ namespace Orleans.CodeGenerator
                     GenericName(
                         Identifier("global::Orleans.ILifecycleParticipant"),
                         TypeArgumentList(SingletonSeparatedList<TypeSyntax>(
-                            ParseTypeName("global::Orleans.IGrainLifecycle"))))))
+                            ParseTypeName("global::Orleans.Runtime.IGrainLifecycle"))))))
                 .WithParameterList(ParameterList(SingletonSeparatedList(
                     Parameter(Identifier("lifecycle"))
-                        .WithType(ParseTypeName("global::Orleans.IGrainLifecycle")))))
+                        .WithType(ParseTypeName("global::Orleans.Runtime.IGrainLifecycle")))))
                 .WithBody(Block(statements));
         }
 

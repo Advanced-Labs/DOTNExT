@@ -367,7 +367,7 @@ namespace Orleans.CodeGenerator
                                     var eventClassDecl = GeneratePartialClassExtensionWithBaseTypes(
                                         symbol,
                                         eventClassMembers,
-                                        new[] { "global::Orleans.ILifecycleParticipant<global::Orleans.IGrainLifecycle>" });
+                                        new[] { "global::Orleans.ILifecycleParticipant<global::Orleans.Runtime.IGrainLifecycle>" });
                                     AddMember(eventClassNs, eventClassDecl);
                                 }
                             }
@@ -491,6 +491,7 @@ namespace Orleans.CodeGenerator
                         SyntaxFactory.TriviaList(
                             new List<SyntaxTrivia>
                             {
+                                Trivia(NullableDirectiveTrivia(Token(SyntaxKind.EnableKeyword), isActive: true)),
                                 Trivia(
                                    PragmaWarningDirectiveTrivia(
                                        Token(SyntaxKind.DisableKeyword),
