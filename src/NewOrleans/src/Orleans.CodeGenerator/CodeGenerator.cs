@@ -38,7 +38,10 @@ namespace Orleans.CodeGenerator
         // State property tracking: maps grain interface to its state properties
         private readonly Dictionary<INamedTypeSymbol, List<StatePropertyCodeGenerator.StatePropertyDescription>> _statePropertiesByInterface = new(SymbolEqualityComparer.Default);
 
-        // Interfaces to visit - deferred to ensure state properties are detected first
+        // Event tracking: maps grain interface to its events
+        private readonly Dictionary<INamedTypeSymbol, List<EventCodeGenerator.EventDescription>> _eventsByInterface = new(SymbolEqualityComparer.Default);
+
+        // Interfaces to visit - deferred to ensure state properties and events are detected first
         private readonly HashSet<INamedTypeSymbol> _interfacesToVisit = new(SymbolEqualityComparer.Default);
 
         public CodeGenerator(Compilation compilation, CodeGeneratorOptions options)
@@ -54,6 +57,7 @@ namespace Orleans.CodeGenerator
             MetadataGenerator = new MetadataGenerator(this);
             ActivatorGenerator = new ActivatorGenerator(this);
             StatePropertyCodeGenerator = new StatePropertyCodeGenerator(this);
+            EventCodeGenerator = new EventCodeGenerator(this);
         }
 
         public Compilation Compilation { get; }
@@ -67,6 +71,7 @@ namespace Orleans.CodeGenerator
         internal MetadataGenerator MetadataGenerator { get; }
         internal ActivatorGenerator ActivatorGenerator { get; }
         internal StatePropertyCodeGenerator StatePropertyCodeGenerator { get; }
+        internal EventCodeGenerator EventCodeGenerator { get; }
 
         public CompilationUnitSyntax GenerateCode(CancellationToken cancellationToken)
         {
@@ -320,6 +325,50 @@ namespace Orleans.CodeGenerator
                                 {
                                     var classDecl = GeneratePartialClassExtension(symbol, allClassMembers);
                                     AddMember(classNs, classDecl);
+                                }
+                            }
+                        }
+
+                        // Scan grain classes for events (NewOrleans Events)
+                        if (LibraryTypes.SupportsEvents)
+                        {
+                            var grainEvents = EventCodeGenerator.ScanGrainClass(symbol);
+                            if (grainEvents.Count > 0)
+                            {
+                                // Group events by their grain interface
+                                foreach (var evt in grainEvents)
+                                {
+                                    var iface = evt.GrainInterface;
+                                    if (!_eventsByInterface.TryGetValue(iface, out var list))
+                                    {
+                                        list = new List<EventCodeGenerator.EventDescription>();
+                                        _eventsByInterface[iface] = list;
+                                    }
+                                    list.Add(evt);
+                                }
+
+                                // Generate partial interface extension (event declarations + subscription methods)
+                                var eventInterfaceNs = GetOriginalNamespaceName(grainEvents[0].GrainInterface);
+                                var eventInterfaceMembers = EventCodeGenerator.GenerateInterfaceMembers(grainEvents);
+                                if (eventInterfaceMembers.Length > 0)
+                                {
+                                    var eventInterfaceDecl = GeneratePartialInterfaceExtension(
+                                        grainEvents[0].GrainInterface,
+                                        eventInterfaceMembers);
+                                    AddMember(eventInterfaceNs, eventInterfaceDecl);
+                                }
+
+                                // Generate partial class extension (stream fields, lifecycle, bridge handlers, subscription implementations)
+                                var eventClassNs = GetOriginalNamespaceName(symbol);
+                                var eventClassMembers = EventCodeGenerator.GenerateGrainMembers(grainEvents);
+                                if (eventClassMembers.Length > 0)
+                                {
+                                    // Add ILifecycleParticipant<IGrainLifecycle> base type
+                                    var eventClassDecl = GeneratePartialClassExtensionWithBaseTypes(
+                                        symbol,
+                                        eventClassMembers,
+                                        new[] { "global::Orleans.ILifecycleParticipant<global::Orleans.IGrainLifecycle>" });
+                                    AddMember(eventClassNs, eventClassDecl);
                                 }
                             }
                         }
@@ -984,6 +1033,51 @@ namespace Orleans.CodeGenerator
             }
 
             return classDecl;
+        }
+
+        /// <summary>
+        /// Generates a partial class extension with the given members and base types.
+        /// </summary>
+        private ClassDeclarationSyntax GeneratePartialClassExtensionWithBaseTypes(
+            INamedTypeSymbol classType,
+            MemberDeclarationSyntax[] members,
+            string[] baseTypes)
+        {
+            var classDecl = ClassDeclaration(classType.Name)
+                .WithModifiers(TokenList(
+                    Token(SyntaxKind.PartialKeyword)))
+                .AddAttributeLists(GetGeneratedCodeAttributes())
+                .AddMembers(members);
+
+            // Add base types
+            if (baseTypes.Length > 0)
+            {
+                var baseList = BaseList(SeparatedList(
+                    baseTypes.Select(bt => (BaseTypeSyntax)SimpleBaseType(ParseTypeName(bt)))));
+                classDecl = classDecl.WithBaseList(baseList);
+            }
+
+            // Add type parameters if present
+            if (classType.TypeParameters.Length > 0)
+            {
+                classDecl = classDecl.WithTypeParameterList(
+                    TypeParameterList(SeparatedList(
+                        classType.TypeParameters.Select(tp => TypeParameter(tp.Name)))));
+            }
+
+            return classDecl;
+        }
+
+        /// <summary>
+        /// Gets events for a grain interface (used by ProxyGenerator).
+        /// </summary>
+        public List<EventCodeGenerator.EventDescription> GetEventsForInterface(INamedTypeSymbol grainInterface)
+        {
+            if (_eventsByInterface.TryGetValue(grainInterface, out var events))
+            {
+                return events;
+            }
+            return new List<EventCodeGenerator.EventDescription>();
         }
     }
 }
