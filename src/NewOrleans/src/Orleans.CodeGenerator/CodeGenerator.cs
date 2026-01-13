@@ -33,7 +33,7 @@ namespace Orleans.CodeGenerator
         private readonly Dictionary<string, List<MemberDeclarationSyntax>> _namespacedMembers = new();
         private readonly Dictionary<InvokableMethodId, InvokableMethodDescription> _invokableMethodDescriptions = new();
         private readonly HashSet<INamedTypeSymbol> _visitedInterfaces = new(SymbolEqualityComparer.Default);
-        private readonly List<string> DisabledWarnings = new() { "CS1591", "RS0016", "RS0041" };
+        private readonly List<string> DisabledWarnings = new() { "CS1591", "RS0016", "RS0041", "CS8669" };
 
         // State property tracking: maps grain interface to its state properties
         private readonly Dictionary<INamedTypeSymbol, List<StatePropertyCodeGenerator.StatePropertyDescription>> _statePropertiesByInterface = new(SymbolEqualityComparer.Default);
@@ -491,7 +491,6 @@ namespace Orleans.CodeGenerator
                         SyntaxFactory.TriviaList(
                             new List<SyntaxTrivia>
                             {
-                                Trivia(NullableDirectiveTrivia(Token(SyntaxKind.EnableKeyword), isActive: true)),
                                 Trivia(
                                    PragmaWarningDirectiveTrivia(
                                        Token(SyntaxKind.DisableKeyword),
