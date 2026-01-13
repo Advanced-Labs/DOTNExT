@@ -839,15 +839,17 @@ namespace Orleans.CodeGenerator
                                 IdentifierName("StreamId")))))));
 
             // Build the subscribe lambda
+            // Lambda signature: (T payload, StreamSequenceToken token) => Task
+            var tokenType = ParseTypeName("global::Orleans.Streams.StreamSequenceToken");
             ExpressionSyntax subscribeLambda;
             if (withHandler)
             {
-                // async (payload, token) => { await handler(payload); __RaiseEventName(payload); }
+                // async (T payload, StreamSequenceToken token) => { await handler(payload); __RaiseEventName(payload); }
                 subscribeLambda = ParenthesizedLambdaExpression(
                     ParameterList(SeparatedList(new[]
                     {
-                        Parameter(Identifier("payload")),
-                        Parameter(Identifier("token"))
+                        Parameter(Identifier("payload")).WithType(payloadTypeSyntax),
+                        Parameter(Identifier("token")).WithType(tokenType)
                     })),
                     Block(
                         ExpressionStatement(
@@ -864,12 +866,12 @@ namespace Orleans.CodeGenerator
             }
             else
             {
-                // (payload, token) => { __RaiseEventName(payload); return Task.CompletedTask; }
+                // (T payload, StreamSequenceToken token) => { __RaiseEventName(payload); return Task.CompletedTask; }
                 subscribeLambda = ParenthesizedLambdaExpression(
                     ParameterList(SeparatedList(new[]
                     {
-                        Parameter(Identifier("payload")),
-                        Parameter(Identifier("token"))
+                        Parameter(Identifier("payload")).WithType(payloadTypeSyntax),
+                        Parameter(Identifier("token")).WithType(tokenType)
                     })),
                     Block(
                         ExpressionStatement(
@@ -883,7 +885,7 @@ namespace Orleans.CodeGenerator
                             IdentifierName("CompletedTask")))));
             }
 
-            // var handle = await stream.SubscribeAsync(lambda);
+            // var handle = await Orleans.Streams.AsyncObservableExtensions.SubscribeAsync(stream, lambda);
             statements.Add(LocalDeclarationStatement(
                 VariableDeclaration(IdentifierName("var"))
                     .AddVariables(VariableDeclarator("handle")
@@ -892,10 +894,13 @@ namespace Orleans.CodeGenerator
                                 InvocationExpression(
                                     MemberAccessExpression(
                                         SyntaxKind.SimpleMemberAccessExpression,
-                                        IdentifierName("stream"),
+                                        ParseTypeName("global::Orleans.Streams.AsyncObservableExtensions"),
                                         IdentifierName("SubscribeAsync")))
-                                    .WithArgumentList(ArgumentList(SingletonSeparatedList(
-                                        Argument(subscribeLambda))))))))));
+                                    .WithArgumentList(ArgumentList(SeparatedList(new[]
+                                    {
+                                        Argument(IdentifierName("stream")),
+                                        Argument(subscribeLambda)
+                                    }))))))))));
 
             // return new EventSubscription<T>(handle, streamId);
             statements.Add(ReturnStatement(
@@ -937,7 +942,7 @@ namespace Orleans.CodeGenerator
             // private IAsyncStream<T> __GetEventStream<T>(string eventNamespace)
             var statements = new List<StatementSyntax>();
 
-            // var streamProvider = this.GetStreamProvider("SMS");
+            // var streamProvider = ServiceProviderKeyedServiceExtensions.GetRequiredKeyedService<IStreamProvider>(this.Shared.ServiceProvider, "SMS");
             statements.Add(LocalDeclarationStatement(
                 VariableDeclaration(IdentifierName("var"))
                     .AddVariables(VariableDeclarator("streamProvider")
@@ -945,12 +950,24 @@ namespace Orleans.CodeGenerator
                             InvocationExpression(
                                 MemberAccessExpression(
                                     SyntaxKind.SimpleMemberAccessExpression,
-                                    ThisExpression(),
-                                    IdentifierName("GetStreamProvider")))
-                                .WithArgumentList(ArgumentList(SingletonSeparatedList(
+                                    ParseTypeName("global::Microsoft.Extensions.DependencyInjection.ServiceProviderKeyedServiceExtensions"),
+                                    GenericName(
+                                        Identifier("GetRequiredKeyedService"),
+                                        TypeArgumentList(SingletonSeparatedList<TypeSyntax>(
+                                            ParseTypeName("global::Orleans.Streams.IStreamProvider"))))))
+                                .WithArgumentList(ArgumentList(SeparatedList(new[]
+                                {
+                                    Argument(MemberAccessExpression(
+                                        SyntaxKind.SimpleMemberAccessExpression,
+                                        MemberAccessExpression(
+                                            SyntaxKind.SimpleMemberAccessExpression,
+                                            ThisExpression(),
+                                            IdentifierName("Shared")),
+                                        IdentifierName("ServiceProvider"))),
                                     Argument(LiteralExpression(
                                         SyntaxKind.StringLiteralExpression,
-                                        Literal("SMS")))))))))));
+                                        Literal("SMS")))
+                                })))))))));
 
             // var grainKey = this.GetPrimaryKeyXxx();
             var keyExtraction = GetProxyKeyExtractionExpression(evt.KeyType);
