@@ -901,7 +901,7 @@ namespace Orleans.CodeGenerator
             statements.Add(ReturnStatement(
                 ObjectCreationExpression(
                     GenericName(
-                        Identifier("global::Orleans.Runtime.EventSubscription"),
+                        Identifier("global::Orleans.Streaming.EventSubscription"),
                         TypeArgumentList(SingletonSeparatedList(payloadTypeSyntax))))
                     .WithArgumentList(ArgumentList(SeparatedList(new[]
                     {

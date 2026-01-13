@@ -195,7 +195,7 @@ namespace Orleans.CodeGenerator
 
             // Event support types
             IEventSubscription_1 = TypeOrDefault("Orleans.IEventSubscription`1");
-            EventSubscription_1 = TypeOrDefault("Orleans.Runtime.EventSubscription`1");
+            EventSubscription_1 = TypeOrDefault("Orleans.Streaming.EventSubscription`1");
             NotEventAttribute = TypeOrDefault("Orleans.NotEventAttribute");
             EventHandler = Type("System.EventHandler");
             EventHandler_1 = Type("System.EventHandler`1");

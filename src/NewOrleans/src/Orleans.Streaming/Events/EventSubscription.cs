@@ -2,7 +2,7 @@ using System;
 using System.Threading.Tasks;
 using Orleans.Streams;
 
-namespace Orleans.Runtime
+namespace Orleans.Streaming
 {
     /// <summary>
     /// Default implementation of <see cref="IEventSubscription{T}"/>.
