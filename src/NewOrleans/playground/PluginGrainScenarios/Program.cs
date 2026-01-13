@@ -16,8 +16,15 @@ namespace PluginGrainScenarios;
 /// </summary>
 public static class Program
 {
-    public static async Task Main()
+    public static async Task Main(string[] args)
     {
+        // Support non-interactive mode via command-line argument
+        if (args.Length > 0)
+        {
+            await RunNonInteractive(args[0]);
+            return;
+        }
+
         AnsiConsole.Write(new FigletText("Plugin Grain Scenarios").Color(Color.Blue));
         AnsiConsole.MarkupLine("[grey]Testing MDCP-based grain loading, unloading, and isolation[/]");
         AnsiConsole.WriteLine();
@@ -37,6 +44,7 @@ public static class Program
                         "5. Split Grain Assemblies",
                         "6. Grain Type Directory (GTD)",
                         "7. Dynamic Grain Client",
+                        "8. State Property Access",
                         "Exit"
                     }));
 
@@ -69,6 +77,52 @@ public static class Program
         }
     }
 
+    private static async Task RunNonInteractive(string scenarioNumber)
+    {
+        Console.WriteLine($"Running scenario {scenarioNumber} non-interactively...");
+        Console.WriteLine();
+
+        try
+        {
+            switch (scenarioNumber)
+            {
+                case "1":
+                    await Scenarios.SingleSiloBasicLoadUnload.RunAsync();
+                    break;
+                case "2":
+                    await Scenarios.MdcpIsolationVerification.RunAsync();
+                    break;
+                case "3":
+                    await Scenarios.MultiSiloManifestPropagation.RunAsync();
+                    break;
+                case "4":
+                    await Scenarios.AssemblyUnloadMemoryReclaim.RunAsync();
+                    break;
+                case "5":
+                    await Scenarios.SplitGrainAssemblies.RunAsync();
+                    break;
+                case "6":
+                    await Scenarios.GrainTypeDirectory.RunAsync();
+                    break;
+                case "7":
+                    await Scenarios.DynamicGrainClient.RunAsync();
+                    break;
+                case "8":
+                    await Scenarios.StatePropertyAccessScenario.RunAsync();
+                    break;
+                default:
+                    Console.WriteLine($"Unknown scenario: {scenarioNumber}");
+                    Console.WriteLine("Valid scenarios: 1-8");
+                    break;
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error: {ex.Message}");
+            Console.WriteLine(ex.StackTrace);
+        }
+    }
+
     private static async Task RunScenarioAsync(string scenario)
     {
         switch (scenario)
@@ -93,6 +147,9 @@ public static class Program
                 break;
             case "7. Dynamic Grain Client":
                 await Scenarios.DynamicGrainClient.RunAsync();
+                break;
+            case "8. State Property Access":
+                await Scenarios.StatePropertyAccessScenario.RunAsync();
                 break;
         }
     }
