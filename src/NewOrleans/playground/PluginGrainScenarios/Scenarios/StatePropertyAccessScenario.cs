@@ -23,6 +23,8 @@ public static class StatePropertyAccessScenario
     private static int _passCount;
     private static int _failCount;
 
+   
+
     public static async Task RunAsync()
     {
         _passCount = 0;
@@ -91,6 +93,16 @@ public static class StatePropertyAccessScenario
         AnsiConsole.MarkupLine("[blue]───────────────────────────────────────────────────────[/]");
 
         await TestDirectPropertyAccess(grainFactory);
+        AnsiConsole.WriteLine();
+
+        // ════════════════════════════════════════════════════════════════════
+        // Phase 6: IPersistentState property mapping
+        // ════════════════════════════════════════════════════════════════════
+        AnsiConsole.MarkupLine("[blue]───────────────────────────────────────────────────────[/]");
+        AnsiConsole.MarkupLine("[blue]Phase 6: IPersistentState property mapping[/]");
+        AnsiConsole.MarkupLine("[blue]───────────────────────────────────────────────────────[/]");
+
+        await TestPersistedPropertyAccess(grainFactory);
         AnsiConsole.WriteLine();
 
         // Cleanup
@@ -499,6 +511,164 @@ public static class StatePropertyAccessScenario
         catch (Exception ex)
         {
             Fail($"Custom method: {ex.Message}");
+        }
+    }
+
+    /// <summary>
+    /// Phase 6: Test IPersistentState property mapping.
+    /// This tests the [State(Persisted = true, StateProperty = "...")] feature
+    /// where partial properties are mapped to IPersistentState&lt;T&gt;.State.
+    /// </summary>
+    private static async Task TestPersistedPropertyAccess(IGrainFactory grainFactory)
+    {
+        AnsiConsole.MarkupLine("[grey]Testing IPersistentState property mapping...[/]");
+
+        var grainId = $"persisted-test-{Guid.NewGuid():N}";
+        var grain = grainFactory.GetGrain<IPersistedPropertyTestGrain>(grainId);
+
+        // Test 1: Basic persisted property set via method (generated SetName)
+        try
+        {
+            await grain.SetName("PersistedPlayer");
+            Pass("SetName() method works on persisted property");
+        }
+        catch (Exception ex)
+        {
+            Fail($"SetName on persisted property: {ex.Message}");
+        }
+
+        // Test 2: Basic persisted property get via method (generated GetName)
+        try
+        {
+            var name = await grain.GetName();
+            if (name == "PersistedPlayer")
+                Pass("GetName() returns persisted value");
+            else
+                Fail($"Expected 'PersistedPlayer', got '{name}'");
+        }
+        catch (Exception ex)
+        {
+            Fail($"GetName on persisted property: {ex.Message}");
+        }
+
+        // Test 3: Property-style access on persisted property (if proxy has StateTask<T>)
+        try
+        {
+            await (grain.Name << "UpdatedViaProperty");
+            string name = await grain.Name;
+            if (name == "UpdatedViaProperty")
+                Pass("Property-style (grain.Name) works on persisted property");
+            else
+                Fail($"Expected 'UpdatedViaProperty', got '{name}'");
+        }
+        catch (Exception ex)
+        {
+            Fail($"Property-style on persisted: {ex.Message}");
+        }
+
+        // Test 4: AutoSave property (Score) - changes should persist automatically
+        try
+        {
+            await grain.SetScore(500);
+            // Score has AutoSave = true, so it should call WriteStateAsync automatically
+
+            // Get a fresh grain reference to verify persistence
+            var grain2 = grainFactory.GetGrain<IPersistedPropertyTestGrain>(grainId);
+            await grain2.RefreshState(); // Force read from storage
+            var score = await grain2.GetScore();
+
+            if (score == 500)
+                Pass("AutoSave property persists automatically");
+            else
+                Fail($"AutoSave: Expected 500, got {score} (may not have persisted)");
+        }
+        catch (Exception ex)
+        {
+            Fail($"AutoSave property: {ex.Message}");
+        }
+
+        // Test 5: Non-AutoSave property requires manual save
+        try
+        {
+            await grain.SetLevel(10);
+            await grain.SaveState(); // Manually save
+
+            var grain3 = grainFactory.GetGrain<IPersistedPropertyTestGrain>(grainId);
+            await grain3.RefreshState();
+            var level = await grain3.GetLevel();
+
+            if (level == 10)
+                Pass("Non-AutoSave property persists after manual SaveState()");
+            else
+                Fail($"Non-AutoSave: Expected 10, got {level}");
+        }
+        catch (Exception ex)
+        {
+            Fail($"Non-AutoSave property: {ex.Message}");
+        }
+
+        // Test 6: Non-persisted property (SessionId) - should use backing field
+        try
+        {
+            await grain.SetSessionId("session-123");
+            var sessionId = await grain.GetSessionId();
+
+            if (sessionId == "session-123")
+                Pass("Non-persisted property (SessionId) works with backing field");
+            else
+                Fail($"Expected 'session-123', got '{sessionId}'");
+        }
+        catch (Exception ex)
+        {
+            Fail($"Non-persisted property: {ex.Message}");
+        }
+
+        // Test 7: Custom method GetSummary() coexists with persisted properties
+        try
+        {
+            await grain.SetName("TestPlayer");
+            await grain.SetScore(999);
+            await grain.SetLevel(5);
+
+            var summary = await grain.GetSummary();
+            if (summary == "Player 'TestPlayer' - Score: 999, Level: 5")
+                Pass("Custom method GetSummary() coexists with persisted properties");
+            else
+                Fail($"Expected summary format, got '{summary}'");
+        }
+        catch (Exception ex)
+        {
+            Fail($"Custom method: {ex.Message}");
+        }
+
+        // Test 8: Verify persisted vs non-persisted after "grain death" simulation
+        // Note: In-memory storage won't truly persist across silo restarts,
+        // but we can verify the state object mapping works correctly
+        try
+        {
+            await grain.SetName("PersistMe");
+            await grain.SetSessionId("LoseMe");
+            await grain.SaveState();
+
+            // Refresh to simulate re-reading from storage
+            await grain.RefreshState();
+
+            var name = await grain.GetName();
+            var sessionId = await grain.GetSessionId();
+
+            // Name should come from storage, SessionId from backing field (still in memory)
+            if (name == "PersistMe")
+                Pass("Persisted property survives RefreshState()");
+            else
+                Fail($"Persisted name: Expected 'PersistMe', got '{name}'");
+
+            // SessionId may or may not survive depending on implementation
+            // (it's non-persisted so uses backing field)
+            AnsiConsole.MarkupLine($"[grey]  (Non-persisted SessionId after refresh: '{sessionId}')[/]");
+        }
+        catch (Exception ex)
+        {
+            Fail($"Persistence verification: {ex.Message}");
         }
     }
 }

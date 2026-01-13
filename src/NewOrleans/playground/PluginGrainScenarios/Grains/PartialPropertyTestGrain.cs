@@ -24,6 +24,7 @@ public partial interface IPartialPropertyTestGrain : IGrainWithStringKey
 {
     // Custom method - this is user-defined, not generated
     Task<string> GetCombinedInfo();
+     
 }
 
 /// <summary>
@@ -45,6 +46,9 @@ public partial class PartialPropertyTestGrain : Grain, IPartialPropertyTestGrain
     // - Generate proxy methods on the proxy class
     // - Generate StateTask<T> properties on the proxy class
     // ========================================================================
+
+    //public ResolveEventHandler EventHandler
+    
 
     /// <summary>
     /// A partial string property. Code generator will generate:
