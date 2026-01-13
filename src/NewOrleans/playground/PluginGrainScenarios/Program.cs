@@ -45,6 +45,7 @@ public static class Program
                         "6. Grain Type Directory (GTD)",
                         "7. Dynamic Grain Client",
                         "8. State Property Access",
+                        "9. NewOrleans Events",
                         "Exit"
                     }));
 
@@ -110,9 +111,12 @@ public static class Program
                 case "8":
                     await Scenarios.StatePropertyAccessScenario.RunAsync();
                     break;
+                case "9":
+                    await Scenarios.EventScenario.RunAsync();
+                    break;
                 default:
                     Console.WriteLine($"Unknown scenario: {scenarioNumber}");
-                    Console.WriteLine("Valid scenarios: 1-8");
+                    Console.WriteLine("Valid scenarios: 1-9");
                     break;
             }
         }
@@ -150,6 +154,9 @@ public static class Program
                 break;
             case "8. State Property Access":
                 await Scenarios.StatePropertyAccessScenario.RunAsync();
+                break;
+            case "9. NewOrleans Events":
+                await Scenarios.EventScenario.RunAsync();
                 break;
         }
     }
@@ -226,6 +233,33 @@ public static class SiloHelper
                 logging.AddConsole();
                 logging.SetMinimumLevel(logLevel);
                 logging.AddFilter("Orleans.Runtime.DynamicGrains", LogLevel.Debug);
+                logging.AddFilter("Microsoft.Hosting", LogLevel.Warning);
+            })
+            .Build();
+    }
+
+    public static IHost BuildSingleSiloWithStreams(int siloPort = 11111, int gatewayPort = 30000, LogLevel logLevel = LogLevel.Information)
+    {
+        return Host.CreateDefaultBuilder()
+            .UseOrleans(siloBuilder =>
+            {
+                siloBuilder
+                    .UseLocalhostClustering(siloPort, gatewayPort)
+                    .AddMemoryGrainStorage("Default")
+                    .AddMemoryStreams("SMS")
+                    .Configure<ClusterOptions>(options =>
+                    {
+                        options.ClusterId = "scenario-test";
+                        options.ServiceId = "scenario-test";
+                    });
+            })
+            .ConfigureLogging(logging =>
+            {
+                logging.ClearProviders();
+                logging.AddConsole();
+                logging.SetMinimumLevel(logLevel);
+                logging.AddFilter("Orleans.Runtime.DynamicGrains", LogLevel.Debug);
+                logging.AddFilter("Orleans.Streams", LogLevel.Debug);
                 logging.AddFilter("Microsoft.Hosting", LogLevel.Warning);
             })
             .Build();
