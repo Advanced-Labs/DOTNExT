@@ -364,21 +364,16 @@ namespace Orleans.CodeGenerator
 
         /// <summary>
         /// Gets a value indicating whether event code generation is available.
-        /// Requires at minimum the IEventSubscription interface and NotEventAttribute.
+        /// Requires all types needed for interface declarations, grain implementation,
+        /// and proxy implementation.
         /// </summary>
         public bool SupportsEvents => IEventSubscription_1 is not null
+            && EventSubscription_1 is not null
             && NotEventAttribute is not null
+            && IAsyncStream_1 is not null
+            && StreamId is not null
             && ILifecycleParticipant_1 is not null
             && IGrainLifecycle is not null;
-
-        /// <summary>
-        /// Gets a value indicating whether full event streaming code generation is available.
-        /// This includes the streaming types needed for grain and proxy event implementation.
-        /// </summary>
-        public bool SupportsEventStreaming => SupportsEvents
-            && EventSubscription_1 is not null
-            && IAsyncStream_1 is not null
-            && StreamId is not null;
 
         public LanguageVersion? LanguageVersion { get; private set; }
 

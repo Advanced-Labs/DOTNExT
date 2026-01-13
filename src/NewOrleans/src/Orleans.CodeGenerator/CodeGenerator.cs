@@ -359,20 +359,16 @@ namespace Orleans.CodeGenerator
                                 }
 
                                 // Generate partial class extension (stream fields, lifecycle, bridge handlers, subscription implementations)
-                                // Only if streaming types are available
-                                if (LibraryTypes.SupportsEventStreaming)
+                                var eventClassNs = GetOriginalNamespaceName(symbol);
+                                var eventClassMembers = EventCodeGenerator.GenerateGrainMembers(grainEvents);
+                                if (eventClassMembers.Length > 0)
                                 {
-                                    var eventClassNs = GetOriginalNamespaceName(symbol);
-                                    var eventClassMembers = EventCodeGenerator.GenerateGrainMembers(grainEvents);
-                                    if (eventClassMembers.Length > 0)
-                                    {
-                                        // Add ILifecycleParticipant<IGrainLifecycle> base type
-                                        var eventClassDecl = GeneratePartialClassExtensionWithBaseTypes(
-                                            symbol,
-                                            eventClassMembers,
-                                            new[] { "global::Orleans.ILifecycleParticipant<global::Orleans.IGrainLifecycle>" });
-                                        AddMember(eventClassNs, eventClassDecl);
-                                    }
+                                    // Add ILifecycleParticipant<IGrainLifecycle> base type
+                                    var eventClassDecl = GeneratePartialClassExtensionWithBaseTypes(
+                                        symbol,
+                                        eventClassMembers,
+                                        new[] { "global::Orleans.ILifecycleParticipant<global::Orleans.IGrainLifecycle>" });
+                                    AddMember(eventClassNs, eventClassDecl);
                                 }
                             }
                         }
