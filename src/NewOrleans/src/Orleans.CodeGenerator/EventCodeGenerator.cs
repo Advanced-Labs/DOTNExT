@@ -959,10 +959,7 @@ namespace Orleans.CodeGenerator
                                 {
                                     Argument(MemberAccessExpression(
                                         SyntaxKind.SimpleMemberAccessExpression,
-                                        MemberAccessExpression(
-                                            SyntaxKind.SimpleMemberAccessExpression,
-                                            ThisExpression(),
-                                            IdentifierName("Shared")),
+                                        ThisExpression(),
                                         IdentifierName("ServiceProvider"))),
                                     Argument(LiteralExpression(
                                         SyntaxKind.StringLiteralExpression,
