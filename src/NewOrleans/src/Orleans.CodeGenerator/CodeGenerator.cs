@@ -1071,7 +1071,7 @@ namespace Orleans.CodeGenerator
         /// <summary>
         /// Gets events for a grain interface (used by ProxyGenerator).
         /// </summary>
-        public List<EventCodeGenerator.EventDescription> GetEventsForInterface(INamedTypeSymbol grainInterface)
+        internal List<EventCodeGenerator.EventDescription> GetEventsForInterface(INamedTypeSymbol grainInterface)
         {
             if (_eventsByInterface.TryGetValue(grainInterface, out var events))
             {
