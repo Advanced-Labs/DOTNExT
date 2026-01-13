@@ -40,13 +40,28 @@ namespace Orleans.Runtime
             _isActive = true;
         }
 
-        /// <inheritdoc/>
+        /// <summary>
+        /// Gets the underlying Orleans stream subscription handle.
+        /// </summary>
+        /// <value>
+        /// The <see cref="StreamSubscriptionHandle{T}"/> managing this subscription.
+        /// </value>
+        /// <remarks>
+        /// This provides access to the raw Orleans stream handle for advanced scenarios
+        /// such as resuming subscriptions after client reconnection.
+        /// </remarks>
         public StreamSubscriptionHandle<T> Handle => _handle;
 
         /// <inheritdoc/>
         public bool IsActive => _isActive;
 
-        /// <inheritdoc/>
+        /// <summary>
+        /// Gets the stream identifier this subscription is listening to.
+        /// </summary>
+        /// <value>
+        /// The <see cref="StreamId"/> uniquely identifying the event stream.
+        /// The format is typically "{InterfaceName}.{EventName}" with the grain key.
+        /// </value>
         public StreamId StreamId => _streamId;
 
         /// <inheritdoc/>
