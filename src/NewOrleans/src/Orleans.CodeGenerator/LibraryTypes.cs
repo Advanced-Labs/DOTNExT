@@ -203,7 +203,7 @@ namespace Orleans.CodeGenerator
             StreamId = TypeOrDefault("Orleans.Runtime.StreamId");
             StreamSubscriptionHandle_1 = TypeOrDefault("Orleans.Streams.StreamSubscriptionHandle`1");
             ILifecycleParticipant_1 = TypeOrDefault("Orleans.ILifecycleParticipant`1");
-            IGrainLifecycle = TypeOrDefault("Orleans.IGrainLifecycle");
+            IGrainLifecycle = TypeOrDefault("Orleans.Runtime.IGrainLifecycle");
             GrainLifecycleStage = TypeOrDefault("Orleans.Runtime.GrainLifecycleStage");
             IAsyncObserver_1 = TypeOrDefault("Orleans.Streams.IAsyncObserver`1");
             Func_1 = Type("System.Func`1");
