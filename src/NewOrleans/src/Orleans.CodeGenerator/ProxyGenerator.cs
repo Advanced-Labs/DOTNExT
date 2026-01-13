@@ -91,23 +91,27 @@ namespace Orleans.CodeGenerator
 
             // Add event support (NewOrleans Events)
             // This includes: local event handlers, raise methods, subscription methods
-            var grainEvents = _codeGenerator.GetEventsForInterface(interfaceDescription.InterfaceType);
-            if (grainEvents.Count > 0)
+            // Only generate if streaming types are available
+            if (_libraryTypes.SupportsEventStreaming)
             {
-                var eventTypeParameterSubstitutions = new Dictionary<ITypeParameterSymbol, string>(SymbolEqualityComparer.Default);
-                foreach (var (name, param) in interfaceDescription.TypeParameters)
+                var grainEvents = _codeGenerator.GetEventsForInterface(interfaceDescription.InterfaceType);
+                if (grainEvents.Count > 0)
                 {
-                    eventTypeParameterSubstitutions[param] = name;
-                }
+                    var eventTypeParameterSubstitutions = new Dictionary<ITypeParameterSymbol, string>(SymbolEqualityComparer.Default);
+                    foreach (var (name, param) in interfaceDescription.TypeParameters)
+                    {
+                        eventTypeParameterSubstitutions[param] = name;
+                    }
 
-                // Generate proxy event members (handler fields, event properties, raise methods, subscription methods)
-                var eventProxyMembers = _codeGenerator.EventCodeGenerator.GenerateProxyMembers(
-                    grainEvents,
-                    eventTypeParameterSubstitutions);
+                    // Generate proxy event members (handler fields, event properties, raise methods, subscription methods)
+                    var eventProxyMembers = _codeGenerator.EventCodeGenerator.GenerateProxyMembers(
+                        grainEvents,
+                        eventTypeParameterSubstitutions);
 
-                if (eventProxyMembers.Length > 0)
-                {
-                    classDeclaration = classDeclaration.AddMembers(eventProxyMembers);
+                    if (eventProxyMembers.Length > 0)
+                    {
+                        classDeclaration = classDeclaration.AddMembers(eventProxyMembers);
+                    }
                 }
             }
 
