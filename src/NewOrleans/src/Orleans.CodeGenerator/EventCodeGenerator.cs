@@ -900,7 +900,7 @@ namespace Orleans.CodeGenerator
                                     {
                                         Argument(IdentifierName("stream")),
                                         Argument(subscribeLambda)
-                                    }))))))))));
+                                    })))))))));
 
             // return new EventSubscription<T>(handle, streamId);
             statements.Add(ReturnStatement(
@@ -942,7 +942,7 @@ namespace Orleans.CodeGenerator
             // private IAsyncStream<T> __GetEventStream<T>(string eventNamespace)
             var statements = new List<StatementSyntax>();
 
-            // var streamProvider = ServiceProviderKeyedServiceExtensions.GetRequiredKeyedService<IStreamProvider>(this.Shared.ServiceProvider, "SMS");
+            // var streamProvider = ServiceProviderKeyedServiceExtensions.GetRequiredKeyedService<IStreamProvider>(this.ServiceProvider, "SMS");
             statements.Add(LocalDeclarationStatement(
                 VariableDeclaration(IdentifierName("var"))
                     .AddVariables(VariableDeclarator("streamProvider")
@@ -964,7 +964,7 @@ namespace Orleans.CodeGenerator
                                     Argument(LiteralExpression(
                                         SyntaxKind.StringLiteralExpression,
                                         Literal("SMS")))
-                                })))))))));
+                                }))))))));
 
             // var grainKey = this.GetPrimaryKeyXxx();
             var keyExtraction = GetProxyKeyExtractionExpression(evt.KeyType);

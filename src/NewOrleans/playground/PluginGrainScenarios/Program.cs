@@ -246,6 +246,7 @@ public static class SiloHelper
                 siloBuilder
                     .UseLocalhostClustering(siloPort, gatewayPort)
                     .AddMemoryGrainStorage("Default")
+                    .AddMemoryGrainStorage("PubSubStore")
                     .AddMemoryStreams("SMS")
                     .Configure<ClusterOptions>(options =>
                     {
