@@ -160,6 +160,7 @@
     <Project Path="test/Grains/TestGrains/TestGrains.csproj" />
     <Project Path="test/Grains/TestInternalGrainInterfaces/TestInternalGrainInterfaces.csproj" />
     <Project Path="test/Grains/TestInternalGrains/TestInternalGrains.csproj" />
+    <Project Path="test/Grains/TestSplitGrainContracts/TestSplitGrainContracts.csproj" />
     <Project Path="test/Grains/TestVersionGrains/TestVersionGrains.csproj" />
     <Project Path="test/Grains/TestVersionGrains2/TestVersionGrains2.csproj" />
   </Folder>

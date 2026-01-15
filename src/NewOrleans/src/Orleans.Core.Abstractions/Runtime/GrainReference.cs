@@ -297,6 +297,11 @@ namespace Orleans.Runtime
         /// </summary>
         protected CodecProvider CodecProvider => _shared.CodecProvider;
 
+        /// <summary>
+        /// Gets the service provider.
+        /// </summary>
+        protected IServiceProvider ServiceProvider => _shared.ServiceProvider;
+
         /// <summary>Initializes a new instance of the <see cref="GrainReference"/> class.</summary>
         /// <param name="shared">
         /// The grain reference functionality which is shared by all grain references of a given type.

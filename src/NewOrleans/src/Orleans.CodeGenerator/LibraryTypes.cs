@@ -193,6 +193,22 @@ namespace Orleans.CodeGenerator
             NotStateAttribute = TypeOrDefault("Orleans.NotStateAttribute");
             IPersistentState_1 = TypeOrDefault("Orleans.Runtime.IPersistentState`1");
 
+            // Event support types
+            IEventSubscription_1 = TypeOrDefault("Orleans.IEventSubscription`1");
+            EventSubscription_1 = TypeOrDefault("Orleans.Streaming.EventSubscription`1");
+            NotEventAttribute = TypeOrDefault("Orleans.NotEventAttribute");
+            EventHandler = Type("System.EventHandler");
+            EventHandler_1 = Type("System.EventHandler`1");
+            IAsyncStream_1 = TypeOrDefault("Orleans.Streams.IAsyncStream`1");
+            StreamId = TypeOrDefault("Orleans.Runtime.StreamId");
+            StreamSubscriptionHandle_1 = TypeOrDefault("Orleans.Streams.StreamSubscriptionHandle`1");
+            ILifecycleParticipant_1 = TypeOrDefault("Orleans.ILifecycleParticipant`1");
+            IGrainLifecycle = TypeOrDefault("Orleans.Runtime.IGrainLifecycle");
+            GrainLifecycleStage = TypeOrDefault("Orleans.Runtime.GrainLifecycleStage");
+            IAsyncObserver_1 = TypeOrDefault("Orleans.Streams.IAsyncObserver`1");
+            Func_1 = Type("System.Func`1");
+            Func_2_Task = TypeOrDefault("System.Func`2"); // Func<T, Task>
+
             INamedTypeSymbol Type(string metadataName)
             {
                 var result = compilation.GetTypeByMetadataName(metadataName);
@@ -329,6 +345,35 @@ namespace Orleans.CodeGenerator
         /// Gets a value indicating whether state property code generation is available.
         /// </summary>
         public bool SupportsStateProperties => StateTask_1 is not null && StateAttribute is not null && NotStateAttribute is not null;
+
+        // Event support types
+        public INamedTypeSymbol? IEventSubscription_1 { get; private set; }
+        public INamedTypeSymbol? EventSubscription_1 { get; private set; }
+        public INamedTypeSymbol? NotEventAttribute { get; private set; }
+        public INamedTypeSymbol EventHandler { get; private set; }
+        public INamedTypeSymbol EventHandler_1 { get; private set; }
+        public INamedTypeSymbol? IAsyncStream_1 { get; private set; }
+        public INamedTypeSymbol? StreamId { get; private set; }
+        public INamedTypeSymbol? StreamSubscriptionHandle_1 { get; private set; }
+        public INamedTypeSymbol? ILifecycleParticipant_1 { get; private set; }
+        public INamedTypeSymbol? IGrainLifecycle { get; private set; }
+        public INamedTypeSymbol? GrainLifecycleStage { get; private set; }
+        public INamedTypeSymbol? IAsyncObserver_1 { get; private set; }
+        public INamedTypeSymbol Func_1 { get; private set; }
+        public INamedTypeSymbol? Func_2_Task { get; private set; }
+
+        /// <summary>
+        /// Gets a value indicating whether event code generation is available.
+        /// Requires all types needed for interface declarations, grain implementation,
+        /// and proxy implementation.
+        /// </summary>
+        public bool SupportsEvents => IEventSubscription_1 is not null
+            && EventSubscription_1 is not null
+            && NotEventAttribute is not null
+            && IAsyncStream_1 is not null
+            && StreamId is not null
+            && ILifecycleParticipant_1 is not null
+            && IGrainLifecycle is not null;
 
         public LanguageVersion? LanguageVersion { get; private set; }
 
