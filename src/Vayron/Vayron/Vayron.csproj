@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <LangVersion>latest</LangVersion>
+
+    <RootNamespace>Vayron</RootNamespace>
+    <AssemblyName>Vayron</AssemblyName>
+
+    <Description>VAYRON - Runtime-Integrated Persistent Storage (Voron + CoreCLR)</Description>
+    <Authors>DOTNExT Team</Authors>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\Raven\src\Voron\Voron.csproj" />
+  </ItemGroup>
+
+</Project>
