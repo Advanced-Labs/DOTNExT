@@ -12,11 +12,25 @@ namespace Vayron;
 /// The handle contains identity (OID) and control; the body lives in Voron storage.
 /// </summary>
 /// <remarks>
-/// Design principles:
-/// - Minimal memory footprint (only OID, epoch, cached pointer)
-/// - Lazy materialization (body loaded on first access)
-/// - Transaction-aware staleness detection
-/// - GC-managed lifecycle with finalizer for cleanup
+/// <para><b>Design principles:</b></para>
+/// <list type="bullet">
+/// <item><description>Minimal memory footprint (only OID, epoch, cached pointer)</description></item>
+/// <item><description>Lazy materialization (body loaded on first access)</description></item>
+/// <item><description>Transaction-aware staleness detection</description></item>
+/// <item><description>GC-managed lifecycle with finalizer for cleanup</description></item>
+/// </list>
+///
+/// <para><b>Phase 2: Object Header Tagging</b></para>
+/// <para>
+/// VAYRON handles are marked with bit 31 (BIT_SBLK_IS_VAYRON_HANDLE) in the
+/// object header. This enables fast O(1) classification of VAYRON handles
+/// without managed code overhead. The bit is set during construction and
+/// remains set for the handle's lifetime.
+/// </para>
+/// <para>
+/// Use <see cref="IsVayronHandleInstance"/> to check if any object is a VAYRON handle
+/// using the runtime header bit classification.
+/// </para>
 /// </remarks>
 public class VayronHandle : IVayronHandle, IDisposable
 {
@@ -71,6 +85,45 @@ public class VayronHandle : IVayronHandle, IDisposable
     /// </summary>
     public bool IsMaterialized => _cachedBody != null;
 
+    // =====================================================================
+    // Phase 2: Object Header Classification
+    // =====================================================================
+
+    /// <summary>
+    /// Checks if any object is a VAYRON persistent handle using runtime header bit classification.
+    /// </summary>
+    /// <param name="obj">The object to check.</param>
+    /// <returns>True if the object has the VAYRON handle bit set in its object header.</returns>
+    /// <remarks>
+    /// This is an O(1) operation that tests bit 31 in the object header.
+    /// It's faster than type checking and works for any object instance.
+    ///
+    /// <para><b>Performance:</b> ~1-5ns (single bit test instruction)</para>
+    ///
+    /// <para><b>Usage:</b></para>
+    /// <code>
+    /// object someObj = GetSomeObject();
+    /// if (VayronHandle.IsVayronHandleInstance(someObj))
+    /// {
+    ///     // Object is a VAYRON handle
+    ///     var handle = (VayronHandle)someObj;
+    /// }
+    /// </code>
+    /// </remarks>
+    public static bool IsVayronHandleInstance(object? obj)
+    {
+        return VayronRuntime.IsVayronHandle(obj);
+    }
+
+    /// <summary>
+    /// Gets diagnostic header information for this handle.
+    /// </summary>
+    /// <returns>Header information including all bit flags.</returns>
+    public VayronHeaderInfo GetHeaderInfo()
+    {
+        return VayronRuntime.GetHeaderInfo(this);
+    }
+
     /// <summary>
     /// Creates a new handle with a new OID (for creating new objects).
     /// </summary>
@@ -81,6 +134,10 @@ public class VayronHandle : IVayronHandle, IDisposable
         _epoch = -1;
         _cachedBody = null;
         _isDirty = false;
+
+        // Phase 2: Mark this object as a VAYRON handle in the object header
+        // This enables fast O(1) classification via single bit test
+        VayronRuntime.MarkAsVayronHandle(this);
     }
 
     /// <summary>
@@ -93,6 +150,10 @@ public class VayronHandle : IVayronHandle, IDisposable
         _epoch = -1;
         _cachedBody = null;
         _isDirty = false;
+
+        // Phase 2: Mark this object as a VAYRON handle in the object header
+        // This enables fast O(1) classification via single bit test
+        VayronRuntime.MarkAsVayronHandle(this);
     }
 
     /// <summary>

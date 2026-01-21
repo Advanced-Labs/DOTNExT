@@ -88,7 +88,12 @@ typedef DPTR(EnCSyncBlockInfo) PTR_EnCSyncBlockInfo;
 // reducing the mask.  We use the very high bit, in _DEBUG, to be sure we never forget
 // to mask the Value to obtain the Index
 
-#define BIT_SBLK_UNUSED                     0x80000000
+// DOTNExT VAYRON Modification: Repurpose BIT_SBLK_UNUSED (bit 31) for VAYRON handle classification.
+// This enables fast O(1) detection of VAYRON persistent handles without managed code overhead.
+// The bit is set when an object is a VAYRON handle, allowing runtime-level classification.
+#define BIT_SBLK_IS_VAYRON_HANDLE           0x80000000  // VAYRON: Mark object as persistent handle
+#define BIT_SBLK_UNUSED                     BIT_SBLK_IS_VAYRON_HANDLE  // Legacy alias for compatibility
+
 #define BIT_SBLK_FINALIZER_RUN              0x40000000
 #define BIT_SBLK_GC_RESERVE                 0x20000000
 
@@ -1673,6 +1678,41 @@ class ObjHeader
     void ReleaseSpinLock();
 
     BOOL Validate (BOOL bVerifySyncBlkIndex = TRUE);
+
+    // =====================================================================
+    // DOTNExT VAYRON Handle Classification
+    // =====================================================================
+    // These methods enable fast O(1) classification of VAYRON persistent handles.
+    // VAYRON handles are marked with BIT_SBLK_IS_VAYRON_HANDLE (bit 31) in the
+    // object header, allowing the runtime to detect them without managed code overhead.
+    //
+    // The bit is set during VayronHandle construction and remains set for the
+    // lifetime of the object. This enables:
+    // - Fast IsVayronHandle() check via single bit test
+    // - JIT helper interception for transparent field access (future)
+    // - SOS debugging support
+
+    // Returns TRUE if this object is a VAYRON persistent handle
+    FORCEINLINE BOOL IsVayronHandle()
+    {
+        LIMITED_METHOD_CONTRACT;
+        return (GetBits() & BIT_SBLK_IS_VAYRON_HANDLE) != 0;
+    }
+
+    // Marks this object as a VAYRON persistent handle (set bit 31)
+    // Called during VayronHandle construction
+    void MarkAsVayronHandle()
+    {
+        LIMITED_METHOD_CONTRACT;
+        SetBit(BIT_SBLK_IS_VAYRON_HANDLE);
+    }
+
+    // Clears the VAYRON handle bit (used for testing/debugging)
+    void ClearVayronHandle()
+    {
+        LIMITED_METHOD_CONTRACT;
+        ClrBit(BIT_SBLK_IS_VAYRON_HANDLE);
+    }
 
     template<typename T> friend struct ::cdac_data;
 };
