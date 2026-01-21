@@ -58,6 +58,9 @@
 #include "exinfo.h"
 #include "arraynative.inl"
 
+// DOTNExT VAYRON Phase 5: JIT helper interception for persistent handles
+#include "vayronjit.h"
+
 using std::isfinite;
 using std::isnan;
 
@@ -507,6 +510,20 @@ HCIMPL2(void*, JIT_GetFieldAddr, Object *obj, FieldDesc* pFD)
     {
         ENDFORBIDGC();
         return HCCALL2(JIT_GetFieldAddr_Framed, obj, pFD);
+    }
+
+    // DOTNExT VAYRON Phase 5: Intercept field access for persistent handles
+    // Fast path: single bit test to check if this is a VAYRON handle
+    // If so, delegate to VAYRON materialization logic
+    if (IsVayronHandle_Fast(obj))
+    {
+        // VAYRON handle detected - use VAYRON field access path
+        // This transparently materializes the body from Voron storage if needed
+        ENDFORBIDGC();
+        HELPER_METHOD_FRAME_BEGIN_RET_1(obj);
+        void* result = VayronJitSupport::GetFieldAddr(obj, pFD);
+        HELPER_METHOD_FRAME_END();
+        return result;
     }
 
     return pFD->GetAddressGuaranteedInHeap(obj);

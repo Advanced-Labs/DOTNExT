@@ -300,6 +300,147 @@ public class VayronHandle : IVayronHandle, IDisposable
         SetField(offset, value);
     }
 
+    // =====================================================================
+    // Phase 5: JIT-Optimized Field Access
+    // =====================================================================
+
+    /// <summary>
+    /// Gets a field value using JIT-optimized path when available.
+    /// </summary>
+    /// <remarks>
+    /// <para><b>Phase 5 Optimization:</b></para>
+    /// When running on DOTNExT runtime with JIT helper interception enabled,
+    /// this method can be transparently called by the JIT when accessing fields.
+    /// The JIT helper checks the VAYRON header bit and dispatches to this method
+    /// for materialization if needed.
+    ///
+    /// <para><b>Performance Characteristics:</b></para>
+    /// <list type="bullet">
+    /// <item><description>Fast path (cached + pinned): ~5ns - direct pointer access</description></item>
+    /// <item><description>Warm path (cached, not pinned): ~15ns - managed array access</description></item>
+    /// <item><description>Cold path (not cached): ~200-500ns - Voron read + cache</description></item>
+    /// </list>
+    /// </remarks>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    protected unsafe T GetFieldJitOptimized<T>(int offset) where T : unmanaged
+    {
+        // Try JIT fast path first - check if we have a pinned body pointer
+        var meta = VayronMetaTable.Get(this);
+        if (meta != null)
+        {
+            // Fast path: pinned body with valid cached pointer
+            if (meta.IsPinned && meta.CachedBodyPtr != IntPtr.Zero && !meta.IsStale(_epoch))
+            {
+                meta.RecordAccess();
+                return *(T*)((byte*)meta.CachedBodyPtr + BodyHeader.Size + offset);
+            }
+
+            // Warm path: have cached managed body
+            var managedBody = meta.GetManagedBody();
+            if (managedBody != null && !meta.IsStale(_epoch))
+            {
+                meta.RecordAccess();
+                RecordReadOperation();
+                return MemoryMarshal.Read<T>(managedBody.AsSpan(BodyHeader.Size + offset));
+            }
+        }
+
+        // Cold path: need to materialize
+        return GetField<T>(offset);
+    }
+
+    /// <summary>
+    /// Sets a field value using JIT-optimized path when available.
+    /// </summary>
+    /// <remarks>
+    /// See <see cref="GetFieldJitOptimized{T}"/> for performance characteristics.
+    /// </remarks>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    protected unsafe void SetFieldJitOptimized<T>(int offset, T value) where T : unmanaged
+    {
+        // Try JIT fast path first - check if we have a pinned body pointer
+        var meta = VayronMetaTable.Get(this);
+        if (meta != null)
+        {
+            // Fast path: pinned body with valid cached pointer
+            if (meta.IsPinned && meta.CachedBodyPtr != IntPtr.Zero && !meta.IsStale(_epoch))
+            {
+                *(T*)((byte*)meta.CachedBodyPtr + BodyHeader.Size + offset) = value;
+                MarkDirty();
+                RecordWriteOperation();
+
+                // Notify JIT interop layer about the dirty state
+                VayronJitInterop.MarkDirty(this);
+                return;
+            }
+        }
+
+        // Managed path
+        SetField(offset, value);
+    }
+
+    /// <summary>
+    /// Enables JIT-optimized access by pinning the body and notifying the JIT layer.
+    /// </summary>
+    /// <remarks>
+    /// Call this before hot loops that repeatedly access fields on this handle.
+    /// The body will remain pinned until <see cref="DisableJitOptimization"/> is called.
+    ///
+    /// <para><b>Example:</b></para>
+    /// <code>
+    /// person.EnableJitOptimization();
+    /// try
+    /// {
+    ///     for (int i = 0; i &lt; 1000000; i++)
+    ///     {
+    ///         sum += person.Age; // Fast path access
+    ///     }
+    /// }
+    /// finally
+    /// {
+    ///     person.DisableJitOptimization();
+    /// }
+    /// </code>
+    /// </remarks>
+    public void EnableJitOptimization()
+    {
+        // Ensure materialized first
+        EnsureMaterialized();
+
+        // Pin the body
+        Pin();
+
+        // Notify JIT interop layer
+        var meta = VayronMetaTable.Get(this);
+        if (meta != null)
+        {
+            VayronJitInterop.UpdateCachedBodyInfo(this, meta.CachedBodyPtr, meta.CachedBodySize, _epoch);
+        }
+    }
+
+    /// <summary>
+    /// Disables JIT-optimized access and unpins the body.
+    /// </summary>
+    public void DisableJitOptimization()
+    {
+        Unpin();
+    }
+
+    /// <summary>
+    /// Gets whether JIT optimization is currently enabled for this handle.
+    /// </summary>
+    public bool IsJitOptimizationEnabled => IsPinned;
+
+    /// <summary>
+    /// Gets a scoped JIT optimization that automatically disables when disposed.
+    /// </summary>
+    /// <returns>A disposable scope for JIT optimization.</returns>
+    public JitOptimizationScope GetJitOptimizationScope()
+    {
+        EnableJitOptimization();
+        return new JitOptimizationScope(this);
+    }
+
     /// <summary>
     /// Gets a byte span from the cached body (for variable-length data).
     /// </summary>
@@ -845,5 +986,35 @@ public readonly struct VayronHandleDiagInfo
     {
         return $"Handle[OID={Oid.Value}] State={MaterializationState} Size={CachedBodySize} " +
                $"Pinned={IsPinned} Dirty={IsDirty} Access={AccessCount}";
+    }
+}
+
+/// <summary>
+/// A scoped JIT optimization that automatically disables when disposed.
+/// </summary>
+/// <remarks>
+/// Use with <c>using</c> statement for automatic cleanup:
+/// <code>
+/// using (handle.GetJitOptimizationScope())
+/// {
+///     // Fast field access here
+/// }
+/// </code>
+/// </remarks>
+public readonly struct JitOptimizationScope : IDisposable
+{
+    private readonly VayronHandle _handle;
+
+    internal JitOptimizationScope(VayronHandle handle)
+    {
+        _handle = handle;
+    }
+
+    /// <summary>
+    /// Disables JIT optimization.
+    /// </summary>
+    public void Dispose()
+    {
+        _handle?.DisableJitOptimization();
     }
 }
