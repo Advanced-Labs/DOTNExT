@@ -2,6 +2,7 @@
 // Handle with lazy materialization
 //
 // Phase 3: Enhanced with native pointer caching, state machine integration, and lifecycle management
+// Phase 4: Enhanced with automatic transaction enrollment and operation recording
 
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
@@ -39,6 +40,17 @@ namespace Vayron;
 /// <item><description>Formal state machine for materialization</description></item>
 /// <item><description>Memory pressure-aware eviction</description></item>
 /// <item><description>Background cleanup and lifecycle management</description></item>
+/// </list>
+/// </para>
+///
+/// <para><b>Phase 4: Transaction Integration</b></para>
+/// <para>
+/// Handles automatically participate in transactions:
+/// <list type="bullet">
+/// <item><description>Auto-enrollment as participants in active transactions</description></item>
+/// <item><description>Operation recording for transaction tracking</description></item>
+/// <item><description>Automatic staleness detection using transaction epochs</description></item>
+/// <item><description>Invalidation on transaction rollback</description></item>
 /// </list>
 /// </para>
 /// </remarks>
@@ -233,6 +245,9 @@ public class VayronHandle : IVayronHandle, IDisposable
         // Phase 3: Record access for LRU tracking
         VayronMetaTable.Get(this)?.RecordAccess();
 
+        // Phase 4: Record read operation in transaction context
+        RecordReadOperation();
+
         return MemoryMarshal.Read<T>(_cachedBody.AsSpan(BodyHeader.Size + offset));
     }
 
@@ -262,6 +277,9 @@ public class VayronHandle : IVayronHandle, IDisposable
         EnsureMaterialized();
         MemoryMarshal.Write(_cachedBody.AsSpan(BodyHeader.Size + offset), in value);
         MarkDirty();
+
+        // Phase 4: Record write operation in transaction context
+        RecordWriteOperation();
     }
 
     /// <summary>
@@ -338,6 +356,10 @@ public class VayronHandle : IVayronHandle, IDisposable
         var scope = VayronTransaction.Current
             ?? throw new InvalidOperationException("No active VAYRON transaction. Use VayronTransaction.BeginRead() or BeginWrite().");
 
+        // Phase 4: Enroll in transaction and record materialization
+        EnrollInTransaction();
+        VayronTransaction.CurrentContext?.RecordOperation(OperationType.Materialize, _oid);
+
         var meta = VayronMetaTable.GetOrCreate(this, _oid);
 
         // Phase 3: Validate state transition
@@ -397,6 +419,9 @@ public class VayronHandle : IVayronHandle, IDisposable
     /// </summary>
     protected virtual void InitializeNewBody(VayronTransactionScope scope)
     {
+        // Phase 4: Record create operation
+        VayronTransaction.CurrentContext?.RecordOperation(OperationType.Create, _oid);
+
         // Default implementation creates minimal body
         var bodySize = GetBodySize();
         _cachedBody = new byte[BodyHeader.Size + bodySize];
@@ -528,6 +553,9 @@ public class VayronHandle : IVayronHandle, IDisposable
             throw new InvalidOperationException("Cannot delete in a read transaction.");
         }
 
+        // Phase 4: Record delete operation
+        VayronTransaction.CurrentContext?.RecordOperation(OperationType.Delete, _oid);
+
         var meta = VayronMetaTable.Get(this);
         if (meta?.StorageLocation.IsValid == true)
         {
@@ -599,6 +627,123 @@ public class VayronHandle : IVayronHandle, IDisposable
     /// Gets whether the cached body is currently pinned.
     /// </summary>
     public bool IsPinned => VayronMetaTable.Get(this)?.IsPinned ?? false;
+
+    // =====================================================================
+    // Phase 4: Transaction Integration
+    // =====================================================================
+
+    /// <summary>
+    /// Enrolls this handle in the current transaction as a participant.
+    /// </summary>
+    /// <remarks>
+    /// This method is called automatically during materialization and field access,
+    /// but can also be called explicitly to ensure a handle is tracked by the transaction.
+    /// </remarks>
+    protected void EnrollInTransaction()
+    {
+        VayronTransaction.Current?.Enroll(this);
+    }
+
+    /// <summary>
+    /// Records a read operation on this handle.
+    /// </summary>
+    protected void RecordReadOperation()
+    {
+        VayronTransaction.Current?.RecordRead(_oid);
+    }
+
+    /// <summary>
+    /// Records a write operation on this handle.
+    /// </summary>
+    protected void RecordWriteOperation()
+    {
+        VayronTransaction.Current?.RecordWrite(_oid);
+    }
+
+    /// <summary>
+    /// Gets the current transaction context, if any.
+    /// </summary>
+    public VayronTransactionContext? TransactionContext => VayronTransaction.CurrentContext;
+
+    /// <summary>
+    /// Gets whether this handle is enrolled in the current transaction.
+    /// </summary>
+    public bool IsEnrolledInTransaction
+    {
+        get
+        {
+            var ctx = VayronTransaction.CurrentContext;
+            return ctx?.IsEnrolled(_oid) == true;
+        }
+    }
+
+    /// <summary>
+    /// Executes an action within a read transaction, using the existing transaction if available.
+    /// </summary>
+    /// <param name="action">The action to execute.</param>
+    public void WithReadTransaction(Action action)
+    {
+        if (VayronTransaction.HasActiveTransaction)
+        {
+            action();
+        }
+        else
+        {
+            VayronTransaction.ExecuteRead(_environment, action);
+        }
+    }
+
+    /// <summary>
+    /// Executes an action within a write transaction, using the existing transaction if available.
+    /// </summary>
+    /// <param name="action">The action to execute.</param>
+    public void WithWriteTransaction(Action action)
+    {
+        if (VayronTransaction.HasActiveWriteTransaction)
+        {
+            action();
+        }
+        else
+        {
+            VayronTransaction.ExecuteWrite(_environment, action);
+        }
+    }
+
+    /// <summary>
+    /// Executes a function within a read transaction, using the existing transaction if available.
+    /// </summary>
+    /// <typeparam name="T">The return type.</typeparam>
+    /// <param name="func">The function to execute.</param>
+    /// <returns>The result of the function.</returns>
+    public T WithReadTransaction<T>(Func<T> func)
+    {
+        if (VayronTransaction.HasActiveTransaction)
+        {
+            return func();
+        }
+        else
+        {
+            return VayronTransaction.ExecuteRead(_environment, func);
+        }
+    }
+
+    /// <summary>
+    /// Executes a function within a write transaction, using the existing transaction if available.
+    /// </summary>
+    /// <typeparam name="T">The return type.</typeparam>
+    /// <param name="func">The function to execute.</param>
+    /// <returns>The result of the function.</returns>
+    public T WithWriteTransaction<T>(Func<T> func)
+    {
+        if (VayronTransaction.HasActiveWriteTransaction)
+        {
+            return func();
+        }
+        else
+        {
+            return VayronTransaction.ExecuteWrite(_environment, func);
+        }
+    }
 
     // =====================================================================
     // Disposal
