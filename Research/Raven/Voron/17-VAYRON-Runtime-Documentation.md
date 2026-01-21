@@ -877,8 +877,9 @@ The VAYRON implementation is code-complete but has never been compiled or execut
 ### 9.1 Prerequisites
 
 - .NET 9.0 SDK or later
-- DOTNExT repository built (for native runtime changes)
-- Voron source available (from RavenDB)
+- DOTNExT repository cloned (includes all dependencies)
+
+**Note on Voron**: VAYRON uses Voron (RavenDB's storage engine) via a direct ProjectReference to `/src/Raven/src/Voron/Voron.csproj`. Voron source is already included in the DOTNExT repository and was **not modified** for VAYRON - VAYRON uses Voron's public API (`StorageEnvironment`, `Transaction`, `Lookup`, `Container`). No separate Voron setup is required.
 
 ### 9.2 Building the Managed Library
 
