@@ -39,6 +39,8 @@ This documentation provides deep engineering analysis of Voron, RavenDB's LMDB-i
 |----------|-------------|
 | [08-Integration-Analysis](./08-Integration-Analysis.md) | Key integration points for runtime embedding |
 | [09-VAYRON-Considerations](./09-VAYRON-Considerations.md) | Architectural considerations for handle/body separation |
+| [10-Runtime-Integration-Analysis](./10-Runtime-Integration-Analysis.md) | Deep CLR analysis: object header, GC, JIT, type system |
+| [11-VAYRON-Synthesis](./11-VAYRON-Synthesis.md) | Final synthesis: integration map, proof path, risk ledger |
 
 ---
 
@@ -116,10 +118,11 @@ For engineers new to Voron:
 
 For VAYRON integration work:
 
-1. Start with **08-Integration-Analysis**
-2. Study **02-Memory-Management** (critical for runtime integration)
+1. Start with **08-Integration-Analysis** for Voron-side integration points
+2. Study **10-Runtime-Integration-Analysis** for CLR integration points
 3. Review **06-Transaction-Model** (impacts object materialization)
-4. Read **09-VAYRON-Considerations** for synthesis
+4. Read **09-VAYRON-Considerations** for architectural decisions
+5. Review **11-VAYRON-Synthesis** for final integration map and proof path
 
 ---
 
@@ -144,4 +147,38 @@ For VAYRON integration work:
 
 - **Voron Version Analyzed:** Schema version 23
 - **RavenDB Source:** Approximately 6.x branch
+- **CoreCLR Analyzed:** DOTNExT VMR runtime branch
 - **Documentation Date:** 2026-01-21
+
+---
+
+## Runtime Source Locations (for documents 10-11)
+
+```
+src/runtime/src/coreclr/
+├── vm/                          # Virtual Machine implementation
+│   ├── syncblk.h                # Object header, BIT_SBLK_* definitions
+│   ├── object.h                 # Object structure, GetHeader()
+│   ├── methodtable.h            # Type flags, category masks
+│   ├── class.h                  # EEClass, VMFlags
+│   ├── jithelpers.cpp           # JIT_GetFieldAddr, JIT_WriteBarrier
+│   ├── jitinterface.h           # Helper declarations
+│   ├── wellknownattributes.h    # Known attribute enum
+│   └── typehandle.h             # TypeHandle class
+│
+├── gc/                          # Garbage Collector
+│   ├── gc.cpp                   # Mark phase, go_through_object
+│   ├── gcpriv.h                 # CFinalize, mark_queue_t
+│   ├── gcdesc.h                 # CGCDesc, CGCDescSeries
+│   └── gcinterface.h            # promote_func typedef
+│
+├── jit/                         # Just-In-Time Compiler
+│   ├── gentree.h                # GenTreeFieldAddr
+│   ├── importer.cpp             # CEE_LDFLD handling
+│   ├── codegencommon.cpp        # Write barrier emission
+│   └── namedintrinsiclist.h     # Intrinsic definitions
+│
+└── inc/                         # Headers
+    ├── jithelpers.h             # JITHELPER macro definitions
+    └── corinfo.h                # CORINFO_HELP_* enum
+```
