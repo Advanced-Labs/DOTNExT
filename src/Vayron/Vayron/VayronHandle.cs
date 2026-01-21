@@ -1,5 +1,7 @@
 // VAYRON - Runtime-Integrated Persistent Storage
 // Handle with lazy materialization
+//
+// Phase 3: Enhanced with native pointer caching, state machine integration, and lifecycle management
 
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
@@ -27,9 +29,17 @@ namespace Vayron;
 /// without managed code overhead. The bit is set during construction and
 /// remains set for the handle's lifetime.
 /// </para>
+///
+/// <para><b>Phase 3: Side Table Integration</b></para>
 /// <para>
-/// Use <see cref="IsVayronHandleInstance"/> to check if any object is a VAYRON handle
-/// using the runtime header bit classification.
+/// Metadata is stored in a side table (VayronMetaTable) using ConditionalWeakTable.
+/// This enables:
+/// <list type="bullet">
+/// <item><description>Native pointer caching for hot paths</description></item>
+/// <item><description>Formal state machine for materialization</description></item>
+/// <item><description>Memory pressure-aware eviction</description></item>
+/// <item><description>Background cleanup and lifecycle management</description></item>
+/// </list>
 /// </para>
 /// </remarks>
 public class VayronHandle : IVayronHandle, IDisposable
@@ -99,16 +109,6 @@ public class VayronHandle : IVayronHandle, IDisposable
     /// It's faster than type checking and works for any object instance.
     ///
     /// <para><b>Performance:</b> ~1-5ns (single bit test instruction)</para>
-    ///
-    /// <para><b>Usage:</b></para>
-    /// <code>
-    /// object someObj = GetSomeObject();
-    /// if (VayronHandle.IsVayronHandleInstance(someObj))
-    /// {
-    ///     // Object is a VAYRON handle
-    ///     var handle = (VayronHandle)someObj;
-    /// }
-    /// </code>
     /// </remarks>
     public static bool IsVayronHandleInstance(object? obj)
     {
@@ -124,6 +124,62 @@ public class VayronHandle : IVayronHandle, IDisposable
         return VayronRuntime.GetHeaderInfo(this);
     }
 
+    // =====================================================================
+    // Phase 3: Side Table Access
+    // =====================================================================
+
+    /// <summary>
+    /// Gets the metadata for this handle from the side table.
+    /// </summary>
+    /// <returns>The metadata, or null if not found.</returns>
+    public VayronMeta? GetMetadata()
+    {
+        return VayronMetaTable.Get(this);
+    }
+
+    /// <summary>
+    /// Gets the current materialization state.
+    /// </summary>
+    public MaterializationState MaterializationState
+    {
+        get
+        {
+            var meta = VayronMetaTable.Get(this);
+            return meta?.State ?? MaterializationState.NotMaterialized;
+        }
+    }
+
+    /// <summary>
+    /// Gets comprehensive diagnostic information about this handle.
+    /// </summary>
+    public VayronHandleDiagInfo GetDiagnostics()
+    {
+        var meta = VayronMetaTable.Get(this);
+        var headerInfo = GetHeaderInfo();
+
+        return new VayronHandleDiagInfo
+        {
+            Oid = _oid,
+            Epoch = _epoch,
+            IsDirty = _isDirty,
+            IsMaterialized = IsMaterialized,
+            CachedBodySize = _cachedBody?.Length ?? 0,
+            MaterializationState = meta?.State ?? MaterializationState.NotMaterialized,
+            StorageLocation = meta?.StorageLocation ?? ContainerEntryId.Invalid,
+            TypeToken = meta?.TypeToken ?? 0,
+            SchemaVersion = meta?.SchemaVersion ?? 0,
+            IsPinned = meta?.IsPinned ?? false,
+            CachedBodyPtr = meta?.CachedBodyPtr ?? IntPtr.Zero,
+            LastAccessTicks = meta?.LastAccessTicks ?? 0,
+            AccessCount = meta?.AccessCount ?? 0,
+            HeaderInfo = headerInfo,
+        };
+    }
+
+    // =====================================================================
+    // Constructors
+    // =====================================================================
+
     /// <summary>
     /// Creates a new handle with a new OID (for creating new objects).
     /// </summary>
@@ -136,8 +192,11 @@ public class VayronHandle : IVayronHandle, IDisposable
         _isDirty = false;
 
         // Phase 2: Mark this object as a VAYRON handle in the object header
-        // This enables fast O(1) classification via single bit test
         VayronRuntime.MarkAsVayronHandle(this);
+
+        // Phase 3: Initialize metadata in side table
+        var meta = VayronMetaTable.GetOrCreate(this, _oid);
+        meta.State = MaterializationState.NotMaterialized;
     }
 
     /// <summary>
@@ -152,9 +211,16 @@ public class VayronHandle : IVayronHandle, IDisposable
         _isDirty = false;
 
         // Phase 2: Mark this object as a VAYRON handle in the object header
-        // This enables fast O(1) classification via single bit test
         VayronRuntime.MarkAsVayronHandle(this);
+
+        // Phase 3: Initialize metadata in side table
+        var meta = VayronMetaTable.GetOrCreate(this, _oid);
+        meta.State = MaterializationState.NotMaterialized;
     }
+
+    // =====================================================================
+    // Field Access
+    // =====================================================================
 
     /// <summary>
     /// Gets a field value from the cached body.
@@ -163,7 +229,28 @@ public class VayronHandle : IVayronHandle, IDisposable
     protected T GetField<T>(int offset) where T : unmanaged
     {
         EnsureMaterialized();
+
+        // Phase 3: Record access for LRU tracking
+        VayronMetaTable.Get(this)?.RecordAccess();
+
         return MemoryMarshal.Read<T>(_cachedBody.AsSpan(BodyHeader.Size + offset));
+    }
+
+    /// <summary>
+    /// Gets a field value using native pointer (Phase 3 hot path).
+    /// </summary>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    protected unsafe T GetFieldFast<T>(int offset) where T : unmanaged
+    {
+        var meta = VayronMetaTable.Get(this);
+        if (meta != null && meta.CachedBodyPtr != IntPtr.Zero)
+        {
+            meta.RecordAccess();
+            return *(T*)((byte*)meta.CachedBodyPtr + BodyHeader.Size + offset);
+        }
+
+        // Fall back to managed path
+        return GetField<T>(offset);
     }
 
     /// <summary>
@@ -178,11 +265,30 @@ public class VayronHandle : IVayronHandle, IDisposable
     }
 
     /// <summary>
+    /// Sets a field value using native pointer (Phase 3 hot path).
+    /// </summary>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    protected unsafe void SetFieldFast<T>(int offset, T value) where T : unmanaged
+    {
+        var meta = VayronMetaTable.Get(this);
+        if (meta != null && meta.CachedBodyPtr != IntPtr.Zero)
+        {
+            *(T*)((byte*)meta.CachedBodyPtr + BodyHeader.Size + offset) = value;
+            MarkDirty();
+            return;
+        }
+
+        // Fall back to managed path
+        SetField(offset, value);
+    }
+
+    /// <summary>
     /// Gets a byte span from the cached body (for variable-length data).
     /// </summary>
     protected ReadOnlySpan<byte> GetFieldBytes(int offset, int length)
     {
         EnsureMaterialized();
+        VayronMetaTable.Get(this)?.RecordAccess();
         return _cachedBody.AsSpan(BodyHeader.Size + offset, length);
     }
 
@@ -195,6 +301,10 @@ public class VayronHandle : IVayronHandle, IDisposable
         data.CopyTo(_cachedBody.AsSpan(BodyHeader.Size + offset));
         MarkDirty();
     }
+
+    // =====================================================================
+    // Materialization
+    // =====================================================================
 
     /// <summary>
     /// Ensures the body is materialized (loaded from storage).
@@ -228,23 +338,57 @@ public class VayronHandle : IVayronHandle, IDisposable
         var scope = VayronTransaction.Current
             ?? throw new InvalidOperationException("No active VAYRON transaction. Use VayronTransaction.BeginRead() or BeginWrite().");
 
-        // Look up storage location
-        if (!_environment.TryGetStorageLocation(scope, _oid, out var storageLocation))
+        var meta = VayronMetaTable.GetOrCreate(this, _oid);
+
+        // Phase 3: Validate state transition
+        if (!meta.TryTransitionState(MaterializationState.Materializing))
         {
-            // New object - allocate body
-            InitializeNewBody(scope);
-            return;
+            // If can't transition, we might already be materializing or materialized
+            if (meta.State == MaterializationState.Materialized && !meta.IsStale(_epoch))
+            {
+                // Already materialized and not stale - use cached body
+                var managedBody = meta.GetManagedBody();
+                if (managedBody != null)
+                {
+                    _cachedBody = managedBody;
+                    _epoch = meta.Epoch;
+                    return;
+                }
+            }
         }
 
-        // Load existing body
-        var storedBody = _environment.GetBody(scope, storageLocation);
-        _cachedBody = storedBody.ToArray();
-        _epoch = scope.Epoch;
+        try
+        {
+            // Look up storage location
+            if (!_environment.TryGetStorageLocation(scope, _oid, out var storageLocation))
+            {
+                // New object - allocate body
+                InitializeNewBody(scope);
+                return;
+            }
 
-        // Update metadata in side table
-        var meta = VayronMetaTable.GetOrCreate(this, _oid);
-        meta.StorageLocation = storageLocation;
-        meta.MarkMaterialized(_epoch, IntPtr.Zero, _cachedBody.Length);
+            // Load existing body
+            var storedBody = _environment.GetBody(scope, storageLocation);
+            _cachedBody = storedBody.ToArray();
+            _epoch = scope.Epoch;
+
+            // Update metadata in side table
+            meta.StorageLocation = storageLocation;
+            meta.SetManagedBody(_cachedBody);
+            meta.MarkMaterialized(_epoch, _cachedBody);
+
+            // Phase 3: Auto-pin if configured for hot bodies
+            if ((meta.Flags & VayronMetaFlags.PreferPinned) != 0)
+            {
+                meta.PinBody(_cachedBody);
+            }
+        }
+        catch
+        {
+            // On failure, transition to stale
+            meta.TryTransitionState(MaterializationState.Stale);
+            throw;
+        }
     }
 
     /// <summary>
@@ -273,7 +417,8 @@ public class VayronHandle : IVayronHandle, IDisposable
         var meta = VayronMetaTable.GetOrCreate(this, _oid);
         meta.TypeToken = header.TypeToken;
         meta.SchemaVersion = header.SchemaVersion;
-        meta.State = MaterializationState.Dirty;
+        meta.SetManagedBody(_cachedBody);
+        meta.TryTransitionState(MaterializationState.Dirty);
     }
 
     /// <summary>
@@ -291,6 +436,10 @@ public class VayronHandle : IVayronHandle, IDisposable
     /// </summary>
     protected virtual ushort GetSchemaVersion() => 1;
 
+    // =====================================================================
+    // Dirty Tracking
+    // =====================================================================
+
     /// <summary>
     /// Marks the handle as dirty (modified).
     /// </summary>
@@ -305,6 +454,10 @@ public class VayronHandle : IVayronHandle, IDisposable
             meta?.MarkDirty();
         }
     }
+
+    // =====================================================================
+    // Persistence
+    // =====================================================================
 
     /// <summary>
     /// Persists the handle's data to storage.
@@ -354,8 +507,13 @@ public class VayronHandle : IVayronHandle, IDisposable
         _isDirty = false;
         _epoch = scope.Epoch;
 
-        meta?.MarkMaterialized(_epoch, IntPtr.Zero, _cachedBody.Length);
+        // Phase 3: Update metadata state
+        meta?.MarkMaterialized(_epoch, _cachedBody);
     }
+
+    // =====================================================================
+    // Deletion
+    // =====================================================================
 
     /// <summary>
     /// Deletes this object from storage.
@@ -378,12 +536,22 @@ public class VayronHandle : IVayronHandle, IDisposable
 
         _environment.RemoveOidMapping(scope, _oid);
 
+        // Phase 3: Mark for deletion in metadata
+        if (meta != null)
+        {
+            meta.Flags |= VayronMetaFlags.MarkedForDeletion;
+        }
+
         _cachedBody = null;
         _isDirty = false;
         _oid = VayronOid.Invalid;
 
         VayronMetaTable.Remove(this);
     }
+
+    // =====================================================================
+    // Invalidation
+    // =====================================================================
 
     /// <summary>
     /// Invalidates the cached body (forces reload on next access).
@@ -395,6 +563,46 @@ public class VayronHandle : IVayronHandle, IDisposable
 
         VayronMetaTable.Get(this)?.Invalidate();
     }
+
+    // =====================================================================
+    // Phase 3: Pinning Support
+    // =====================================================================
+
+    /// <summary>
+    /// Pins the cached body in memory for fast native pointer access.
+    /// </summary>
+    /// <remarks>
+    /// Pinning prevents GC from moving the body, enabling fast pointer-based access.
+    /// Call <see cref="Unpin"/> when done to allow GC to reclaim memory.
+    /// </remarks>
+    public void Pin()
+    {
+        if (_cachedBody == null)
+            throw new InvalidOperationException("Cannot pin: body not materialized.");
+
+        var meta = VayronMetaTable.Get(this);
+        if (meta != null && !meta.IsPinned)
+        {
+            meta.PinBody(_cachedBody);
+        }
+    }
+
+    /// <summary>
+    /// Unpins the cached body, allowing GC to move it.
+    /// </summary>
+    public void Unpin()
+    {
+        VayronMetaTable.Get(this)?.Unpin();
+    }
+
+    /// <summary>
+    /// Gets whether the cached body is currently pinned.
+    /// </summary>
+    public bool IsPinned => VayronMetaTable.Get(this)?.IsPinned ?? false;
+
+    // =====================================================================
+    // Disposal
+    // =====================================================================
 
     /// <summary>
     /// Finalizer for cleanup.
@@ -425,6 +633,12 @@ public class VayronHandle : IVayronHandle, IDisposable
 
         _disposed = true;
 
+        // Phase 3: Record finalization for lifecycle manager
+        if (!disposing && _oid.IsValid)
+        {
+            VayronLifecycleManager.Instance.RecordFinalization(_oid, _cachedBody?.Length ?? 0);
+        }
+
         if (disposing)
         {
             // Clean up managed resources
@@ -432,5 +646,59 @@ public class VayronHandle : IVayronHandle, IDisposable
         }
 
         _cachedBody = null;
+    }
+}
+
+/// <summary>
+/// Comprehensive diagnostic information about a VAYRON handle.
+/// </summary>
+public readonly struct VayronHandleDiagInfo
+{
+    /// <summary>The OID.</summary>
+    public VayronOid Oid { get; init; }
+
+    /// <summary>The epoch.</summary>
+    public long Epoch { get; init; }
+
+    /// <summary>Whether dirty.</summary>
+    public bool IsDirty { get; init; }
+
+    /// <summary>Whether materialized.</summary>
+    public bool IsMaterialized { get; init; }
+
+    /// <summary>Cached body size.</summary>
+    public int CachedBodySize { get; init; }
+
+    /// <summary>Materialization state.</summary>
+    public MaterializationState MaterializationState { get; init; }
+
+    /// <summary>Storage location.</summary>
+    public ContainerEntryId StorageLocation { get; init; }
+
+    /// <summary>Type token.</summary>
+    public uint TypeToken { get; init; }
+
+    /// <summary>Schema version.</summary>
+    public ushort SchemaVersion { get; init; }
+
+    /// <summary>Whether pinned.</summary>
+    public bool IsPinned { get; init; }
+
+    /// <summary>Cached body pointer (if pinned).</summary>
+    public IntPtr CachedBodyPtr { get; init; }
+
+    /// <summary>Last access ticks.</summary>
+    public long LastAccessTicks { get; init; }
+
+    /// <summary>Access count.</summary>
+    public int AccessCount { get; init; }
+
+    /// <summary>Object header info.</summary>
+    public VayronHeaderInfo HeaderInfo { get; init; }
+
+    public override string ToString()
+    {
+        return $"Handle[OID={Oid.Value}] State={MaterializationState} Size={CachedBodySize} " +
+               $"Pinned={IsPinned} Dirty={IsDirty} Access={AccessCount}";
     }
 }
