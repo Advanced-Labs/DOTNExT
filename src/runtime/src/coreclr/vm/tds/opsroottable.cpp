@@ -229,7 +229,7 @@ void OpsRootTable::EnumerateEntries(EnumerateCallback callback, void* context)
 
     for (auto iter = m_table.Begin(); iter != m_table.End(); ++iter)
     {
-        OpsRootEntry& entry = *iter;
+        const OpsRootEntry& entry = *iter;
         if (!OpsRootTableTraits::IsNull(entry) && !OpsRootTableTraits::IsDeleted(entry))
         {
             callback(entry.syncBlockIndex, entry.ops, context);
