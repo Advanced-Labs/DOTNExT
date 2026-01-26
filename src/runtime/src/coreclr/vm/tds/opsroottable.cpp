@@ -63,7 +63,7 @@ OpsRoot* OpsRootTable::Get(Object* obj)
     // Fast path: check the TDS routing bit
     if (!obj->IsTDSNonDefault())
     {
-        return g_DefaultOpsRoot;
+        return &g_DefaultOpsRoot;
     }
 
     // Get the SyncBlockIndex
@@ -73,7 +73,7 @@ OpsRoot* OpsRootTable::Get(Object* obj)
     // No SyncBlock means no custom routing (shouldn't happen if bit is set)
     if (syncBlockIndex == 0)
     {
-        return g_DefaultOpsRoot;
+        return &g_DefaultOpsRoot;
     }
 
     return GetByIndex(syncBlockIndex);
@@ -94,7 +94,7 @@ OpsRoot* OpsRootTable::GetByIndex(DWORD syncBlockIndex)
     const OpsRootEntry* entry = m_table.LookupPtr(syncBlockIndex);
     if (entry == nullptr)
     {
-        return g_DefaultOpsRoot;
+        return &g_DefaultOpsRoot;
     }
 
     // Validate generation (safety net for reuse)
@@ -104,7 +104,7 @@ OpsRoot* OpsRootTable::GetByIndex(DWORD syncBlockIndex)
         // Note: We're modifying while iterating, but this is safe since we
         // hold the lock and return immediately after
         const_cast<OpsRootTable*>(this)->m_table.Remove(syncBlockIndex);
-        return g_DefaultOpsRoot;
+        return &g_DefaultOpsRoot;
     }
 
     return entry->ops;
