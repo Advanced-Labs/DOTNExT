@@ -11073,6 +11073,28 @@ namespace System.Net
         public static byte[]? UrlEncodeToBytes(byte[]? value, int offset, int count) { throw null; }
     }
 }
+namespace System.OS
+{
+    [System.AttributeUsageAttribute(System.AttributeTargets.Class | System.AttributeTargets.Struct)]
+    public sealed partial class PersistentAttribute : System.Attribute
+    {
+        public PersistentAttribute() { }
+    }
+    public static partial class TypeDriverHelper
+    {
+        public static void DisableNonDefaultRouting(object obj) { }
+        public static void EnableNonDefaultRouting(object obj) { }
+        [System.CLSCompliantAttribute(false)]
+        public static uint GetDriverFlags(object obj) { throw null; }
+        public static int GetRoutedObjectCount() { throw null; }
+        public static bool IsNonDefaultRouted(object obj) { throw null; }
+    }
+    [System.AttributeUsageAttribute(System.AttributeTargets.Class | System.AttributeTargets.Struct)]
+    public sealed partial class VirtualAttribute : System.Attribute
+    {
+        public VirtualAttribute() { }
+    }
+}
 namespace System.Numerics
 {
     public static partial class BitOperations
