@@ -48,4 +48,14 @@
 - Phase 2/4 interfaces reserved with placeholder methods
 - Ready for T04 (Default Drivers)
 
+## 2026-01-26 - T04 Default Drivers Complete
+
+- Created defaultdrivers.cpp with passthrough implementations
+- g_DefaultObjectModelOps: GetSize, ScanRefs (CGCDesc), GetFieldAddress, GetMethodTable
+- g_DefaultFieldAccessOps: Read, Write, WriteBarrier (SetObjectReference)
+- g_DefaultOpsRoot wired to default drivers
+- TDS_Initialize/TDS_Shutdown management functions
+- Updated ceemain.cpp to use TDS_Initialize()/TDS_Shutdown()
+- Ready for TAI build verification
+
 ---
