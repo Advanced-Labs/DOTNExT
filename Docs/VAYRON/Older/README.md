@@ -1,6 +1,6 @@
-# VAYRON R1 Project Documentation
+# VAYRON Project Documentation
 
-> **VAYRON R1** - A novel runtime platform inspired by OS/kernel architecture: CLR/VM/compiler stack restructured as a **microkernel + device driver system** for software paradigms.
+> **VAYRON** - A novel runtime platform inspired by OS/kernel architecture: CLR/VM/compiler stack restructured as a microkernel + device driver system for software paradigms.
 
 ---
 
@@ -8,15 +8,13 @@
 
 VAYRON transforms the .NET CLR from a closed runtime into an extensible platform where core behaviors become pluggable "device drivers":
 
-| Device Class | Responsibility | Gen-0 Engine |
-|--------------|----------------|--------------|
-| **ObjectModelDevice** | What an object IS (layout, scanning, identity) | CLR Default |
-| **FieldAccessDevice** | Field read/write interception | CLR Default |
-| **StorageDevice** | Persistence (layer I/O, transactions) | Voron |
-| **CallDispatchDevice** | Method invocation/routing | NewOrleans |
-| **RelationalDevice** | Edges and graph traversal | (Phase 2+) |
-| **VersionDevice** | Time-travel / MVCC | (Phase 4+) |
-| **SecurityDevice** | Kernel-enforced security | (Early wiring) |
+- **ObjectModelDevice** - What an object IS (layout, scanning, identity)
+- **FieldAccessDevice** - Field read/write interception
+- **StorageDevice** - Persistence (backed by Voron)
+- **CallDispatchDevice** - Method invocation/routing (backed by NewOrleans)
+- **RelationalDevice** - Edges and graph traversal
+- **VersionDevice** - Time-travel / MVCC
+- **SecurityDevice** - Kernel-enforced security
 
 Default behavior is preserved via "DefaultDrivers" that proxy standard CLR operations.
 
@@ -26,42 +24,37 @@ Default behavior is preserved via "DefaultDrivers" that proxy standard CLR opera
 
 | Document | Description |
 |----------|-------------|
-| [VAYRON-R1-Platform-Vision.md](./VAYRON-R1-Platform-Vision.md) | Complete platform vision, architecture, and design philosophy |
-| [VAYRON-R1-Roadmap-and-Codebase-Map.md](./VAYRON-R1-Roadmap-and-Codebase-Map.md) | Implementation roadmap and codebase analysis |
-| [Phase1/01-Phase1-DDS-Microkernel-and-Persistence.md](./Phase1/01-Phase1-DDS-Microkernel-and-Persistence.md) | Phase 1 detailed implementation plan |
-
-### Archived Documentation
-
-Original documentation versions are preserved in [Older/](./Older/).
+| [VAYRON-Codebase-Analysis.md](./VAYRON-Codebase-Analysis.md) | Analysis of existing infrastructure in DOTNExT repo |
+| [VAYRON-Phase0-Implementation-Plan.md](./VAYRON-Phase0-Implementation-Plan.md) | Detailed implementation plan for Phase 0 |
 
 ---
 
 ## Phase Overview
 
-### Phase 1: Open the CLR (DDS/SAL Skeleton) - *Current Focus*
+### Phase 0: Open the CLR (Current Focus)
 - Implement DDS routing bit in object headers
 - Create ops_root side table
 - Define ObjectModelDevice + FieldAccessDevice interfaces
 - Implement DefaultDrivers (proxy CLR behavior)
 - Validate with test suite
 
-### Phase 2: Persistence Vertical Slice
+### Phase 1: Persistence Vertical Slice
 - StorageDevice interface becomes real
 - Voron-backed StorageDriver implementation
 - VUID (UUID v7) identity system
-- Create -> mutate -> restart -> materialize validation
+- Create → mutate → restart → materialize validation
 
-### Phase 3: Relational Substrate
+### Phase 2: Relational Substrate
 - RelationalDevice for edges and reverse-edges
 - Graph traversal primitives
 - Indexing integration with Voron
 
-### Phase 4: Distribution
+### Phase 3: Distribution
 - CallDispatchDevice implementation
 - NewOrleans-backed activation/placement
 - Remote method invocation
 
-### Phase 5+: Advanced Features
+### Phase 4+: Advanced Features
 - Replication policies
 - VersionDevice (time-travel)
 - SemanticDevice (embeddings)
@@ -77,7 +70,6 @@ Original documentation versions are preserved in [Older/](./Older/).
 | **SAL** | Software Abstraction Layer - what DDS implements |
 | **VObject** | Virtualized object instance (runtime view) |
 | **Varia** | Whole object across space+time (conceptual) |
-| **VType** | A CLR type marked as virtual and subject to virtualization rules |
 | **VUID** | Virtual Unique Identifier (UUID v7) |
 | **ops_root** | Per-object driver dispatch table |
 | **DefaultDriver** | Driver that proxies standard CLR behavior |
@@ -125,10 +117,10 @@ DOTNExT/
 
 ## Getting Started
 
-1. Read [VAYRON-R1-Platform-Vision.md](./VAYRON-R1-Platform-Vision.md) to understand the architecture
-2. Review [VAYRON-R1-Roadmap-and-Codebase-Map.md](./VAYRON-R1-Roadmap-and-Codebase-Map.md) for implementation roadmap and codebase details
-3. Start with Phase 1 implementation plan in [Phase1/01-Phase1-DDS-Microkernel-and-Persistence.md](./Phase1/01-Phase1-DDS-Microkernel-and-Persistence.md)
+1. Read [VAYRON-Codebase-Analysis.md](./VAYRON-Codebase-Analysis.md) to understand existing infrastructure
+2. Review [VAYRON-Phase0-Implementation-Plan.md](./VAYRON-Phase0-Implementation-Plan.md) for detailed implementation steps
+3. Start with WP1 (Header Bit Infrastructure) as the foundation
 
 ---
 
-*VAYRON R1 R&D Project - Advanced-Labs/DOTNExT*
+*VAYRON R&D Project - Advanced-Labs/DOTNExT*
