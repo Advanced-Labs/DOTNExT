@@ -11,8 +11,8 @@ Tasks must be completed in order. Dependencies are explicit.
 
 | Task | Name | Work Package | Dependencies | Status |
 |------|------|--------------|--------------|--------|
-| T01 | Header Bit Infrastructure | WP1 | None | Pending |
-| T02 | OpsRoot Side Table | WP2 | T01 | Pending |
+| T01 | Header Bit Infrastructure | WP1 | None | **Completed** |
+| T02 | OpsRoot Side Table | WP2 | T01 | **Completed** |
 | T03 | Device Interfaces | WP3 | None | Pending |
 | T04 | Default Drivers | WP4 | T03 | Pending |
 | T05 | Field Access Interception | WP5 | T01, T02, T03, T04 | Pending |

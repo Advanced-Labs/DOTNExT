@@ -19,4 +19,13 @@
 - Created TDS directory and test infrastructure
 - Ready for T02 (OpsRoot Side Table) or T03 (Device Interfaces)
 
+## 2026-01-26 - T02 OpsRoot Side Table Complete
+
+- Created OpsRootTable class with SHash-based mapping (SyncBlockIndex -> OpsRoot*)
+- Added CrstOpsRootTable for thread safety
+- Integrated into CLR startup (ceemain.cpp) and shutdown
+- Added generation tag mechanism for SyncBlock reuse safety
+- Created test files (native tds_tests.h updates, managed T02_OpsRootTableTests.cs)
+- Ready for T03 (Device Interfaces) - parallel track
+
 ---

@@ -534,6 +534,17 @@ if(FEATURE_OBJCMARSHAL)
     )
 endif(FEATURE_OBJCMARSHAL)
 
+#
+# TDS (TypeDriver System) - Phase 1 Infrastructure
+#
+list(APPEND VM_SOURCES_WKS
+    tds/opsroottable.cpp
+)
+list(APPEND VM_HEADERS_WKS
+    tds/opsroottable.h
+    tds/tds_tests.h
+)
+
 if(CLR_CMAKE_TARGET_WIN32)
 
     set(VM_SOURCES_DAC_AND_WKS_WIN32

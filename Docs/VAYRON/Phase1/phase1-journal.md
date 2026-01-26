@@ -64,3 +64,52 @@
 - Continue with T02: OpsRoot Side Table
 
 ---
+
+## 2026-01-26 - Session 3: T02 OpsRoot Side Table
+
+### What I Did
+- Created `opsroottable.h` with:
+  - `OpsRootEntry` struct (syncBlockIndex, ops, generationTag)
+  - `OpsRootTableTraits` for SHash integration
+  - `OpsRootTable` class with full API
+- Created `opsroottable.cpp` with:
+  - All method implementations using CrstHolder for thread safety
+  - Generation tag validation on lookups
+  - OnSyncBlockRecycled() hook for cleanup
+- Added `CrstOpsRootTable` to CrstTypes.def (alphabetically after ObjectList)
+- Added TDS sources to CMakeLists.txt (VM_SOURCES_WKS, VM_HEADERS_WKS)
+- Integrated initialization in ceemain.cpp:
+  - Added `#include "tds/opsroottable.h"`
+  - Called `g_OpsRootTable.Initialize()` after `SyncBlockCache::Start()`
+  - Called `g_OpsRootTable.Destroy()` in shutdown path
+- Updated tds_tests.h with T02 test functions
+- Created T02_OpsRootTableTests.cs and .csproj
+
+### Files Created
+- `src/runtime/src/coreclr/vm/tds/opsroottable.h` - OpsRootTable declaration
+- `src/runtime/src/coreclr/vm/tds/opsroottable.cpp` - OpsRootTable implementation
+- `src/runtime/src/tests/tds/Phase1/T02_OpsRootTableTests.cs` - Managed test template
+- `src/runtime/src/tests/tds/Phase1/T02_OpsRootTableTests.csproj` - Test project
+
+### Files Modified
+- `src/runtime/src/coreclr/inc/CrstTypes.def` - Added CrstOpsRootTable
+- `src/runtime/src/coreclr/vm/CMakeLists.txt` - Added TDS sources
+- `src/runtime/src/coreclr/vm/ceemain.cpp` - Added initialization/shutdown
+- `src/runtime/src/coreclr/vm/tds/tds_tests.h` - Added T02 test functions
+
+### Key Implementation Details
+- Used SHash<OpsRootTableTraits> for efficient hash table
+- OpsRootEntry contains: syncBlockIndex (key), ops (value), generationTag (safety)
+- Generation tag prevents stale lookups after SyncBlock recycle
+- Thread safety via CrstOpsRootTable with CrstHolder RAII pattern
+- Get() returns g_DefaultOpsRoot for unmarked or not-found objects
+- Set() ensures SyncBlock exists (may trigger GC) and sets TDS routing bit
+
+### Blockers
+- None
+
+### Next Session
+- Proceed with T03: Device Interfaces (parallel track with T01/T02)
+- Request TAI build verification after T03
+
+---
