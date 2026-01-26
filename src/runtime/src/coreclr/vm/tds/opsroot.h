@@ -16,6 +16,21 @@
 class Object;
 
 //=============================================================================
+// OpsRoot flags (must be defined before OpsRoot struct)
+//=============================================================================
+#define OPSROOT_FLAG_NONE           0x0000
+#define OPSROOT_FLAG_PERSISTENT     0x0001  // Object supports persistence
+#define OPSROOT_FLAG_DISTRIBUTED    0x0002  // Object may be remote
+#define OPSROOT_FLAG_VERSIONED      0x0004  // Object has version tracking
+#define OPSROOT_FLAG_READONLY       0x0008  // Object is read-only
+#define OPSROOT_FLAG_COMPUTED       0x0010  // Object has computed fields
+
+//=============================================================================
+// OpsRoot version
+//=============================================================================
+#define OPSROOT_VERSION 1
+
+//=============================================================================
 // OpsRoot - Per-object driver dispatch table
 //
 // Every object with the TDS routing bit set has an associated OpsRoot
@@ -74,21 +89,6 @@ struct OpsRoot
         return (flags & OPSROOT_FLAG_DISTRIBUTED) != 0;
     }
 };
-
-//=============================================================================
-// OpsRoot flags
-//=============================================================================
-#define OPSROOT_FLAG_NONE           0x0000
-#define OPSROOT_FLAG_PERSISTENT     0x0001  // Object supports persistence
-#define OPSROOT_FLAG_DISTRIBUTED    0x0002  // Object may be remote
-#define OPSROOT_FLAG_VERSIONED      0x0004  // Object has version tracking
-#define OPSROOT_FLAG_READONLY       0x0008  // Object is read-only
-#define OPSROOT_FLAG_COMPUTED       0x0010  // Object has computed fields
-
-//=============================================================================
-// OpsRoot version
-//=============================================================================
-#define OPSROOT_VERSION 1
 
 //=============================================================================
 // Global instances (defined in T04 Default Drivers)
