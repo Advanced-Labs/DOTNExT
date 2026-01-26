@@ -1608,7 +1608,99 @@ All changes are additive:
 
 ---
 
-## Part VI: Success Criteria
+## Part VI: Gap Closures & Decisions
+
+> **Purpose:** This section documents specific implementation decisions made to close analysis gaps before Phase 1 implementation begins. These decisions are binding for Phase 1.
+
+### 6.1 Locked Decisions
+
+| Decision | Choice | Rationale |
+|----------|--------|-----------|
+| **Routing bit** | Repurpose bit 31 (`BIT_SBLK_UNUSED` → `BIT_SBLK_DDS_NONDEFAULT`) | Explicitly unused in CLR; minimal invasiveness; fast check |
+| **Routing storage** | SyncBlockIndex-keyed table (Stage 0) | GC-safe key; avoids object relocation tracking |
+| **Reuse safety** | Generation tag validation (safety net) | Prevents stale mappings when SyncBlock index reused; clean hook deferred to WP2 hardening |
+| **GC scanning** | Default only (`ObjectModel_DefaultCLR`) | No custom scanning in Phase 1; avoids GC correctness surface |
+| **JIT modification** | None (syscall/intrinsics only) | Prove routing infrastructure first; JIT surgery in Phase 2+ |
+| **VContext** | Null context placeholder (`g_NullContext`) | Signature compatibility; populated in Phase 2 for transactions |
+| **Driver loading** | Static only (compiled into runtime) | Dynamic loading deferred; avoid module lifetime complexity |
+
+### 6.2 Explicitly Deferred to Later Phases
+
+| Item | Deferred To | Notes |
+|------|-------------|-------|
+| Custom object layouts (external body, no-GC objects) | Phase 3+ | Requires custom GC scanning |
+| JIT helper interception (`JIT_GetFieldAddr`, etc.) | Phase 2.5 | After persistence works and tests exist |
+| Dynamic driver module loading | Phase 4+ | Requires stable ops ABI |
+| SyncBlock recycle hook (clean solution) | WP2 hardening | Generation tag safety net is sufficient for now |
+| VContext thread propagation (TLS/AsyncLocal) | Phase 2 | Needed for transaction scope |
+
+### 6.3 Implementation Notes
+
+#### Routing Bit Verification (WP1)
+- Verify `BIT_SBLK_UNUSED` (bit 31) is truly unused in x64 and ARM64 release builds
+- Check for DEBUG-only usages that could conflict
+- If conflict found, document and escalate (unlikely)
+
+#### Generation Tag Safety Net (WP2)
+Until the clean SyncBlock recycle hook is implemented:
+
+```cpp
+struct OpsRootEntry {
+    OpsRoot* ops;
+    uint32_t generationTag;  // Must match current generation
+};
+
+// On retrieval: validate generation
+OpsRoot* Get(DWORD syncBlockIndex) {
+    auto entry = m_table.Get(syncBlockIndex);
+    if (entry && entry.generationTag == GetCurrentGeneration(syncBlockIndex)) {
+        return entry.ops;
+    }
+    return &g_DefaultOpsRoot;  // Stale or missing
+}
+```
+
+This approach:
+- Prevents stale mapping corruption
+- Allows Phase 1 to proceed without deep SyncBlock archaeology
+- Clean hook can be added in WP2 as hardening
+
+#### Test Infrastructure (WP8)
+Phase 1 uses dual testing approach:
+1. **Micro tests**: Tiny native/managed harness for fast iteration
+   - Allocates objects, marks routed, calls driver ops, forces GC
+2. **Official harness**: CoreCLR test infrastructure for correctness/perf
+
+### 6.4 Future Improvements
+
+The following improvements are tracked in `/Docs/VAYRON/Backlogs/Improvements/`:
+
+| Improvement | File | Phase 1 Decision It Relates To |
+|-------------|------|--------------------------------|
+| SyncBlock recycle hook (clean) | `IMP-001-SyncBlock-Recycle-Hook.md` | Generation tag safety net |
+| JIT helper interception | `IMP-002-JIT-Helper-Interception.md` | No JIT surgery in Phase 1 |
+| VContext thread propagation | `IMP-003-VContext-Threading.md` | Null context placeholder |
+| Custom GC scanning | `IMP-004-Custom-GC-Scanning.md` | Default scanning only |
+| Dynamic driver loading | `IMP-005-Dynamic-Driver-Loading.md` | Static only |
+
+### 6.5 Task Breakdown
+
+Ordered implementation tasks are documented in `/Docs/VAYRON/Phase1/Tasks/`:
+
+| Task | File | Work Package |
+|------|------|--------------|
+| Header bit infrastructure | `T01-Header-Bit-Infrastructure.md` | WP1 |
+| OpsRoot side table | `T02-OpsRoot-Side-Table.md` | WP2 |
+| Device interfaces | `T03-Device-Interfaces.md` | WP3 |
+| Default drivers | `T04-Default-Drivers.md` | WP4 |
+| Field access interception | `T05-Field-Access-Interception.md` | WP5 |
+| GC integration | `T06-GC-Integration.md` | WP6 |
+| Managed API surface | `T07-Managed-API-Surface.md` | WP7 |
+| Test suite | `T08-Test-Suite.md` | WP8 |
+
+---
+
+## Part VII: Success Criteria
 
 Phase 1 is complete when:
 

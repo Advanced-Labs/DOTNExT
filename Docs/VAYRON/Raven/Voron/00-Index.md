@@ -1,46 +1,27 @@
-# Voron Storage Engine Research Documentation
+# Voron Storage Engine Reference Documentation
 
-> **Project:** VAYRON - Runtime-Integrated Persistent Storage
-> **Status:** Research & Analysis Phase
-> **Author:** Engineering Documentation by Claude
+> **Purpose:** Reference documentation for Voron storage engine fundamentals.
 > **Source Analyzed:** RavenDB 6.x (src/Raven/src/Voron)
-
----
-
-## Purpose
-
-This documentation provides deep engineering analysis of Voron, RavenDB's LMDB-inspired storage engine. The analysis is conducted with a specific goal: understanding how Voron's architecture could inform and enable integration of persistent storage primitives directly into the .NET runtime for the VAYRON project.
+>
+> **Note:** For VAYRON R1 integration guidance, see:
+> - Phase 1 CLR integration: `../../Phase1/CLR-Integration-Reference.md`
+> - Phase 2 Voron usage: `../../Phase2/Voron-Integration-Guide.md`
 
 ---
 
 ## Document Index
 
-### Core Architecture
+### Core Architecture (01-07)
+
 | Document | Description |
 |----------|-------------|
 | [01-Architecture-Overview](./01-Architecture-Overview.md) | High-level architecture, design philosophy, LMDB heritage |
 | [02-Memory-Management](./02-Memory-Management.md) | Memory mapping, pager abstraction, address space management |
 | [03-Storage-Layout](./03-Storage-Layout.md) | Page formats, file structure, on-disk layout |
-
-### Data Structures
-| Document | Description |
-|----------|-------------|
 | [04-Data-Structures](./04-Data-Structures.md) | B+Trees, Fixed-Size Trees, Tables, Containers |
 | [05-Page-Architecture](./05-Page-Architecture.md) | Page types, headers, node layouts |
-
-### Transaction & Durability
-| Document | Description |
-|----------|-------------|
 | [06-Transaction-Model](./06-Transaction-Model.md) | ACID guarantees, MVCC, transaction lifecycle |
 | [07-Journal-WAL](./07-Journal-WAL.md) | Write-Ahead Logging, recovery, checkpointing |
-
-### VAYRON Integration
-| Document | Description |
-|----------|-------------|
-| [08-Integration-Analysis](./08-Integration-Analysis.md) | Key integration points for runtime embedding |
-| [09-VAYRON-Considerations](./09-VAYRON-Considerations.md) | Architectural considerations for handle/body separation |
-| [10-Runtime-Integration-Analysis](./10-Runtime-Integration-Analysis.md) | Deep CLR analysis: object header, GC, JIT, type system |
-| [11-VAYRON-Synthesis](./11-VAYRON-Synthesis.md) | Final synthesis: integration map, proof path, risk ledger |
 
 ---
 
@@ -116,13 +97,11 @@ For engineers new to Voron:
 4. Study **04-Data-Structures** for the tree implementations
 5. Review **07-Journal-WAL** for durability mechanisms
 
-For VAYRON integration work:
+For VAYRON integration:
 
-1. Start with **08-Integration-Analysis** for Voron-side integration points
-2. Study **10-Runtime-Integration-Analysis** for CLR integration points
-3. Review **06-Transaction-Model** (impacts object materialization)
-4. Read **09-VAYRON-Considerations** for architectural decisions
-5. Review **11-VAYRON-Synthesis** for final integration map and proof path
+1. Read this folder's docs (01-07) for Voron fundamentals
+2. See `../../Phase1/CLR-Integration-Reference.md` for CLR integration points
+3. See `../../Phase2/Voron-Integration-Guide.md` for StorageDevice patterns
 
 ---
 
@@ -147,38 +126,8 @@ For VAYRON integration work:
 
 - **Voron Version Analyzed:** Schema version 23
 - **RavenDB Source:** Approximately 6.x branch
-- **CoreCLR Analyzed:** DOTNExT VMR runtime branch
-- **Documentation Date:** 2026-01-21
+- **Documentation Date:** 2026-01-21 (original), 2026-01-26 (reorganized)
 
 ---
 
-## Runtime Source Locations (for documents 10-11)
-
-```
-src/runtime/src/coreclr/
-├── vm/                          # Virtual Machine implementation
-│   ├── syncblk.h                # Object header, BIT_SBLK_* definitions
-│   ├── object.h                 # Object structure, GetHeader()
-│   ├── methodtable.h            # Type flags, category masks
-│   ├── class.h                  # EEClass, VMFlags
-│   ├── jithelpers.cpp           # JIT_GetFieldAddr, JIT_WriteBarrier
-│   ├── jitinterface.h           # Helper declarations
-│   ├── wellknownattributes.h    # Known attribute enum
-│   └── typehandle.h             # TypeHandle class
-│
-├── gc/                          # Garbage Collector
-│   ├── gc.cpp                   # Mark phase, go_through_object
-│   ├── gcpriv.h                 # CFinalize, mark_queue_t
-│   ├── gcdesc.h                 # CGCDesc, CGCDescSeries
-│   └── gcinterface.h            # promote_func typedef
-│
-├── jit/                         # Just-In-Time Compiler
-│   ├── gentree.h                # GenTreeFieldAddr
-│   ├── importer.cpp             # CEE_LDFLD handling
-│   ├── codegencommon.cpp        # Write barrier emission
-│   └── namedintrinsiclist.h     # Intrinsic definitions
-│
-└── inc/                         # Headers
-    ├── jithelpers.h             # JITHELPER macro definitions
-    └── corinfo.h                # CORINFO_HELP_* enum
-```
+*Voron fundamentals documentation. For VAYRON-specific integration, see Phase1/ and Phase2/ folders.*
