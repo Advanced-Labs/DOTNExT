@@ -13,22 +13,34 @@ Define C++ interface structures for device classes (`IObjectModelOps`, `IFieldAc
 
 ---
 
+## Naming Convention
+
+| Context | Convention | Example |
+|---------|------------|---------|
+| C++ directory | `tds/` | `src/runtime/src/coreclr/vm/tds/` |
+| C++ interface header | `tdsinterfaces.h` | Interface definitions |
+| C++ version constants | `TDS_*_VERSION` | `TDS_OBJECTMODEL_VERSION` |
+| C++ callback type | `TDSRefEnumCallback` | Reference enumeration |
+| C++ functions | `TDS_*` | `TDS_Initialize()`, `TDS_CreateOpsRoot()` |
+
+---
+
 ## New Files to Create
 
 | File | Purpose |
 |------|---------|
-| `src/runtime/src/coreclr/vm/dds/ddsinterfaces.h` | Device interface definitions |
-| `src/runtime/src/coreclr/vm/dds/opsroot.h` | OpsRoot structure |
+| `src/runtime/src/coreclr/vm/tds/tdsinterfaces.h` | Device interface definitions |
+| `src/runtime/src/coreclr/vm/tds/opsroot.h` | OpsRoot structure |
 
 ---
 
 ## Implementation Steps
 
-### Step 1: Create ddsinterfaces.h
+### Step 1: Create tdsinterfaces.h
 
 ```cpp
-#ifndef _DDS_INTERFACES_H_
-#define _DDS_INTERFACES_H_
+#ifndef _TDS_INTERFACES_H_
+#define _TDS_INTERFACES_H_
 
 #include "common.h"
 
@@ -41,10 +53,10 @@ struct ScanContext;
 //=============================================================================
 // Version constants for ABI compatibility
 //=============================================================================
-#define DDS_OBJECTMODEL_VERSION   1
-#define DDS_FIELDACCESS_VERSION   1
-#define DDS_STORAGE_VERSION       1
-#define DDS_CALLDISPATCH_VERSION  1
+#define TDS_OBJECTMODEL_VERSION   1
+#define TDS_FIELDACCESS_VERSION   1
+#define TDS_STORAGE_VERSION       1
+#define TDS_CALLDISPATCH_VERSION  1
 
 //=============================================================================
 // VContext - Execution context (Phase 1: placeholder)
@@ -67,7 +79,7 @@ extern VContext g_NullContext;
 //=============================================================================
 // Reference enumeration callback
 //=============================================================================
-typedef void (*DDSRefEnumCallback)(Object** refLocation, ScanContext* sc, void* context);
+typedef void (*TDSRefEnumCallback)(Object** refLocation, ScanContext* sc, void* context);
 
 //=============================================================================
 // IObjectModelOps - What an object IS to the runtime
@@ -83,7 +95,7 @@ struct IObjectModelOps
     void (STDMETHODCALLTYPE *ScanRefs)(
         VContext* ctx,
         Object* obj,
-        DDSRefEnumCallback callback,
+        TDSRefEnumCallback callback,
         ScanContext* sc,
         void* context);
 
@@ -195,7 +207,7 @@ struct ICallDispatchOps
     void* reserved[8];
 };
 
-#endif // _DDS_INTERFACES_H_
+#endif // _TDS_INTERFACES_H_
 ```
 
 ### Step 2: Create opsroot.h
@@ -204,7 +216,7 @@ struct ICallDispatchOps
 #ifndef _OPSROOT_H_
 #define _OPSROOT_H_
 
-#include "dds/ddsinterfaces.h"
+#include "tds/tdsinterfaces.h"
 
 //=============================================================================
 // OpsRoot - Per-object driver dispatch table
@@ -242,24 +254,24 @@ extern IObjectModelOps g_DefaultObjectModelOps;
 extern IFieldAccessOps g_DefaultFieldAccessOps;
 
 //=============================================================================
-// DDS management functions
+// TDS management functions
 //=============================================================================
-void DDS_Initialize();
-void DDS_Shutdown();
+void TDS_Initialize();
+void TDS_Shutdown();
 
-OpsRoot* DDS_CreateOpsRoot(
+OpsRoot* TDS_CreateOpsRoot(
     IObjectModelOps* objectModel,
     IFieldAccessOps* fieldAccess,
     IStorageOps* storage,
     ICallDispatchOps* dispatch);
 
-void DDS_FreeOpsRoot(OpsRoot* ops);
+void TDS_FreeOpsRoot(OpsRoot* ops);
 
 // Get OpsRoot for object (inline for performance)
-inline OpsRoot* DDS_GetOpsRoot(Object* obj);
+inline OpsRoot* TDS_GetOpsRoot(Object* obj);
 
 // Set OpsRoot for object
-void DDS_SetOpsRoot(Object* obj, OpsRoot* ops);
+void TDS_SetOpsRoot(Object* obj, OpsRoot* ops);
 
 #endif // _OPSROOT_H_
 ```
@@ -304,8 +316,8 @@ void DDS_SetOpsRoot(Object* obj, OpsRoot* ops);
 
 Compile verification:
 ```cpp
-#include "dds/ddsinterfaces.h"
-#include "dds/opsroot.h"
+#include "tds/tdsinterfaces.h"
+#include "tds/opsroot.h"
 
 void TestInterfaceSizes()
 {
@@ -320,5 +332,5 @@ void TestInterfaceSizes()
 
 ## References
 
-- Main Doc: Part II §2.1-2.3 (Device Class Hierarchy, OpsRoot, Interfaces)
-- Main Doc: Part III §3.2 WP3
+- Main Doc: Part II SS2.1-2.3 (Device Class Hierarchy, OpsRoot, Interfaces)
+- Main Doc: Part III SS3.2 WP3

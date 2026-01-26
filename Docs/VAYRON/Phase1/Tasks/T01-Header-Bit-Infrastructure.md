@@ -9,7 +9,18 @@
 
 ## Objective
 
-Repurpose `BIT_SBLK_UNUSED` (bit 31) as `BIT_SBLK_DDS_NONDEFAULT` for DDS routing.
+Repurpose `BIT_SBLK_UNUSED` (bit 31) as `BIT_SBLK_TDS_NONDEFAULT` for TypeDriver System routing.
+
+---
+
+## Naming Convention
+
+| Context | Convention | Example |
+|---------|------------|---------|
+| C++ bit constant | `BIT_SBLK_TDS_NONDEFAULT` | `0x80000000` |
+| C++ accessor methods | `IsTDSNonDefault()`, `SetTDSNonDefault()`, `ClearTDSNonDefault()` | On ObjHeader class |
+
+**TDS** = TypeDriver System (used in C++ for brevity)
 
 ---
 
@@ -34,13 +45,13 @@ Repurpose `BIT_SBLK_UNUSED` (bit 31) as `BIT_SBLK_DDS_NONDEFAULT` for DDS routin
 #define BIT_SBLK_UNUSED  0x80000000
 
 // AFTER:
-// DDS (Device Driver System) routing bit
+// TDS (TypeDriver System) routing bit
 // When set, this object uses non-default drivers for runtime operations
 // When clear (default), standard CLR behavior applies
-#define BIT_SBLK_DDS_NONDEFAULT  0x80000000
+#define BIT_SBLK_TDS_NONDEFAULT  0x80000000
 
 // Legacy alias for compatibility (remove after verification)
-#define BIT_SBLK_UNUSED  BIT_SBLK_DDS_NONDEFAULT
+#define BIT_SBLK_UNUSED  BIT_SBLK_TDS_NONDEFAULT
 ```
 
 ### Step 2: Add ObjHeader Accessor Methods
@@ -49,17 +60,17 @@ Repurpose `BIT_SBLK_UNUSED` (bit 31) as `BIT_SBLK_DDS_NONDEFAULT` for DDS routin
 
 ```cpp
 public:
-    // DDS routing support
-    inline bool IsDDSNonDefault() const {
-        return (GetBits() & BIT_SBLK_DDS_NONDEFAULT) != 0;
+    // TDS (TypeDriver System) routing support
+    inline bool IsTDSNonDefault() const {
+        return (GetBits() & BIT_SBLK_TDS_NONDEFAULT) != 0;
     }
 
-    inline void SetDDSNonDefault() {
-        SetBit(BIT_SBLK_DDS_NONDEFAULT);
+    inline void SetTDSNonDefault() {
+        SetBit(BIT_SBLK_TDS_NONDEFAULT);
     }
 
-    inline void ClearDDSNonDefault() {
-        ClrBit(BIT_SBLK_DDS_NONDEFAULT);
+    inline void ClearTDSNonDefault() {
+        ClrBit(BIT_SBLK_TDS_NONDEFAULT);
     }
 ```
 
@@ -69,9 +80,9 @@ public:
 
 ```cpp
 public:
-    // DDS routing
-    inline bool IsDDSNonDefault() const {
-        return GetHeader()->IsDDSNonDefault();
+    // TDS routing
+    inline bool IsTDSNonDefault() const {
+        return GetHeader()->IsTDSNonDefault();
     }
 ```
 
@@ -95,11 +106,11 @@ Before marking complete:
 
 ## Acceptance Criteria
 
-- [ ] `BIT_SBLK_DDS_NONDEFAULT` defined at 0x80000000
-- [ ] `ObjHeader::IsDDSNonDefault()` returns correct value
-- [ ] `ObjHeader::SetDDSNonDefault()` sets bit correctly
-- [ ] `ObjHeader::ClearDDSNonDefault()` clears bit correctly
-- [ ] `Object::IsDDSNonDefault()` delegates to header
+- [ ] `BIT_SBLK_TDS_NONDEFAULT` defined at 0x80000000
+- [ ] `ObjHeader::IsTDSNonDefault()` returns correct value
+- [ ] `ObjHeader::SetTDSNonDefault()` sets bit correctly
+- [ ] `ObjHeader::ClearTDSNonDefault()` clears bit correctly
+- [ ] `Object::IsTDSNonDefault()` delegates to header
 - [ ] Runtime compiles successfully on x64
 - [ ] Runtime compiles successfully on ARM64
 - [ ] No other code uses bit 31 (verified by search)
@@ -114,13 +125,13 @@ Before marking complete:
 ```cpp
 // In a test or debugging context
 Object* obj = AllocateObject(...);
-assert(!obj->IsDDSNonDefault());  // Should be clear initially
+assert(!obj->IsTDSNonDefault());  // Should be clear initially
 
-obj->GetHeader()->SetDDSNonDefault();
-assert(obj->IsDDSNonDefault());   // Should be set
+obj->GetHeader()->SetTDSNonDefault();
+assert(obj->IsTDSNonDefault());   // Should be set
 
-obj->GetHeader()->ClearDDSNonDefault();
-assert(!obj->IsDDSNonDefault());  // Should be clear again
+obj->GetHeader()->ClearTDSNonDefault();
+assert(!obj->IsTDSNonDefault());  // Should be clear again
 ```
 
 ### Thread Safety
@@ -138,7 +149,7 @@ No additional synchronization needed.
 
 ## Notes
 
-- This is the foundation for all DDS routing
+- This is the foundation for all TypeDriver routing
 - The bit check is designed to be fast (~1ns)
 - Default objects have bit clear (0), so fast path is unchanged
 - Only routed objects have bit set (1), triggering driver lookup
@@ -147,6 +158,6 @@ No additional synchronization needed.
 
 ## References
 
-- Main Doc: Part I §1.1 (Object Header Structure)
-- Main Doc: Part III §3.2 WP1
-- CLR Integration Reference: §1 (Object Header Bit Layout)
+- Main Doc: Part I SS1.1 (Object Header Structure)
+- Main Doc: Part III SS3.2 WP1
+- CLR Integration Reference: SS1 (Object Header Bit Layout)

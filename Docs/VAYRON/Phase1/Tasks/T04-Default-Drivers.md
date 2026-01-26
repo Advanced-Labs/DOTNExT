@@ -13,11 +13,21 @@ Implement default drivers that proxy to existing CLR behavior. These are the "pa
 
 ---
 
+## Naming Convention
+
+| Context | Convention | Example |
+|---------|------------|---------|
+| C++ directory | `tds/` | `src/runtime/src/coreclr/vm/tds/` |
+| C++ functions | `TDS_*` | `TDS_Initialize()`, `TDS_CreateOpsRoot()` |
+| C++ version constants | `TDS_*_VERSION` | `TDS_OBJECTMODEL_VERSION` |
+
+---
+
 ## New Files to Create
 
 | File | Purpose |
 |------|---------|
-| `src/runtime/src/coreclr/vm/dds/defaultdrivers.cpp` | Default driver implementations |
+| `src/runtime/src/coreclr/vm/tds/defaultdrivers.cpp` | Default driver implementations |
 
 ---
 
@@ -26,7 +36,7 @@ Implement default drivers that proxy to existing CLR behavior. These are the "pa
 ### Step 1: Implement g_NullContext
 
 ```cpp
-#include "dds/ddsinterfaces.h"
+#include "tds/tdsinterfaces.h"
 
 VContext g_NullContext = {
     1,      // version
@@ -39,7 +49,7 @@ VContext g_NullContext = {
 
 ```cpp
 #include "common.h"
-#include "dds/opsroot.h"
+#include "tds/opsroot.h"
 #include "object.h"
 #include "field.h"
 #include "methodtable.h"
@@ -58,7 +68,7 @@ static size_t STDMETHODCALLTYPE DefaultOM_GetSize(VContext* ctx, Object* obj)
 static void STDMETHODCALLTYPE DefaultOM_ScanRefs(
     VContext* ctx,
     Object* obj,
-    DDSRefEnumCallback callback,
+    TDSRefEnumCallback callback,
     ScanContext* sc,
     void* context)
 {
@@ -119,7 +129,7 @@ static bool STDMETHODCALLTYPE DefaultOM_EnsureMaterialized(VContext* ctx, Object
 }
 
 IObjectModelOps g_DefaultObjectModelOps = {
-    DDS_OBJECTMODEL_VERSION,
+    TDS_OBJECTMODEL_VERSION,
     DefaultOM_GetSize,
     DefaultOM_ScanRefs,
     DefaultOM_GetFieldAddress,
@@ -220,7 +230,7 @@ static void* STDMETHODCALLTYPE DefaultFA_GetEffectiveAddress(
 }
 
 IFieldAccessOps g_DefaultFieldAccessOps = {
-    DDS_FIELDACCESS_VERSION,
+    TDS_FIELDACCESS_VERSION,
     DefaultFA_Read,
     DefaultFA_Write,
     DefaultFA_WriteBarrier,
@@ -249,20 +259,20 @@ OpsRoot g_DefaultOpsRoot = {
 };
 ```
 
-### Step 5: Implement DDS Management Functions
+### Step 5: Implement TDS Management Functions
 
 ```cpp
-void DDS_Initialize()
+void TDS_Initialize()
 {
     g_OpsRootTable.Initialize();
 }
 
-void DDS_Shutdown()
+void TDS_Shutdown()
 {
     g_OpsRootTable.Destroy();
 }
 
-OpsRoot* DDS_CreateOpsRoot(
+OpsRoot* TDS_CreateOpsRoot(
     IObjectModelOps* objectModel,
     IFieldAccessOps* fieldAccess,
     IStorageOps* storage,
@@ -282,7 +292,7 @@ OpsRoot* DDS_CreateOpsRoot(
     return ops;
 }
 
-void DDS_FreeOpsRoot(OpsRoot* ops)
+void TDS_FreeOpsRoot(OpsRoot* ops)
 {
     if (ops != &g_DefaultOpsRoot) {
         delete ops;
@@ -323,8 +333,8 @@ void DDS_FreeOpsRoot(OpsRoot* ops)
 - [ ] `DefaultFA_WriteBarrier` uses CLR write barrier
 - [ ] `DefaultFA_OnBeforeAccess` returns false (no intercept)
 - [ ] `g_DefaultOpsRoot` wired to default drivers
-- [ ] `DDS_Initialize` and `DDS_Shutdown` work
-- [ ] `DDS_CreateOpsRoot` creates valid OpsRoot
+- [ ] `TDS_Initialize` and `TDS_Shutdown` work
+- [ ] `TDS_CreateOpsRoot` creates valid OpsRoot
 - [ ] Runtime compiles and all tests pass
 
 ---
@@ -363,6 +373,6 @@ void TestDefaultDrivers()
 
 ## References
 
-- Main Doc: Part III §3.2 WP4
-- Main Doc: Part II §2.5 (Default implementations)
-- CLR Integration Reference: §4 (GC Integration Points)
+- Main Doc: Part III SS3.2 WP4
+- Main Doc: Part II SS2.5 (Default implementations)
+- CLR Integration Reference: SS4 (GC Integration Points)

@@ -9,8 +9,8 @@
 
 ## Objective
 
-Ensure GC correctly handles DDS objects. For Phase 1, this means:
-1. DDS objects use standard GC scanning (no custom scanning)
+Ensure GC correctly handles TDS (TypeDriver System) objects. For Phase 1, this means:
+1. TDS objects use standard GC scanning (no custom scanning)
 2. OpsRootTable entries are cleaned up when objects are collected
 
 ---
@@ -86,32 +86,32 @@ void OnSyncBlockAboutToBeReused(DWORD index)
 
 ### Step 3: Verify GC Scanning Path
 
-Confirm that DDS objects use standard scanning:
+Confirm that TDS objects use standard scanning:
 
 ```cpp
-// In gc scanning, the existing path handles DDS objects:
+// In gc scanning, the existing path handles TDS objects:
 void ScanObject(Object* obj)
 {
     // Standard CGCDesc-based scanning
-    // DDS bit doesn't change this in Phase 1
+    // TDS bit doesn't change this in Phase 1
     go_through_object_cl(obj, promote_func, scan_context);
 }
 ```
 
-DDS objects have standard CLR layout, so standard scanning works.
+TDS objects have standard CLR layout, so standard scanning works.
 
 ---
 
 ## Verification Tests
 
-### Test 1: DDS Object Survives GC
+### Test 1: TDS Object Survives GC
 
 ```cpp
-void TestDDSObjectSurvivesGC()
+void TestTDSObjectSurvivesGC()
 {
     Object* obj = AllocateTestObject();
     OpsRoot* custom = CreateCustomOpsRoot();
-    DDS_SetOpsRoot(obj, custom);
+    TDS_SetOpsRoot(obj, custom);
 
     // Keep strong reference
     GCHandle handle = GCHandle::Alloc(obj, GCHandleType::Normal);
@@ -122,23 +122,23 @@ void TestDDSObjectSurvivesGC()
 
     // Object should still be routed
     Object* retrieved = (Object*)GCHandle::GetTarget(handle);
-    assert(retrieved->IsDDSNonDefault());
+    assert(retrieved->IsTDSNonDefault());
     assert(g_OpsRootTable.Get(retrieved) == custom);
 
     GCHandle::Free(handle);
 }
 ```
 
-### Test 2: DDS Mapping Cleaned Up on Collection
+### Test 2: TDS Mapping Cleaned Up on Collection
 
 ```cpp
-void TestDDSMappingCleanedUp()
+void TestTDSMappingCleanedUp()
 {
     WeakGCHandle weakHandle;
 
     {
         Object* obj = AllocateTestObject();
-        DDS_SetOpsRoot(obj, CreateCustomOpsRoot());
+        TDS_SetOpsRoot(obj, CreateCustomOpsRoot());
         weakHandle = GCHandle::Alloc(obj, GCHandleType::Weak);
 
         size_t countBefore = g_OpsRootTable.GetCount();
@@ -162,17 +162,17 @@ void TestDDSMappingCleanedUp()
 ### Test 3: Reference Fields Scanned Correctly
 
 ```cpp
-void TestDDSRefFieldsScanned()
+void TestTDSRefFieldsScanned()
 {
     Object* parent = AllocateTestObject();
     Object* child = AllocateTestObject();
 
     // Make parent routed
-    DDS_SetOpsRoot(parent, CreateCustomOpsRoot());
+    TDS_SetOpsRoot(parent, CreateCustomOpsRoot());
 
     // Set child as a field of parent
     FieldDesc* refField = GetRefField(parent);
-    DDS_WriteRefField(parent, refField, child);
+    TDS_WriteRefField(parent, refField, child);
 
     // Only keep reference to parent
     WeakGCHandle childWeak = GCHandle::Alloc(child, GCHandleType::Weak);
@@ -189,11 +189,11 @@ void TestDDSRefFieldsScanned()
 ### Test 4: GC Compaction Survival
 
 ```cpp
-void TestDDSObjectSurvivesCompaction()
+void TestTDSObjectSurvivesCompaction()
 {
     Object* obj = AllocateTestObject();
     OpsRoot* custom = CreateCustomOpsRoot();
-    DDS_SetOpsRoot(obj, custom);
+    TDS_SetOpsRoot(obj, custom);
 
     void* originalAddr = (void*)obj;
 
@@ -211,7 +211,7 @@ void TestDDSObjectSurvivesCompaction()
 
     // But routing should still work!
     // (SyncBlockIndex is stable, unlike object address)
-    assert(obj->IsDDSNonDefault());
+    assert(obj->IsTDSNonDefault());
     assert(g_OpsRootTable.Get(obj) == custom);
 }
 ```
@@ -220,10 +220,10 @@ void TestDDSObjectSurvivesCompaction()
 
 ## Acceptance Criteria
 
-- [ ] DDS objects survive GC with routing intact
-- [ ] Reference fields in DDS objects are scanned correctly
-- [ ] Child objects referenced by DDS objects survive GC
-- [ ] DDS objects survive compaction (SyncBlockIndex stable)
+- [ ] TDS objects survive GC with routing intact
+- [ ] Reference fields in TDS objects are scanned correctly
+- [ ] Child objects referenced by TDS objects survive GC
+- [ ] TDS objects survive compaction (SyncBlockIndex stable)
 - [ ] Stale mappings are detected via generation tag
 - [ ] (Optional) SyncBlock recycle hook cleans up mappings
 - [ ] No GC corruption under stress
@@ -244,14 +244,14 @@ The main work is verification and testing.
 
 ### Future Work (IMP-001, IMP-004)
 
-- Clean SyncBlock recycle hook → IMP-001
-- Custom GC scanning for external bodies → IMP-004
+- Clean SyncBlock recycle hook -> IMP-001
+- Custom GC scanning for external bodies -> IMP-004
 
 ---
 
 ## References
 
-- Main Doc: Part III §3.2 WP6
-- Main Doc: Part VI §6.1 (GC scanning = Default only)
-- CLR Integration Reference: §4 (GC Integration Points)
+- Main Doc: Part III SS3.2 WP6
+- Main Doc: Part VI SS6.1 (GC scanning = Default only)
+- CLR Integration Reference: SS4 (GC Integration Points)
 - Backlog: IMP-001, IMP-004

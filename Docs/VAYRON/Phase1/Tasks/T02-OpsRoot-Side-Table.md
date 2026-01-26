@@ -13,18 +13,28 @@ Implement GC-safe mapping from objects to `OpsRoot*` using SyncBlockIndex as the
 
 ---
 
+## Naming Convention
+
+| Context | Convention | Example |
+|---------|------------|---------|
+| C++ directory | `tds/` | `src/runtime/src/coreclr/vm/tds/` |
+| C++ global instance | `g_OpsRootTable` | Global side table |
+| C++ accessor | `IsTDSNonDefault()` | Check routing bit |
+
+---
+
 ## New Files to Create
 
 | File | Purpose |
 |------|---------|
-| `src/runtime/src/coreclr/vm/dds/opsroottable.h` | Side table declaration |
-| `src/runtime/src/coreclr/vm/dds/opsroottable.cpp` | Side table implementation |
+| `src/runtime/src/coreclr/vm/tds/opsroottable.h` | Side table declaration |
+| `src/runtime/src/coreclr/vm/tds/opsroottable.cpp` | Side table implementation |
 
 ## Files to Modify
 
 | File | Changes |
 |------|---------|
-| `src/runtime/src/coreclr/vm/CMakeLists.txt` | Add new DDS source files |
+| `src/runtime/src/coreclr/vm/CMakeLists.txt` | Add new TDS source files |
 | `src/runtime/src/coreclr/vm/ceemain.cpp` | Initialize OpsRootTable |
 
 ---
@@ -34,7 +44,7 @@ Implement GC-safe mapping from objects to `OpsRoot*` using SyncBlockIndex as the
 ### Step 1: Create Directory Structure
 
 ```bash
-mkdir -p src/runtime/src/coreclr/vm/dds
+mkdir -p src/runtime/src/coreclr/vm/tds
 ```
 
 ### Step 2: Implement opsroottable.h
@@ -77,7 +87,7 @@ public:
 };
 
 //-----------------------------------------------------------------------------
-// Thread-safe table: SyncBlockIndex → OpsRoot*
+// Thread-safe table: SyncBlockIndex -> OpsRoot*
 //-----------------------------------------------------------------------------
 class OpsRootTable
 {
@@ -125,8 +135,8 @@ extern OpsRootTable g_OpsRootTable;
 
 ```cpp
 #include "common.h"
-#include "dds/opsroottable.h"
-#include "dds/opsroot.h"
+#include "tds/opsroottable.h"
+#include "tds/opsroot.h"
 #include "syncblk.h"
 #include "object.h"
 
@@ -146,7 +156,7 @@ void OpsRootTable::Destroy()
 
 OpsRoot* OpsRootTable::Get(Object* obj)
 {
-    if (!obj->IsDDSNonDefault()) {
+    if (!obj->IsTDSNonDefault()) {
         return &g_DefaultOpsRoot;
     }
 
@@ -193,7 +203,7 @@ void OpsRootTable::Set(Object* obj, OpsRoot* ops)
     m_table.AddOrReplace(syncBlockIndex, entry);
 
     // Set the routing bit
-    obj->GetHeader()->SetDDSNonDefault();
+    obj->GetHeader()->SetTDSNonDefault();
 }
 
 void OpsRootTable::Remove(Object* obj)
@@ -204,7 +214,7 @@ void OpsRootTable::Remove(Object* obj)
     CrstHolder lock(&m_lock);
     m_table.Remove(syncBlockIndex);
 
-    obj->GetHeader()->ClearDDSNonDefault();
+    obj->GetHeader()->ClearTDSNonDefault();
 }
 
 void OpsRootTable::OnSyncBlockRecycled(DWORD syncBlockIndex)
@@ -237,12 +247,12 @@ size_t OpsRootTable::GetCount()
 **File:** `CMakeLists.txt`
 
 ```cmake
-set(VM_SOURCES_DDS
-    dds/opsroottable.cpp
+set(VM_SOURCES_TDS
+    tds/opsroottable.cpp
     # Add more as created
 )
 
-list(APPEND VM_SOURCES ${VM_SOURCES_DDS})
+list(APPEND VM_SOURCES ${VM_SOURCES_TDS})
 ```
 
 ### Step 5: Initialize at Startup
@@ -254,7 +264,7 @@ void EEStartup()
 {
     // ... existing initialization ...
 
-    // Initialize DDS subsystem
+    // Initialize TDS (TypeDriver System) subsystem
     g_OpsRootTable.Initialize();
 }
 ```
@@ -282,7 +292,7 @@ This is a **safety net** until the clean recycle hook (IMP-001) is implemented.
 - [ ] `Get()` returns `g_DefaultOpsRoot` for unmarked objects
 - [ ] `Set()` associates OpsRoot with object
 - [ ] `Set()` ensures object has SyncBlock
-- [ ] `Set()` sets DDS routing bit
+- [ ] `Set()` sets TDS routing bit
 - [ ] `Remove()` clears association and bit
 - [ ] Generation tag prevents stale lookups
 - [ ] Thread-safe (lock protects all operations)
@@ -306,12 +316,12 @@ void TestOpsRootTable()
     OpsRoot* custom = CreateCustomOpsRoot();
     g_OpsRootTable.Set(obj, custom);
 
-    assert(obj->IsDDSNonDefault());
+    assert(obj->IsTDSNonDefault());
     assert(g_OpsRootTable.Get(obj) == custom);
 
     // Remove
     g_OpsRootTable.Remove(obj);
-    assert(!obj->IsDDSNonDefault());
+    assert(!obj->IsTDSNonDefault());
     assert(g_OpsRootTable.Get(obj) == &g_DefaultOpsRoot);
 }
 ```
@@ -327,7 +337,7 @@ void TestOpsRootSurvivesGC()
     GC_Collect();
 
     // Object still has routing (SyncBlockIndex is stable)
-    assert(obj->IsDDSNonDefault());
+    assert(obj->IsTDSNonDefault());
     assert(g_OpsRootTable.Get(obj) != &g_DefaultOpsRoot);
 }
 ```
@@ -345,7 +355,7 @@ void TestOpsRootSurvivesGC()
 
 ## References
 
-- Main Doc: Part II §2.4 (Routing Logic)
-- Main Doc: Part III §3.2 WP2
-- CLR Integration Reference: §2 (SyncBlock Integration)
+- Main Doc: Part II SS2.4 (Routing Logic)
+- Main Doc: Part III SS3.2 WP2
+- CLR Integration Reference: SS2 (SyncBlock Integration)
 - Backlog: IMP-001 (Clean recycle hook)

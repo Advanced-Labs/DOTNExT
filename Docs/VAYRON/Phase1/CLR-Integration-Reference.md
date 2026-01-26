@@ -1,6 +1,8 @@
 # CLR Integration Reference for VAYRON Phase 1
 
-> **Purpose:** Detailed CLR integration analysis extracted from previous research. Directly applicable to Phase 1 DDS/SAL implementation.
+> **Purpose:** Detailed CLR integration analysis extracted from previous research. Directly applicable to Phase 1 TDS (TypeDriver System) implementation.
+>
+> **Naming Convention:** C++ uses `TDS` prefix for brevity; C# uses `TypeDriver` for readability.
 >
 > **Source:** Consolidated from previous VAYRON research docs (Runtime-Integration-Analysis, VAYRON-Synthesis).
 
@@ -22,7 +24,7 @@ Bit Layout of m_SyncBlockValue (32-bit value):
 └───────────────────────────────────────────────────────────────┘
 
 Legend:
-- Bit 31 (U):  BIT_SBLK_UNUSED (0x80000000) - EXPLICITLY UNUSED ← DDS routing bit
+- Bit 31 (U):  BIT_SBLK_UNUSED (0x80000000) - EXPLICITLY UNUSED ← TDS routing bit
 - Bit 30 (R):  Reserved
 - Bits 29-28:  BIT_SBLK_GC_RESERVE - GC marking bits
 - Bit 27 (SP): BIT_SBLK_SPIN_LOCK - Thin lock spin bit
@@ -34,7 +36,7 @@ Legend:
 
 | Bit | Constant | Usage | Availability for DDS |
 |-----|----------|-------|---------------------|
-| 31 | `BIT_SBLK_UNUSED` | Explicitly marked unused | **Available** |
+| 31 | `BIT_SBLK_UNUSED` | Explicitly marked unused | **Available** (TDS routing) |
 | 30 | (reserved) | Reserved, sometimes used in DEBUG | **Risky** |
 | 29-28 | `BIT_SBLK_GC_RESERVE` | GC marking | **Do not use** |
 | 27 | `BIT_SBLK_SPIN_LOCK` | Thin lock | **Do not use** |
@@ -48,7 +50,7 @@ Legend:
 #define BIT_SBLK_IS_HASH_OR_SYNCBLKINDEX    0x04000000
 #define BIT_SBLK_SPIN_LOCK                  0x08000000
 #define BIT_SBLK_GC_RESERVE                 0x30000000
-#define BIT_SBLK_UNUSED                     0x80000000  // ← Use this for DDS
+#define BIT_SBLK_UNUSED                     0x80000000  // ← Use this for TDS
 
 // ObjHeader class methods (syncblk.h)
 class ObjHeader
@@ -69,20 +71,20 @@ public:
 };
 ```
 
-**Recommendation:** Rename `BIT_SBLK_UNUSED` to `BIT_SBLK_DDS_NONDEFAULT` and add helper methods:
+**Recommendation:** Rename `BIT_SBLK_UNUSED` to `BIT_SBLK_TDS_NONDEFAULT` and add helper methods:
 
 ```cpp
 // Proposed additions to ObjHeader class
-inline bool IsDDSNonDefault() const {
-    return (GetBits(BIT_SBLK_DDS_NONDEFAULT) != 0);
+inline bool IsTDSNonDefault() const {
+    return (GetBits(BIT_SBLK_TDS_NONDEFAULT) != 0);
 }
 
-inline void SetDDSNonDefault() {
-    SetBit(BIT_SBLK_DDS_NONDEFAULT);
+inline void SetTDSNonDefault() {
+    SetBit(BIT_SBLK_TDS_NONDEFAULT);
 }
 
-inline void ClearDDSNonDefault() {
-    ClrBit(BIT_SBLK_DDS_NONDEFAULT);
+inline void ClearTDSNonDefault() {
+    ClrBit(BIT_SBLK_TDS_NONDEFAULT);
 }
 ```
 
@@ -111,7 +113,7 @@ inline void ClearDDSNonDefault() {
               │  ┌──────────────────────┐  │
               │  │ ObjHeader            │  │
               │  │   m_SyncBlockValue   │──┼── Contains index to SyncTableEntry
-              │  │   BIT_SBLK_DDS_...   │  │   OR hashcode (bit 26 discriminates)
+              │  │   BIT_SBLK_TDS_...   │  │   OR hashcode (bit 26 discriminates)
               │  ├──────────────────────┤  │
               │  │ MethodTable*         │  │
               │  ├──────────────────────┤  │
@@ -151,7 +153,7 @@ public:
 };
 ```
 
-### 2.3 SyncBlock Lifecycle and DDS Cleanup
+### 2.3 SyncBlock Lifecycle and TDS Cleanup
 
 **Critical Issue:** When an object is collected, its SyncBlock is recycled (returned to free list). The SyncBlockIndex may be reused for a different object.
 
@@ -163,7 +165,7 @@ void SyncBlock::Recycle()
 {
     // ... existing cleanup ...
 
-    // DDS CLEANUP: Remove ops_root entry for this SyncBlock index
+    // TDS CLEANUP: Remove ops_root entry for this SyncBlock index
     // The SyncBlockIndex is about to be reused, so stale mapping must be removed
     DWORD index = GetSyncBlockIndex();  // Need to pass this somehow
     g_OpsRootTable.OnSyncBlockRecycled(index);
@@ -207,7 +209,7 @@ HCIMPL2(void*, JIT_GetFieldAddr, Object* obj, FieldDesc* pFD)
 HCIMPLEND
 ```
 
-### 3.2 Proposed DDS Modification
+### 3.2 Proposed TDS Modification
 
 ```cpp
 HCIMPL2(void*, JIT_GetFieldAddr, Object* obj, FieldDesc* pFD)
@@ -217,10 +219,10 @@ HCIMPL2(void*, JIT_GetFieldAddr, Object* obj, FieldDesc* pFD)
     _ASSERTE(obj != NULL);
     _ASSERTE(pFD != NULL);
 
-    // DDS fast-path check
-    if (UNLIKELY(obj->IsDDSNonDefault()))
+    // TDS fast-path check
+    if (UNLIKELY(obj->IsTDSNonDefault()))
     {
-        return DDS_GetFieldAddrHelper(obj, pFD);  // NOINLINE
+        return TDS_GetFieldAddrHelper(obj, pFD);  // NOINLINE
     }
 
     // Original fast path
@@ -229,9 +231,9 @@ HCIMPL2(void*, JIT_GetFieldAddr, Object* obj, FieldDesc* pFD)
 HCIMPLEND
 
 // Separate function to keep fast path small
-NOINLINE void* DDS_GetFieldAddrHelper(Object* obj, FieldDesc* pFD)
+NOINLINE void* TDS_GetFieldAddrHelper(Object* obj, FieldDesc* pFD)
 {
-    OpsRoot* ops = DDS_GetOpsRoot(obj);
+    OpsRoot* ops = TDS_GetOpsRoot(obj);
     VContext* ctx = &g_NullContext;
 
     // Try ObjectModel first
@@ -259,7 +261,7 @@ HCIMPL2(void, JIT_WriteBarrier, Object** dst, Object* ref)
 }
 ```
 
-**DDS Consideration:** FieldAccessDevice.WriteBarrier() must either:
+**TDS Consideration:** FieldAccessDevice.WriteBarrier() must either:
 1. Call the standard write barrier internally
 2. Provide equivalent GC notification
 
@@ -309,7 +311,7 @@ public:
 };
 ```
 
-### 4.3 DDS ObjectModelDevice GC Integration
+### 4.3 TDS ObjectModelDevice GC Integration
 
 For Phase 1, DefaultObjectModelDriver should use existing CGCDesc:
 
@@ -317,7 +319,7 @@ For Phase 1, DefaultObjectModelDriver should use existing CGCDesc:
 static void DefaultOM_ScanRefs(
     VContext* ctx,
     Object* obj,
-    DDSRefEnumCallback callback,
+    TDSRefEnumCallback callback,
     ScanContext* sc,
     void* context)
 {
@@ -364,7 +366,7 @@ void ObjHeader::SetBit(DWORD dwBit)
 }
 ```
 
-**Safe for concurrent access** - DDS routing bit can be set from any thread.
+**Safe for concurrent access** - TDS routing bit can be set from any thread.
 
 ### 5.2 OpsRootTable Thread Safety
 
@@ -416,14 +418,14 @@ public:
    - All existing CLR tests must pass
    - Performance benchmarks for field access (default objects)
 
-2. **DDS Functionality Tests**
+2. **TDS Functionality Tests**
    - Routing bit set/clear works
    - OpsRoot correctly associated and retrieved
    - Survives GC compaction
    - Survives GC collection
 
 3. **Stress Tests**
-   - Many DDS objects created/destroyed
+   - Many TDS objects created/destroyed
    - Concurrent access patterns
    - SyncBlock recycling under load
 
@@ -433,18 +435,18 @@ public:
 
 ### 7.1 Overhead Budgets
 
-| Operation | Current CLR | Target with DDS Check |
+| Operation | Current CLR | Target with TDS Check |
 |-----------|-------------|----------------------|
 | Field read (default obj) | ~1ns | <2ns (+bit test) |
-| Field read (DDS obj, cached) | N/A | <50ns |
-| Field read (DDS obj, cold) | N/A | <500ns |
-| DDS bit test | N/A | <1ns |
+| Field read (TDS obj, cached) | N/A | <50ns |
+| Field read (TDS obj, cold) | N/A | <500ns |
+| TDS bit test | N/A | <1ns |
 
 ### 7.2 Memory Overhead
 
 | Component | Per-Object Cost |
 |-----------|-----------------|
-| DDS routing bit | 0 bytes (uses existing header bit) |
+| TDS routing bit | 0 bytes (uses existing header bit) |
 | OpsRoot pointer | Only for non-default objects |
 | SyncBlock (if needed) | ~40 bytes (existing cost if allocated) |
 | OpsRoot structure | ~64 bytes per unique driver combination |

@@ -11,9 +11,19 @@
 
 Validate Phase 1 infrastructure through comprehensive testing:
 1. No regression on standard CLR behavior
-2. DDS routing works correctly
-3. GC handles DDS objects properly
+2. TypeDriver routing works correctly
+3. GC handles TDS objects properly
 4. Performance acceptable for testing
+
+---
+
+## Naming Convention
+
+| Context | Convention | Example |
+|---------|------------|---------|
+| Test directory | `tds/` | `src/tests/tds/` |
+| C# helper class | `TypeDriverHelper` | `TypeDriverHelper.IsNonDefaultRouted()` |
+| Test namespace | `TDS.Tests` | Test organization namespace |
 
 ---
 
@@ -22,7 +32,7 @@ Validate Phase 1 infrastructure through comprehensive testing:
 | Category | Purpose | Count |
 |----------|---------|-------|
 | No Regression | Verify standard objects unchanged | ~10 |
-| Basic Routing | DDS bit and OpsRoot association | ~10 |
+| Basic Routing | TDS bit and OpsRoot association | ~10 |
 | GC Integration | Survival, compaction, cleanup | ~10 |
 | Driver Dispatch | Field access through drivers | ~10 |
 | Stress Tests | Concurrency, load | ~5 |
@@ -34,10 +44,10 @@ Validate Phase 1 infrastructure through comprehensive testing:
 
 | File | Purpose |
 |------|---------|
-| `src/tests/dds/Phase1Tests.cs` | Main test file |
-| `src/tests/dds/Phase1StressTests.cs` | Stress tests |
-| `src/tests/dds/Phase1PerfTests.cs` | Performance benchmarks |
-| `src/tests/dds/TestInfrastructure.cs` | Test helpers |
+| `src/tests/tds/Phase1Tests.cs` | Main test file |
+| `src/tests/tds/Phase1StressTests.cs` | Stress tests |
+| `src/tests/tds/Phase1PerfTests.cs` | Performance benchmarks |
+| `src/tests/tds/TestInfrastructure.cs` | Test helpers |
 
 ---
 
@@ -48,7 +58,9 @@ Validate Phase 1 infrastructure through comprehensive testing:
 **File:** `TestInfrastructure.cs`
 
 ```csharp
-namespace DDS.Tests
+using System.OS;
+
+namespace TDS.Tests
 {
     /// <summary>
     /// Test helper class with various field types.
@@ -105,7 +117,9 @@ namespace DDS.Tests
 **File:** `Phase1Tests.cs`
 
 ```csharp
-namespace DDS.Tests
+using System.OS;
+
+namespace TDS.Tests
 {
     public class NoRegressionTests
     {
@@ -113,7 +127,7 @@ namespace DDS.Tests
         public void DefaultObject_FieldAccess_Works()
         {
             var obj = new TestObject { IntField = 42 };
-            Assert.False(DDSRuntime.IsNonDefaultRouted(obj));
+            Assert.False(TypeDriverHelper.IsNonDefaultRouted(obj));
             Assert.Equal(42, obj.IntField);
 
             obj.IntField = 100;
@@ -186,7 +200,9 @@ namespace DDS.Tests
 ### Basic Routing Tests
 
 ```csharp
-namespace DDS.Tests
+using System.OS;
+
+namespace TDS.Tests
 {
     public class BasicRoutingTests
     {
@@ -194,28 +210,28 @@ namespace DDS.Tests
         public void CanEnableNonDefaultRouting()
         {
             var obj = new TestObject();
-            Assert.False(DDSRuntime.IsNonDefaultRouted(obj));
+            Assert.False(TypeDriverHelper.IsNonDefaultRouted(obj));
 
-            DDSRuntime.EnableNonDefaultRouting(obj);
-            Assert.True(DDSRuntime.IsNonDefaultRouted(obj));
+            TypeDriverHelper.EnableNonDefaultRouting(obj);
+            Assert.True(TypeDriverHelper.IsNonDefaultRouted(obj));
         }
 
         [Fact]
         public void CanDisableNonDefaultRouting()
         {
             var obj = new TestObject();
-            DDSRuntime.EnableNonDefaultRouting(obj);
-            Assert.True(DDSRuntime.IsNonDefaultRouted(obj));
+            TypeDriverHelper.EnableNonDefaultRouting(obj);
+            Assert.True(TypeDriverHelper.IsNonDefaultRouted(obj));
 
-            DDSRuntime.DisableNonDefaultRouting(obj);
-            Assert.False(DDSRuntime.IsNonDefaultRouted(obj));
+            TypeDriverHelper.DisableNonDefaultRouting(obj);
+            Assert.False(TypeDriverHelper.IsNonDefaultRouted(obj));
         }
 
         [Fact]
         public void RoutedObject_FieldAccessStillWorks()
         {
             var obj = new TestObject { IntField = 42 };
-            DDSRuntime.EnableNonDefaultRouting(obj);
+            TypeDriverHelper.EnableNonDefaultRouting(obj);
 
             // Field access should still work (default drivers)
             Assert.Equal(42, obj.IntField);
@@ -230,7 +246,7 @@ namespace DDS.Tests
             var obj = new TestObject();
             var child = new TestObject { IntField = 42 };
 
-            DDSRuntime.EnableNonDefaultRouting(obj);
+            TypeDriverHelper.EnableNonDefaultRouting(obj);
 
             obj.NestedField = child;
             Assert.Same(child, obj.NestedField);
@@ -242,28 +258,28 @@ namespace DDS.Tests
             var obj1 = new TestObject();
             var obj2 = new TestObject();
 
-            DDSRuntime.EnableNonDefaultRouting(obj1);
+            TypeDriverHelper.EnableNonDefaultRouting(obj1);
 
-            Assert.True(DDSRuntime.IsNonDefaultRouted(obj1));
-            Assert.False(DDSRuntime.IsNonDefaultRouted(obj2));
+            Assert.True(TypeDriverHelper.IsNonDefaultRouted(obj1));
+            Assert.False(TypeDriverHelper.IsNonDefaultRouted(obj2));
         }
 
         [Fact]
         public void GetRoutedObjectCount_Accurate()
         {
-            int initialCount = DDSRuntime.GetRoutedObjectCount();
+            int initialCount = TypeDriverHelper.GetRoutedObjectCount();
 
             var obj1 = new TestObject();
             var obj2 = new TestObject();
 
-            DDSRuntime.EnableNonDefaultRouting(obj1);
-            Assert.Equal(initialCount + 1, DDSRuntime.GetRoutedObjectCount());
+            TypeDriverHelper.EnableNonDefaultRouting(obj1);
+            Assert.Equal(initialCount + 1, TypeDriverHelper.GetRoutedObjectCount());
 
-            DDSRuntime.EnableNonDefaultRouting(obj2);
-            Assert.Equal(initialCount + 2, DDSRuntime.GetRoutedObjectCount());
+            TypeDriverHelper.EnableNonDefaultRouting(obj2);
+            Assert.Equal(initialCount + 2, TypeDriverHelper.GetRoutedObjectCount());
 
-            DDSRuntime.DisableNonDefaultRouting(obj1);
-            Assert.Equal(initialCount + 1, DDSRuntime.GetRoutedObjectCount());
+            TypeDriverHelper.DisableNonDefaultRouting(obj1);
+            Assert.Equal(initialCount + 1, TypeDriverHelper.GetRoutedObjectCount());
         }
     }
 }
@@ -272,7 +288,9 @@ namespace DDS.Tests
 ### GC Integration Tests
 
 ```csharp
-namespace DDS.Tests
+using System.OS;
+
+namespace TDS.Tests
 {
     public class GCIntegrationTests
     {
@@ -280,11 +298,11 @@ namespace DDS.Tests
         public void RoutedObject_SurvivesGC()
         {
             var obj = new TestObject { IntField = 42 };
-            DDSRuntime.EnableNonDefaultRouting(obj);
+            TypeDriverHelper.EnableNonDefaultRouting(obj);
 
             TestUtils.ForceFullGC();
 
-            Assert.True(DDSRuntime.IsNonDefaultRouted(obj));
+            Assert.True(TypeDriverHelper.IsNonDefaultRouted(obj));
             Assert.Equal(42, obj.IntField);
         }
 
@@ -292,14 +310,14 @@ namespace DDS.Tests
         public void RoutedObject_SurvivesCompaction()
         {
             var obj = new TestObject { IntField = 42 };
-            DDSRuntime.EnableNonDefaultRouting(obj);
+            TypeDriverHelper.EnableNonDefaultRouting(obj);
 
             // Allocate to trigger compaction
             TestUtils.AllocatePressure();
             TestUtils.ForceFullGC();
 
             // Routing should survive
-            Assert.True(DDSRuntime.IsNonDefaultRouted(obj));
+            Assert.True(TypeDriverHelper.IsNonDefaultRouted(obj));
             Assert.Equal(42, obj.IntField);
         }
 
@@ -310,7 +328,7 @@ namespace DDS.Tests
             var child = new TestObject { IntField = 42 };
 
             parent.NestedField = child;
-            DDSRuntime.EnableNonDefaultRouting(parent);
+            TypeDriverHelper.EnableNonDefaultRouting(parent);
 
             WeakReference childWeak = new WeakReference(child);
             child = null;
@@ -325,12 +343,12 @@ namespace DDS.Tests
         [Fact]
         public void RoutedObject_CleanedUpOnCollection()
         {
-            int countBefore = DDSRuntime.GetRoutedObjectCount();
+            int countBefore = TypeDriverHelper.GetRoutedObjectCount();
 
             WeakReference wr;
             {
                 var obj = new TestObject();
-                DDSRuntime.EnableNonDefaultRouting(obj);
+                TypeDriverHelper.EnableNonDefaultRouting(obj);
                 wr = new WeakReference(obj);
             }
 
@@ -348,7 +366,7 @@ namespace DDS.Tests
             for (int i = 0; i < 100; i++)
             {
                 var obj = new TestObject { IntField = i };
-                DDSRuntime.EnableNonDefaultRouting(obj);
+                TypeDriverHelper.EnableNonDefaultRouting(obj);
                 objects.Add(obj);
             }
 
@@ -356,7 +374,7 @@ namespace DDS.Tests
 
             for (int i = 0; i < 100; i++)
             {
-                Assert.True(DDSRuntime.IsNonDefaultRouted(objects[i]));
+                Assert.True(TypeDriverHelper.IsNonDefaultRouted(objects[i]));
                 Assert.Equal(i, objects[i].IntField);
             }
         }
@@ -369,7 +387,9 @@ namespace DDS.Tests
 **File:** `Phase1StressTests.cs`
 
 ```csharp
-namespace DDS.Tests
+using System.OS;
+
+namespace TDS.Tests
 {
     public class StressTests
     {
@@ -384,11 +404,11 @@ namespace DDS.Tests
                 try
                 {
                     var obj = new TestObject { IntField = i };
-                    DDSRuntime.EnableNonDefaultRouting(obj);
+                    TypeDriverHelper.EnableNonDefaultRouting(obj);
                     objects.Add(obj);
 
                     // Verify immediately
-                    Assert.True(DDSRuntime.IsNonDefaultRouted(obj));
+                    Assert.True(TypeDriverHelper.IsNonDefaultRouted(obj));
                     Assert.Equal(i, obj.IntField);
                 }
                 catch (Exception ex)
@@ -407,12 +427,12 @@ namespace DDS.Tests
 
             for (int i = 0; i < 10000; i++)
             {
-                DDSRuntime.EnableNonDefaultRouting(obj);
-                Assert.True(DDSRuntime.IsNonDefaultRouted(obj));
+                TypeDriverHelper.EnableNonDefaultRouting(obj);
+                Assert.True(TypeDriverHelper.IsNonDefaultRouted(obj));
                 Assert.Equal(42, obj.IntField);
 
-                DDSRuntime.DisableNonDefaultRouting(obj);
-                Assert.False(DDSRuntime.IsNonDefaultRouted(obj));
+                TypeDriverHelper.DisableNonDefaultRouting(obj);
+                Assert.False(TypeDriverHelper.IsNonDefaultRouted(obj));
                 Assert.Equal(42, obj.IntField);
             }
         }
@@ -428,7 +448,7 @@ namespace DDS.Tests
                 for (int i = 0; i < 100; i++)
                 {
                     var obj = new TestObject { IntField = round * 100 + i };
-                    DDSRuntime.EnableNonDefaultRouting(obj);
+                    TypeDriverHelper.EnableNonDefaultRouting(obj);
                     objects.Add(obj);
                 }
 
@@ -438,7 +458,7 @@ namespace DDS.Tests
                 // Verify all objects
                 for (int i = 0; i < objects.Count; i++)
                 {
-                    Assert.True(DDSRuntime.IsNonDefaultRouted(objects[i]));
+                    Assert.True(TypeDriverHelper.IsNonDefaultRouted(objects[i]));
                 }
 
                 // Remove half
@@ -454,7 +474,9 @@ namespace DDS.Tests
 **File:** `Phase1PerfTests.cs`
 
 ```csharp
-namespace DDS.Tests
+using System.OS;
+
+namespace TDS.Tests
 {
     public class PerformanceTests
     {
@@ -465,7 +487,7 @@ namespace DDS.Tests
         {
             var defaultObj = new TestObject();
             var routedObj = new TestObject();
-            DDSRuntime.EnableNonDefaultRouting(routedObj);
+            TypeDriverHelper.EnableNonDefaultRouting(routedObj);
 
             // Warmup
             for (int i = 0; i < 1000; i++)
@@ -511,7 +533,7 @@ namespace DDS.Tests
             var sw = Stopwatch.StartNew();
             for (int i = 0; i < Iterations; i++)
             {
-                _ = DDSRuntime.IsNonDefaultRouted(obj);
+                _ = TypeDriverHelper.IsNonDefaultRouted(obj);
             }
             sw.Stop();
 
@@ -531,8 +553,8 @@ namespace DDS.Tests
             var sw = Stopwatch.StartNew();
             for (int i = 0; i < iterations; i++)
             {
-                DDSRuntime.EnableNonDefaultRouting(obj);
-                DDSRuntime.DisableNonDefaultRouting(obj);
+                TypeDriverHelper.EnableNonDefaultRouting(obj);
+                TypeDriverHelper.DisableNonDefaultRouting(obj);
             }
             sw.Stop();
 
@@ -550,7 +572,7 @@ namespace DDS.Tests
 ### Using dotnet test
 
 ```bash
-cd src/tests/dds
+cd src/tests/tds
 dotnet test --filter "FullyQualifiedName~Phase1"
 ```
 
@@ -585,6 +607,6 @@ dotnet test --filter "Category=Phase1"
 
 ## References
 
-- Main Doc: Part III §3.2 WP8
+- Main Doc: Part III SS3.2 WP8
 - Main Doc: Part VII (Success Criteria)
 - .NET Test Framework documentation

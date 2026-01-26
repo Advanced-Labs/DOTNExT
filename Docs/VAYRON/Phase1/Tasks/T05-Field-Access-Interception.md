@@ -9,15 +9,27 @@
 
 ## Objective
 
-Create intrinsic helpers for field access that route through DDS drivers when the routing bit is set. **Phase 1 does NOT modify JIT helpers** - it uses explicit intrinsics only.
+Create intrinsic helpers for field access that route through TypeDriver drivers when the routing bit is set. **Phase 1 does NOT modify JIT helpers** - it uses explicit intrinsics only.
+
+---
+
+## Naming Convention
+
+| Context | Convention | Example |
+|---------|------------|---------|
+| C++ directory | `tds/` | `src/runtime/src/coreclr/vm/tds/` |
+| C++ header | `tdsintrinsics.h` | Intrinsic declarations |
+| C++ functions | `TDS_*` | `TDS_ReadField()`, `TDS_WriteField()` |
+| C# namespace | `System.OS` | `using System.OS;` |
+| C# intrinsics | `VIntrinsics` | `VIntrinsics.ReadField<T>()` |
 
 ---
 
 ## Scope Clarification
 
 ### What Phase 1 Does
-- Adds **new intrinsic functions** (`VFieldRead`, `VFieldWrite`)
-- These check the DDS bit and dispatch through drivers
+- Adds **new intrinsic functions** (`TDS_ReadField`, `TDS_WriteField`)
+- These check the TDS bit and dispatch through drivers
 - Used for prototype testing of driver infrastructure
 
 ### What Phase 1 Does NOT Do
@@ -31,76 +43,76 @@ Create intrinsic helpers for field access that route through DDS drivers when th
 
 | File | Purpose |
 |------|---------|
-| `src/runtime/src/coreclr/vm/dds/ddsintrinsics.h` | Intrinsic declarations |
-| `src/runtime/src/coreclr/vm/dds/ddsintrinsics.cpp` | Intrinsic implementations |
+| `src/runtime/src/coreclr/vm/tds/tdsintrinsics.h` | Intrinsic declarations |
+| `src/runtime/src/coreclr/vm/tds/tdsintrinsics.cpp` | Intrinsic implementations |
 
 ---
 
 ## Implementation Steps
 
-### Step 1: Create ddsintrinsics.h
+### Step 1: Create tdsintrinsics.h
 
 ```cpp
-#ifndef _DDS_INTRINSICS_H_
-#define _DDS_INTRINSICS_H_
+#ifndef _TDS_INTRINSICS_H_
+#define _TDS_INTRINSICS_H_
 
 #include "common.h"
-#include "dds/opsroot.h"
+#include "tds/opsroot.h"
 
 //=============================================================================
-// DDS Field Access Intrinsics (Phase 1: explicit calls)
+// TDS Field Access Intrinsics (Phase 1: explicit calls)
 //=============================================================================
 
-// Read a field value through DDS routing
+// Read a field value through TDS routing
 // Returns: bytes read, or -1 on error
-intptr_t DDS_ReadField(Object* obj, FieldDesc* field, void* buffer, size_t bufferSize);
+intptr_t TDS_ReadField(Object* obj, FieldDesc* field, void* buffer, size_t bufferSize);
 
-// Write a field value through DDS routing
-void DDS_WriteField(Object* obj, FieldDesc* field, const void* value, size_t valueSize);
+// Write a field value through TDS routing
+void TDS_WriteField(Object* obj, FieldDesc* field, const void* value, size_t valueSize);
 
-// Write a reference field with barrier through DDS routing
-void DDS_WriteRefField(Object* obj, FieldDesc* field, Object* newRef);
+// Write a reference field with barrier through TDS routing
+void TDS_WriteRefField(Object* obj, FieldDesc* field, Object* newRef);
 
-// Get effective field address through DDS routing
-void* DDS_GetFieldAddress(Object* obj, FieldDesc* field);
+// Get effective field address through TDS routing
+void* TDS_GetFieldAddress(Object* obj, FieldDesc* field);
 
 //=============================================================================
 // Convenience templates (for managed interop)
 //=============================================================================
 
 template<typename T>
-T DDS_ReadFieldValue(Object* obj, int fieldOffset)
+T TDS_ReadFieldValue(Object* obj, int fieldOffset)
 {
     T result;
     FieldDesc* field = FindFieldByOffset(obj, fieldOffset);
-    DDS_ReadField(obj, field, &result, sizeof(T));
+    TDS_ReadField(obj, field, &result, sizeof(T));
     return result;
 }
 
 template<typename T>
-void DDS_WriteFieldValue(Object* obj, int fieldOffset, T value)
+void TDS_WriteFieldValue(Object* obj, int fieldOffset, T value)
 {
     FieldDesc* field = FindFieldByOffset(obj, fieldOffset);
-    DDS_WriteField(obj, field, &value, sizeof(T));
+    TDS_WriteField(obj, field, &value, sizeof(T));
 }
 
-#endif // _DDS_INTRINSICS_H_
+#endif // _TDS_INTRINSICS_H_
 ```
 
-### Step 2: Create ddsintrinsics.cpp
+### Step 2: Create tdsintrinsics.cpp
 
 ```cpp
 #include "common.h"
-#include "dds/ddsintrinsics.h"
-#include "dds/opsroottable.h"
+#include "tds/tdsintrinsics.h"
+#include "tds/opsroottable.h"
 #include "object.h"
 #include "field.h"
 
 //=============================================================================
-// Field Read - Routes through driver if DDS bit set
+// Field Read - Routes through driver if TDS bit set
 //=============================================================================
 
-intptr_t DDS_ReadField(Object* obj, FieldDesc* field, void* buffer, size_t bufferSize)
+intptr_t TDS_ReadField(Object* obj, FieldDesc* field, void* buffer, size_t bufferSize)
 {
     _ASSERTE(obj != nullptr);
     _ASSERTE(field != nullptr);
@@ -139,10 +151,10 @@ intptr_t DDS_ReadField(Object* obj, FieldDesc* field, void* buffer, size_t buffe
 }
 
 //=============================================================================
-// Field Write - Routes through driver if DDS bit set
+// Field Write - Routes through driver if TDS bit set
 //=============================================================================
 
-void DDS_WriteField(Object* obj, FieldDesc* field, const void* value, size_t valueSize)
+void TDS_WriteField(Object* obj, FieldDesc* field, const void* value, size_t valueSize)
 {
     _ASSERTE(obj != nullptr);
     _ASSERTE(field != nullptr);
@@ -180,7 +192,7 @@ void DDS_WriteField(Object* obj, FieldDesc* field, const void* value, size_t val
 // Reference Field Write - With GC barrier
 //=============================================================================
 
-void DDS_WriteRefField(Object* obj, FieldDesc* field, Object* newRef)
+void TDS_WriteRefField(Object* obj, FieldDesc* field, Object* newRef)
 {
     _ASSERTE(obj != nullptr);
     _ASSERTE(field != nullptr);
@@ -198,7 +210,7 @@ void DDS_WriteRefField(Object* obj, FieldDesc* field, Object* newRef)
 // Get Field Address - For scenarios needing direct pointer
 //=============================================================================
 
-void* DDS_GetFieldAddress(Object* obj, FieldDesc* field)
+void* TDS_GetFieldAddress(Object* obj, FieldDesc* field)
 {
     _ASSERTE(obj != nullptr);
     _ASSERTE(field != nullptr);
@@ -236,9 +248,9 @@ FieldDesc* FindFieldByOffset(Object* obj, int offset)
 
 ```csharp
 // Managed wrapper (Phase 1 testing)
-namespace System.Runtime.DDS
+namespace System.OS
 {
-    internal static class DDSIntrinsics
+    internal static class VIntrinsics
     {
         [MethodImpl(MethodImplOptions.InternalCall)]
         internal static extern T ReadField<T>(object obj, int fieldOffset) where T : unmanaged;
@@ -266,7 +278,7 @@ namespace System.Runtime.DDS
 - Overhead is minimal (~10-20ns) for prototype testing
 
 ### Write Barrier Preservation
-- `DDS_WriteRefField` always goes through driver's `WriteBarrier`
+- `TDS_WriteRefField` always goes through driver's `WriteBarrier`
 - Default driver uses `SetObjectReference()` (CLR write barrier)
 - GC correctness is preserved
 
@@ -274,11 +286,11 @@ namespace System.Runtime.DDS
 
 ## Acceptance Criteria
 
-- [ ] `DDS_ReadField` reads through driver for routed objects
-- [ ] `DDS_ReadField` works for default objects (proxy behavior)
-- [ ] `DDS_WriteField` writes through driver for routed objects
-- [ ] `DDS_WriteRefField` uses write barrier
-- [ ] `DDS_GetFieldAddress` returns correct address
+- [ ] `TDS_ReadField` reads through driver for routed objects
+- [ ] `TDS_ReadField` works for default objects (proxy behavior)
+- [ ] `TDS_WriteField` writes through driver for routed objects
+- [ ] `TDS_WriteRefField` uses write barrier
+- [ ] `TDS_GetFieldAddress` returns correct address
 - [ ] Templates compile and work
 - [ ] Managed wrappers work (QCalls/FCalls)
 - [ ] No GC corruption under stress
@@ -291,24 +303,24 @@ namespace System.Runtime.DDS
 ### Basic Functionality
 
 ```cpp
-void TestDDSIntrinsics()
+void TestTDSIntrinsics()
 {
     Object* obj = AllocateTestObject();
     FieldDesc* intField = GetIntField(obj);
 
     // Test with default object
     int value = 42;
-    DDS_WriteField(obj, intField, &value, sizeof(value));
+    TDS_WriteField(obj, intField, &value, sizeof(value));
 
     int readBack = 0;
-    DDS_ReadField(obj, intField, &readBack, sizeof(readBack));
+    TDS_ReadField(obj, intField, &readBack, sizeof(readBack));
     assert(readBack == 42);
 
     // Test with routed object
     OpsRoot* custom = CreateTracingOpsRoot();  // Logs all accesses
-    DDS_SetOpsRoot(obj, custom);
+    TDS_SetOpsRoot(obj, custom);
 
-    DDS_WriteField(obj, intField, &value, sizeof(value));
+    TDS_WriteField(obj, intField, &value, sizeof(value));
     // Verify tracing driver logged the write
 }
 ```
@@ -316,21 +328,21 @@ void TestDDSIntrinsics()
 ### Reference Field Test
 
 ```cpp
-void TestDDSRefField()
+void TestTDSRefField()
 {
     Object* parent = AllocateTestObject();
     Object* child = AllocateTestObject();
     FieldDesc* refField = GetRefField(parent);
 
-    DDS_WriteRefField(parent, refField, child);
+    TDS_WriteRefField(parent, refField, child);
 
     Object* readBack = nullptr;
-    DDS_ReadField(parent, refField, &readBack, sizeof(readBack));
+    TDS_ReadField(parent, refField, &readBack, sizeof(readBack));
     assert(readBack == child);
 
     // Force GC and verify reference is still valid
     GC_Collect();
-    DDS_ReadField(parent, refField, &readBack, sizeof(readBack));
+    TDS_ReadField(parent, refField, &readBack, sizeof(readBack));
     assert(readBack == child);
 }
 ```
@@ -339,7 +351,7 @@ void TestDDSRefField()
 
 ## References
 
-- Main Doc: Part III §3.2 WP5
-- Main Doc: Part VI §6.1 (JIT = None decision)
+- Main Doc: Part III SS3.2 WP5
+- Main Doc: Part VI SS6.1 (JIT = None decision)
 - Backlog: IMP-002 (JIT Helper Interception)
-- CLR Integration Reference: §3 (JIT Helper Functions)
+- CLR Integration Reference: SS3 (JIT Helper Functions)
