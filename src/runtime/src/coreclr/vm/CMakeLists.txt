@@ -540,11 +540,13 @@ endif(FEATURE_OBJCMARSHAL)
 list(APPEND VM_SOURCES_WKS
     tds/opsroottable.cpp
     tds/defaultdrivers.cpp
+    tds/tdsintrinsics.cpp
 )
 list(APPEND VM_HEADERS_WKS
     tds/tdsinterfaces.h
     tds/opsroot.h
     tds/opsroottable.h
+    tds/tdsintrinsics.h
     tds/tds_tests.h
 )
 

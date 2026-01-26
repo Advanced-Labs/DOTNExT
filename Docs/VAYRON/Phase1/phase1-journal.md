@@ -232,3 +232,68 @@
 - If passed, proceed to T05: Managed TypeDriver Attribute
 
 ---
+
+## 2026-01-26 - Session 6 (continued): TAI Build Test #2 PASSED
+
+### TAI Build Test #2 Final Results
+- **Status:** PASSED
+- **Platform:** Windows x64 Debug
+- **Result:** T01+T02+T03+T04 infrastructure compiles successfully
+
+### Additional Fixes During Verification
+
+| Issue | Fix | Commit |
+|-------|-----|--------|
+| OpsRoot incomplete type in opsroottable.cpp | Added `#include "tds/opsroot.h"` | 5d94227d |
+| Return pointer vs value | Changed to `&g_DefaultOpsRoot` | 57a484a2 |
+
+### Phase 1 Infrastructure Status
+
+| Task | Status |
+|------|--------|
+| T01 - Header Bit Infrastructure | ✓ VERIFIED |
+| T02 - OpsRoot Side Table | ✓ VERIFIED |
+| T03 - Device Interfaces | ✓ VERIFIED |
+| T04 - Default Drivers | ✓ VERIFIED |
+
+### Next Session
+- Proceed to T05: Field Access Interception
+
+---
+
+## 2026-01-26 - Session 7: T05 Field Access Interception
+
+### What I Did
+- Created `tdsintrinsics.h` with:
+  - `TDS_ReadField()` - read through TDS routing
+  - `TDS_WriteField()` - write through TDS routing
+  - `TDS_WriteRefField()` - reference write with GC barrier
+  - `TDS_GetFieldAddress()` - get effective address with materialization
+- Created `tdsintrinsics.cpp` with:
+  - Full implementations routing through OpsRoot drivers
+  - OnBeforeAccess/OnAfterAccess hook calls
+  - Proper CONTRACTL specifications
+  - Uses g_NullContext from defaultdrivers.cpp
+- Updated CMakeLists.txt with new TDS files
+
+### Files Created
+- `src/runtime/src/coreclr/vm/tds/tdsintrinsics.h` - Intrinsic declarations
+- `src/runtime/src/coreclr/vm/tds/tdsintrinsics.cpp` - Intrinsic implementations
+
+### Files Modified
+- `src/runtime/src/coreclr/vm/CMakeLists.txt` - Added T05 files
+
+### Key Design Decisions
+- Phase 1 uses explicit intrinsic calls (no JIT modification)
+- Reference writes ALWAYS go through WriteBarrier driver function
+- GetFieldAddress triggers EnsureMaterialized for lazy objects
+- OnBeforeAccess returning true means driver intercepts completely
+
+### Blockers
+- None (pending TAI Build Test #3 verification)
+
+### Next Session
+- Await TAI Build Test #3 results
+- If passed, proceed to T06
+
+---
