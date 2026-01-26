@@ -88,7 +88,14 @@ typedef DPTR(EnCSyncBlockInfo) PTR_EnCSyncBlockInfo;
 // reducing the mask.  We use the very high bit, in _DEBUG, to be sure we never forget
 // to mask the Value to obtain the Index
 
-#define BIT_SBLK_UNUSED                     0x80000000
+// TDS (TypeDriver System) routing bit - indicates object uses non-default drivers
+// When set, runtime operations are routed through the object's OpsRoot dispatch table
+// When clear (default), standard CLR behavior applies
+#define BIT_SBLK_TDS_NONDEFAULT             0x80000000
+
+// Legacy alias for compatibility (BIT_SBLK_UNUSED was previously unused, now repurposed for TDS)
+#define BIT_SBLK_UNUSED                     BIT_SBLK_TDS_NONDEFAULT
+
 #define BIT_SBLK_FINALIZER_RUN              0x40000000
 #define BIT_SBLK_GC_RESERVE                 0x20000000
 
@@ -1574,6 +1581,27 @@ class ObjHeader
         LIMITED_METHOD_CONTRACT;
 
         m_SyncBlockValue.RawValue() &= ~BIT_SBLK_GC_RESERVE;
+    }
+
+    // TDS (TypeDriver System) routing support
+    // These methods check/set/clear the routing bit that indicates an object
+    // uses non-default drivers for runtime operations (field access, etc.)
+    FORCEINLINE bool IsTDSNonDefault() const
+    {
+        LIMITED_METHOD_DAC_CONTRACT;
+        return (m_SyncBlockValue.LoadWithoutBarrier() & BIT_SBLK_TDS_NONDEFAULT) != 0;
+    }
+
+    void SetTDSNonDefault()
+    {
+        LIMITED_METHOD_CONTRACT;
+        SetBit(BIT_SBLK_TDS_NONDEFAULT);
+    }
+
+    void ClearTDSNonDefault()
+    {
+        LIMITED_METHOD_CONTRACT;
+        ClrBit(BIT_SBLK_TDS_NONDEFAULT);
     }
 
     // Don't bother masking out the index since anyone who wants bits will presumably

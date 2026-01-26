@@ -1,0 +1,66 @@
+# Phase 1 Journal
+
+> Detailed session tracking for Phase 1: TDS Microkernel Implementation
+> Update after each session, even if task isn't complete.
+
+---
+
+## 2026-01-26 - Session 1: Documentation Review & Naming Update
+
+### What I Did
+- Read all VAYRON documentation (README, Vision, Roadmap, how-to-work)
+- Read all Phase 1 task files (T01-T08) and CLR Integration Reference
+- Updated naming conventions across 9 documentation files:
+  - C++: `DDS_*` -> `TDS_*`, `dds/` -> `tds/`
+  - C#: `System.Runtime.DDS` -> `System.OS`, `DDSRuntime` -> `TypeDriverHelper`
+- Committed and pushed changes
+
+### What I Learned
+- Phase 1 goal: Make CLR extensible without breaking existing behavior
+- Key integration points: syncblk.h (bit 31), object.h, jithelpers.cpp
+- SyncBlockIndex is stable across GC compaction (used as key for OpsRootTable)
+- QCall = "Quick Call" - fast managed-to-native transition
+
+### Blockers
+- None
+
+### Next Session
+- Continue with T02: OpsRoot Side Table
+- Or proceed to T03: Device Interfaces (can run in parallel)
+
+---
+
+## 2026-01-26 - Session 2: T01 Header Bit Infrastructure
+
+### What I Did
+- Added `BIT_SBLK_TDS_NONDEFAULT` constant (0x80000000) to syncblk.h
+- Preserved `BIT_SBLK_UNUSED` as legacy alias for compatibility
+- Added ObjHeader methods: `IsTDSNonDefault()`, `SetTDSNonDefault()`, `ClearTDSNonDefault()`
+- Added Object convenience method: `IsTDSNonDefault()` (delegates to header)
+- Created TDS directory: `src/runtime/src/coreclr/vm/tds/`
+- Created native test header: `tds/tds_tests.h`
+- Created managed test template: `src/tests/tds/Phase1/T01_HeaderBitTests.cs`
+
+### Files Modified
+- `src/runtime/src/coreclr/vm/syncblk.h` - TDS bit constant and ObjHeader methods
+- `src/runtime/src/coreclr/vm/object.h` - Object::IsTDSNonDefault()
+
+### Files Created
+- `src/runtime/src/coreclr/vm/tds/tds_tests.h` - C++ test utilities
+- `src/runtime/src/tests/tds/Phase1/T01_HeaderBitTests.cs` - Managed test template
+- `src/runtime/src/tests/tds/Phase1/T01_HeaderBitTests.csproj` - Test project
+
+### Key Implementation Details
+- Used `FORCEINLINE` for IsTDSNonDefault() for performance
+- Used `LIMITED_METHOD_DAC_CONTRACT` for DAC compatibility
+- SetBit/ClrBit already use interlocked operations (thread-safe)
+- LoadWithoutBarrier used for read to avoid spurious barriers
+
+### Blockers
+- None
+
+### Next Session
+- Request TAI build verification (after T02+T03)
+- Continue with T02: OpsRoot Side Table
+
+---
