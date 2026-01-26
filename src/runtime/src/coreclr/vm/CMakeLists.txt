@@ -539,6 +539,7 @@ endif(FEATURE_OBJCMARSHAL)
 #
 list(APPEND VM_SOURCES_WKS
     tds/opsroottable.cpp
+    tds/defaultdrivers.cpp
 )
 list(APPEND VM_HEADERS_WKS
     tds/tdsinterfaces.h

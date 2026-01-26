@@ -14,9 +14,7 @@
 // Global instance
 OpsRootTable g_OpsRootTable;
 
-// Default OpsRoot placeholder - will be properly initialized in T04
-// For now, set to nullptr; callers should check and handle appropriately
-OpsRoot* g_DefaultOpsRoot = nullptr;
+// Note: g_DefaultOpsRoot is defined in defaultdrivers.cpp
 
 //-----------------------------------------------------------------------------
 // OpsRootTable Implementation
