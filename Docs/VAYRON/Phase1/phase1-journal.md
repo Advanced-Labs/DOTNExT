@@ -138,6 +138,47 @@
 - `inc/crsttypes_generated.h` - CrstOpsRootTable type
 
 ### Next Session
-- Proceed with T03: Device Interfaces
+- T03 completed, proceed with T04
+
+---
+
+## 2026-01-26 - Session 5: T03 Device Interfaces
+
+### What I Did
+- Created `tdsinterfaces.h` with:
+  - `VContext` struct (execution context, Phase 1 placeholder)
+  - `TDSRefEnumCallback` type for GC reference enumeration
+  - `IObjectModelOps` - object layout, size, GC scanning
+  - `IFieldAccessOps` - field read/write interception
+  - `IStorageOps` - persistence (Phase 2 reserved)
+  - `ICallDispatchOps` - remote dispatch (Phase 4 reserved)
+  - Version constants for ABI compatibility
+- Created `opsroot.h` with:
+  - `OpsRoot` dispatch table struct
+  - Flag constants (PERSISTENT, DISTRIBUTED, etc.)
+  - Convenience methods (HasStorage, IsDistributed, etc.)
+  - Management function prototypes (TDS_Initialize, TDS_CreateOpsRoot, etc.)
+  - Global extern declarations
+- Updated CMakeLists.txt with new headers
+
+### Files Created
+- `src/runtime/src/coreclr/vm/tds/tdsinterfaces.h` - Device interface definitions
+- `src/runtime/src/coreclr/vm/tds/opsroot.h` - OpsRoot dispatch table
+
+### Files Modified
+- `src/runtime/src/coreclr/vm/CMakeLists.txt` - Added new headers
+
+### Key Design Decisions
+- VContext is empty placeholder in Phase 1 (reserved for transactions, security)
+- All interface methods use STDMETHODCALLTYPE for cross-module compatibility
+- Reserved slots in each interface for future expansion without ABI break
+- IStorageOps and ICallDispatchOps are defined but implementations deferred
+
+### Blockers
+- None
+
+### Next Session
+- T04: Implement Default Drivers (passthrough implementations)
+- Request TAI build verification after T04
 
 ---

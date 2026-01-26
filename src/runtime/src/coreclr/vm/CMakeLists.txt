@@ -541,6 +541,8 @@ list(APPEND VM_SOURCES_WKS
     tds/opsroottable.cpp
 )
 list(APPEND VM_HEADERS_WKS
+    tds/tdsinterfaces.h
+    tds/opsroot.h
     tds/opsroottable.h
     tds/tds_tests.h
 )
