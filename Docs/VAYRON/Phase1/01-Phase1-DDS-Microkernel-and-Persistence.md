@@ -786,6 +786,10 @@ struct IStorageOps
     void* reserved[8];
 };
 
+// NOTE: IStorageOps is reserved here with VContext support.
+// Full implementation begins in Phase 2.
+// See: ../Phase2/02-Phase2-StorageDevice-Voron.md
+
 //=============================================================================
 // CallDispatchDevice Interface (Phase 4 - interface reserved now)
 //=============================================================================

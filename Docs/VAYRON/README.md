@@ -29,6 +29,7 @@ Default behavior is preserved via "DefaultDrivers" that proxy standard CLR opera
 | [VAYRON-R1-Platform-Vision.md](./VAYRON-R1-Platform-Vision.md) | Complete platform vision, architecture, and design philosophy |
 | [VAYRON-R1-Roadmap-and-Codebase-Map.md](./VAYRON-R1-Roadmap-and-Codebase-Map.md) | Implementation roadmap and codebase analysis |
 | [Phase1/01-Phase1-DDS-Microkernel-and-Persistence.md](./Phase1/01-Phase1-DDS-Microkernel-and-Persistence.md) | Phase 1 detailed implementation plan |
+| [Phase2/02-Phase2-StorageDevice-Voron.md](./Phase2/02-Phase2-StorageDevice-Voron.md) | Phase 2 detailed implementation plan |
 
 ### Archived Documentation
 
@@ -48,9 +49,11 @@ Original documentation versions are preserved in [Older/](./Older/).
 > **Note:** Phase 1 delivers routing infrastructure + default driver scaffolding only. No persistence yet — that's Phase 2.
 
 ### Phase 2: Persistence Vertical Slice
-- StorageDevice interface becomes real
-- Voron-backed StorageDriver implementation
+- StorageDevice interface becomes real (Voron-backed)
+- FlushPersist mode: dirty tracking + batch commit
 - VUID (UUID v7) identity system
+- Body layer encoding (tagged field map v1)
+- Pattern B: activation copy + durable body
 - Create -> mutate -> restart -> materialize validation
 
 ### Phase 3: Relational Substrate
@@ -81,8 +84,13 @@ Original documentation versions are preserved in [Older/](./Older/).
 | **Varia** | Whole object across space+time (conceptual) |
 | **VType** | A CLR type marked as virtual and subject to virtualization rules |
 | **VUID** | Virtual Unique Identifier (UUID v7) |
+| **VContext** | Execution context passed through all driver operations |
 | **ops_root** | Per-object driver dispatch table |
 | **DefaultDriver** | Driver that proxies standard CLR behavior |
+| **TypeDriver** | Per-type policy selecting which OpsRoot/drivers apply |
+| **Body layer** | Durable representation of object fields in storage |
+| **FlushPersist** | Persistence mode: writes mark dirty, flush commits batch |
+| **Activation copy** | RAM-resident materialized VObject (Pattern B) |
 
 ---
 

@@ -29,10 +29,14 @@
 **Goal:** `[Virtual + Persistent]` (or C= equivalent) survives restart.
 
 **Deliverables:**
-- StorageDevice contract becomes real
-- Voron-backed StorageDriver plugs in
-- Choose Pattern B or A as initial ObjectModel
+- StorageDevice contract becomes real (VContext-aware)
+- Voron-backed StorageDriver (uses existing Voron analysis below)
+- Pattern B as initial ObjectModel (activation copy + durable body)
+- FlushPersist mode: dirty tracking → batch commit on flush/turn-end
+- Body layer v1: tagged field map encoding
 - Validate: create -> mutate -> restart -> materialize by VUID
+
+**See:** [Phase2/02-Phase2-StorageDevice-Voron.md](./Phase2/02-Phase2-StorageDevice-Voron.md) for detailed plan.
 
 ### Phase 3: Relational Substrate
 
