@@ -12,7 +12,7 @@
 #include "common.h"
 
 // Forward declarations
-struct Object;
+class Object;
 class FieldDesc;
 
 //=============================================================================
