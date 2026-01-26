@@ -3,7 +3,7 @@
 > **Work Package:** WP2
 > **Dependencies:** T01 (Header Bit Infrastructure)
 > **Estimated Complexity:** Medium
-> **Status:** Pending
+> **Status:** Completed
 
 ---
 
@@ -359,3 +359,58 @@ void TestOpsRootSurvivesGC()
 - Main Doc: Part III SS3.2 WP2
 - CLR Integration Reference: SS2 (SyncBlock Integration)
 - Backlog: IMP-001 (Clean recycle hook)
+
+---
+
+## Implementation Notes
+
+**Completed:** 2026-01-26
+**Session:** 3
+
+### What Was Done
+
+- Created `opsroottable.h` with OpsRootEntry, OpsRootTableTraits, and OpsRootTable class
+- Created `opsroottable.cpp` with full implementation using SHash and CrstHolder
+- Added CrstOpsRootTable to CrstTypes.def for thread-safe locking
+- Added TDS sources to CMakeLists.txt (VM_SOURCES_WKS and VM_HEADERS_WKS)
+- Integrated initialization in ceemain.cpp (after SyncBlockCache::Start())
+- Added shutdown cleanup in ceemain.cpp (before SyncBlock cleanup)
+- Updated tds_tests.h with T02 native test functions
+- Created managed test template T02_OpsRootTableTests.cs
+
+### Deviations from Plan
+
+- Added `syncBlockIndex` directly to OpsRootEntry struct (needed for SHash traits GetKey)
+- Used `UINT32` instead of `uint32_t` for generationTag (CLR style consistency)
+- Added `RemoveByIndex()` method for direct index-based removal
+- Added `IsEntryValid()` method for debugging/diagnostics
+- Added explicit include for `crst.h` in header for CrstExplicitInit
+- Used global generation counter (per-index tracking deferred to future optimization)
+
+### Files Created
+
+| File | Purpose |
+|------|---------|
+| `vm/tds/opsroottable.h` | OpsRootTable class declaration |
+| `vm/tds/opsroottable.cpp` | Full implementation |
+| `tests/tds/Phase1/T02_OpsRootTableTests.cs` | Managed test template |
+| `tests/tds/Phase1/T02_OpsRootTableTests.csproj` | Test project file |
+
+### Files Modified
+
+| File | Changes |
+|------|---------|
+| `inc/CrstTypes.def` | Added CrstOpsRootTable |
+| `vm/CMakeLists.txt` | Added TDS sources to VM_SOURCES_WKS |
+| `vm/ceemain.cpp` | Added include, Initialize(), and Destroy() calls |
+| `vm/tds/tds_tests.h` | Added T02 test functions and TDS_RunT02Tests() |
+
+### Issues Encountered
+
+- None significant. Implementation followed task specification closely.
+
+### Follow-up Items
+
+- T06 will hook OnSyncBlockRecycled() into actual SyncBlock recycling path
+- IMP-001 in backlog: Need cleaner recycle hook integration
+- Consider reader-writer lock optimization for high-read workloads (post-Phase 1)

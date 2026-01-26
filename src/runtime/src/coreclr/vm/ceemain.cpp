@@ -127,6 +127,7 @@
 #include "ceemain.h"
 #include "dllimport.h"
 #include "syncblk.h"
+#include "tds/opsroottable.h"
 #include "eeconfig.h"
 #include "stublink.h"
 #include "method.hpp"
@@ -892,6 +893,10 @@ void EEStartupHelper()
         // Set up the sync block
         SyncBlockCache::Start();
 
+        // Initialize TDS (TypeDriver System) OpsRoot table
+        // This must be done after SyncBlockCache is initialized since it depends on SyncBlock infrastructure
+        g_OpsRootTable.Initialize();
+
         // This isn't done as part of InitializeGarbageCollector() above because it
         // requires write barriers to have been set up on x86, which happens as part
         // of InitJITHelpers1.
@@ -1337,6 +1342,11 @@ void STDMETHODCALLTYPE EEShutDownHelper(BOOL fIsDllUnloading)
 #ifdef _DEBUG
         g_fEEShutDown |= ShutDown_SyncBlock;
 #endif
+
+        // Destroy TDS (TypeDriver System) OpsRoot table
+        // This should happen before SyncBlock cleanup since OpsRootTable depends on SyncBlock infrastructure
+        g_OpsRootTable.Destroy();
+
         {
             // From here on out we might call stuff that violates mode requirements, but we ignore these
             // because we are shutting down.

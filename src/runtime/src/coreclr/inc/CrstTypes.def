@@ -357,6 +357,11 @@ Crst ObjectList
     SameLevelAs ObjectList
 End
 
+// TDS (TypeDriver System) OpsRoot side table
+// Maps SyncBlockIndex -> OpsRoot* for non-default routing
+Crst OpsRootTable
+End
+
 Crst PEImage
     AcquiredBefore UniqueStack
 End

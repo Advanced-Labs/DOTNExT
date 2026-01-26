@@ -242,6 +242,14 @@ class Object
         return GetHeader()->GetSyncBlockIndex();
     }
 
+    // TDS (TypeDriver System) routing support
+    // Returns true if this object uses non-default drivers for runtime operations
+    FORCEINLINE bool IsTDSNonDefault() const
+    {
+        LIMITED_METHOD_DAC_CONTRACT;
+        return GetHeader()->IsTDSNonDefault();
+    }
+
     // DO NOT ADD ANY ASSERTS TO THIS METHOD.
     // DO NOT USE THIS METHOD.
     // Yes folks, for better or worse the debugger pokes supposed object addresses

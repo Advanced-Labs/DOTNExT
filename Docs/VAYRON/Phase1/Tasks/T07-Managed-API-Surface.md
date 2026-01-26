@@ -9,7 +9,24 @@
 
 ## Objective
 
-Expose minimal C# API for testing DDS infrastructure from managed code.
+Expose minimal C# API for testing TypeDriver infrastructure from managed code.
+
+---
+
+## Naming Conventions
+
+| Context | Convention | Example |
+|---------|------------|---------|
+| C# namespace | `System.OS` | `using System.OS;` |
+| C# runtime helper | `TypeDriverHelper` | `TypeDriverHelper.IsNonDefaultRouted(obj)` |
+| C# intrinsics | `VIntrinsics` | `VIntrinsics.ReadField<T>(...)` |
+| C++ QCalls | `TDSNative_*` | `TDSNative_EnableNonDefaultRouting` |
+| C++ header bit | `BIT_SBLK_TDS_NONDEFAULT` | Bit 31 in ObjHeader |
+
+**Rationale:**
+- `System.OS` is short, frequently imported, and reflects VAYRON's "OS-like" vision
+- `TypeDriver` in C# is human-readable; `TDS` (TypeDriver System) in C++ for brevity
+- `VIntrinsics` = VAYRON Intrinsics (low-level)
 
 ---
 
@@ -17,9 +34,10 @@ Expose minimal C# API for testing DDS infrastructure from managed code.
 
 | File | Purpose |
 |------|---------|
-| `src/.../System.Private.CoreLib/src/System/Runtime/DDS/VirtualAttribute.cs` | Marker attribute |
-| `src/.../System.Private.CoreLib/src/System/Runtime/DDS/DDSRuntime.cs` | Runtime API |
-| `src/runtime/src/coreclr/vm/dds/ddsqcalls.cpp` | Native QCall implementations |
+| `src/.../System.Private.CoreLib/src/System/OS/VirtualAttribute.cs` | Marker attribute |
+| `src/.../System.Private.CoreLib/src/System/OS/TypeDriverHelper.cs` | Runtime API |
+| `src/.../System.Private.CoreLib/src/System/OS/VIntrinsics.cs` | Low-level intrinsics |
+| `src/runtime/src/coreclr/vm/tds/tdsqcalls.cpp` | Native QCall implementations |
 
 ---
 
@@ -33,10 +51,10 @@ Expose minimal C# API for testing DDS infrastructure from managed code.
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-namespace System.Runtime.DDS
+namespace System.OS
 {
     /// <summary>
-    /// Marks a type as participating in DDS routing.
+    /// Marks a type as participating in TypeDriver routing.
     /// Phase 1: Used for testing infrastructure.
     /// </summary>
     [AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct)]
@@ -55,9 +73,9 @@ namespace System.Runtime.DDS
 }
 ```
 
-### Step 2: Create DDSRuntime Class
+### Step 2: Create TypeDriverHelper Class
 
-**File:** `DDSRuntime.cs`
+**File:** `TypeDriverHelper.cs`
 
 ```csharp
 // Licensed to the .NET Foundation under one or more agreements.
@@ -66,16 +84,16 @@ namespace System.Runtime.DDS
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
-namespace System.Runtime.DDS
+namespace System.OS
 {
     /// <summary>
-    /// Runtime services for DDS (Device Driver System).
+    /// Runtime services for TypeDriver System (TDS).
     /// Phase 1: Testing and diagnostics only.
     /// </summary>
-    public static class DDSRuntime
+    public static class TypeDriverHelper
     {
         /// <summary>
-        /// Check if object is using non-default DDS routing.
+        /// Check if object is using non-default TypeDriver routing.
         /// </summary>
         [MethodImpl(MethodImplOptions.InternalCall)]
         public static extern bool IsNonDefaultRouted(object obj);
@@ -110,39 +128,44 @@ namespace System.Runtime.DDS
 }
 ```
 
-### Step 3: Create DDSIntrinsics Class (for field access testing)
+### Step 3: Create VIntrinsics Class (for field access testing)
 
-**File:** `DDSIntrinsics.cs`
+**File:** `VIntrinsics.cs`
 
 ```csharp
-namespace System.Runtime.DDS
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
+using System.Runtime.CompilerServices;
+
+namespace System.OS
 {
     /// <summary>
-    /// Low-level field access through DDS routing.
+    /// Low-level field access through TypeDriver routing.
     /// Phase 1: For testing driver dispatch.
     /// </summary>
-    internal static class DDSIntrinsics
+    internal static class VIntrinsics
     {
         /// <summary>
-        /// Read a value-type field through DDS routing.
+        /// Read a value-type field through TypeDriver routing.
         /// </summary>
         [MethodImpl(MethodImplOptions.InternalCall)]
         internal static extern T ReadField<T>(object obj, int fieldOffset) where T : unmanaged;
 
         /// <summary>
-        /// Write a value-type field through DDS routing.
+        /// Write a value-type field through TypeDriver routing.
         /// </summary>
         [MethodImpl(MethodImplOptions.InternalCall)]
         internal static extern void WriteField<T>(object obj, int fieldOffset, T value) where T : unmanaged;
 
         /// <summary>
-        /// Write a reference field through DDS routing (with barrier).
+        /// Write a reference field through TypeDriver routing (with barrier).
         /// </summary>
         [MethodImpl(MethodImplOptions.InternalCall)]
         internal static extern void WriteRefField(object obj, int fieldOffset, object? value);
 
         /// <summary>
-        /// Read a reference field through DDS routing.
+        /// Read a reference field through TypeDriver routing.
         /// </summary>
         [MethodImpl(MethodImplOptions.InternalCall)]
         internal static extern object? ReadRefField(object obj, int fieldOffset);
@@ -152,20 +175,20 @@ namespace System.Runtime.DDS
 
 ### Step 4: Implement Native QCalls
 
-**File:** `ddsqcalls.cpp`
+**File:** `tdsqcalls.cpp`
 
 ```cpp
 #include "common.h"
-#include "dds/opsroot.h"
-#include "dds/opsroottable.h"
-#include "dds/ddsintrinsics.h"
+#include "tds/opsroot.h"
+#include "tds/opsroottable.h"
+#include "tds/tdsintrinsics.h"
 #include "qcall.h"
 
 //=============================================================================
-// DDSRuntime QCalls
+// TypeDriverHelper QCalls
 //=============================================================================
 
-extern "C" BOOL QCALLTYPE DDSNative_IsNonDefaultRouted(QCall::ObjectHandleOnStack obj)
+extern "C" BOOL QCALLTYPE TDSNative_IsNonDefaultRouted(QCall::ObjectHandleOnStack obj)
 {
     QCALL_CONTRACT;
 
@@ -177,7 +200,7 @@ extern "C" BOOL QCALLTYPE DDSNative_IsNonDefaultRouted(QCall::ObjectHandleOnStac
     OBJECTREF objRef = obj.Get();
     if (objRef != NULL)
     {
-        result = objRef->GetHeader()->IsDDSNonDefault() ? TRUE : FALSE;
+        result = objRef->GetHeader()->IsTDSNonDefault() ? TRUE : FALSE;
     }
 
     END_QCALL;
@@ -185,7 +208,7 @@ extern "C" BOOL QCALLTYPE DDSNative_IsNonDefaultRouted(QCall::ObjectHandleOnStac
     return result;
 }
 
-extern "C" void QCALLTYPE DDSNative_EnableNonDefaultRouting(QCall::ObjectHandleOnStack obj)
+extern "C" void QCALLTYPE TDSNative_EnableNonDefaultRouting(QCall::ObjectHandleOnStack obj)
 {
     QCALL_CONTRACT;
 
@@ -196,14 +219,14 @@ extern "C" void QCALLTYPE DDSNative_EnableNonDefaultRouting(QCall::ObjectHandleO
     if (objRef != NULL)
     {
         // Create default OpsRoot (all default drivers)
-        OpsRoot* ops = DDS_CreateOpsRoot(nullptr, nullptr, nullptr, nullptr);
-        DDS_SetOpsRoot(OBJECTREFToObject(objRef), ops);
+        OpsRoot* ops = TDS_CreateOpsRoot(nullptr, nullptr, nullptr, nullptr);
+        TDS_SetOpsRoot(OBJECTREFToObject(objRef), ops);
     }
 
     END_QCALL;
 }
 
-extern "C" void QCALLTYPE DDSNative_DisableNonDefaultRouting(QCall::ObjectHandleOnStack obj)
+extern "C" void QCALLTYPE TDSNative_DisableNonDefaultRouting(QCall::ObjectHandleOnStack obj)
 {
     QCALL_CONTRACT;
 
@@ -219,7 +242,7 @@ extern "C" void QCALLTYPE DDSNative_DisableNonDefaultRouting(QCall::ObjectHandle
     END_QCALL;
 }
 
-extern "C" UINT32 QCALLTYPE DDSNative_GetDriverFlags(QCall::ObjectHandleOnStack obj)
+extern "C" UINT32 QCALLTYPE TDSNative_GetDriverFlags(QCall::ObjectHandleOnStack obj)
 {
     QCALL_CONTRACT;
 
@@ -240,7 +263,7 @@ extern "C" UINT32 QCALLTYPE DDSNative_GetDriverFlags(QCall::ObjectHandleOnStack 
     return flags;
 }
 
-extern "C" INT32 QCALLTYPE DDSNative_GetRoutedObjectCount()
+extern "C" INT32 QCALLTYPE TDSNative_GetRoutedObjectCount()
 {
     QCALL_CONTRACT;
 
@@ -262,11 +285,11 @@ Add to QCall registration table (exact location varies by CLR version):
 
 ```cpp
 // In qcallentrypoints.cpp or similar
-FCFuncElement("IsNonDefaultRouted", DDSNative_IsNonDefaultRouted)
-FCFuncElement("EnableNonDefaultRouting", DDSNative_EnableNonDefaultRouting)
-FCFuncElement("DisableNonDefaultRouting", DDSNative_DisableNonDefaultRouting)
-FCFuncElement("GetDriverFlags", DDSNative_GetDriverFlags)
-FCFuncElement("GetRoutedObjectCount", DDSNative_GetRoutedObjectCount)
+FCFuncElement("IsNonDefaultRouted", TDSNative_IsNonDefaultRouted)
+FCFuncElement("EnableNonDefaultRouting", TDSNative_EnableNonDefaultRouting)
+FCFuncElement("DisableNonDefaultRouting", TDSNative_DisableNonDefaultRouting)
+FCFuncElement("GetDriverFlags", TDSNative_GetDriverFlags)
+FCFuncElement("GetRoutedObjectCount", TDSNative_GetRoutedObjectCount)
 ```
 
 ---
@@ -274,26 +297,29 @@ FCFuncElement("GetRoutedObjectCount", DDSNative_GetRoutedObjectCount)
 ## Usage Example
 
 ```csharp
+using System.OS;
+using System.Diagnostics;
+
 // Test code
-public class DDSTest
+public class TypeDriverTest
 {
     public static void TestBasicRouting()
     {
         var obj = new TestClass { Value = 42 };
 
         // Initially not routed
-        Debug.Assert(!DDSRuntime.IsNonDefaultRouted(obj));
+        Debug.Assert(!TypeDriverHelper.IsNonDefaultRouted(obj));
 
         // Enable routing
-        DDSRuntime.EnableNonDefaultRouting(obj);
-        Debug.Assert(DDSRuntime.IsNonDefaultRouted(obj));
+        TypeDriverHelper.EnableNonDefaultRouting(obj);
+        Debug.Assert(TypeDriverHelper.IsNonDefaultRouted(obj));
 
         // Field access still works
         Debug.Assert(obj.Value == 42);
 
         // Disable routing
-        DDSRuntime.DisableNonDefaultRouting(obj);
-        Debug.Assert(!DDSRuntime.IsNonDefaultRouted(obj));
+        TypeDriverHelper.DisableNonDefaultRouting(obj);
+        Debug.Assert(!TypeDriverHelper.IsNonDefaultRouted(obj));
     }
 }
 
@@ -308,12 +334,12 @@ public class TestClass
 ## Acceptance Criteria
 
 - [ ] `VirtualAttribute` and `PersistentAttribute` compile
-- [ ] `DDSRuntime.IsNonDefaultRouted()` returns correct value
-- [ ] `DDSRuntime.EnableNonDefaultRouting()` enables routing
-- [ ] `DDSRuntime.DisableNonDefaultRouting()` disables routing
-- [ ] `DDSRuntime.GetDriverFlags()` returns correct flags
-- [ ] `DDSRuntime.GetRoutedObjectCount()` returns correct count
-- [ ] `DDSIntrinsics` methods work for field access
+- [ ] `TypeDriverHelper.IsNonDefaultRouted()` returns correct value
+- [ ] `TypeDriverHelper.EnableNonDefaultRouting()` enables routing
+- [ ] `TypeDriverHelper.DisableNonDefaultRouting()` disables routing
+- [ ] `TypeDriverHelper.GetDriverFlags()` returns correct flags
+- [ ] `TypeDriverHelper.GetRoutedObjectCount()` returns correct count
+- [ ] `VIntrinsics` methods work for field access
 - [ ] All QCalls properly registered
 - [ ] Managed tests pass
 
@@ -321,5 +347,5 @@ public class TestClass
 
 ## References
 
-- Main Doc: Part III §3.2 WP7
+- Main Doc: Part III SS3.2 WP7
 - CLR QCall documentation in runtime sources
