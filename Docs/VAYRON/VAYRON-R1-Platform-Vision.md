@@ -119,8 +119,8 @@ Updated framing: **Virtues are Systemic capabilities implemented by Drivers**.
 
 | Systemic "Virtue" | What it means | Implemented as |
 |-------------------|---------------|----------------|
-| Virtual | Participates in DDS routing | Object routing + ops_root |
-| Persistent | State survives restarts | StorageDevice driver (Voron as gen-0 engine) |
+| Virtual | Participates in DDS routing | Object routing + ops_root (Phase 1) |
+| Persistent | State survives restarts | StorageDevice driver (Voron as gen-0 engine) — **Phase 2** |
 | Distributed | Object may be remote | CallDispatch/Placement driver family (NewOrleans-derived gen-0) |
 | Replicated(N) | Multiple synchronized instances | Replication driver family + placement + storage cooperation |
 | Versioned | Time-travel / MVCC history | VersionDevice driver (initially layered on storage) |
@@ -496,7 +496,7 @@ VAYRON (in this form) is best understood as an:
    * Tooling/persistence: stable IDs (portable)
 
 4. **Which object model pattern is the Phase 2 default?**
-   * Mirrored copy (Pattern B) vs indirection (Pattern A)
+   * ✅ **Decided:** Pattern B (Mirrored/Activation Copy) — see [Phase 2 document](./Phase2/01-Phase2-StorageDevice-Voron-Driver.md#9-materialization-activation-model--pattern-b-first)
 
 5. **How do we express VUID generation and mapping early?**
    * UUID v7 + storage mapping policy (per-type tree, global index, etc.)

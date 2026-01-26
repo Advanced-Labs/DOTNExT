@@ -28,9 +28,9 @@ This document provides a detailed implementation plan for **Phase 1** of the VAY
 
 | Non-Goal | Deferred To | Rationale |
 |----------|-------------|-----------|
-| **Persistence / StorageDevice real implementation** | Phase 2 | Phase 1 establishes routing; persistence requires stable infrastructure first |
-| **VUID generation and mapping** | Phase 2 | Depends on StorageDevice being functional |
-| **Voron integration** | Phase 2 | Storage engine integration requires Phase 1 foundation |
+| **Persistence / StorageDevice real implementation** | [Phase 2](../Phase2/01-Phase2-StorageDevice-Voron-Driver.md) | Phase 1 establishes routing; persistence requires stable infrastructure first |
+| **VUID generation and mapping** | [Phase 2](../Phase2/01-Phase2-StorageDevice-Voron-Driver.md#5-vuid-global-object-identity) | Depends on StorageDevice being functional |
+| **Voron integration** | [Phase 2](../Phase2/01-Phase2-StorageDevice-Voron-Driver.md#111-wp21-voron-embedding-strategy) | Storage engine integration requires Phase 1 foundation |
 | **Remote dispatch / CallDispatchDevice** | Phase 4 | Requires persistence (Phase 2) and relations (Phase 3) first |
 | **NewOrleans integration** | Phase 4 | Distribution builds on persistence layer |
 | **JIT codegen modifications** | Phase 2+ | Use JIT helpers for Phase 1; optimize later |
@@ -300,7 +300,7 @@ extern IFieldAccessOps  g_DefaultFieldAccessOps;
 >
 > **Phase 1 usage:** All calls pass `&g_NullContext`. Default drivers receive and ignore it.
 >
-> **Phase 2+ usage:** Will populate VContext with transaction handles, security principals, etc. No signature changes required.
+> **Phase 2+ usage:** Will populate VContext with transaction handles for StorageDevice operations. See [Phase 2 Section 7](../Phase2/01-Phase2-StorageDevice-Voron-Driver.md#7-transactions-phase-2-minimal) for details on VContext transaction integration.
 
 ### 2.4 Routing Logic
 

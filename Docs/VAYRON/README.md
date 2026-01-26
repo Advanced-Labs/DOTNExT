@@ -29,6 +29,7 @@ Default behavior is preserved via "DefaultDrivers" that proxy standard CLR opera
 | [VAYRON-R1-Platform-Vision.md](./VAYRON-R1-Platform-Vision.md) | Complete platform vision, architecture, and design philosophy |
 | [VAYRON-R1-Roadmap-and-Codebase-Map.md](./VAYRON-R1-Roadmap-and-Codebase-Map.md) | Implementation roadmap and codebase analysis |
 | [Phase1/01-Phase1-DDS-Microkernel-and-Persistence.md](./Phase1/01-Phase1-DDS-Microkernel-and-Persistence.md) | Phase 1 detailed implementation plan |
+| [Phase2/01-Phase2-StorageDevice-Voron-Driver.md](./Phase2/01-Phase2-StorageDevice-Voron-Driver.md) | Phase 2 detailed implementation plan |
 
 ### Archived Documentation
 
@@ -47,11 +48,15 @@ Original documentation versions are preserved in [Older/](./Older/).
 
 > **Note:** Phase 1 delivers routing infrastructure + default driver scaffolding only. No persistence yet — that's Phase 2.
 
-### Phase 2: Persistence Vertical Slice
-- StorageDevice interface becomes real
-- Voron-backed StorageDriver implementation
+### Phase 2: Persistence Vertical Slice (First Non-Default Driver)
+- StorageDevice interface becomes real (`Storage_Voron` driver)
+- FlushPersist mode as default persistence policy
+- Tagged field map body encoding (v1)
 - VUID (UUID v7) identity system
+- Pattern B (Activation Copy) materialization model
 - Create -> mutate -> restart -> materialize validation
+
+> See [Phase2/01-Phase2-StorageDevice-Voron-Driver.md](./Phase2/01-Phase2-StorageDevice-Voron-Driver.md) for detailed implementation plan.
 
 ### Phase 3: Relational Substrate
 - RelationalDevice for edges and reverse-edges

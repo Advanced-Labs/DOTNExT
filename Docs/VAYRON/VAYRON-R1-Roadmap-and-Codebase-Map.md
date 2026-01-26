@@ -28,11 +28,18 @@
 
 **Goal:** `[Virtual + Persistent]` (or C= equivalent) survives restart.
 
+**First Memory Driver:** `Storage_Voron` — Voron-backed StorageDevice implementation
+
 **Deliverables:**
-- StorageDevice contract becomes real
-- Voron-backed StorageDriver plugs in
-- Choose Pattern B or A as initial ObjectModel
+- StorageDevice contract becomes real (implements `IStorageOps`)
+- Voron-backed StorageDriver (`Storage_Voron`) plugs in
+- FlushPersist persistence policy (writes mark dirty, flush on turn end)
+- Tagged field map body encoding (v1)
+- Pattern B (Activation Copy) as initial materialization model
+- VUID structure and generation (128-bit UUID v7)
 - Validate: create -> mutate -> restart -> materialize by VUID
+
+> See [Phase2/01-Phase2-StorageDevice-Voron-Driver.md](./Phase2/01-Phase2-StorageDevice-Voron-Driver.md) for detailed implementation plan.
 
 ### Phase 3: Relational Substrate
 
@@ -349,6 +356,8 @@ public class WriteAheadJournal {
 | `CommitTransaction()` | `tx.Commit()` |
 | `IsDirty(obj)` | Track in side-table (not Voron native) |
 | MVCC reads | Transaction snapshot isolation |
+
+> **Note:** Phase 2 uses Tagged Field Map encoding (Option B) for body serialization. See [Phase 2 document Section 8](./Phase2/01-Phase2-StorageDevice-Voron-Driver.md#8-body-layer-encoding-big-tbd-but-phase-2-must-choose-a-v1) for encoding options analysis.
 
 ---
 
