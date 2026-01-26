@@ -329,10 +329,63 @@
 - Standard GC scanning works for TDS objects (no custom scanning in Phase 1)
 
 ### Blockers
-- None (pending TAI Build Test #4 verification)
+- None
+
+### TAI Build Test #4 Results
+- **Status:** PASSED
+- syncblk.cpp compiles with TDS cleanup hook
+
+### Phase 1 Infrastructure Status
+
+| Task | Status |
+|------|--------|
+| T01 - Header Bit Infrastructure | ✓ VERIFIED |
+| T02 - OpsRoot Side Table | ✓ VERIFIED |
+| T03 - Device Interfaces | ✓ VERIFIED |
+| T04 - Default Drivers | ✓ VERIFIED |
+| T05 - Field Access Intrinsics | ✓ VERIFIED |
+| T06 - GC Integration | ✓ VERIFIED |
 
 ### Next Session
-- Await TAI Build Test #4 results
-- If passed, proceed to T07
+- Proceed to T07
+
+---
+
+## 2026-01-26 - Session 8: T07 Managed API Surface
+
+### What I Did
+- Created `System.OS` namespace in System.Private.CoreLib:
+  - `VirtualAttribute.cs` - Marker attributes (VirtualAttribute, PersistentAttribute)
+  - `TypeDriverHelper.cs` - Runtime API with QCalls for testing/diagnostics
+  - `VIntrinsics.cs` - Low-level field access intrinsics
+- Created native QCall implementations:
+  - `tdsqcalls.h` - QCall declarations
+  - `tdsqcalls.cpp` - QCall implementations (TypeDriverHelper + VIntrinsics)
+- Registered QCalls in qcallentrypoints.cpp (11 entry points)
+- Updated CMakeLists.txt with new TDS files
+- Updated System.Private.CoreLib.csproj with new C# files
+
+### Files Created
+- `src/.../System.Private.CoreLib/src/System/OS/VirtualAttribute.cs`
+- `src/.../System.Private.CoreLib/src/System/OS/TypeDriverHelper.cs`
+- `src/.../System.Private.CoreLib/src/System/OS/VIntrinsics.cs`
+- `src/runtime/src/coreclr/vm/tds/tdsqcalls.h`
+- `src/runtime/src/coreclr/vm/tds/tdsqcalls.cpp`
+
+### Files Modified
+- `src/runtime/src/coreclr/vm/qcallentrypoints.cpp` - Added TDS QCalls
+- `src/runtime/src/coreclr/vm/CMakeLists.txt` - Added T07 files
+- `src/.../System.Private.CoreLib/System.Private.CoreLib.csproj` - Added C# files
+
+### QCalls Registered
+- TypeDriverHelper: IsNonDefaultRouted, EnableNonDefaultRouting, DisableNonDefaultRouting, GetDriverFlags, GetRoutedObjectCount
+- VIntrinsics: ReadInt32Field, WriteInt32Field, ReadInt64Field, WriteInt64Field, ReadRefField, WriteRefField
+
+### Blockers
+- None (pending TAI Build Test #5 verification)
+
+### Next Session
+- Await TAI Build Test #5 results
+- If passed, proceed to T08
 
 ---
