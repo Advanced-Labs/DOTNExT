@@ -599,10 +599,13 @@ src/NewOrleans/src/Orleans.Core/
 ### 10. Next Steps for Phase 1
 
 1. **Validate Header Bit** - Confirm BIT_SBLK_UNUSED is truly unused
-2. **Prototype Side Table** - Simple hash map in test harness
+2. **Prototype Side Table** - SyncBlockIndex-keyed hash map in test harness
 3. **Implement Default Drivers** - Verify wrapping works
-4. **Integration Test** - End-to-end with Voron persistence
+4. **DDS Routing Tests** - Validate routing bit + default driver passthrough
 5. **Performance Baseline** - Measure overhead of routing check
+
+**Phase 2 (after Phase 1 complete):**
+- Integration test with Voron persistence (StorageDevice becomes real)
 
 See [Phase1/01-Phase1-DDS-Microkernel-and-Persistence.md](./Phase1/01-Phase1-DDS-Microkernel-and-Persistence.md) for detailed implementation plan.
 

@@ -40,10 +40,12 @@ Original documentation versions are preserved in [Older/](./Older/).
 
 ### Phase 1: Open the CLR (DDS/SAL Skeleton) - *Current Focus*
 - Implement DDS routing bit in object headers
-- Create ops_root side table
+- Create ops_root side table (SyncBlockIndex-keyed for GC safety)
 - Define ObjectModelDevice + FieldAccessDevice interfaces
 - Implement DefaultDrivers (proxy CLR behavior)
 - Validate with test suite
+
+> **Note:** Phase 1 delivers routing infrastructure + default driver scaffolding only. No persistence yet — that's Phase 2.
 
 ### Phase 2: Persistence Vertical Slice
 - StorageDevice interface becomes real

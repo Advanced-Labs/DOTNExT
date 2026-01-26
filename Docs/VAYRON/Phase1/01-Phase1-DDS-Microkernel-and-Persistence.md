@@ -284,43 +284,57 @@ inline void SetNonDefaultRouted(Object* obj, bool enabled) {
 }
 
 //=============================================================================
-// ops_root resolution (Stage 0: side-table)
+// ops_root resolution (Stage 0: SyncBlock-based)
 //=============================================================================
 
-// Global side table: Object* -> OpsRoot*
-// Using concurrent hash map for thread safety
+// IMPORTANT: We use SyncBlockIndex (not Object*) as the stable key.
+// Object addresses change during GC compaction, but SyncBlockIndex is stable.
+// This avoids unreliable GC relocation callbacks.
+
+// Strategy: DDS objects get a SyncBlock entry, and we store ops_root* there.
+// The SyncBlockIndex (bits 0-25 of header when BIT_SBLK_IS_HASH_OR_SYNCBLKINDEX is set)
+// provides a stable, GC-safe key.
+
 class OpsRootTable {
 private:
-    // Hash table with object address as key
-    // Must handle object movement during GC (see GC integration)
-    ConcurrentHashMap<Object*, OpsRoot*> m_table;
+    // Hash table keyed by SyncBlockIndex (stable across GC)
+    ConcurrentHashMap<DWORD, OpsRoot*> m_table;
 
 public:
     OpsRoot* Get(Object* obj) {
+        // Get SyncBlockIndex from object header
+        DWORD syncBlockIndex = obj->GetHeader()->GetSyncBlockIndex();
+        if (syncBlockIndex == 0) {
+            return &g_DefaultOpsRoot;  // No SyncBlock = default
+        }
+
         OpsRoot* result;
-        if (m_table.TryGet(obj, &result)) {
+        if (m_table.TryGet(syncBlockIndex, &result)) {
             return result;
         }
-        return &g_DefaultOpsRoot;  // Fallback (shouldn't happen if bit is set)
+        return &g_DefaultOpsRoot;
     }
 
     void Set(Object* obj, OpsRoot* ops) {
-        m_table.Set(obj, ops);
+        // Ensure object has a SyncBlock (allocates if needed)
+        SyncBlock* syncBlock = obj->GetSyncBlock();
+        DWORD syncBlockIndex = obj->GetHeader()->GetSyncBlockIndex();
+
+        m_table.Set(syncBlockIndex, ops);
         SetNonDefaultRouted(obj, true);
     }
 
     void Remove(Object* obj) {
-        m_table.Remove(obj);
+        DWORD syncBlockIndex = obj->GetHeader()->GetSyncBlockIndex();
+        if (syncBlockIndex != 0) {
+            m_table.Remove(syncBlockIndex);
+        }
         SetNonDefaultRouted(obj, false);
     }
 
-    // Called by GC when objects move
-    void OnObjectMoved(Object* oldAddr, Object* newAddr) {
-        OpsRoot* ops;
-        if (m_table.TryRemove(oldAddr, &ops)) {
-            m_table.Set(newAddr, ops);
-        }
-    }
+    // Note: No OnObjectMoved needed! SyncBlockIndex is stable across GC.
+    // When SyncBlock is freed (object collected), CLR recycles the index.
+    // We clean up via weak reference or SyncBlock destructor hook.
 };
 
 extern OpsRootTable g_OpsRootTable;
@@ -350,7 +364,7 @@ inline OpsRoot* GetOpsRoot(Object* obj) {
 | WP3 | Device Interfaces | C++ interface definitions | None | Low |
 | WP4 | Default Drivers | Proxy implementations | WP3 | Medium |
 | WP5 | Field Access Interception | JIT helper modifications | WP1-4 | High |
-| WP6 | GC Integration | Object movement tracking | WP2 | Medium |
+| WP6 | GC Integration | SyncBlock recycling hooks | WP2 | Low |
 | WP7 | Managed API Surface | C# APIs for testing | WP1-6 | Low |
 | WP8 | Test Suite | Validation tests | WP7 | Medium |
 
@@ -430,7 +444,7 @@ public:
 
 #### WP2: OpsRoot Side Table
 
-**Objective:** Implement concurrent hash table mapping Object* -> OpsRoot*
+**Objective:** Implement GC-safe mapping from objects to OpsRoot* using SyncBlockIndex as stable key
 
 **New Files:**
 
@@ -462,33 +476,33 @@ struct OpsRoot;
 class Object;
 
 //-----------------------------------------------------------------------------
-// Hash traits for Object* keys
+// Hash traits for SyncBlockIndex keys (DWORD, GC-stable)
 //-----------------------------------------------------------------------------
-class OpsRootTableTraits : public DefaultSHashTraits<Object*, OpsRoot*>
+class OpsRootTableTraits : public DefaultSHashTraits<DWORD, OpsRoot*>
 {
 public:
-    typedef Object* key_t;
+    typedef DWORD key_t;  // SyncBlockIndex is stable across GC
 
     static key_t GetKey(element_t e) { return e.first; }
     static BOOL Equals(key_t k1, key_t k2) { return k1 == k2; }
     static count_t Hash(key_t k) {
-        // Use object address as hash, shifted to remove alignment bits
-        return (count_t)((size_t)k >> 3);
+        // SyncBlockIndex is already well-distributed
+        return (count_t)k;
     }
 
-    static const element_t Null() { return element_t(nullptr, nullptr); }
-    static const element_t Deleted() { return element_t((Object*)-1, nullptr); }
-    static bool IsNull(const element_t &e) { return e.first == nullptr; }
-    static bool IsDeleted(const element_t &e) { return e.first == (Object*)-1; }
+    static const element_t Null() { return element_t(0, nullptr); }
+    static const element_t Deleted() { return element_t((DWORD)-1, nullptr); }
+    static bool IsNull(const element_t &e) { return e.first == 0; }
+    static bool IsDeleted(const element_t &e) { return e.first == (DWORD)-1; }
 };
 
 //-----------------------------------------------------------------------------
-// Thread-safe table mapping Object* -> OpsRoot*
+// Thread-safe table mapping SyncBlockIndex -> OpsRoot* (GC-safe)
 //-----------------------------------------------------------------------------
 class OpsRootTable
 {
 private:
-    // Lock-free hash table using CLR's SHash with reader-writer lock
+    // Hash table using SyncBlockIndex as key (GC-stable)
     typedef SHash<OpsRootTableTraits> TableType;
 
     TableType m_table;
@@ -498,23 +512,20 @@ public:
     void Initialize();
     void Destroy();
 
-    // Get OpsRoot for object (returns g_DefaultOpsRoot if not found)
-    OpsRoot* Get(Object* obj);
+    // Get OpsRoot for object via its SyncBlockIndex
+    OpsRoot* Get(DWORD syncBlockIndex);
 
-    // Set OpsRoot for object (also sets DDS bit)
-    void Set(Object* obj, OpsRoot* ops);
+    // Set OpsRoot for SyncBlockIndex (caller ensures object has SyncBlock)
+    void Set(DWORD syncBlockIndex, OpsRoot* ops);
 
-    // Remove OpsRoot for object (also clears DDS bit)
-    void Remove(Object* obj);
+    // Remove OpsRoot for SyncBlockIndex
+    void Remove(DWORD syncBlockIndex);
 
-    // GC callback: update table when objects move
-    void OnObjectRelocated(Object* oldAddr, Object* newAddr);
-
-    // GC callback: remove entries for collected objects
-    void OnObjectCollected(Object* obj);
+    // Called when SyncBlock is being recycled (cleanup hook)
+    void OnSyncBlockRecycled(DWORD syncBlockIndex);
 
     // Enumerate all entries (for debugging/diagnostics)
-    void EnumerateEntries(void (*callback)(Object*, OpsRoot*, void*), void* context);
+    void EnumerateEntries(void (*callback)(DWORD, OpsRoot*, void*), void* context);
 };
 
 // Global instance
@@ -526,20 +537,28 @@ extern OpsRoot g_DefaultOpsRoot;
 #endif // _OPSROOTTABLE_H_
 ```
 
-**GC Integration Hook Points:**
+**Why SyncBlockIndex is GC-Safe:**
+
+Using SyncBlockIndex as the key avoids GC relocation callbacks entirely:
+
+1. **Object addresses change** during compacting GC, making `Object*` keys unsafe
+2. **SyncBlockIndex is stable** - it's an index into the global SyncTableEntry array
+3. **No relocation tracking needed** - the mapping remains valid as objects move
+4. **Cleanup via SyncBlock lifecycle** - when object is collected, SyncBlock is recycled
 
 ```cpp
-// In gc.cpp or gcenv.ee.cpp, during object relocation:
-void GCToEEInterface::OnObjectRelocated(Object* oldAddr, Object* newAddr)
+// In syncblk.cpp, when SyncBlock is being recycled:
+void SyncBlock::OnRecycle()
 {
-    // ... existing relocation handling ...
+    // ... existing cleanup ...
 
-    // Update DDS table
-    if (oldAddr->IsDDSNonDefault()) {
-        g_OpsRootTable.OnObjectRelocated(oldAddr, newAddr);
-    }
+    // Clean up DDS entry
+    DWORD index = GetSyncBlockIndex();
+    g_OpsRootTable.OnSyncBlockRecycled(index);
 }
 ```
+
+**Note:** We hook into SyncBlock recycling (not GC relocation) for cleanup.
 
 ---
 
@@ -789,19 +808,25 @@ OpsRoot* DDS_CreateOpsRoot(
 // Free an OpsRoot
 void DDS_FreeOpsRoot(OpsRoot* ops);
 
-// Get OpsRoot for an object
+// Get OpsRoot for an object (via SyncBlockIndex)
 inline OpsRoot* DDS_GetOpsRoot(Object* obj)
 {
     if (!obj->IsDDSNonDefault()) {
         return &g_DefaultOpsRoot;
     }
-    return g_OpsRootTable.Get(obj);
+    DWORD syncBlockIndex = obj->GetHeader()->GetSyncBlockIndex();
+    return g_OpsRootTable.Get(syncBlockIndex);
 }
 
-// Set OpsRoot for an object
+// Set OpsRoot for an object (ensures SyncBlock exists, uses stable index)
 inline void DDS_SetOpsRoot(Object* obj, OpsRoot* ops)
 {
-    g_OpsRootTable.Set(obj, ops);
+    // Ensure object has a SyncBlock (allocates if needed)
+    SyncBlock* syncBlock = obj->GetSyncBlock();
+    DWORD syncBlockIndex = obj->GetHeader()->GetSyncBlockIndex();
+
+    g_OpsRootTable.Set(syncBlockIndex, ops);
+    obj->GetHeader()->SetDDSNonDefault();
 }
 
 #endif // _OPSROOT_H_
@@ -1106,21 +1131,35 @@ void STDCALL JIT_WriteBarrier_DDS(Object* obj, Object** dst, Object* ref)
 **Files to Modify:**
 
 ```
-src/runtime/src/coreclr/gc/gcenv.ee.cpp
-src/runtime/src/coreclr/gc/gc.cpp
+src/runtime/src/coreclr/vm/syncblk.cpp  (SyncBlock recycling hook)
+src/runtime/src/coreclr/gc/gcenv.ee.cpp (optional root scanning)
 ```
 
 **Key Integration Points:**
 
-1. **Object Relocation** - Update OpsRootTable when objects move
-2. **Object Collection** - Remove OpsRootTable entries for collected objects
-3. **Reference Scanning** - Use ObjectModelDevice for non-default objects
+1. **SyncBlock Recycling** - Clean up OpsRootTable entries when SyncBlock is recycled
+2. **Reference Scanning** - Use ObjectModelDevice for non-default objects (if needed)
+
+**Note:** Because we use SyncBlockIndex as the stable key, we do NOT need object relocation callbacks. The mapping remains valid as objects move during compaction.
 
 **Implementation:**
 
 ```cpp
-// In gcenv.ee.cpp
+// In syncblk.cpp - hook into SyncBlock recycling
 
+void SyncBlock::OnRecycle()
+{
+    // ... existing cleanup ...
+
+    // Clean up DDS entry when SyncBlock is recycled (object collected)
+    DWORD index = GetSyncBlockIndex();
+    if (g_OpsRootTable.Contains(index))
+    {
+        g_OpsRootTable.OnSyncBlockRecycled(index);
+    }
+}
+
+// Optional: In gcenv.ee.cpp for root scanning if drivers hold managed refs
 void GCToEEInterface::GcScanRoots(
     promote_func* fn,
     int condemned,
@@ -1129,26 +1168,8 @@ void GCToEEInterface::GcScanRoots(
 {
     // ... existing root scanning ...
 
-    // Also scan DDS table as roots (OpsRoot pointers may reference managed objects)
-    // Note: OpsRoot itself is unmanaged, but drivers may hold managed refs
-}
-
-void GCToEEInterface::AfterGcScanRoots(
-    int condemned,
-    int max_gen,
-    ScanContext* sc)
-{
-    // Clean up OpsRootTable entries for collected objects
-    g_OpsRootTable.RemoveCollectedEntries();
-}
-
-// Object relocation callback
-void GCToEEInterface::GcMoveObject(Object* oldAddr, Object* newAddr)
-{
-    if (oldAddr->IsDDSNonDefault())
-    {
-        g_OpsRootTable.OnObjectRelocated(oldAddr, newAddr);
-    }
+    // Scan any managed references held by DDS drivers (if applicable)
+    // Note: Most drivers use unmanaged storage, but this is the hook point
 }
 ```
 
@@ -1451,10 +1472,12 @@ namespace DDS.Tests
 
 | Risk | Severity | Mitigation |
 |------|----------|------------|
-| GC corruption from incorrect relocation handling | High | Extensive testing, staged rollout, kill switch |
+| SyncBlock allocation overhead | Low | DDS objects already need extended metadata; minimal impact |
 | Performance regression on default path | Medium | Careful branch placement, benchmarking |
 | SyncBlock table capacity | Low | Monitor usage, can expand if needed |
 | Thread safety in OpsRootTable | Medium | Use proven concurrent data structures |
+
+**Note:** Using SyncBlockIndex as the stable key **eliminates** GC relocation tracking risks. The original concern about "GC corruption from incorrect relocation handling" is mitigated by design.
 
 ### Kill Switch
 
