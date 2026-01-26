@@ -140,8 +140,10 @@ void OpsRootTable::Set(Object* obj, OpsRoot* ops)
         entry.ops = ops;
         entry.generationTag = m_currentGeneration;
 
-        // Use AddOrReplace to update existing entries
-        m_table.AddOrReplace(entry);
+        // Remove existing entry if present, then add new one
+        // (SHash doesn't support AddOrReplace for removable tables)
+        m_table.Remove(syncBlockIndex);
+        m_table.Add(entry);
     }
 
     // Set the routing bit (thread-safe, uses interlocked operations)
