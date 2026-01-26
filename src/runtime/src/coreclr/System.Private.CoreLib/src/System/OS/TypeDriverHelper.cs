@@ -55,6 +55,7 @@ namespace System.OS
         /// Get driver flags for an object.
         /// Returns 0 for default objects.
         /// </summary>
+        [CLSCompliant(false)]
         public static uint GetDriverFlags(object obj)
         {
             ArgumentNullException.ThrowIfNull(obj);
