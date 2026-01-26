@@ -8,6 +8,7 @@
 
 #include "common.h"
 #include "tds/opsroottable.h"
+#include "tds/opsroot.h"
 #include "syncblk.h"
 #include "object.h"
 
