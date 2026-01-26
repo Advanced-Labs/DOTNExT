@@ -1,6 +1,6 @@
 # VAYRON Project Documentation
 
-> **VAYRON** - A forked .NET "Hyper Computer": CLR/VM/compiler stack restructured as a microkernel + device driver system for software paradigms.
+> **VAYRON** - A novel runtime platform inspired by OS/kernel architecture: CLR/VM/compiler stack restructured as a microkernel + device driver system for software paradigms.
 
 ---
 
