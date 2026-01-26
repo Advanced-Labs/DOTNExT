@@ -215,6 +215,21 @@ extern OpsRoot g_DefaultOpsRoot;
 
 ```cpp
 //=============================================================================
+// VContext - Minimal execution context (Phase 1: placeholder for future use)
+//=============================================================================
+
+// Forward-compatible context struct. Phase 1 passes this through but doesn't use it.
+// Later phases will populate fields as needed (transactions, security, etc.)
+struct VContext {
+    uint32_t version;           // Context structure version
+    uint32_t flags;             // Context flags (reserved)
+    void*    reserved[6];       // Reserved for: transaction, security, thread state, etc.
+};
+
+// Global null context for Phase 1 (all drivers receive this, ignore it)
+extern VContext g_NullContext;
+
+//=============================================================================
 // ObjectModelDevice - What an object IS to the runtime
 //=============================================================================
 struct IObjectModelOps {
@@ -222,22 +237,22 @@ struct IObjectModelOps {
     uint32_t version;
 
     // Get the total size of the object in bytes
-    size_t (*GetSize)(Object* obj);
+    size_t (*GetSize)(VContext* ctx, Object* obj);
 
     // Enumerate all reference fields for GC
     // Callback signature: void(Object** refLocation, ScanContext* sc)
-    void (*ScanRefs)(Object* obj, void* callback, void* context);
+    void (*ScanRefs)(VContext* ctx, Object* obj, void* callback, void* context);
 
     // Get the address of a field within the object
     // Returns null if field should be accessed through FieldAccessDevice
-    void* (*GetFieldAddress)(Object* obj, FieldDesc* field);
+    void* (*GetFieldAddress)(VContext* ctx, Object* obj, FieldDesc* field);
 
     // Get layout information for tooling/debugging
     // Returns serializable layout descriptor
-    void* (*GetLayoutDescriptor)(Object* obj);
+    void* (*GetLayoutDescriptor)(VContext* ctx, Object* obj);
 
     // Called when object is being collected
-    void (*OnFinalize)(Object* obj);
+    void (*OnFinalize)(VContext* ctx, Object* obj);
 
     // Reserved
     void* reserved[4];
@@ -252,22 +267,22 @@ struct IFieldAccessOps {
     // Read a field value
     // For value types: copies into buffer, returns bytes written
     // For references: returns Object* cast to intptr_t
-    intptr_t (*Read)(Object* obj, FieldDesc* field, void* buffer, size_t bufferSize);
+    intptr_t (*Read)(VContext* ctx, Object* obj, FieldDesc* field, void* buffer, size_t bufferSize);
 
     // Write a field value
     // For value types: copies from buffer
     // For references: value is Object*
-    void (*Write)(Object* obj, FieldDesc* field, void* value, size_t valueSize);
+    void (*Write)(VContext* ctx, Object* obj, FieldDesc* field, void* value, size_t valueSize);
 
     // Write barrier for reference fields (GC integration)
-    void (*WriteBarrier)(Object* obj, FieldDesc* field, Object* newRef, Object* oldRef);
+    void (*WriteBarrier)(VContext* ctx, Object* obj, FieldDesc* field, Object* newRef, Object* oldRef);
 
     // Called before any field access (for lazy materialization, etc.)
     // Return false to proceed with access, true if driver handled it
-    bool (*OnBeforeAccess)(Object* obj, FieldDesc* field, bool isWrite);
+    bool (*OnBeforeAccess)(VContext* ctx, Object* obj, FieldDesc* field, bool isWrite);
 
     // Called after field access (for dirty tracking, etc.)
-    void (*OnAfterAccess)(Object* obj, FieldDesc* field, bool isWrite);
+    void (*OnAfterAccess)(VContext* ctx, Object* obj, FieldDesc* field, bool isWrite);
 
     void* reserved[4];
 };
@@ -279,25 +294,13 @@ extern IObjectModelOps  g_DefaultObjectModelOps;
 extern IFieldAccessOps  g_DefaultFieldAccessOps;
 ```
 
-#### Design Note: VContext for Future Phases
+#### Design Note: VContext in Phase 1
 
-> **Forward Compatibility Consideration:** Later phases (Phase 2+) will likely need to pass contextual state through driver operations, including:
-> - Transaction handles (StorageDevice)
-> - Security principals / capability references
-> - Placement and dispatch policies
-> - Per-thread runtime state
+> **Why VContext exists now:** Adding a context parameter to all driver ops in Phase 1 (even though it's unused) avoids breaking interface changes later. The cost is minimal — one extra pointer parameter that default drivers ignore.
 >
-> **Phase 1 Decision:** We intentionally keep Phase 1 signatures **simple and context-free**. This allows us to:
-> 1. Validate the basic routing infrastructure without premature complexity
-> 2. Gather real usage patterns before designing VContext
-> 3. Use interface versioning (already present) to evolve signatures
+> **Phase 1 usage:** All calls pass `&g_NullContext`. Default drivers receive and ignore it.
 >
-> **Evolution Strategy:** When VContext becomes necessary (Phase 2+), we can:
-> - Add `IObjectModelOpsV2` / `IFieldAccessOpsV2` interfaces with VContext parameter
-> - Use thread-local VContext as an implicit parameter (simpler migration)
-> - The version field in each ops struct enables runtime detection of capabilities
->
-> This is explicitly **not** a "we forgot" — it's "we're intentionally deferring complexity until we have concrete requirements."
+> **Phase 2+ usage:** Will populate VContext with transaction handles, security principals, etc. No signature changes required.
 
 ### 2.4 Routing Logic
 
@@ -648,6 +651,21 @@ struct ScanContext;
 #define DDS_CALLDISPATCH_VERSION  1
 
 //=============================================================================
+// VContext - Execution context passed to all driver operations
+//=============================================================================
+
+// Minimal context struct for Phase 1. Later phases populate fields.
+struct VContext
+{
+    uint32_t version;           // Context structure version
+    uint32_t flags;             // Context flags (reserved)
+    void*    reserved[6];       // Reserved for: transaction, security, thread state, etc.
+};
+
+// Global null context (Phase 1: passed but ignored by default drivers)
+extern VContext g_NullContext;
+
+//=============================================================================
 // ObjectModelDevice Interface
 //=============================================================================
 
@@ -659,26 +677,27 @@ struct IObjectModelOps
     uint32_t version;
 
     // Get total object size in bytes (including header)
-    size_t (STDMETHODCALLTYPE *GetSize)(Object* obj);
+    size_t (STDMETHODCALLTYPE *GetSize)(VContext* ctx, Object* obj);
 
     // Enumerate reference fields for GC
     void (STDMETHODCALLTYPE *ScanRefs)(
+        VContext* ctx,
         Object* obj,
         DDSRefEnumCallback callback,
         ScanContext* sc,
         void* context);
 
     // Get direct field address (null if must use FieldAccessDevice)
-    void* (STDMETHODCALLTYPE *GetFieldAddress)(Object* obj, FieldDesc* field);
+    void* (STDMETHODCALLTYPE *GetFieldAddress)(VContext* ctx, Object* obj, FieldDesc* field);
 
     // Get MethodTable for type information
-    MethodTable* (STDMETHODCALLTYPE *GetMethodTable)(Object* obj);
+    MethodTable* (STDMETHODCALLTYPE *GetMethodTable)(VContext* ctx, Object* obj);
 
     // Check if object is valid/materialized
-    bool (STDMETHODCALLTYPE *IsValid)(Object* obj);
+    bool (STDMETHODCALLTYPE *IsValid)(VContext* ctx, Object* obj);
 
     // Prepare object for access (lazy materialization hook)
-    bool (STDMETHODCALLTYPE *EnsureMaterialized)(Object* obj);
+    bool (STDMETHODCALLTYPE *EnsureMaterialized)(VContext* ctx, Object* obj);
 
     void* reserved[4];
 };
@@ -695,6 +714,7 @@ struct IFieldAccessOps
     // Returns: number of bytes read, or -1 on error
     // For reference fields: buffer receives Object*, returns sizeof(Object*)
     intptr_t (STDMETHODCALLTYPE *Read)(
+        VContext* ctx,
         Object* obj,
         FieldDesc* field,
         void* buffer,
@@ -702,6 +722,7 @@ struct IFieldAccessOps
 
     // Write field value
     void (STDMETHODCALLTYPE *Write)(
+        VContext* ctx,
         Object* obj,
         FieldDesc* field,
         const void* value,
@@ -709,24 +730,28 @@ struct IFieldAccessOps
 
     // Write barrier for reference fields
     void (STDMETHODCALLTYPE *WriteBarrier)(
+        VContext* ctx,
         Object* obj,
         FieldDesc* field,
         Object* newRef);
 
     // Pre-access hook (return true to skip default access)
     bool (STDMETHODCALLTYPE *OnBeforeAccess)(
+        VContext* ctx,
         Object* obj,
         FieldDesc* field,
         bool isWrite);
 
     // Post-access hook (for dirty tracking, logging, etc.)
     void (STDMETHODCALLTYPE *OnAfterAccess)(
+        VContext* ctx,
         Object* obj,
         FieldDesc* field,
         bool isWrite);
 
     // Get effective field address after all hooks
     void* (STDMETHODCALLTYPE *GetEffectiveAddress)(
+        VContext* ctx,
         Object* obj,
         FieldDesc* field);
 
@@ -742,21 +767,21 @@ struct IStorageOps
     uint32_t version;
 
     // Persist object state to durable storage
-    bool (STDMETHODCALLTYPE *Persist)(Object* obj, uint64_t* outVuid);
+    bool (STDMETHODCALLTYPE *Persist)(VContext* ctx, Object* obj, uint64_t* outVuid);
 
     // Materialize object from storage by VUID
-    Object* (STDMETHODCALLTYPE *Materialize)(uint64_t vuid, MethodTable* expectedType);
+    Object* (STDMETHODCALLTYPE *Materialize)(VContext* ctx, uint64_t vuid, MethodTable* expectedType);
 
     // Check if object has pending changes
-    bool (STDMETHODCALLTYPE *IsDirty)(Object* obj);
+    bool (STDMETHODCALLTYPE *IsDirty)(VContext* ctx, Object* obj);
 
     // Mark object as dirty (needs persistence)
-    void (STDMETHODCALLTYPE *MarkDirty)(Object* obj);
+    void (STDMETHODCALLTYPE *MarkDirty)(VContext* ctx, Object* obj);
 
     // Transaction support
-    void* (STDMETHODCALLTYPE *BeginTransaction)();
-    bool (STDMETHODCALLTYPE *CommitTransaction)(void* txHandle);
-    void (STDMETHODCALLTYPE *RollbackTransaction)(void* txHandle);
+    void* (STDMETHODCALLTYPE *BeginTransaction)(VContext* ctx);
+    bool (STDMETHODCALLTYPE *CommitTransaction)(VContext* ctx, void* txHandle);
+    void (STDMETHODCALLTYPE *RollbackTransaction)(VContext* ctx, void* txHandle);
 
     void* reserved[8];
 };
@@ -771,16 +796,17 @@ struct ICallDispatchOps
 
     // Invoke method on object (may be remote)
     void* (STDMETHODCALLTYPE *Invoke)(
+        VContext* ctx,
         Object* obj,
         void* methodDesc,
         void* args,
         void* returnBuffer);
 
     // Check if object is local or remote
-    bool (STDMETHODCALLTYPE *IsLocal)(Object* obj);
+    bool (STDMETHODCALLTYPE *IsLocal)(VContext* ctx, Object* obj);
 
     // Get location hint
-    uint64_t (STDMETHODCALLTYPE *GetLocationId)(Object* obj);
+    uint64_t (STDMETHODCALLTYPE *GetLocationId)(VContext* ctx, Object* obj);
 
     void* reserved[8];
 };
@@ -908,20 +934,28 @@ src/runtime/src/coreclr/vm/dds/defaultdrivers.cpp
 #include "gcenv.h"
 
 //=============================================================================
+// Global null context (Phase 1: passed but ignored)
+//=============================================================================
+VContext g_NullContext = { 1, 0, { nullptr, nullptr, nullptr, nullptr, nullptr, nullptr } };
+
+//=============================================================================
 // Default ObjectModel Driver
 //=============================================================================
 
-static size_t STDMETHODCALLTYPE DefaultOM_GetSize(Object* obj)
+static size_t STDMETHODCALLTYPE DefaultOM_GetSize(VContext* ctx, Object* obj)
 {
+    (void)ctx;  // Unused in Phase 1
     return obj->GetSize();
 }
 
 static void STDMETHODCALLTYPE DefaultOM_ScanRefs(
+    VContext* ctx,
     Object* obj,
     DDSRefEnumCallback callback,
     ScanContext* sc,
     void* context)
 {
+    (void)ctx;  // Unused in Phase 1
     MethodTable* mt = obj->GetMethodTable();
 
     if (!mt->ContainsPointers())
@@ -951,23 +985,27 @@ static void STDMETHODCALLTYPE DefaultOM_ScanRefs(
     }
 }
 
-static void* STDMETHODCALLTYPE DefaultOM_GetFieldAddress(Object* obj, FieldDesc* field)
+static void* STDMETHODCALLTYPE DefaultOM_GetFieldAddress(VContext* ctx, Object* obj, FieldDesc* field)
 {
+    (void)ctx;  // Unused in Phase 1
     return field->GetAddressGuaranteedInHeap(obj);
 }
 
-static MethodTable* STDMETHODCALLTYPE DefaultOM_GetMethodTable(Object* obj)
+static MethodTable* STDMETHODCALLTYPE DefaultOM_GetMethodTable(VContext* ctx, Object* obj)
 {
+    (void)ctx;  // Unused in Phase 1
     return obj->GetMethodTable();
 }
 
-static bool STDMETHODCALLTYPE DefaultOM_IsValid(Object* obj)
+static bool STDMETHODCALLTYPE DefaultOM_IsValid(VContext* ctx, Object* obj)
 {
+    (void)ctx;  // Unused in Phase 1
     return obj != nullptr && obj->GetMethodTable() != nullptr;
 }
 
-static bool STDMETHODCALLTYPE DefaultOM_EnsureMaterialized(Object* obj)
+static bool STDMETHODCALLTYPE DefaultOM_EnsureMaterialized(VContext* ctx, Object* obj)
 {
+    (void)ctx;  // Unused in Phase 1
     // Default objects are always materialized
     return true;
 }
@@ -988,11 +1026,13 @@ IObjectModelOps g_DefaultObjectModelOps = {
 //=============================================================================
 
 static intptr_t STDMETHODCALLTYPE DefaultFA_Read(
+    VContext* ctx,
     Object* obj,
     FieldDesc* field,
     void* buffer,
     size_t bufferSize)
 {
+    (void)ctx;  // Unused in Phase 1
     void* addr = field->GetAddressGuaranteedInHeap(obj);
     size_t fieldSize = field->GetSize();
 
@@ -1004,11 +1044,13 @@ static intptr_t STDMETHODCALLTYPE DefaultFA_Read(
 }
 
 static void STDMETHODCALLTYPE DefaultFA_Write(
+    VContext* ctx,
     Object* obj,
     FieldDesc* field,
     const void* value,
     size_t valueSize)
 {
+    (void)ctx;  // Unused in Phase 1
     void* addr = field->GetAddressGuaranteedInHeap(obj);
     size_t fieldSize = field->GetSize();
 
@@ -1017,28 +1059,34 @@ static void STDMETHODCALLTYPE DefaultFA_Write(
 }
 
 static void STDMETHODCALLTYPE DefaultFA_WriteBarrier(
+    VContext* ctx,
     Object* obj,
     FieldDesc* field,
     Object* newRef)
 {
+    (void)ctx;  // Unused in Phase 1
     Object** addr = (Object**)field->GetAddressGuaranteedInHeap(obj);
     SetObjectReference(addr, newRef);  // Uses existing write barrier
 }
 
 static bool STDMETHODCALLTYPE DefaultFA_OnBeforeAccess(
+    VContext* ctx,
     Object* obj,
     FieldDesc* field,
     bool isWrite)
 {
+    (void)ctx;  // Unused in Phase 1
     // No special handling for default objects
     return false;
 }
 
 static void STDMETHODCALLTYPE DefaultFA_OnAfterAccess(
+    VContext* ctx,
     Object* obj,
     FieldDesc* field,
     bool isWrite)
 {
+    (void)ctx;  // Unused in Phase 1
     // No special handling for default objects
 }
 
@@ -1118,31 +1166,32 @@ HCIMPLEND
 NOINLINE Object* DDS_GetFieldHelper(Object* obj, FieldDesc* pFD)
 {
     OpsRoot* ops = DDS_GetOpsRoot(obj);
+    VContext* ctx = &g_NullContext;  // Phase 1: use null context
 
     // Check if driver wants to intercept
-    if (ops->fieldAccessOps->OnBeforeAccess(obj, pFD, false))
+    if (ops->fieldAccessOps->OnBeforeAccess(ctx, obj, pFD, false))
     {
         // Driver handled the access
         // For reads, need to get value from driver
         Object* result = nullptr;
-        ops->fieldAccessOps->Read(obj, pFD, &result, sizeof(result));
+        ops->fieldAccessOps->Read(ctx, obj, pFD, &result, sizeof(result));
         return result;
     }
 
     // Get field address (may be redirected by ObjectModel driver)
-    void* addr = ops->objectModelOps->GetFieldAddress(obj, pFD);
+    void* addr = ops->objectModelOps->GetFieldAddress(ctx, obj, pFD);
     if (addr == nullptr)
     {
         // Must use FieldAccess driver
         Object* result = nullptr;
-        ops->fieldAccessOps->Read(obj, pFD, &result, sizeof(result));
-        ops->fieldAccessOps->OnAfterAccess(obj, pFD, false);
+        ops->fieldAccessOps->Read(ctx, obj, pFD, &result, sizeof(result));
+        ops->fieldAccessOps->OnAfterAccess(ctx, obj, pFD, false);
         return result;
     }
 
     // Direct read
     Object* result = *(Object**)addr;
-    ops->fieldAccessOps->OnAfterAccess(obj, pFD, false);
+    ops->fieldAccessOps->OnAfterAccess(ctx, obj, pFD, false);
     return result;
 }
 
@@ -1156,13 +1205,14 @@ NOINLINE Object* DDS_GetFieldHelper(Object* obj, FieldDesc* pFD)
 void STDCALL JIT_WriteBarrier_DDS(Object* obj, Object** dst, Object* ref)
 {
     OpsRoot* ops = DDS_GetOpsRoot(obj);
+    VContext* ctx = &g_NullContext;  // Phase 1: use null context
 
     // Find the FieldDesc for this location (may need reverse mapping)
     FieldDesc* pFD = FindFieldDescFromAddress(obj, dst);
 
     if (pFD != nullptr)
     {
-        ops->fieldAccessOps->WriteBarrier(obj, pFD, ref);
+        ops->fieldAccessOps->WriteBarrier(ctx, obj, pFD, ref);
     }
     else
     {
@@ -1230,12 +1280,14 @@ void GCToEEInterface::GcScanRoots(
 void ScanNonDefaultObject(Object* obj, promote_func* fn, ScanContext* sc)
 {
     OpsRoot* ops = DDS_GetOpsRoot(obj);
+    VContext* ctx = &g_NullContext;  // Phase 1: use null context
 
     // Use driver's scanning function
     ops->objectModelOps->ScanRefs(
+        ctx,
         obj,
-        [](Object** ref, ScanContext* sc, void* ctx) {
-            promote_func* fn = (promote_func*)ctx;
+        [](Object** ref, ScanContext* sc, void* callbackCtx) {
+            promote_func* fn = (promote_func*)callbackCtx;
             fn(*ref, sc, 0);  // Standard promotion
         },
         sc,
