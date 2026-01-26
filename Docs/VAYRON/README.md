@@ -14,8 +14,8 @@ VAYRON transforms the .NET CLR from a closed runtime into an extensible platform
 | **FieldAccessDevice** | Field read/write interception | CLR Default |
 | **StorageDevice** | Persistence (layer I/O, transactions) | Voron |
 | **CallDispatchDevice** | Method invocation/routing | NewOrleans |
-| **RelationalDevice** | Edges and graph traversal | (Phase 2+) |
-| **VersionDevice** | Time-travel / MVCC | (Phase 4+) |
+| **RelationalDevice** | Edges and graph traversal | (Phase 3+) |
+| **VersionDevice** | Time-travel / MVCC | (Phase 5+) |
 | **SecurityDevice** | Kernel-enforced security | (Early wiring) |
 
 Default behavior is preserved via "DefaultDrivers" that proxy standard CLR operations.

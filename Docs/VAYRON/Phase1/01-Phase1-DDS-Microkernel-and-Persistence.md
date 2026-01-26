@@ -22,6 +22,25 @@ This document provides a detailed implementation plan for **Phase 1** of the VAY
 
 ---
 
+## Phase 1 Non-Goals (Explicitly Out of Scope)
+
+> **Important:** The following items are intentionally deferred to later phases. Do not attempt to implement them in Phase 1.
+
+| Non-Goal | Deferred To | Rationale |
+|----------|-------------|-----------|
+| **Persistence / StorageDevice real implementation** | Phase 2 | Phase 1 establishes routing; persistence requires stable infrastructure first |
+| **VUID generation and mapping** | Phase 2 | Depends on StorageDevice being functional |
+| **Voron integration** | Phase 2 | Storage engine integration requires Phase 1 foundation |
+| **Remote dispatch / CallDispatchDevice** | Phase 4 | Requires persistence (Phase 2) and relations (Phase 3) first |
+| **NewOrleans integration** | Phase 4 | Distribution builds on persistence layer |
+| **JIT codegen modifications** | Phase 2+ | Use JIT helpers for Phase 1; optimize later |
+| **Alternate object layouts (Mode B)** | Phase 2+ | Start with stub+external body (Mode A) |
+| **Transaction coordination across drivers** | Phase 2+ | Requires StorageDevice to be functional |
+
+Phase 1 focuses solely on **opening the CLR** — establishing the DDS routing mechanism and proving that default drivers correctly proxy existing CLR behavior. All feature work builds on this foundation.
+
+---
+
 ## Part I: Architecture Analysis
 
 ### 1.1 Current CLR Object Model
@@ -259,6 +278,26 @@ struct IFieldAccessOps {
 extern IObjectModelOps  g_DefaultObjectModelOps;
 extern IFieldAccessOps  g_DefaultFieldAccessOps;
 ```
+
+#### Design Note: VContext for Future Phases
+
+> **Forward Compatibility Consideration:** Later phases (Phase 2+) will likely need to pass contextual state through driver operations, including:
+> - Transaction handles (StorageDevice)
+> - Security principals / capability references
+> - Placement and dispatch policies
+> - Per-thread runtime state
+>
+> **Phase 1 Decision:** We intentionally keep Phase 1 signatures **simple and context-free**. This allows us to:
+> 1. Validate the basic routing infrastructure without premature complexity
+> 2. Gather real usage patterns before designing VContext
+> 3. Use interface versioning (already present) to evolve signatures
+>
+> **Evolution Strategy:** When VContext becomes necessary (Phase 2+), we can:
+> - Add `IObjectModelOpsV2` / `IFieldAccessOpsV2` interfaces with VContext parameter
+> - Use thread-local VContext as an implicit parameter (simpler migration)
+> - The version field in each ops struct enables runtime detection of capabilities
+>
+> This is explicitly **not** a "we forgot" — it's "we're intentionally deferring complexity until we have concrete requirements."
 
 ### 2.4 Routing Logic
 
@@ -545,6 +584,17 @@ Using SyncBlockIndex as the key avoids GC relocation callbacks entirely:
 2. **SyncBlockIndex is stable** - it's an index into the global SyncTableEntry array
 3. **No relocation tracking needed** - the mapping remains valid as objects move
 4. **Cleanup via SyncBlock lifecycle** - when object is collected, SyncBlock is recycled
+
+> ⚠️ **MUST-DO: SyncBlockIndex Reuse Safety**
+>
+> **Problem:** When a SyncBlock is recycled (after object collection), its index may be reused for a different object. If the OpsRootTable isn't cleaned up, the new object could inherit stale driver bindings.
+>
+> **Required Implementation:**
+> 1. **Hook into SyncBlock recycling** - `SyncBlock::OnRecycle()` must call `g_OpsRootTable.OnSyncBlockRecycled(index)`
+> 2. **Clear DDS bit on recycling** - The new object won't have the bit set (freshly allocated), but defensive clearing in `OnSyncBlockRecycled` prevents edge cases
+> 3. **Verify implementation** - Add tests that allocate/deallocate many DDS objects to stress the recycling path
+>
+> This is **critical for correctness** — stale mappings would cause undefined behavior.
 
 ```cpp
 // In syncblk.cpp, when SyncBlock is being recycled:
