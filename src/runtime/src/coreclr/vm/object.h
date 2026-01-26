@@ -212,6 +212,12 @@ class Object
         return dac_cast<PTR_ObjHeader>(this) - 1;
     }
 
+    PTR_ObjHeader   GetHeader() const
+    {
+        LIMITED_METHOD_DAC_CONTRACT;
+        return dac_cast<PTR_ObjHeader>(const_cast<Object*>(this)) - 1;
+    }
+
     // Get the current address of the object (works for debug refs, too.)
     PTR_BYTE      GetAddress()
     {
@@ -244,9 +250,10 @@ class Object
 
     // TDS (TypeDriver System) routing support
     // Returns true if this object uses non-default drivers for runtime operations
-    FORCEINLINE bool IsTDSNonDefault() const
+    FORCEINLINE bool IsTDSNonDefault()
     {
-        LIMITED_METHOD_DAC_CONTRACT;
+        LIMITED_METHOD_CONTRACT;
+        SUPPORTS_DAC;
         return GetHeader()->IsTDSNonDefault();
     }
 
