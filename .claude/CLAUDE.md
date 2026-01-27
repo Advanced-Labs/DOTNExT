@@ -79,9 +79,14 @@ ls artifacts/bin/coreclr/linux.x64.Debug/
 | Build Type | Status | Notes |
 |------------|--------|-------|
 | Native CLR (C++) | ✅ Works | Full offline build via CMake |
-| Managed (C#) | ❌ Requires TAI | NuGet restore needs network access |
+| Managed (C#) | ❌ Requires TAI | Proxy blocks .NET SDK's NuGet client |
 
-For managed code verification, coordinate with TAI (Test AI on Windows) which has full network access.
+**Why managed builds don't work:** The environment's proxy requires authentication that works with `wget` but not with the .NET SDK's HttpClient. Even nuget.org is blocked for NuGet restore operations. This is a fundamental infrastructure limitation.
+
+**Workflow recommendation:**
+1. Use local native builds to verify C++ code (TDS infrastructure, intrinsics, QCalls)
+2. Coordinate with TAI for managed code (C#) verification and full integration testing
+3. TAI has full network access on Windows and can run complete builds
 
 ---
 
