@@ -68,7 +68,12 @@ namespace System.OS
         /// <summary>
         /// Get count of routed objects (diagnostics).
         /// </summary>
+        public static int GetRoutedObjectCount()
+        {
+            return GetRoutedObjectCountInternal();
+        }
+
         [LibraryImport(RuntimeHelpers.QCall, EntryPoint = "TDSNative_GetRoutedObjectCount")]
-        public static partial int GetRoutedObjectCount();
+        private static partial int GetRoutedObjectCountInternal();
     }
 }
