@@ -1,11 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="$([MSBuild]::GetPathOfFileAbove('Directory.Merged.props', $(MSBuildThisFileDirectory)..))" />
+  <!-- Skip merged test infrastructure import for TDS tests -->
   <Import Project="$([MSBuild]::GetPathOfFileAbove('Directory.Build.props', $(MSBuildThisFileDirectory)..))" />
 
   <PropertyGroup>
     <!-- TDS Tests Category -->
     <TDSTests>true</TDSTests>
+    <!-- Opt out of merged test directory checking -->
+    <InMergedTestDirectory>false</InMergedTestDirectory>
     <RunAnalyzers>true</RunAnalyzers>
     <NoWarn>$(NoWarn);xUnit1013</NoWarn>
     <EnableNETAnalyzers>false</EnableNETAnalyzers>
