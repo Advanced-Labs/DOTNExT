@@ -4,19 +4,9 @@
     <CLRTestKind>BuildAndRun</CLRTestKind>
     <CLRTestPriority>0</CLRTestPriority>
     <BuildAsStandalone>true</BuildAsStandalone>
-    <!-- Use NoStdLib to compile against live CoreLib instead of targeting pack -->
-    <NoStdLib>true</NoStdLib>
-    <NoCompilerStandardLib>true</NoCompilerStandardLib>
   </PropertyGroup>
 
   <ItemGroup>
     <Compile Include="TDSVerification.cs" />
-  </ItemGroup>
-
-  <!-- Reference live-built CoreLib for System.OS APIs -->
-  <ItemGroup>
-    <Reference Include="System.Private.CoreLib">
-      <HintPath>$(ArtifactsBinDir)coreclr\$(TargetOS).$(TargetArchitecture).$(Configuration)\IL\System.Private.CoreLib.dll</HintPath>
-    </Reference>
   </ItemGroup>
 </Project>
