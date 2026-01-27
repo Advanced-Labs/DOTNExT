@@ -3,8 +3,8 @@
     <OutputType>Exe</OutputType>
     <CLRTestKind>BuildAndRun</CLRTestKind>
     <CLRTestPriority>0</CLRTestPriority>
-    <!-- Required for tests with Main() entry point -->
-    <RequiresProcessIsolation>true</RequiresProcessIsolation>
+    <!-- Build standalone to use live CoreLib with System.OS -->
+    <BuildAsStandalone>true</BuildAsStandalone>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="TDSVerification.cs" />
