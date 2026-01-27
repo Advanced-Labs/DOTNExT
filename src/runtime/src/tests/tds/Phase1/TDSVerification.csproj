@@ -3,10 +3,19 @@
     <OutputType>Exe</OutputType>
     <CLRTestKind>BuildAndRun</CLRTestKind>
     <CLRTestPriority>0</CLRTestPriority>
-    <!-- Build standalone to use live CoreLib with System.OS -->
     <BuildAsStandalone>true</BuildAsStandalone>
+    <!-- Disable default framework reference to use live CoreLib -->
+    <DisableImplicitFrameworkReferences>true</DisableImplicitFrameworkReferences>
   </PropertyGroup>
+
   <ItemGroup>
     <Compile Include="TDSVerification.cs" />
+  </ItemGroup>
+
+  <!-- Reference live-built CoreLib instead of targeting pack -->
+  <ItemGroup>
+    <Reference Include="System.Private.CoreLib">
+      <HintPath>$(ArtifactsBinDir)coreclr\$(TargetOS).$(TargetArchitecture).$(Configuration)\IL\System.Private.CoreLib.dll</HintPath>
+    </Reference>
   </ItemGroup>
 </Project>
