@@ -24,7 +24,7 @@ namespace System.OS
     /// Carries transaction handles and state through driver operations.
     /// Phase 2: Transaction support for persistence.
     /// </summary>
-    public sealed class VContext : IDisposable
+    public sealed partial class VContext : IDisposable
     {
         private IntPtr _nativeHandle;
         private bool _disposed;
@@ -146,7 +146,7 @@ namespace System.OS
     /// <summary>
     /// Static methods for per-thread VContext management.
     /// </summary>
-    public static class VContextManager
+    public static partial class VContextManager
     {
         /// <summary>
         /// Get the current thread's VContext (may be null).
