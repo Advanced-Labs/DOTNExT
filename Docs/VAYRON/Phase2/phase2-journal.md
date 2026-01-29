@@ -148,3 +148,47 @@ T01 code complete. Ready for TAI build verification.
 T02 code complete. Ready for TAI build verification.
 
 ---
+
+## 2026-01-29 - T03: Dirty Tracking
+
+### What I Did
+- Created dirtyset.h with DirtySet class:
+  - DirtyEntry struct (syncBlockIndex + dirtyTimestamp)
+  - DirtySetTraits for SHash
+  - DirtySet class with thread-safe operations
+  - Helper functions: MarkObjectDirty, ClearObjectDirty, IsObjectDirty
+- Created dirtyset.cpp with implementation:
+  - Platform-specific timestamp for ordering
+  - MarkDirty/ClearDirty/IsDirty operations
+  - GetDirtyEntries for bulk flush
+  - ClearAll for full flush
+- Added CrstTdsDirtySet to CrstTypes.def
+- Added dirty tracking QCalls:
+  - TDSNative_MarkDirty
+  - TDSNative_ClearDirty
+  - TDSNative_IsObjectDirty
+  - TDSNative_GetDirtyCount
+- Updated TypeDriverHelper.cs:
+  - MarkDirty(object) method
+  - ClearDirty(object) method
+  - IsDirty(object) method
+  - GetDirtyCount() method
+
+### Also Fixed
+- Added `partial` keyword to VUID struct (build fix from TAI)
+- Added `partial` keyword to VContext/VContextManager (previous fix)
+
+### Files Changed
+- `vm/tds/dirtyset.h` - NEW - DirtySet declaration
+- `vm/tds/dirtyset.cpp` - NEW - DirtySet implementation
+- `inc/CrstTypes.def` - Added CrstTdsDirtySet
+- `vm/tds/tdsqcalls.h` - Added dirty QCall declarations
+- `vm/tds/tdsqcalls.cpp` - Added dirty QCall implementations
+- `vm/CMakeLists.txt` - Added dirtyset.cpp/h
+- `System/OS/TypeDriverHelper.cs` - Added dirty tracking methods
+- `System/OS/VUID.cs` - Fixed: added partial keyword
+
+### Status
+T03 code complete. Ready for TAI build verification.
+
+---

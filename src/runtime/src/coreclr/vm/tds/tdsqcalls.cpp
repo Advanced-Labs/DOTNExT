@@ -13,6 +13,7 @@
 #include "tds/tdsintrinsics.h"
 #include "tds/tdscontext.h"
 #include "tds/vuid.h"
+#include "tds/dirtyset.h"
 #include "qcall.h"
 #include "object.h"
 #include "field.h"
@@ -447,4 +448,75 @@ extern "C" void QCALLTYPE TDSNative_SetObjectVUID(QCall::ObjectHandleOnStack obj
     }
 
     END_QCALL;
+}
+
+//=============================================================================
+// Dirty Tracking QCalls - Phase 2 Object Modification Tracking
+//=============================================================================
+
+extern "C" void QCALLTYPE TDSNative_MarkDirty(QCall::ObjectHandleOnStack obj)
+{
+    QCALL_CONTRACT;
+
+    BEGIN_QCALL;
+
+    GCX_COOP();
+    OBJECTREF objRef = obj.Get();
+    if (objRef != NULL)
+    {
+        TDS::MarkObjectDirty(OBJECTREFToObject(objRef));
+    }
+
+    END_QCALL;
+}
+
+extern "C" void QCALLTYPE TDSNative_ClearDirty(QCall::ObjectHandleOnStack obj)
+{
+    QCALL_CONTRACT;
+
+    BEGIN_QCALL;
+
+    GCX_COOP();
+    OBJECTREF objRef = obj.Get();
+    if (objRef != NULL)
+    {
+        TDS::ClearObjectDirty(OBJECTREFToObject(objRef));
+    }
+
+    END_QCALL;
+}
+
+extern "C" BOOL QCALLTYPE TDSNative_IsObjectDirty(QCall::ObjectHandleOnStack obj)
+{
+    QCALL_CONTRACT;
+
+    BOOL result = FALSE;
+
+    BEGIN_QCALL;
+
+    GCX_COOP();
+    OBJECTREF objRef = obj.Get();
+    if (objRef != NULL)
+    {
+        result = TDS::IsObjectDirty(OBJECTREFToObject(objRef)) ? TRUE : FALSE;
+    }
+
+    END_QCALL;
+
+    return result;
+}
+
+extern "C" INT32 QCALLTYPE TDSNative_GetDirtyCount()
+{
+    QCALL_CONTRACT;
+
+    INT32 count = 0;
+
+    BEGIN_QCALL;
+
+    count = (INT32)TDS::g_DirtySet.GetCount();
+
+    END_QCALL;
+
+    return count;
 }

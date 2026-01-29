@@ -115,5 +115,57 @@ namespace System.OS
 
         [LibraryImport(RuntimeHelpers.QCall, EntryPoint = "TDSNative_SetObjectVUID")]
         private static partial void SetObjectVUIDInternal(ObjectHandleOnStack obj, ulong hi, ulong lo);
+
+        //=====================================================================
+        // Phase 2: Dirty Tracking Operations
+        //=====================================================================
+
+        /// <summary>
+        /// Mark an object as dirty (needs to be persisted).
+        /// </summary>
+        public static void MarkDirty(object obj)
+        {
+            ArgumentNullException.ThrowIfNull(obj);
+            MarkDirtyInternal(ObjectHandleOnStack.Create(ref obj));
+        }
+
+        /// <summary>
+        /// Clear an object's dirty state (after successful persist).
+        /// </summary>
+        public static void ClearDirty(object obj)
+        {
+            ArgumentNullException.ThrowIfNull(obj);
+            ClearDirtyInternal(ObjectHandleOnStack.Create(ref obj));
+        }
+
+        /// <summary>
+        /// Check if an object is dirty (has modifications pending persist).
+        /// </summary>
+        public static bool IsDirty(object obj)
+        {
+            ArgumentNullException.ThrowIfNull(obj);
+            return IsDirtyInternal(ObjectHandleOnStack.Create(ref obj));
+        }
+
+        /// <summary>
+        /// Get count of dirty objects in the system.
+        /// </summary>
+        public static int GetDirtyCount()
+        {
+            return GetDirtyCountInternal();
+        }
+
+        [LibraryImport(RuntimeHelpers.QCall, EntryPoint = "TDSNative_MarkDirty")]
+        private static partial void MarkDirtyInternal(ObjectHandleOnStack obj);
+
+        [LibraryImport(RuntimeHelpers.QCall, EntryPoint = "TDSNative_ClearDirty")]
+        private static partial void ClearDirtyInternal(ObjectHandleOnStack obj);
+
+        [LibraryImport(RuntimeHelpers.QCall, EntryPoint = "TDSNative_IsObjectDirty")]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        private static partial bool IsDirtyInternal(ObjectHandleOnStack obj);
+
+        [LibraryImport(RuntimeHelpers.QCall, EntryPoint = "TDSNative_GetDirtyCount")]
+        private static partial int GetDirtyCountInternal();
     }
 }
