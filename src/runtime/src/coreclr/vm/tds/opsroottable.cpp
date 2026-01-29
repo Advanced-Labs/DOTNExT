@@ -141,7 +141,11 @@ void OpsRootTable::Set(Object* obj, OpsRoot* ops)
 
         // Remove existing entry if present, then add new one
         // (SHash doesn't support AddOrReplace for removable tables)
-        m_table.Remove(syncBlockIndex);
+        // Must check if entry exists first - Remove asserts key exists
+        if (m_table.LookupPtr(syncBlockIndex) != nullptr)
+        {
+            m_table.Remove(syncBlockIndex);
+        }
         m_table.Add(entry);
     }
 
@@ -184,7 +188,11 @@ void OpsRootTable::RemoveByIndex(DWORD syncBlockIndex)
     CONTRACTL_END;
 
     CrstHolder lock(&m_lock);
-    m_table.Remove(syncBlockIndex);
+    // Check if entry exists before removing - Remove asserts key exists
+    if (m_table.LookupPtr(syncBlockIndex) != nullptr)
+    {
+        m_table.Remove(syncBlockIndex);
+    }
 }
 
 void OpsRootTable::OnSyncBlockRecycled(DWORD syncBlockIndex)
@@ -199,8 +207,11 @@ void OpsRootTable::OnSyncBlockRecycled(DWORD syncBlockIndex)
 
     CrstHolder lock(&m_lock);
 
-    // Remove any stale entry for this index
-    m_table.Remove(syncBlockIndex);
+    // Remove any stale entry for this index (if it exists)
+    if (m_table.LookupPtr(syncBlockIndex) != nullptr)
+    {
+        m_table.Remove(syncBlockIndex);
+    }
 
     // Increment generation to invalidate any cached lookups
     // Note: This uses a global generation counter for simplicity.
