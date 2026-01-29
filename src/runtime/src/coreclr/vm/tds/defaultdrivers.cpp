@@ -374,7 +374,7 @@ void TDS_ClearOpsRoot(Object* obj)
 {
     CONTRACTL
     {
-        NOTHROW;
+        THROWS;  // g_OpsRootTable.Remove() can throw
         GC_NOTRIGGER;
         MODE_COOPERATIVE;
     }

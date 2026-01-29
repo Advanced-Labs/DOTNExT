@@ -157,7 +157,7 @@ void OpsRootTable::Remove(Object* obj)
 {
     CONTRACTL
     {
-        NOTHROW;
+        THROWS;  // GetSyncBlockIndex() can throw
         GC_NOTRIGGER;
         MODE_COOPERATIVE;
     }
