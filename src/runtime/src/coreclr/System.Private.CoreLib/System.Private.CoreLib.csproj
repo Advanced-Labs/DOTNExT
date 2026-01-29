@@ -146,6 +146,7 @@
     <Compile Include="$(BclSourcesRoot)\System\MulticastDelegate.CoreCLR.cs" />
     <Compile Include="$(BclSourcesRoot)\System\Object.CoreCLR.cs" />
     <Compile Include="$(BclSourcesRoot)\System\OS\TypeDriverHelper.cs" />
+    <Compile Include="$(BclSourcesRoot)\System\OS\VContext.cs" />
     <Compile Include="$(BclSourcesRoot)\System\OS\VIntrinsics.cs" />
     <Compile Include="$(BclSourcesRoot)\System\OS\VirtualAttribute.cs" />
     <Compile Include="$(BclSourcesRoot)\System\Reflection\Assembly.CoreCLR.cs" />

@@ -31,4 +31,23 @@ extern "C" void QCALLTYPE TDSNative_WriteInt64Field(QCall::ObjectHandleOnStack o
 extern "C" void QCALLTYPE TDSNative_ReadRefField(QCall::ObjectHandleOnStack obj, INT32 fieldOffset, QCall::ObjectHandleOnStack result);
 extern "C" void QCALLTYPE TDSNative_WriteRefField(QCall::ObjectHandleOnStack obj, INT32 fieldOffset, QCall::ObjectHandleOnStack value);
 
+//=============================================================================
+// VContext QCalls - Phase 2 Context Management
+//=============================================================================
+
+// Forward declaration
+struct VContext;
+
+extern "C" void* QCALLTYPE TDSContext_Create();
+extern "C" void QCALLTYPE TDSContext_Destroy(VContext* ctx);
+extern "C" BOOL QCALLTYPE TDSContext_HasTransaction(VContext* ctx);
+extern "C" BOOL QCALLTYPE TDSContext_IsWriteTransaction(VContext* ctx);
+extern "C" BOOL QCALLTYPE TDSContext_IsDirty(VContext* ctx);
+extern "C" UINT32 QCALLTYPE TDSContext_GetFlags(VContext* ctx);
+extern "C" void QCALLTYPE TDSContext_SetDirty(VContext* ctx);
+extern "C" void QCALLTYPE TDSContext_ClearDirty(VContext* ctx);
+extern "C" VContext* QCALLTYPE TDSContext_GetCurrent();
+extern "C" void QCALLTYPE TDSContext_Push(VContext* ctx);
+extern "C" VContext* QCALLTYPE TDSContext_Pop();
+
 #endif // _TDS_QCALLS_H_
