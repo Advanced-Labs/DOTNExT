@@ -95,3 +95,56 @@
 T01 code complete. Ready for TAI build verification.
 
 ---
+
+## 2026-01-29 - T02: VUID Infrastructure
+
+### What I Did
+- Created vuid.h with TDS::VUID struct:
+  - 128-bit UUID v7 format (hi/lo uint64_t)
+  - IsValid/IsEmpty methods
+  - Comparison operators (<, <=, >, >=, ==, !=)
+  - Empty() static factory
+- Created vuid.cpp with full implementation:
+  - GenerateVUID() using UUID v7 specification
+  - Platform-specific timestamp (Windows FILETIME, Unix gettimeofday)
+  - Thread-local xorshift128+ random generator
+  - VUIDToBytes/VUIDFromBytes (big-endian for sortability)
+  - VUIDToString/VUIDFromString
+- Updated opsroottable.h:
+  - Added VUID field to OpsRootEntry
+  - Added GetVUID/SetVUID methods to OpsRootTable class
+- Updated opsroottable.cpp:
+  - Implemented GetVUID/GetVUIDByIndex
+  - Implemented SetVUID/SetVUIDByIndex
+  - Initialize VUID to empty in Set()
+- Created VUID.cs managed struct:
+  - IEquatable<VUID>, IComparable<VUID>
+  - VUID.New() via QCall
+  - FromBytes/WriteBytes
+  - Parse/TryParse for string format
+  - ToString() standard UUID format
+  - All comparison operators
+- Added VUID QCalls:
+  - TDSNative_GenerateVUID
+  - TDSNative_GetObjectVUID
+  - TDSNative_SetObjectVUID
+- Updated TypeDriverHelper.cs:
+  - GetVUID(object) method
+  - SetVUID(object, VUID) method
+
+### Files Changed
+- `vm/tds/vuid.h` - NEW - VUID structure
+- `vm/tds/vuid.cpp` - NEW - VUID implementation
+- `vm/tds/opsroottable.h` - Added VUID field and methods
+- `vm/tds/opsroottable.cpp` - VUID accessor implementations
+- `vm/tds/tdsqcalls.h` - Added VUID QCall declarations
+- `vm/tds/tdsqcalls.cpp` - Added VUID QCall implementations
+- `vm/CMakeLists.txt` - Added vuid.cpp/h
+- `System/OS/VUID.cs` - NEW - Managed VUID struct
+- `System/OS/TypeDriverHelper.cs` - Added GetVUID/SetVUID
+- `System.Private.CoreLib.csproj` - Added VUID.cs
+
+### Status
+T02 code complete. Ready for TAI build verification.
+
+---

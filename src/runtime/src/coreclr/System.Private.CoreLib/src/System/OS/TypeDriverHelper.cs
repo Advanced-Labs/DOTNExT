@@ -75,5 +75,45 @@ namespace System.OS
 
         [LibraryImport(RuntimeHelpers.QCall, EntryPoint = "TDSNative_GetRoutedObjectCount")]
         private static partial int GetRoutedObjectCountInternal();
+
+        //=====================================================================
+        // Phase 2: VUID Operations
+        //=====================================================================
+
+        /// <summary>
+        /// Get the VUID for an object (empty if not assigned).
+        /// </summary>
+        public static VUID GetVUID(object obj)
+        {
+            ArgumentNullException.ThrowIfNull(obj);
+            GetObjectVUIDInternal(ObjectHandleOnStack.Create(ref obj), out ulong hi, out ulong lo);
+            if (hi == 0 && lo == 0)
+                return VUID.Empty;
+
+            // Reconstruct VUID from parts
+            Span<byte> bytes = stackalloc byte[16];
+            System.Buffers.Binary.BinaryPrimitives.WriteUInt64BigEndian(bytes, hi);
+            System.Buffers.Binary.BinaryPrimitives.WriteUInt64BigEndian(bytes.Slice(8), lo);
+            return VUID.FromBytes(bytes);
+        }
+
+        /// <summary>
+        /// Set the VUID for an object (must be TDS-routed).
+        /// </summary>
+        public static void SetVUID(object obj, VUID vuid)
+        {
+            ArgumentNullException.ThrowIfNull(obj);
+            Span<byte> bytes = stackalloc byte[16];
+            vuid.WriteBytes(bytes);
+            ulong hi = System.Buffers.Binary.BinaryPrimitives.ReadUInt64BigEndian(bytes);
+            ulong lo = System.Buffers.Binary.BinaryPrimitives.ReadUInt64BigEndian(bytes.Slice(8));
+            SetObjectVUIDInternal(ObjectHandleOnStack.Create(ref obj), hi, lo);
+        }
+
+        [LibraryImport(RuntimeHelpers.QCall, EntryPoint = "TDSNative_GetObjectVUID")]
+        private static partial void GetObjectVUIDInternal(ObjectHandleOnStack obj, out ulong hi, out ulong lo);
+
+        [LibraryImport(RuntimeHelpers.QCall, EntryPoint = "TDSNative_SetObjectVUID")]
+        private static partial void SetObjectVUIDInternal(ObjectHandleOnStack obj, ulong hi, ulong lo);
     }
 }

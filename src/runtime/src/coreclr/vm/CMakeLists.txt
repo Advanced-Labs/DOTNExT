@@ -543,6 +543,7 @@ list(APPEND VM_SOURCES_WKS
     tds/tdsintrinsics.cpp
     tds/tdsqcalls.cpp
     tds/tdscontext.cpp
+    tds/vuid.cpp
 )
 list(APPEND VM_HEADERS_WKS
     tds/tdsinterfaces.h
@@ -552,6 +553,7 @@ list(APPEND VM_HEADERS_WKS
     tds/tdsqcalls.h
     tds/tds_tests.h
     tds/tdscontext.h
+    tds/vuid.h
 )
 
 if(CLR_CMAKE_TARGET_WIN32)

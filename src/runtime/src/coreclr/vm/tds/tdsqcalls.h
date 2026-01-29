@@ -50,4 +50,12 @@ extern "C" VContext* QCALLTYPE TDSContext_GetCurrent();
 extern "C" void QCALLTYPE TDSContext_Push(VContext* ctx);
 extern "C" VContext* QCALLTYPE TDSContext_Pop();
 
+//=============================================================================
+// VUID QCalls - Phase 2 Virtual Object Identity
+//=============================================================================
+
+extern "C" void QCALLTYPE TDSNative_GenerateVUID(UINT64* outHi, UINT64* outLo);
+extern "C" void QCALLTYPE TDSNative_GetObjectVUID(QCall::ObjectHandleOnStack obj, UINT64* outHi, UINT64* outLo);
+extern "C" void QCALLTYPE TDSNative_SetObjectVUID(QCall::ObjectHandleOnStack obj, UINT64 hi, UINT64 lo);
+
 #endif // _TDS_QCALLS_H_

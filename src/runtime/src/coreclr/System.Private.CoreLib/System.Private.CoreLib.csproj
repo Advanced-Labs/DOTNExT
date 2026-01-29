@@ -149,6 +149,7 @@
     <Compile Include="$(BclSourcesRoot)\System\OS\VContext.cs" />
     <Compile Include="$(BclSourcesRoot)\System\OS\VIntrinsics.cs" />
     <Compile Include="$(BclSourcesRoot)\System\OS\VirtualAttribute.cs" />
+    <Compile Include="$(BclSourcesRoot)\System\OS\VUID.cs" />
     <Compile Include="$(BclSourcesRoot)\System\Reflection\Assembly.CoreCLR.cs" />
     <Compile Include="$(BclSourcesRoot)\System\Reflection\AssemblyName.CoreCLR.cs" />
     <Compile Include="$(BclSourcesRoot)\System\Reflection\Associates.cs" />
