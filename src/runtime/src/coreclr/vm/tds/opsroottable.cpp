@@ -141,8 +141,10 @@ void OpsRootTable::Set(Object* obj, OpsRoot* ops)
 
         // Remove existing entry if present, then add new one
         // (SHash doesn't support AddOrReplace for removable tables)
-        // Must check if entry exists first - Remove asserts key exists
-        if (m_table.LookupPtr(syncBlockIndex) != nullptr)
+        // Must check if entry exists and is not a deleted tombstone
+        // LookupPtr returns pointers to tombstones, but Remove expects actual entries
+        const OpsRootEntry* existingEntry = m_table.LookupPtr(syncBlockIndex);
+        if (existingEntry != nullptr && !OpsRootTableTraits::IsDeleted(*existingEntry))
         {
             m_table.Remove(syncBlockIndex);
         }
@@ -188,8 +190,9 @@ void OpsRootTable::RemoveByIndex(DWORD syncBlockIndex)
     CONTRACTL_END;
 
     CrstHolder lock(&m_lock);
-    // Check if entry exists before removing - Remove asserts key exists
-    if (m_table.LookupPtr(syncBlockIndex) != nullptr)
+    // Check if entry exists and is not a deleted tombstone before removing
+    const OpsRootEntry* entry = m_table.LookupPtr(syncBlockIndex);
+    if (entry != nullptr && !OpsRootTableTraits::IsDeleted(*entry))
     {
         m_table.Remove(syncBlockIndex);
     }
@@ -207,8 +210,9 @@ void OpsRootTable::OnSyncBlockRecycled(DWORD syncBlockIndex)
 
     CrstHolder lock(&m_lock);
 
-    // Remove any stale entry for this index (if it exists)
-    if (m_table.LookupPtr(syncBlockIndex) != nullptr)
+    // Remove any stale entry for this index (if it exists and is not a tombstone)
+    const OpsRootEntry* entry = m_table.LookupPtr(syncBlockIndex);
+    if (entry != nullptr && !OpsRootTableTraits::IsDeleted(*entry))
     {
         m_table.Remove(syncBlockIndex);
     }
