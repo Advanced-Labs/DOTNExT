@@ -12,6 +12,7 @@
 #include "tds/opsroottable.h"
 #include "tds/tdsintrinsics.h"
 #include "tds/tdscontext.h"
+#include "tds/vuid.h"
 #include "qcall.h"
 #include "object.h"
 #include "field.h"
@@ -387,4 +388,63 @@ extern "C" VContext* QCALLTYPE TDSContext_Pop()
     END_QCALL;
 
     return ctx;
+}
+
+//=============================================================================
+// VUID QCalls - Phase 2 Virtual Object Identity
+//=============================================================================
+
+extern "C" void QCALLTYPE TDSNative_GenerateVUID(UINT64* outHi, UINT64* outLo)
+{
+    QCALL_CONTRACT;
+
+    BEGIN_QCALL;
+
+    TDS::VUID vuid = TDS::GenerateVUID();
+    *outHi = vuid.hi;
+    *outLo = vuid.lo;
+
+    END_QCALL;
+}
+
+extern "C" void QCALLTYPE TDSNative_GetObjectVUID(QCall::ObjectHandleOnStack obj, UINT64* outHi, UINT64* outLo)
+{
+    QCALL_CONTRACT;
+
+    BEGIN_QCALL;
+
+    GCX_COOP();
+    OBJECTREF objRef = obj.Get();
+    if (objRef != NULL)
+    {
+        TDS::VUID vuid = g_OpsRootTable.GetVUID(OBJECTREFToObject(objRef));
+        *outHi = vuid.hi;
+        *outLo = vuid.lo;
+    }
+    else
+    {
+        *outHi = 0;
+        *outLo = 0;
+    }
+
+    END_QCALL;
+}
+
+extern "C" void QCALLTYPE TDSNative_SetObjectVUID(QCall::ObjectHandleOnStack obj, UINT64 hi, UINT64 lo)
+{
+    QCALL_CONTRACT;
+
+    BEGIN_QCALL;
+
+    GCX_COOP();
+    OBJECTREF objRef = obj.Get();
+    if (objRef != NULL)
+    {
+        TDS::VUID vuid;
+        vuid.hi = hi;
+        vuid.lo = lo;
+        g_OpsRootTable.SetVUID(OBJECTREFToObject(objRef), vuid);
+    }
+
+    END_QCALL;
 }

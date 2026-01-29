@@ -137,6 +137,7 @@ void OpsRootTable::Set(Object* obj, OpsRoot* ops)
         entry.syncBlockIndex = syncBlockIndex;
         entry.ops = ops;
         entry.generationTag = m_currentGeneration;
+        entry.vuid = TDS::VUID::Empty();  // Phase 2: Initialize empty, set later if persisted
 
         // Remove existing entry if present, then add new one
         // (SHash doesn't support AddOrReplace for removable tables)
@@ -193,6 +194,108 @@ void OpsRootTable::RemoveByIndex(DWORD syncBlockIndex)
     if (entry != nullptr && !OpsRootTableTraits::IsDeleted(*entry))
     {
         m_table.RemovePtr(entry);
+    }
+}
+
+//-----------------------------------------------------------------------------
+// VUID accessors (Phase 2)
+//-----------------------------------------------------------------------------
+
+TDS::VUID OpsRootTable::GetVUID(Object* obj)
+{
+    CONTRACTL
+    {
+        NOTHROW;
+        GC_NOTRIGGER;
+        MODE_COOPERATIVE;
+    }
+    CONTRACTL_END;
+
+    _ASSERTE(obj != nullptr);
+
+    // Fast path: if not TDS-routed, no VUID
+    if (!obj->IsTDSNonDefault())
+    {
+        return TDS::VUID::Empty();
+    }
+
+    ObjHeader* header = obj->GetHeader();
+    DWORD syncBlockIndex = header->GetSyncBlockIndex();
+
+    if (syncBlockIndex == 0)
+    {
+        return TDS::VUID::Empty();
+    }
+
+    return GetVUIDByIndex(syncBlockIndex);
+}
+
+TDS::VUID OpsRootTable::GetVUIDByIndex(DWORD syncBlockIndex)
+{
+    CONTRACTL
+    {
+        NOTHROW;
+        GC_NOTRIGGER;
+        MODE_ANY;
+    }
+    CONTRACTL_END;
+
+    CrstHolder lock(&m_lock);
+
+    const OpsRootEntry* entry = m_table.LookupPtr(syncBlockIndex);
+    if (entry == nullptr || OpsRootTableTraits::IsDeleted(*entry))
+    {
+        return TDS::VUID::Empty();
+    }
+
+    // Validate generation
+    if (entry->generationTag != m_currentGeneration)
+    {
+        return TDS::VUID::Empty();
+    }
+
+    return entry->vuid;
+}
+
+void OpsRootTable::SetVUID(Object* obj, const TDS::VUID& vuid)
+{
+    CONTRACTL
+    {
+        NOTHROW;
+        GC_NOTRIGGER;
+        MODE_COOPERATIVE;
+    }
+    CONTRACTL_END;
+
+    _ASSERTE(obj != nullptr);
+
+    ObjHeader* header = obj->GetHeader();
+    DWORD syncBlockIndex = header->GetSyncBlockIndex();
+
+    if (syncBlockIndex == 0)
+    {
+        return;  // No SyncBlock, can't set VUID
+    }
+
+    SetVUIDByIndex(syncBlockIndex, vuid);
+}
+
+void OpsRootTable::SetVUIDByIndex(DWORD syncBlockIndex, const TDS::VUID& vuid)
+{
+    CONTRACTL
+    {
+        NOTHROW;
+        GC_NOTRIGGER;
+        MODE_ANY;
+    }
+    CONTRACTL_END;
+
+    CrstHolder lock(&m_lock);
+
+    OpsRootEntry* entry = const_cast<OpsRootEntry*>(m_table.LookupPtr(syncBlockIndex));
+    if (entry != nullptr && !OpsRootTableTraits::IsDeleted(*entry))
+    {
+        entry->vuid = vuid;
     }
 }
 

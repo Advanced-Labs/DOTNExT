@@ -15,6 +15,7 @@
 #include "common.h"
 #include "shash.h"
 #include "crst.h"
+#include "vuid.h"
 
 // Forward declarations
 struct OpsRoot;
@@ -22,13 +23,14 @@ class Object;
 
 //-----------------------------------------------------------------------------
 // OpsRootEntry - Entry in the OpsRoot side table
-// Contains the OpsRoot pointer and a generation tag for stale detection
+// Contains the OpsRoot pointer, generation tag, and VUID for stale detection
 //-----------------------------------------------------------------------------
 struct OpsRootEntry
 {
     DWORD syncBlockIndex;   // Key: SyncBlockIndex of the object
     OpsRoot* ops;           // Value: Pointer to OpsRoot dispatch table
     UINT32 generationTag;   // Safety net: validates entry is not stale
+    TDS::VUID vuid;         // Phase 2: Virtual Object Unique ID (if persisted)
 };
 
 //-----------------------------------------------------------------------------
@@ -62,6 +64,7 @@ public:
         e.syncBlockIndex = 0;
         e.ops = nullptr;
         e.generationTag = 0;
+        e.vuid = TDS::VUID::Empty();
         return e;
     }
 
@@ -72,6 +75,7 @@ public:
         e.syncBlockIndex = (DWORD)-1;
         e.ops = nullptr;
         e.generationTag = 0;
+        e.vuid = TDS::VUID::Empty();
         return e;
     }
 
@@ -138,6 +142,23 @@ public:
 
     // Remove by SyncBlockIndex directly
     void RemoveByIndex(DWORD syncBlockIndex);
+
+    //-------------------------------------------------------------------------
+    // VUID accessors (Phase 2)
+    //-------------------------------------------------------------------------
+
+    // Get VUID for object
+    // Returns empty VUID if object is not TDS-routed or has no VUID
+    TDS::VUID GetVUID(Object* obj);
+
+    // Get VUID by SyncBlockIndex directly
+    TDS::VUID GetVUIDByIndex(DWORD syncBlockIndex);
+
+    // Set VUID for object (must already have an OpsRoot entry)
+    void SetVUID(Object* obj, const TDS::VUID& vuid);
+
+    // Set VUID by SyncBlockIndex directly
+    void SetVUIDByIndex(DWORD syncBlockIndex, const TDS::VUID& vuid);
 
     //-------------------------------------------------------------------------
     // SyncBlock lifecycle hooks
