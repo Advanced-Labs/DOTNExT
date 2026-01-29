@@ -27,31 +27,44 @@ struct ScanContext;
 #define TDS_CALLDISPATCH_VERSION  1
 
 //=============================================================================
-// VContext - Execution context (Phase 1: placeholder)
+// VContext version constants
+//=============================================================================
+#define VCONTEXT_VERSION_1  1   // Phase 1 (empty placeholder)
+#define VCONTEXT_VERSION_2  2   // Phase 2 (transaction support)
+#define VCONTEXT_VERSION    VCONTEXT_VERSION_2
+
+//=============================================================================
+// VContext - Execution context for virtual object operations
 //
 // VContext provides ambient execution information to device drivers.
-// In Phase 1, this is unused (all calls receive &g_NullContext).
-// Future phases will populate with transaction handles, security
-// principals, and call dispatch context.
+// Phase 1: Unused (all calls received &g_NullContext)
+// Phase 2: Carries transaction handles for persistence operations
+// Future: Security principal, activation context, call dispatch context
 //=============================================================================
 struct VContext
 {
-    uint32_t version;           // Context structure version
-    uint32_t flags;             // Context flags
+    uint32_t version;           // = VCONTEXT_VERSION
+    uint32_t flags;             // VCONTEXT_FLAG_* values
 
-    // Reserved for future phases
-    // Phase 2: transaction handle
-    // Phase 3: security principal
-    // Phase 4: call dispatch context
-    void* reserved[6];
+    // Phase 2: Transaction state
+    void* transaction;          // Voron transaction handle (managed object pointer)
+    void* transactionScope;     // Transaction scope marker (for nested transactions)
+
+    // Future phases (reserved)
+    void* securityCtx;          // Phase 3+: capability/security principal
+    void* activationCtx;        // Phase 4+: distributed activation context
+
+    void* reserved[2];          // Future expansion
 };
 
 // VContext flags
 #define VCONTEXT_FLAG_NONE          0x0000
-#define VCONTEXT_FLAG_INTRANSACTION 0x0001
-#define VCONTEXT_FLAG_READONLY      0x0002
+#define VCONTEXT_FLAG_INTRANSACTION 0x0001  // Context has active transaction
+#define VCONTEXT_FLAG_READONLY      0x0002  // Transaction is read-only
+#define VCONTEXT_FLAG_WRITE_TX      0x0004  // Transaction is read-write
+#define VCONTEXT_FLAG_DIRTY         0x0008  // Context has dirty objects pending flush
 
-// Global null context (Phase 1: used everywhere)
+// Global null context (Phase 1 compatibility, non-transactional operations)
 extern VContext g_NullContext;
 
 //=============================================================================

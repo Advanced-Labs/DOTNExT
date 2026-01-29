@@ -17,13 +17,17 @@
 #include "gchelpers.h"
 
 //=============================================================================
-// Global Context (Phase 1: unused placeholder)
+// Global Context (Phase 2: with transaction fields)
 //=============================================================================
 
 VContext g_NullContext = {
-    1,      // version
-    VCONTEXT_FLAG_NONE,  // flags
-    { nullptr, nullptr, nullptr, nullptr, nullptr, nullptr }  // reserved
+    VCONTEXT_VERSION,     // version
+    VCONTEXT_FLAG_NONE,   // flags
+    nullptr,              // transaction
+    nullptr,              // transactionScope
+    nullptr,              // securityCtx
+    nullptr,              // activationCtx
+    { nullptr, nullptr }  // reserved
 };
 
 //=============================================================================

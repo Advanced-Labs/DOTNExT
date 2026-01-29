@@ -535,13 +535,14 @@ if(FEATURE_OBJCMARSHAL)
 endif(FEATURE_OBJCMARSHAL)
 
 #
-# TDS (TypeDriver System) - Phase 1 Infrastructure
+# TDS (TypeDriver System) - Phase 1 & 2 Infrastructure
 #
 list(APPEND VM_SOURCES_WKS
     tds/opsroottable.cpp
     tds/defaultdrivers.cpp
     tds/tdsintrinsics.cpp
     tds/tdsqcalls.cpp
+    tds/tdscontext.cpp
 )
 list(APPEND VM_HEADERS_WKS
     tds/tdsinterfaces.h
@@ -550,6 +551,7 @@ list(APPEND VM_HEADERS_WKS
     tds/tdsintrinsics.h
     tds/tdsqcalls.h
     tds/tds_tests.h
+    tds/tdscontext.h
 )
 
 if(CLR_CMAKE_TARGET_WIN32)

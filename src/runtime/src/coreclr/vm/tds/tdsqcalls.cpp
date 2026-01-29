@@ -11,6 +11,7 @@
 #include "tds/opsroot.h"
 #include "tds/opsroottable.h"
 #include "tds/tdsintrinsics.h"
+#include "tds/tdscontext.h"
 #include "qcall.h"
 #include "object.h"
 #include "field.h"
@@ -230,4 +231,160 @@ extern "C" void QCALLTYPE TDSNative_WriteRefField(QCall::ObjectHandleOnStack obj
     }
 
     END_QCALL;
+}
+
+//=============================================================================
+// VContext QCalls - Phase 2 Context Management
+//=============================================================================
+
+extern "C" void* QCALLTYPE TDSContext_Create()
+{
+    QCALL_CONTRACT;
+
+    VContext* ctx = nullptr;
+
+    BEGIN_QCALL;
+
+    ctx = TDS::CreateContext();
+
+    END_QCALL;
+
+    return ctx;
+}
+
+extern "C" void QCALLTYPE TDSContext_Destroy(VContext* ctx)
+{
+    QCALL_CONTRACT;
+
+    BEGIN_QCALL;
+
+    TDS::DestroyContext(ctx);
+
+    END_QCALL;
+}
+
+extern "C" BOOL QCALLTYPE TDSContext_HasTransaction(VContext* ctx)
+{
+    QCALL_CONTRACT;
+
+    BOOL result = FALSE;
+
+    BEGIN_QCALL;
+
+    result = TDS::HasTransaction(ctx) ? TRUE : FALSE;
+
+    END_QCALL;
+
+    return result;
+}
+
+extern "C" BOOL QCALLTYPE TDSContext_IsWriteTransaction(VContext* ctx)
+{
+    QCALL_CONTRACT;
+
+    BOOL result = FALSE;
+
+    BEGIN_QCALL;
+
+    result = TDS::IsWriteTransaction(ctx) ? TRUE : FALSE;
+
+    END_QCALL;
+
+    return result;
+}
+
+extern "C" BOOL QCALLTYPE TDSContext_IsDirty(VContext* ctx)
+{
+    QCALL_CONTRACT;
+
+    BOOL result = FALSE;
+
+    BEGIN_QCALL;
+
+    result = TDS::IsDirty(ctx) ? TRUE : FALSE;
+
+    END_QCALL;
+
+    return result;
+}
+
+extern "C" UINT32 QCALLTYPE TDSContext_GetFlags(VContext* ctx)
+{
+    QCALL_CONTRACT;
+
+    UINT32 flags = 0;
+
+    BEGIN_QCALL;
+
+    if (ctx != nullptr)
+    {
+        flags = ctx->flags;
+    }
+
+    END_QCALL;
+
+    return flags;
+}
+
+extern "C" void QCALLTYPE TDSContext_SetDirty(VContext* ctx)
+{
+    QCALL_CONTRACT;
+
+    BEGIN_QCALL;
+
+    TDS::SetDirty(ctx);
+
+    END_QCALL;
+}
+
+extern "C" void QCALLTYPE TDSContext_ClearDirty(VContext* ctx)
+{
+    QCALL_CONTRACT;
+
+    BEGIN_QCALL;
+
+    TDS::ClearDirty(ctx);
+
+    END_QCALL;
+}
+
+extern "C" VContext* QCALLTYPE TDSContext_GetCurrent()
+{
+    QCALL_CONTRACT;
+
+    VContext* ctx = nullptr;
+
+    BEGIN_QCALL;
+
+    ctx = TDS::GetCurrentContext();
+
+    END_QCALL;
+
+    return ctx;
+}
+
+extern "C" void QCALLTYPE TDSContext_Push(VContext* ctx)
+{
+    QCALL_CONTRACT;
+
+    BEGIN_QCALL;
+
+    TDS::PushContext(ctx);
+
+    END_QCALL;
+}
+
+extern "C" VContext* QCALLTYPE TDSContext_Pop()
+{
+    QCALL_CONTRACT;
+
+    VContext* ctx = nullptr;
+
+    BEGIN_QCALL;
+
+    ctx = TDS::PopContext();
+
+    END_QCALL;
+
+    return ctx;
 }

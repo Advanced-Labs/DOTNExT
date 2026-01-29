@@ -49,3 +49,49 @@
 - T06 (Body Encoder) can also run independently
 
 ---
+
+## 2026-01-29 - T01: VContext Enhancement
+
+### What I Did
+- Updated VContext struct in tdsinterfaces.h:
+  - Added VCONTEXT_VERSION constants (VERSION_1=1, VERSION_2=2)
+  - Added transaction, transactionScope fields
+  - Added securityCtx, activationCtx fields for future phases
+  - Added VCONTEXT_FLAG_WRITE_TX and VCONTEXT_FLAG_DIRTY flags
+- Created tdscontext.h with context management declarations:
+  - CreateContext/DestroyContext/InitContext lifecycle
+  - BindTransaction/UnbindTransaction for Voron tx binding
+  - SetDirty/ClearDirty/IsDirty for dirty tracking flags
+  - GetCurrentContext/SetCurrentContext for per-thread context
+  - PushContext/PopContext for nested transaction scopes
+- Created tdscontext.cpp with full implementation:
+  - Thread-local storage for current context and stack
+  - Max 16 nested context levels
+- Created VContext.cs managed wrapper:
+  - VContextFlags enum matching native flags
+  - VContext class with Dispose pattern
+  - VContextManager static class for thread context
+- Added VContext QCalls to tdsqcalls.cpp/h:
+  - TDSContext_Create/Destroy
+  - TDSContext_HasTransaction/IsWriteTransaction/IsDirty
+  - TDSContext_GetFlags/SetDirty/ClearDirty
+  - TDSContext_GetCurrent/Push/Pop
+- Updated CMakeLists.txt to include tdscontext.cpp/h
+- Updated System.Private.CoreLib.csproj to include VContext.cs
+- Updated g_NullContext in defaultdrivers.cpp for new struct layout
+
+### Files Changed
+- `vm/tds/tdsinterfaces.h` - Updated VContext struct
+- `vm/tds/tdscontext.h` - NEW - Context management
+- `vm/tds/tdscontext.cpp` - NEW - Context implementation
+- `vm/tds/tdsqcalls.h` - Added VContext QCall declarations
+- `vm/tds/tdsqcalls.cpp` - Added VContext QCall implementations
+- `vm/tds/defaultdrivers.cpp` - Updated g_NullContext init
+- `vm/CMakeLists.txt` - Added new TDS files
+- `System.Private.CoreLib/src/System/OS/VContext.cs` - NEW - Managed API
+- `System.Private.CoreLib.csproj` - Added VContext.cs
+
+### Status
+T01 code complete. Ready for TAI build verification.
+
+---
