@@ -177,7 +177,7 @@ public:
 extern OpsRootTable g_OpsRootTable;
 
 // Default OpsRoot - used for objects without custom drivers
-// Will be defined in T04 (Default Drivers)
-extern OpsRoot* g_DefaultOpsRoot;
+// Defined in defaultdrivers.cpp
+extern OpsRoot g_DefaultOpsRoot;
 
 #endif // _OPSROOTTABLE_H_

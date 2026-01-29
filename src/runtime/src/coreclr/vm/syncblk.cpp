@@ -28,6 +28,7 @@
 #include "corhost.h"
 #include "comdelegate.h"
 #include "finalizerthread.h"
+#include "tds/opsroottable.h"
 
 #ifdef FEATURE_COMINTEROP
 #include "runtimecallablewrapper.h"
@@ -994,6 +995,10 @@ void SyncBlockCache::DeleteSyncBlock(SyncBlock *psb)
     if (psb->m_pEnCInfo)
         psb->m_pEnCInfo->Cleanup();
 #endif // FEATURE_METADATA_UPDATER
+
+    // TDS cleanup: remove any OpsRoot mapping for this SyncBlock
+    // This proactively cleans up rather than relying on generation tag
+    g_OpsRootTable.OnSyncBlockRecycled(psb->GetSyncBlockIndex());
 
     // Destruct the SyncBlock, but don't reclaim its memory.  (Overridden
     // operator delete).

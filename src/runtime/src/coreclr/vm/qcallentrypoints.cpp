@@ -72,6 +72,7 @@
 #include <minipal/entrypoints.h>
 
 #include "exceptionhandlingqcalls.h"
+#include "tds/tdsqcalls.h"
 
 static const Entry s_QCall[] =
 {
@@ -445,6 +446,19 @@ static const Entry s_QCall[] =
     DllImportEntry(EHEnumNext)
     DllImportEntry(AppendExceptionStackFrame)
 #endif // FEATURE_EH_FUNCLETS
+
+    // TypeDriver System (TDS) QCalls
+    DllImportEntry(TDSNative_IsNonDefaultRouted)
+    DllImportEntry(TDSNative_EnableNonDefaultRouting)
+    DllImportEntry(TDSNative_DisableNonDefaultRouting)
+    DllImportEntry(TDSNative_GetDriverFlags)
+    DllImportEntry(TDSNative_GetRoutedObjectCount)
+    DllImportEntry(TDSNative_ReadInt32Field)
+    DllImportEntry(TDSNative_WriteInt32Field)
+    DllImportEntry(TDSNative_ReadInt64Field)
+    DllImportEntry(TDSNative_WriteInt64Field)
+    DllImportEntry(TDSNative_ReadRefField)
+    DllImportEntry(TDSNative_WriteRefField)
 };
 
 const void* QCallResolveDllImport(const char* name)

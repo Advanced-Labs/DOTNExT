@@ -8,15 +8,14 @@
 
 #include "common.h"
 #include "tds/opsroottable.h"
+#include "tds/opsroot.h"
 #include "syncblk.h"
 #include "object.h"
 
 // Global instance
 OpsRootTable g_OpsRootTable;
 
-// Default OpsRoot placeholder - will be properly initialized in T04
-// For now, set to nullptr; callers should check and handle appropriately
-OpsRoot* g_DefaultOpsRoot = nullptr;
+// Note: g_DefaultOpsRoot is defined in defaultdrivers.cpp
 
 //-----------------------------------------------------------------------------
 // OpsRootTable Implementation
@@ -64,7 +63,7 @@ OpsRoot* OpsRootTable::Get(Object* obj)
     // Fast path: check the TDS routing bit
     if (!obj->IsTDSNonDefault())
     {
-        return g_DefaultOpsRoot;
+        return &g_DefaultOpsRoot;
     }
 
     // Get the SyncBlockIndex
@@ -74,7 +73,7 @@ OpsRoot* OpsRootTable::Get(Object* obj)
     // No SyncBlock means no custom routing (shouldn't happen if bit is set)
     if (syncBlockIndex == 0)
     {
-        return g_DefaultOpsRoot;
+        return &g_DefaultOpsRoot;
     }
 
     return GetByIndex(syncBlockIndex);
@@ -95,17 +94,16 @@ OpsRoot* OpsRootTable::GetByIndex(DWORD syncBlockIndex)
     const OpsRootEntry* entry = m_table.LookupPtr(syncBlockIndex);
     if (entry == nullptr)
     {
-        return g_DefaultOpsRoot;
+        return &g_DefaultOpsRoot;
     }
 
     // Validate generation (safety net for reuse)
     if (entry->generationTag != m_currentGeneration)
     {
-        // Stale entry - remove it
-        // Note: We're modifying while iterating, but this is safe since we
-        // hold the lock and return immediately after
-        const_cast<OpsRootTable*>(this)->m_table.Remove(syncBlockIndex);
-        return g_DefaultOpsRoot;
+        // Stale entry - remove it using RemovePtr to avoid Remove(key)'s precondition
+        OpsRootEntry* entryToRemove = const_cast<OpsRootEntry*>(entry);
+        const_cast<OpsRootTable*>(this)->m_table.RemovePtr(entryToRemove);
+        return &g_DefaultOpsRoot;
     }
 
     return entry->ops;
@@ -140,8 +138,15 @@ void OpsRootTable::Set(Object* obj, OpsRoot* ops)
         entry.ops = ops;
         entry.generationTag = m_currentGeneration;
 
-        // Use AddOrReplace to update existing entries
-        m_table.AddOrReplace(entry);
+        // Remove existing entry if present, then add new one
+        // (SHash doesn't support AddOrReplace for removable tables)
+        // Use RemovePtr to avoid Remove(key)'s redundant Lookup precondition
+        OpsRootEntry* existingEntry = const_cast<OpsRootEntry*>(m_table.LookupPtr(syncBlockIndex));
+        if (existingEntry != nullptr && !OpsRootTableTraits::IsDeleted(*existingEntry))
+        {
+            m_table.RemovePtr(existingEntry);
+        }
+        m_table.Add(entry);
     }
 
     // Set the routing bit (thread-safe, uses interlocked operations)
@@ -152,7 +157,7 @@ void OpsRootTable::Remove(Object* obj)
 {
     CONTRACTL
     {
-        NOTHROW;
+        THROWS;  // GetSyncBlockIndex() can throw
         GC_NOTRIGGER;
         MODE_COOPERATIVE;
     }
@@ -183,7 +188,12 @@ void OpsRootTable::RemoveByIndex(DWORD syncBlockIndex)
     CONTRACTL_END;
 
     CrstHolder lock(&m_lock);
-    m_table.Remove(syncBlockIndex);
+    // Use RemovePtr to avoid Remove(key)'s redundant Lookup precondition
+    OpsRootEntry* entry = const_cast<OpsRootEntry*>(m_table.LookupPtr(syncBlockIndex));
+    if (entry != nullptr && !OpsRootTableTraits::IsDeleted(*entry))
+    {
+        m_table.RemovePtr(entry);
+    }
 }
 
 void OpsRootTable::OnSyncBlockRecycled(DWORD syncBlockIndex)
@@ -198,8 +208,12 @@ void OpsRootTable::OnSyncBlockRecycled(DWORD syncBlockIndex)
 
     CrstHolder lock(&m_lock);
 
-    // Remove any stale entry for this index
-    m_table.Remove(syncBlockIndex);
+    // Use RemovePtr to avoid Remove(key)'s redundant Lookup precondition
+    OpsRootEntry* entry = const_cast<OpsRootEntry*>(m_table.LookupPtr(syncBlockIndex));
+    if (entry != nullptr && !OpsRootTableTraits::IsDeleted(*entry))
+    {
+        m_table.RemovePtr(entry);
+    }
 
     // Increment generation to invalidate any cached lookups
     // Note: This uses a global generation counter for simplicity.
@@ -229,7 +243,7 @@ void OpsRootTable::EnumerateEntries(EnumerateCallback callback, void* context)
 
     for (auto iter = m_table.Begin(); iter != m_table.End(); ++iter)
     {
-        OpsRootEntry& entry = *iter;
+        const OpsRootEntry& entry = *iter;
         if (!OpsRootTableTraits::IsNull(entry) && !OpsRootTableTraits::IsDeleted(entry))
         {
             callback(entry.syncBlockIndex, entry.ops, context);

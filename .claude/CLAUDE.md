@@ -19,6 +19,14 @@ This repository contains the complete source code for the .NET SDK, runtime, com
 
 ## Environment
 
+### Detecting Your Environment
+
+Check the platform to determine which environment you're in:
+- **Windows**: `$env:OS` equals "Windows_NT", paths like `D:\Dev\DOTNExT\`
+- **Linux**: Running in Claude Code Web session, paths like `/home/user/DOTNExT/`
+
+### Windows Environment (Primary)
+
 **You are running in:**
 - **Claude Code CLI** on **Windows 11**
 - **PowerShell** as the primary shell
@@ -26,6 +34,59 @@ This repository contains the complete source code for the .NET SDK, runtime, com
 - All paths use Windows format: `D:\Dev\DOTNExT\`
 
 **Shell preference:** Use PowerShell for most operations. Git Bash available for Unix-style commands when necessary.
+
+### Linux Environment (Claude Code Web Sessions)
+
+**When running in Claude Code Web:**
+- Linux environment with Bash shell
+- Restricted network (proxy blocks Azure DevOps feeds)
+- Paths use Linux format: `/home/user/DOTNExT/`
+
+**Automatic Setup:**
+A SessionStart hook (`/.claude/hooks/session-start.sh`) runs automatically and:
+- Sets required environment variables
+- Checks for missing system dependencies
+- Provides guidance if setup is needed
+
+**If the hook reports missing packages, run the full setup:**
+```bash
+./.claude/scripts/setup-dotnext-env.sh
+```
+
+This script:
+1. Installs system dependencies (libkrb5-dev, libicu-dev, liblttng-ust-dev)
+2. Downloads Arcade SDK packages via wget (bypasses proxy)
+3. Installs SDKs to the repo's local `.dotnet/` directory (with case fix for Linux)
+4. Sets up local NuGet feed at `/tmp/nuget-feed/`
+
+**Build commands for Linux:**
+```bash
+# Native CLR build (C++ only - works offline)
+cd src/runtime/src/coreclr
+./build-runtime.sh -component runtime -c Debug
+
+# Output location
+ls artifacts/bin/coreclr/linux.x64.Debug/
+```
+
+**Check setup status:**
+```bash
+./.claude/scripts/setup-dotnext-env.sh --status
+```
+
+**Build Capabilities in Linux/Web Environment:**
+
+| Build Type | Status | Notes |
+|------------|--------|-------|
+| Native CLR (C++) | ✅ Works | Full offline build via CMake |
+| Managed (C#) | ❌ Requires TAI | Proxy blocks .NET SDK's NuGet client |
+
+**Why managed builds don't work:** The environment's proxy requires authentication that works with `wget` but not with the .NET SDK's HttpClient. Even nuget.org is blocked for NuGet restore operations. This is a fundamental infrastructure limitation.
+
+**Workflow recommendation:**
+1. Use local native builds to verify C++ code (TDS infrastructure, intrinsics, QCalls)
+2. Coordinate with TAI for managed code (C#) verification and full integration testing
+3. TAI has full network access on Windows and can run complete builds
 
 ---
 
@@ -393,6 +454,8 @@ Context: Testing JIT loop optimization. Test app at D:\Test\JitTest\
 
 ## Command Quick Reference
 
+### Windows (PowerShell)
+
 ```powershell
 # Context management
 .\Manage-Contexts.ps1 -Action reboot    # RECOMMENDED: Full context dump for resurrection
@@ -418,6 +481,26 @@ Build.cmd -restore -build -c Release -deployExtensions
 
 # Verify SDK being used
 dotnet --info
+```
+
+### Linux (Claude Code Web Sessions)
+
+```bash
+# Setup build environment (run once per session if needed)
+./.claude/scripts/setup-dotnext-env.sh
+
+# Check environment status
+./.claude/scripts/setup-dotnext-env.sh --status
+
+# Build native CLR runtime (C++)
+cd src/runtime/src/coreclr
+./build-runtime.sh -component runtime -c Debug
+
+# Build output location
+ls src/runtime/artifacts/bin/coreclr/linux.x64.Debug/
+
+# Check git status
+git status
 ```
 
 ---
