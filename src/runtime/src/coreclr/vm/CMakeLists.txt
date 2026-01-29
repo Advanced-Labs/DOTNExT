@@ -544,6 +544,7 @@ list(APPEND VM_SOURCES_WKS
     tds/tdsqcalls.cpp
     tds/tdscontext.cpp
     tds/vuid.cpp
+    tds/dirtyset.cpp
 )
 list(APPEND VM_HEADERS_WKS
     tds/tdsinterfaces.h
@@ -554,6 +555,7 @@ list(APPEND VM_HEADERS_WKS
     tds/tds_tests.h
     tds/tdscontext.h
     tds/vuid.h
+    tds/dirtyset.h
 )
 
 if(CLR_CMAKE_TARGET_WIN32)

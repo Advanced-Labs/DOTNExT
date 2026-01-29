@@ -362,6 +362,11 @@ End
 Crst OpsRootTable
 End
 
+// TDS (TypeDriver System) Dirty Set
+// Tracks objects that have been modified and need to be persisted
+Crst TdsDirtySet
+End
+
 Crst PEImage
     AcquiredBefore UniqueStack
 End

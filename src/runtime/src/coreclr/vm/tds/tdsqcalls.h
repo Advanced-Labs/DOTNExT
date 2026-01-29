@@ -58,4 +58,13 @@ extern "C" void QCALLTYPE TDSNative_GenerateVUID(UINT64* outHi, UINT64* outLo);
 extern "C" void QCALLTYPE TDSNative_GetObjectVUID(QCall::ObjectHandleOnStack obj, UINT64* outHi, UINT64* outLo);
 extern "C" void QCALLTYPE TDSNative_SetObjectVUID(QCall::ObjectHandleOnStack obj, UINT64 hi, UINT64 lo);
 
+//=============================================================================
+// Dirty Tracking QCalls - Phase 2 Object Modification Tracking
+//=============================================================================
+
+extern "C" void QCALLTYPE TDSNative_MarkDirty(QCall::ObjectHandleOnStack obj);
+extern "C" void QCALLTYPE TDSNative_ClearDirty(QCall::ObjectHandleOnStack obj);
+extern "C" BOOL QCALLTYPE TDSNative_IsObjectDirty(QCall::ObjectHandleOnStack obj);
+extern "C" INT32 QCALLTYPE TDSNative_GetDirtyCount();
+
 #endif // _TDS_QCALLS_H_
