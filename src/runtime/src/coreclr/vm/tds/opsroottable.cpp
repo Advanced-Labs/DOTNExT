@@ -100,10 +100,9 @@ OpsRoot* OpsRootTable::GetByIndex(DWORD syncBlockIndex)
     // Validate generation (safety net for reuse)
     if (entry->generationTag != m_currentGeneration)
     {
-        // Stale entry - remove it
-        // Note: We're modifying while iterating, but this is safe since we
-        // hold the lock and return immediately after
-        const_cast<OpsRootTable*>(this)->m_table.Remove(syncBlockIndex);
+        // Stale entry - remove it using RemovePtr to avoid Remove(key)'s precondition
+        OpsRootEntry* entryToRemove = const_cast<OpsRootEntry*>(entry);
+        const_cast<OpsRootTable*>(this)->m_table.RemovePtr(entryToRemove);
         return &g_DefaultOpsRoot;
     }
 
