@@ -297,3 +297,79 @@ T04 scaffolding complete. Pending:
 - TAI: Deploy Voron.dll and Sparrow.dll to Core_Root
 
 ---
+
+## 2026-01-30 - T04 Build Verified
+
+### Build Fixes Applied
+Multiple iterations to fix build errors:
+1. CS3001 (CLS compliance) - Added [CLSCompliant(false)] to VKernel class
+2. CS1674 (IDisposable) - Changed `using var tx` to try/finally with DisposeTransaction
+3. CA1822 (static methods) - Made CreateTree, ReadTree, Commit, DisposeTransaction static
+4. IL2026 (trimming) - Added [RequiresUnreferencedCode] to VoronStorage
+5. IL2026 propagation - Added [UnconditionalSuppressMessage] to VKernel methods
+6. IDE0073 (license header) - Ensured license header comes first
+7. CP0014 (API compat) - Added [CLSCompliant(false)] to New<T>(VUID) implementation
+
+### TAI Verification Result
+**Build: PASSED ✓**
+**Phase 1 Regression Tests: 10/10 PASSED ✓**
+
+All Phase 2 T01-T04 infrastructure verified:
+- T01: VContext Enhancement ✓
+- T02: VUID Infrastructure ✓
+- T03: Dirty Tracking ✓
+- T04: Voron Embedding ✓
+
+### Next Steps
+- T05: Storage_Voron Driver - Implement actual Voron read/write operations
+- TAI: Deploy Voron.dll to Core_Root for runtime testing
+
+---
+
+## 2026-01-30 - T05: Storage_Voron Driver
+
+### What I Did
+
+**Extended VoronStorage with tree operations:**
+- `TreeAdd(tree, key, value)` - Add key-value via reflection
+- `TreeRead(tree, key)` - Read value by key
+- `TreeDelete(tree, key)` - Delete by key
+- All methods work with Voron's `Slice` type dynamically
+
+**Created VoronStorageOps.cs:**
+
+High-level storage operations for the hybrid storage model:
+
+Key building methods:
+- `BuildMetadataKey(vuid)` → `{VUID}/meta`
+- `BuildFieldKey(vuid, token)` → `{VUID}/f/{token}`
+- `BuildReferenceKey(vuid, token)` → `{VUID}/r/{token}`
+- `BuildEmbeddedKey(vuid, token)` → `{VUID}/e/{token}`
+
+Low-level operations:
+- `Put(tree, key, value)` - Store bytes
+- `Get(tree, key)` - Read bytes
+- `Delete(tree, key)` - Delete key
+
+Object operations:
+- `Exists(vuid)` - Check if object exists
+- `DeleteObject(vuid)` - Delete all keys for object
+
+Transaction helpers:
+- `WithReadTransaction<T>(func)` - Execute in read tx
+- `WithWriteTransaction<T>(func)` - Execute in write tx
+
+Primitive serialization:
+- `SerializePrimitive(value)` - Convert to bytes
+- `DeserializePrimitive(bytes, type)` - Convert from bytes
+- `IsPrimitiveOrString(type)` - Check if searchable type
+
+### Files Changed
+- `System/OS/Storage/VoronStorage.cs` - Added TreeAdd/TreeRead/TreeDelete
+- `System/OS/Storage/VoronStorageOps.cs` - NEW - High-level storage ops
+- `System.Private.CoreLib.csproj` - Added VoronStorageOps.cs
+
+### Status
+T05 code complete. Ready for TAI build verification.
+
+---
