@@ -1,10 +1,7 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-// VKernel intentionally calls VoronStorage which uses reflection to load Voron dynamically.
-// Suppress IL2026 to prevent the attribute from propagating to all VKernel callers.
-#pragma warning disable IL2026
-
+using System.Diagnostics.CodeAnalysis;
 using System.OS.Storage;
 
 namespace System.OS
@@ -34,6 +31,8 @@ namespace System.OS
         /// Initialize VAYRON subsystem.
         /// Called automatically on first use, or explicitly for control.
         /// </summary>
+        [UnconditionalSuppressMessage("Trimming", "IL2026:RequiresUnreferencedCode",
+            Justification = "VoronStorage uses reflection intentionally to load Voron dynamically")]
         public static void Initialize()
         {
             if (s_initialized) return;
@@ -61,6 +60,8 @@ namespace System.OS
         /// Shutdown VAYRON subsystem.
         /// Flushes pending changes and releases resources.
         /// </summary>
+        [UnconditionalSuppressMessage("Trimming", "IL2026:RequiresUnreferencedCode",
+            Justification = "VoronStorage uses reflection intentionally to load Voron dynamically")]
         public static void Shutdown()
         {
             if (!s_initialized) return;
@@ -303,6 +304,8 @@ namespace System.OS
         /// <summary>
         /// Get the Voron storage data path.
         /// </summary>
+        [UnconditionalSuppressMessage("Trimming", "IL2026:RequiresUnreferencedCode",
+            Justification = "VoronStorage uses reflection intentionally to load Voron dynamically")]
         public static string? DataPath
         {
             get
