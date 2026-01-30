@@ -323,12 +323,13 @@ namespace System.OS.Storage
         /// <summary>
         /// Find a suitable Slice.From method that accepts byte data.
         /// Voron has multiple overloads; we need one that takes allocator and byte[]/string.
+        /// All parameters after the first two must have default values.
         /// </summary>
         private static System.Reflection.MethodInfo? FindSliceFromMethodForBytes(Type sliceType, Type allocatorType)
         {
             var methods = sliceType.GetMethods(System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static);
 
-            // Priority 1: Look for byte[] overload
+            // Priority 1: Look for byte[] overload with exactly 2 params or all optional after first 2
             foreach (var m in methods)
             {
                 if (m.Name != "From")
@@ -338,11 +339,22 @@ namespace System.OS.Storage
                     && parameters[0].ParameterType.IsAssignableFrom(allocatorType)
                     && parameters[1].ParameterType == typeof(byte[]))
                 {
-                    return m;
+                    // Check that all params after first 2 have default values
+                    bool allOptional = true;
+                    for (int i = 2; i < parameters.Length; i++)
+                    {
+                        if (!parameters[i].HasDefaultValue)
+                        {
+                            allOptional = false;
+                            break;
+                        }
+                    }
+                    if (allOptional)
+                        return m;
                 }
             }
 
-            // Priority 2: Look for string overload (we can convert bytes to string)
+            // Priority 2: Look for string overload with exactly 2 params or all optional after first 2
             foreach (var m in methods)
             {
                 if (m.Name != "From")
@@ -352,7 +364,18 @@ namespace System.OS.Storage
                     && parameters[0].ParameterType.IsAssignableFrom(allocatorType)
                     && parameters[1].ParameterType == typeof(string))
                 {
-                    return m;
+                    // Check that all params after first 2 have default values
+                    bool allOptional = true;
+                    for (int i = 2; i < parameters.Length; i++)
+                    {
+                        if (!parameters[i].HasDefaultValue)
+                        {
+                            allOptional = false;
+                            break;
+                        }
+                    }
+                    if (allOptional)
+                        return m;
                 }
             }
 
