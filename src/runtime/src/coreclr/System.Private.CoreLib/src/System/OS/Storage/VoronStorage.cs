@@ -105,14 +105,22 @@ namespace System.OS.Storage
         /// </summary>
         private void InitializeTrees()
         {
-            using var tx = WriteTransaction();
+            object? tx = null;
+            try
+            {
+                tx = WriteTransaction();
 
-            // Create required trees
-            CreateTree(tx, "vobjects");    // Main VObject storage
-            CreateTree(tx, "typeIndex");   // Type -> VUIDs index
-            CreateTree(tx, "metadata");    // Runtime metadata
+                // Create required trees
+                CreateTree(tx, "vobjects");    // Main VObject storage
+                CreateTree(tx, "typeIndex");   // Type -> VUIDs index
+                CreateTree(tx, "metadata");    // Runtime metadata
 
-            Commit(tx);
+                Commit(tx);
+            }
+            finally
+            {
+                DisposeTransaction(tx);
+            }
         }
 
         /// <summary>
@@ -147,7 +155,7 @@ namespace System.OS.Storage
         /// <summary>
         /// Create or get a tree within a transaction.
         /// </summary>
-        public object CreateTree(object transaction, string name)
+        public static object CreateTree(object transaction, string name)
         {
             var method = transaction.GetType().GetMethod("CreateTree", new[] { typeof(string) })
                 ?? throw new InvalidOperationException("Cannot find CreateTree method");
@@ -158,7 +166,7 @@ namespace System.OS.Storage
         /// <summary>
         /// Read a tree within a transaction.
         /// </summary>
-        public object? ReadTree(object transaction, string name)
+        public static object? ReadTree(object transaction, string name)
         {
             var method = transaction.GetType().GetMethod("ReadTree", new[] { typeof(string) })
                 ?? throw new InvalidOperationException("Cannot find ReadTree method");
@@ -168,7 +176,7 @@ namespace System.OS.Storage
         /// <summary>
         /// Commit a transaction.
         /// </summary>
-        public void Commit(object transaction)
+        public static void Commit(object transaction)
         {
             var method = transaction.GetType().GetMethod("Commit", Type.EmptyTypes)
                 ?? throw new InvalidOperationException("Cannot find Commit method");
@@ -178,7 +186,7 @@ namespace System.OS.Storage
         /// <summary>
         /// Dispose a transaction.
         /// </summary>
-        public void DisposeTransaction(object transaction)
+        public static void DisposeTransaction(object? transaction)
         {
             if (transaction is IDisposable disposable)
             {

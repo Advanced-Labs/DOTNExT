@@ -11154,6 +11154,7 @@ namespace System.OS
         public static System.OS.VContext? Pop() { throw null; }
         public static void Push(System.OS.VContext context) { }
     }
+    [System.CLSCompliantAttribute(false)]
     public static partial class VKernel
     {
         public static string? DataPath { get { throw null; } }
