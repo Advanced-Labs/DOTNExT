@@ -11101,18 +11101,18 @@ namespace System.OS
         AutoFlush = 4,
         Immutable = 8,
     }
-    [System.AttributeUsageAttribute(System.AttributeTargets.Field)]
+    [System.AttributeUsageAttribute(System.AttributeTargets.Field, AllowMultiple = false)]
     public sealed partial class MemorizeAttribute : System.Attribute
     {
         public MemorizeAttribute() { }
     }
-    [System.AttributeUsageAttribute(System.AttributeTargets.Class)]
+    [System.AttributeUsageAttribute(System.AttributeTargets.Class, AllowMultiple = false, Inherited = true)]
     public sealed partial class PersistentAttribute : System.Attribute
     {
         public System.OS.DriverFlags Flags { get { throw null; } }
         public PersistentAttribute() { }
     }
-    [System.AttributeUsageAttribute(System.AttributeTargets.Field)]
+    [System.AttributeUsageAttribute(System.AttributeTargets.Field, AllowMultiple = false)]
     public sealed partial class TransientAttribute : System.Attribute
     {
         public TransientAttribute() { }
@@ -11131,7 +11131,7 @@ namespace System.OS
         public static void Unregister(System.Type type) { }
         public static void Unregister<T>() { }
     }
-    [System.AttributeUsageAttribute(System.AttributeTargets.Class)]
+    [System.AttributeUsageAttribute(System.AttributeTargets.Class, AllowMultiple = false, Inherited = true)]
     public sealed partial class VirtualAttribute : System.Attribute
     {
         public System.OS.DriverFlags Flags { get { throw null; } }
