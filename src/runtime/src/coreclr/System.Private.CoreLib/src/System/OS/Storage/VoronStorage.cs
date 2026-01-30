@@ -138,11 +138,22 @@ namespace System.OS.Storage
         public object ReadTransaction()
         {
             ThrowIfDisposed();
-            // Voron's ReadTransaction has optional params: (ByteStringContext context = null, TimeSpan? timeout = null)
-            // Find by name since Type.EmptyTypes won't match methods with default parameters
+            // Voron has multiple ReadTransaction overloads - we want the 2-param version:
+            // ReadTransaction(ByteStringContext context = null, TimeSpan? timeout = null)
+            // NOT the 3-param version that requires TransactionPersistentContext
             var methods = _environment.GetType().GetMethods();
-            var method = Array.Find(methods, m => m.Name == "ReadTransaction")
-                ?? throw new InvalidOperationException("Cannot find ReadTransaction method");
+            System.Reflection.MethodInfo? method = null;
+            int minParams = int.MaxValue;
+            foreach (var m in methods)
+            {
+                if (m.Name == "ReadTransaction" && m.GetParameters().Length < minParams)
+                {
+                    method = m;
+                    minParams = m.GetParameters().Length;
+                }
+            }
+            if (method == null)
+                throw new InvalidOperationException("Cannot find ReadTransaction method");
             var paramCount = method.GetParameters().Length;
             var args = paramCount > 0 ? new object?[paramCount] : null;
             return method.Invoke(_environment, args)
@@ -155,11 +166,22 @@ namespace System.OS.Storage
         public object WriteTransaction()
         {
             ThrowIfDisposed();
-            // Voron's WriteTransaction has optional params: (ByteStringContext context = null, TimeSpan? timeout = null)
-            // Find by name since Type.EmptyTypes won't match methods with default parameters
+            // Voron has multiple WriteTransaction overloads - we want the 2-param version:
+            // WriteTransaction(ByteStringContext context = null, TimeSpan? timeout = null)
+            // NOT the 3-param version that requires TransactionPersistentContext
             var methods = _environment.GetType().GetMethods();
-            var method = Array.Find(methods, m => m.Name == "WriteTransaction")
-                ?? throw new InvalidOperationException("Cannot find WriteTransaction method");
+            System.Reflection.MethodInfo? method = null;
+            int minParams = int.MaxValue;
+            foreach (var m in methods)
+            {
+                if (m.Name == "WriteTransaction" && m.GetParameters().Length < minParams)
+                {
+                    method = m;
+                    minParams = m.GetParameters().Length;
+                }
+            }
+            if (method == null)
+                throw new InvalidOperationException("Cannot find WriteTransaction method");
             var paramCount = method.GetParameters().Length;
             var args = paramCount > 0 ? new object?[paramCount] : null;
             return method.Invoke(_environment, args)
