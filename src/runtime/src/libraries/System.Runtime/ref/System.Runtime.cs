@@ -11167,9 +11167,9 @@ namespace System.OS
         public static bool Flush(object obj) { throw null; }
         public static int FlushAll() { throw null; }
         [System.CLSCompliantAttribute(false)]
-        public static T? Get<T>(System.OS.VUID vuid) where T : class { throw null; }
+        public static T? Get<[System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembersAttribute(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicFields | System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.NonPublicFields | System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicConstructors | System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.NonPublicConstructors)] T>(System.OS.VUID vuid) where T : class { throw null; }
         [System.CLSCompliantAttribute(false)]
-        public static T GetOrNew<T>(System.OS.VUID vuid) where T : class, new() { throw null; }
+        public static T GetOrNew<[System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembersAttribute(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicFields | System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.NonPublicFields | System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicConstructors | System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.NonPublicConstructors)] T>(System.OS.VUID vuid) where T : class, new() { throw null; }
         public static int GetPendingFlushCount() { throw null; }
         public static void Initialize() { }
         public static T New<T>() where T : class, new() { throw null; }
