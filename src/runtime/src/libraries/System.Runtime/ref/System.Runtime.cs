@@ -11223,8 +11223,10 @@ namespace System.OS
     {
         internal VTransaction() { }
         public bool IsActive { get { throw null; } }
+        [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCodeAttribute("Uses VoronStorage which loads Voron dynamically")]
         public void Commit() { }
         public void Dispose() { }
+        [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCodeAttribute("Uses VoronStorage which loads Voron dynamically")]
         public void Rollback() { }
     }
 }

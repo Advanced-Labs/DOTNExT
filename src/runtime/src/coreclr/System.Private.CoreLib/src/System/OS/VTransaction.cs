@@ -114,6 +114,8 @@ namespace System.OS
         /// <summary>
         /// Dispose the transaction. Auto-rollback if not committed.
         /// </summary>
+        [UnconditionalSuppressMessage("Trimming", "IL2026:RequiresUnreferencedCode",
+            Justification = "VoronStorage uses reflection intentionally to load Voron dynamically")]
         public void Dispose()
         {
             if (_disposed) return;
@@ -121,9 +123,7 @@ namespace System.OS
             if (!_committed && !_rolledBack && _voronTransaction != null)
             {
                 // Auto-rollback on dispose without commit
-                #pragma warning disable IL2026 // VoronStorage uses reflection intentionally
                 VoronStorage.DisposeTransaction(_voronTransaction);
-                #pragma warning restore IL2026
             }
 
             _voronTransaction = null;
