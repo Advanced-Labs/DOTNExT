@@ -488,3 +488,51 @@ Added IL trimming attributes:
 T07 code complete. Ready for TAI build verification.
 
 ---
+
+## 2026-01-30 - T07 Build Verified
+
+**Build: PASSED ✓**
+
+Build fixes:
+1. CA1859 - Suppressed for EnumerateDirtyObjects (IEnumerable is intentional)
+2. CP0016 - Added DynamicallyAccessedMembers to VKernel ref assembly
+
+---
+
+## 2026-01-30 - T08: Driver Registry
+
+### What I Did
+
+**Created TypeDriverRegistry.cs:**
+
+Managed registry for type-to-driver mapping:
+- `Register<T>(flags)` - Register type with driver flags
+- `Unregister<T>()` - Remove type registration
+- `IsRegistered<T>()` - Check if type is registered
+- `IsRegisteredForPersist<T>()` - Check Persist flag
+- `GetFlags<T>()` - Get driver flags for type
+- `Count` - Number of registered types
+- Thread-safe with lock synchronization
+
+**Created DriverFlags enum:**
+
+- None, Persist, DirtyTrack, AutoFlush, Immutable
+
+**Updated VirtualAttribute.cs:**
+
+- Added `Flags` property to VirtualAttribute
+- Added constructor `VirtualAttribute(DriverFlags flags)`
+- Default flags: `Persist | DirtyTrack`
+- Added `TransientAttribute` for non-persisted fields
+- Added `MemorizeAttribute` for VUID references
+
+### Files Changed
+- `System/OS/TypeDriverRegistry.cs` - NEW
+- `System/OS/VirtualAttribute.cs` - Updated with Flags, new attributes
+- `System.Private.CoreLib.csproj` - Added TypeDriverRegistry
+- `System.Runtime/ref/System.Runtime.cs` - Added new types
+
+### Status
+T08 code complete. Ready for TAI build verification.
+
+---

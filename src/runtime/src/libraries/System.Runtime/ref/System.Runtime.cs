@@ -11097,10 +11097,51 @@ namespace System.OS
         [System.CLSCompliantAttribute(false)]
         public static void SetVUID(object obj, System.OS.VUID vuid) { }
     }
-    [System.AttributeUsageAttribute(System.AttributeTargets.Class | System.AttributeTargets.Struct)]
+    [System.FlagsAttribute]
+    public enum DriverFlags
+    {
+        None = 0,
+        Persist = 1,
+        DirtyTrack = 2,
+        AutoFlush = 4,
+        Immutable = 8,
+    }
+    [System.AttributeUsageAttribute(System.AttributeTargets.Field)]
+    public sealed partial class MemorizeAttribute : System.Attribute
+    {
+        public MemorizeAttribute() { }
+    }
+    [System.AttributeUsageAttribute(System.AttributeTargets.Class)]
+    public sealed partial class PersistentAttribute : System.Attribute
+    {
+        public System.OS.DriverFlags Flags { get { throw null; } }
+        public PersistentAttribute() { }
+    }
+    [System.AttributeUsageAttribute(System.AttributeTargets.Field)]
+    public sealed partial class TransientAttribute : System.Attribute
+    {
+        public TransientAttribute() { }
+    }
+    public static partial class TypeDriverRegistry
+    {
+        public static int Count { get { throw null; } }
+        public static System.OS.DriverFlags GetFlags(System.Type type) { throw null; }
+        public static System.OS.DriverFlags GetFlags<T>() { throw null; }
+        public static bool IsRegistered(System.Type type) { throw null; }
+        public static bool IsRegistered<T>() { throw null; }
+        public static bool IsRegisteredForPersist(System.Type type) { throw null; }
+        public static bool IsRegisteredForPersist<T>() { throw null; }
+        public static void Register(System.Type type, System.OS.DriverFlags flags = System.OS.DriverFlags.Persist | System.OS.DriverFlags.DirtyTrack) { }
+        public static void Register<T>(System.OS.DriverFlags flags = System.OS.DriverFlags.Persist | System.OS.DriverFlags.DirtyTrack) { }
+        public static void Unregister(System.Type type) { }
+        public static void Unregister<T>() { }
+    }
+    [System.AttributeUsageAttribute(System.AttributeTargets.Class)]
     public sealed partial class VirtualAttribute : System.Attribute
     {
+        public System.OS.DriverFlags Flags { get { throw null; } }
         public VirtualAttribute() { }
+        public VirtualAttribute(System.OS.DriverFlags flags) { }
     }
     [System.CLSCompliantAttribute(false)]
     [System.Runtime.InteropServices.StructLayoutAttribute(System.Runtime.InteropServices.LayoutKind.Sequential)]
