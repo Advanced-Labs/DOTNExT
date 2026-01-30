@@ -1,6 +1,7 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 
 // Note: Voron namespace will be available when Voron.dll is deployed
@@ -19,6 +20,7 @@ namespace System.OS.Storage
     /// Phase 2: This class wraps Voron's StorageEnvironment to provide
     /// durable storage for virtual objects.
     /// </summary>
+    [RequiresUnreferencedCode("Voron types are loaded dynamically via reflection to avoid compile-time dependency")]
     internal sealed class VoronStorage : IDisposable
     {
         private static VoronStorage? s_instance;
