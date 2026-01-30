@@ -11089,10 +11089,12 @@ namespace System.OS
         [System.CLSCompliantAttribute(false)]
         public static uint GetDriverFlags(object obj) { throw null; }
         public static int GetRoutedObjectCount() { throw null; }
+        [System.CLSCompliantAttribute(false)]
         public static System.OS.VUID GetVUID(object obj) { throw null; }
         public static bool IsDirty(object obj) { throw null; }
         public static bool IsNonDefaultRouted(object obj) { throw null; }
         public static void MarkDirty(object obj) { }
+        [System.CLSCompliantAttribute(false)]
         public static void SetVUID(object obj, System.OS.VUID vuid) { }
     }
     [System.AttributeUsageAttribute(System.AttributeTargets.Class | System.AttributeTargets.Struct)]
