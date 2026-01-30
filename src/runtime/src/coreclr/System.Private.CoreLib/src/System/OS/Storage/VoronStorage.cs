@@ -322,60 +322,44 @@ namespace System.OS.Storage
 
         /// <summary>
         /// Find a suitable Slice.From method that accepts byte data.
-        /// Voron has multiple overloads; we need one that takes allocator and byte[]/string.
-        /// All parameters after the first two must have default values.
+        /// Voron uses: From(ByteStringContext, ReadOnlySpan&lt;byte&gt;, out Slice)
+        /// or: From(ByteStringContext, string, out Slice)
         /// </summary>
         private static System.Reflection.MethodInfo? FindSliceFromMethodForBytes(Type sliceType, Type allocatorType)
         {
             var methods = sliceType.GetMethods(System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static);
 
-            // Priority 1: Look for byte[] overload with exactly 2 params or all optional after first 2
+            // Priority 1: Look for ReadOnlySpan<byte> overload
+            // Signature: From(ByteStringContext, ReadOnlySpan<byte>, out Slice)
+            var spanType = typeof(ReadOnlySpan<byte>);
             foreach (var m in methods)
             {
                 if (m.Name != "From")
                     continue;
                 var parameters = m.GetParameters();
-                if (parameters.Length >= 2
+                // Look for 3-param version: (context, ReadOnlySpan<byte>, out Slice)
+                if (parameters.Length == 3
                     && parameters[0].ParameterType.IsAssignableFrom(allocatorType)
-                    && parameters[1].ParameterType == typeof(byte[]))
+                    && parameters[1].ParameterType == spanType
+                    && parameters[2].IsOut)
                 {
-                    // Check that all params after first 2 have default values
-                    bool allOptional = true;
-                    for (int i = 2; i < parameters.Length; i++)
-                    {
-                        if (!parameters[i].HasDefaultValue)
-                        {
-                            allOptional = false;
-                            break;
-                        }
-                    }
-                    if (allOptional)
-                        return m;
+                    return m;
                 }
             }
 
-            // Priority 2: Look for string overload with exactly 2 params or all optional after first 2
+            // Priority 2: Look for string overload
+            // Signature: From(ByteStringContext, string, out Slice)
             foreach (var m in methods)
             {
                 if (m.Name != "From")
                     continue;
                 var parameters = m.GetParameters();
-                if (parameters.Length >= 2
+                if (parameters.Length == 3
                     && parameters[0].ParameterType.IsAssignableFrom(allocatorType)
-                    && parameters[1].ParameterType == typeof(string))
+                    && parameters[1].ParameterType == typeof(string)
+                    && parameters[2].IsOut)
                 {
-                    // Check that all params after first 2 have default values
-                    bool allOptional = true;
-                    for (int i = 2; i < parameters.Length; i++)
-                    {
-                        if (!parameters[i].HasDefaultValue)
-                        {
-                            allOptional = false;
-                            break;
-                        }
-                    }
-                    if (allOptional)
-                        return m;
+                    return m;
                 }
             }
 
@@ -384,6 +368,7 @@ namespace System.OS.Storage
 
         /// <summary>
         /// Create a Slice from byte data using reflection.
+        /// Voron's Slice.From returns InternalScope and outputs Slice via out param.
         /// </summary>
         private static object CreateSlice(Type sliceType, object allocator, byte[] data)
         {
@@ -392,28 +377,60 @@ namespace System.OS.Storage
 
             var parameters = fromMethod.GetParameters();
             var secondParamType = parameters[1].ParameterType;
-            object?[] args = new object?[parameters.Length];
-            args[0] = allocator;
 
-            if (secondParamType == typeof(byte[]))
+            // Prepare arguments array - third param is out Slice
+            object?[] args = new object?[3];
+            args[0] = allocator;
+            args[2] = null; // out parameter placeholder
+
+            if (secondParamType == typeof(ReadOnlySpan<byte>))
             {
-                args[1] = data;
+                // Convert byte[] to ReadOnlySpan<byte>
+                // We need to box it properly for reflection
+                args[1] = new ReadOnlySpan<byte>(data).ToArray(); // This won't work directly...
+
+                // Actually, we can't pass ReadOnlySpan via reflection easily.
+                // Fall back to string overload which is more reflection-friendly
+                var stringMethod = FindStringSliceFromMethod(sliceType, allocator.GetType());
+                if (stringMethod != null)
+                {
+                    args[1] = System.Text.Encoding.UTF8.GetString(data);
+                    stringMethod.Invoke(null, args);
+                    return args[2] ?? throw new InvalidOperationException("Slice.From did not return slice via out param");
+                }
+
+                throw new InvalidOperationException("Cannot invoke Slice.From with ReadOnlySpan<byte> via reflection. String overload not available.");
             }
             else if (secondParamType == typeof(string))
             {
-                // Convert bytes to UTF-8 string
                 args[1] = System.Text.Encoding.UTF8.GetString(data);
+                fromMethod.Invoke(null, args);
+                return args[2] ?? throw new InvalidOperationException("Slice.From did not return slice via out param");
             }
-            else
+
+            throw new InvalidOperationException($"Unsupported Slice.From parameter type: {secondParamType}");
+        }
+
+        /// <summary>
+        /// Find string overload of Slice.From specifically.
+        /// </summary>
+        private static System.Reflection.MethodInfo? FindStringSliceFromMethod(Type sliceType, Type allocatorType)
+        {
+            var methods = sliceType.GetMethods(System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static);
+            foreach (var m in methods)
             {
-                throw new InvalidOperationException($"Unsupported Slice.From parameter type: {secondParamType}");
+                if (m.Name != "From")
+                    continue;
+                var parameters = m.GetParameters();
+                if (parameters.Length == 3
+                    && parameters[0].ParameterType.IsAssignableFrom(allocatorType)
+                    && parameters[1].ParameterType == typeof(string)
+                    && parameters[2].IsOut)
+                {
+                    return m;
+                }
             }
-
-            for (int i = 2; i < parameters.Length; i++)
-                args[i] = parameters[i].HasDefaultValue ? parameters[i].DefaultValue : Type.Missing;
-
-            return fromMethod.Invoke(null, args)
-                ?? throw new InvalidOperationException("Slice.From returned null");
+            return null;
         }
 
         /// <summary>

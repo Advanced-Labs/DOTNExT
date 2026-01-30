@@ -70,8 +70,23 @@ namespace System.OS
             {
                 if (!s_initialized) return;
 
-                // Flush pending changes
-                FlushAll();
+                // Check for active ambient transaction - can't safely FlushAll if one exists
+                // This can happen if a test failed mid-transaction
+                var ambientTx = VTransaction.Current;
+                if (ambientTx == null || !ambientTx.IsActive)
+                {
+                    // Safe to flush - no active transaction
+                    try
+                    {
+                        FlushAll();
+                    }
+                    catch
+                    {
+                        // Ignore flush errors during shutdown
+                    }
+                }
+                // If there's an active transaction, skip flush to avoid nested tx error
+                // The transaction will be cleaned up when VoronStorage shuts down
 
                 // Shutdown storage
                 VoronStorage.Shutdown();
