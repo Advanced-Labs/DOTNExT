@@ -373,3 +373,63 @@ Primitive serialization:
 T05 code complete. Ready for TAI build verification.
 
 ---
+
+## 2026-01-30 - T05 Build Verified
+
+**Build: PASSED ✓**
+**Phase 1 Regression Tests: 10/10 PASSED ✓**
+
+Build fixes applied:
+1. CS8121 - Can't pattern match ReadOnlySpan (ref struct)
+2. CA1822 - Made methods static
+3. CS0128 - Renamed duplicate variable
+
+---
+
+## 2026-01-30 - T06: Body Encoder
+
+### What I Did
+
+**Created BodyEncoder.TypeCodes.cs:**
+- FieldTypeCode enum for type identification
+- Primitives: Boolean through Decimal
+- Special types: String, DateTime, TimeSpan, Guid, VUID
+- Reference types: VObjectRef, NullRef
+- Collections: ByteArray (more in future)
+- Complex: Nested (embedded blob)
+
+**Created BodyEncoder.cs:**
+
+Serialize/Deserialize object fields using Tagged Field Map format:
+
+Header (4 bytes):
+- Version (1 byte) = 1
+- FieldCount (2 bytes)
+- Flags (1 byte) = reserved
+
+Field Directory (9 bytes per field):
+- FieldToken (4 bytes) - metadata token
+- TypeCode (1 byte)
+- DataOffset (4 bytes)
+
+Data Section:
+- Serialized field values
+
+Features:
+- All primitive types supported
+- String with UTF-8 encoding
+- DateTime/TimeSpan as ticks
+- Guid/VUID as 16-byte arrays
+- VObject references stored as VUIDs
+- Null values handled
+- Schema evolution (unknown fields skipped)
+
+### Files Changed
+- `System/OS/Storage/BodyEncoder.TypeCodes.cs` - NEW
+- `System/OS/Storage/BodyEncoder.cs` - NEW
+- `System.Private.CoreLib.csproj` - Added both files
+
+### Status
+T06 code complete. Ready for TAI build verification.
+
+---
