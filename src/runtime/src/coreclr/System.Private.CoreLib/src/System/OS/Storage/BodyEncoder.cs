@@ -30,6 +30,7 @@ namespace System.OS.Storage
         /// <summary>
         /// Serialize an object's fields to a byte array.
         /// </summary>
+        [RequiresUnreferencedCode("Serialization uses reflection to access object fields")]
         public static byte[] Serialize(object obj)
         {
             ArgumentNullException.ThrowIfNull(obj);
@@ -72,6 +73,7 @@ namespace System.OS.Storage
         /// <summary>
         /// Serialize an object's fields to an existing stream.
         /// </summary>
+        [RequiresUnreferencedCode("Serialization uses reflection to access object fields")]
         public static void SerializeTo(object obj, Stream output)
         {
             var bytes = Serialize(obj);
@@ -144,7 +146,10 @@ namespace System.OS.Storage
         /// <summary>
         /// Deserialize a byte array into an object of type T.
         /// </summary>
-        public static T Deserialize<T>(byte[] body) where T : class
+        public static T Deserialize<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicFields |
+                                                                 DynamicallyAccessedMemberTypes.NonPublicFields |
+                                                                 DynamicallyAccessedMemberTypes.PublicConstructors |
+                                                                 DynamicallyAccessedMemberTypes.NonPublicConstructors)] T>(byte[] body) where T : class
         {
             return (T)Deserialize(body, typeof(T));
         }
@@ -352,8 +357,11 @@ namespace System.OS.Storage
 
         #region Read Field Values
 
-        private static object? ReadFieldValue(BinaryReader reader, FieldTypeCode typeCode, Type _fieldType)
+        #pragma warning disable IDE0060 // Remove unused parameter - fieldType reserved for nested object deserialization
+        private static object? ReadFieldValue(BinaryReader reader, FieldTypeCode typeCode, Type fieldType)
+        #pragma warning restore IDE0060
         {
+            // Note: fieldType is reserved for future nested object deserialization support
             switch (typeCode)
             {
                 case FieldTypeCode.Null:
