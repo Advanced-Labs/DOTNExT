@@ -196,6 +196,135 @@ namespace System.OS.Storage
             }
         }
 
+        #region Tree Operations
+
+        /// <summary>
+        /// Add a key-value pair to a tree.
+        /// </summary>
+        /// <param name="tree">The tree object (from CreateTree/ReadTree)</param>
+        /// <param name="key">Key bytes</param>
+        /// <param name="value">Value bytes</param>
+        public static void TreeAdd(object tree, ReadOnlySpan<byte> key, ReadOnlySpan<byte> value)
+        {
+            var treeType = tree.GetType();
+
+            // Get LowLevelTransaction for allocator access
+            var lltxProp = treeType.GetProperty("Llt")
+                ?? throw new InvalidOperationException("Cannot find Llt property on Tree");
+            var lltx = lltxProp.GetValue(tree)
+                ?? throw new InvalidOperationException("Llt is null");
+            var allocatorProp = lltx.GetType().GetProperty("Allocator")
+                ?? throw new InvalidOperationException("Cannot find Allocator property");
+            var allocator = allocatorProp.GetValue(lltx)
+                ?? throw new InvalidOperationException("Allocator is null");
+
+            // Create Slices from byte arrays using Slice.From
+            var sliceType = treeType.Assembly.GetType("Voron.Slice")
+                ?? throw new InvalidOperationException("Cannot find Voron.Slice type");
+            var fromMethod = sliceType.GetMethod("From", new[] { allocator.GetType(), typeof(ReadOnlySpan<byte>) })
+                ?? throw new InvalidOperationException("Cannot find Slice.From method");
+
+            var keySlice = fromMethod.Invoke(null, new object[] { allocator, key.ToArray() });
+            var valueSlice = fromMethod.Invoke(null, new object[] { allocator, value.ToArray() });
+
+            // Call Tree.Add(Slice key, Slice value)
+            var addMethod = treeType.GetMethod("Add", new[] { sliceType, sliceType })
+                ?? throw new InvalidOperationException("Cannot find Tree.Add method");
+            addMethod.Invoke(tree, new[] { keySlice, valueSlice });
+        }
+
+        /// <summary>
+        /// Read a value from a tree by key.
+        /// </summary>
+        /// <param name="tree">The tree object</param>
+        /// <param name="key">Key bytes</param>
+        /// <returns>Value bytes, or null if not found</returns>
+        public static byte[]? TreeRead(object tree, ReadOnlySpan<byte> key)
+        {
+            var treeType = tree.GetType();
+
+            // Get allocator
+            var lltxProp = treeType.GetProperty("Llt")
+                ?? throw new InvalidOperationException("Cannot find Llt property on Tree");
+            var lltx = lltxProp.GetValue(tree)
+                ?? throw new InvalidOperationException("Llt is null");
+            var allocatorProp = lltx.GetType().GetProperty("Allocator")
+                ?? throw new InvalidOperationException("Cannot find Allocator property");
+            var allocator = allocatorProp.GetValue(lltx)
+                ?? throw new InvalidOperationException("Allocator is null");
+
+            // Create key Slice
+            var sliceType = treeType.Assembly.GetType("Voron.Slice")
+                ?? throw new InvalidOperationException("Cannot find Voron.Slice type");
+            var fromMethod = sliceType.GetMethod("From", new[] { allocator.GetType(), typeof(ReadOnlySpan<byte>) })
+                ?? throw new InvalidOperationException("Cannot find Slice.From method");
+            var keySlice = fromMethod.Invoke(null, new object[] { allocator, key.ToArray() });
+
+            // Call Tree.Read(Slice key) -> ReadResult
+            var readMethod = treeType.GetMethod("Read", new[] { sliceType })
+                ?? throw new InvalidOperationException("Cannot find Tree.Read method");
+            var readResult = readMethod.Invoke(tree, new[] { keySlice });
+
+            if (readResult == null)
+                return null;
+
+            // Get ReadResult.Reader.AsSpan()
+            var readerProp = readResult.GetType().GetProperty("Reader")
+                ?? throw new InvalidOperationException("Cannot find Reader property");
+            var reader = readerProp.GetValue(readResult);
+            if (reader == null)
+                return null;
+
+            var asSpanMethod = reader.GetType().GetMethod("AsSpan", Type.EmptyTypes)
+                ?? throw new InvalidOperationException("Cannot find AsSpan method");
+            var span = asSpanMethod.Invoke(reader, null);
+
+            // Convert to byte array
+            if (span is ReadOnlySpan<byte> ros)
+                return ros.ToArray();
+
+            // Handle as Span<byte> via reflection
+            var toArrayMethod = span?.GetType().GetMethod("ToArray", Type.EmptyTypes);
+            return toArrayMethod?.Invoke(span, null) as byte[];
+        }
+
+        /// <summary>
+        /// Delete a key from a tree.
+        /// </summary>
+        /// <param name="tree">The tree object</param>
+        /// <param name="key">Key bytes</param>
+        /// <returns>True if deleted, false if not found</returns>
+        public static bool TreeDelete(object tree, ReadOnlySpan<byte> key)
+        {
+            var treeType = tree.GetType();
+
+            // Get allocator
+            var lltxProp = treeType.GetProperty("Llt")
+                ?? throw new InvalidOperationException("Cannot find Llt property on Tree");
+            var lltx = lltxProp.GetValue(tree)
+                ?? throw new InvalidOperationException("Llt is null");
+            var allocatorProp = lltx.GetType().GetProperty("Allocator")
+                ?? throw new InvalidOperationException("Cannot find Allocator property");
+            var allocator = allocatorProp.GetValue(lltx)
+                ?? throw new InvalidOperationException("Allocator is null");
+
+            // Create key Slice
+            var sliceType = treeType.Assembly.GetType("Voron.Slice")
+                ?? throw new InvalidOperationException("Cannot find Voron.Slice type");
+            var fromMethod = sliceType.GetMethod("From", new[] { allocator.GetType(), typeof(ReadOnlySpan<byte>) })
+                ?? throw new InvalidOperationException("Cannot find Slice.From method");
+            var keySlice = fromMethod.Invoke(null, new object[] { allocator, key.ToArray() });
+
+            // Call Tree.Delete(Slice key)
+            var deleteMethod = treeType.GetMethod("Delete", new[] { sliceType })
+                ?? throw new InvalidOperationException("Cannot find Tree.Delete method");
+            var result = deleteMethod.Invoke(tree, new[] { keySlice });
+
+            return result is bool b && b;
+        }
+
+        #endregion
+
         /// <summary>
         /// Get the default data path for VAYRON storage.
         /// </summary>
