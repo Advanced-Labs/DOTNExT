@@ -1,20 +1,12 @@
 <Project Sdk="Microsoft.NET.Sdk">
-
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>net9.0</TargetFramework>
-    <Nullable>enable</Nullable>
-    <ImplicitUsings>disable</ImplicitUsings>
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <RootNamespace>TDS.Tests.Phase2</RootNamespace>
-    <AssemblyName>TDSPhase2Verification</AssemblyName>
+    <CLRTestKind>BuildAndRun</CLRTestKind>
+    <CLRTestPriority>0</CLRTestPriority>
+    <BuildAsStandalone>true</BuildAsStandalone>
   </PropertyGroup>
 
   <ItemGroup>
-    <!-- Reference the built CoreLib for System.OS types -->
-    <Reference Include="System.Private.CoreLib">
-      <HintPath>$(ArtifactsBinDir)coreclr\$(TargetOS).$(TargetArchitecture).$(Configuration)\IL\System.Private.CoreLib.dll</HintPath>
-    </Reference>
+    <Compile Include="Phase2Verification.cs" />
   </ItemGroup>
-
 </Project>
