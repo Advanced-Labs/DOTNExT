@@ -193,9 +193,27 @@ namespace System.OS.Storage
         /// </summary>
         public static object CreateTree(object transaction, string name)
         {
-            var method = transaction.GetType().GetMethod("CreateTree", new[] { typeof(string) })
-                ?? throw new InvalidOperationException("Cannot find CreateTree method");
-            return method.Invoke(transaction, new object[] { name })
+            // Voron's CreateTree has optional params: (string name, RootObjectType type = ..., TreeFlags flags = ..., ...)
+            // Find by name with first param being string, pick the one with fewest params
+            var methods = transaction.GetType().GetMethods();
+            System.Reflection.MethodInfo? method = null;
+            int minParams = int.MaxValue;
+            foreach (var m in methods)
+            {
+                if (m.Name == "CreateTree" && m.GetParameters().Length > 0
+                    && m.GetParameters()[0].ParameterType == typeof(string)
+                    && m.GetParameters().Length < minParams)
+                {
+                    method = m;
+                    minParams = m.GetParameters().Length;
+                }
+            }
+            if (method == null)
+                throw new InvalidOperationException("Cannot find CreateTree method");
+            var paramCount = method.GetParameters().Length;
+            var args = new object?[paramCount];
+            args[0] = name;  // First param is the tree name, rest are optional (null)
+            return method.Invoke(transaction, args)
                 ?? throw new InvalidOperationException("CreateTree returned null");
         }
 
@@ -204,9 +222,26 @@ namespace System.OS.Storage
         /// </summary>
         public static object? ReadTree(object transaction, string name)
         {
-            var method = transaction.GetType().GetMethod("ReadTree", new[] { typeof(string) })
-                ?? throw new InvalidOperationException("Cannot find ReadTree method");
-            return method.Invoke(transaction, new object[] { name });
+            // Voron's ReadTree may have optional params - find by name with string first param
+            var methods = transaction.GetType().GetMethods();
+            System.Reflection.MethodInfo? method = null;
+            int minParams = int.MaxValue;
+            foreach (var m in methods)
+            {
+                if (m.Name == "ReadTree" && m.GetParameters().Length > 0
+                    && m.GetParameters()[0].ParameterType == typeof(string)
+                    && m.GetParameters().Length < minParams)
+                {
+                    method = m;
+                    minParams = m.GetParameters().Length;
+                }
+            }
+            if (method == null)
+                throw new InvalidOperationException("Cannot find ReadTree method");
+            var paramCount = method.GetParameters().Length;
+            var args = new object?[paramCount];
+            args[0] = name;  // First param is the tree name
+            return method.Invoke(transaction, args);
         }
 
         /// <summary>
@@ -214,9 +249,23 @@ namespace System.OS.Storage
         /// </summary>
         public static void Commit(object transaction)
         {
-            var method = transaction.GetType().GetMethod("Commit", Type.EmptyTypes)
-                ?? throw new InvalidOperationException("Cannot find Commit method");
-            method.Invoke(transaction, null);
+            // Find Commit method - may have optional parameters
+            var methods = transaction.GetType().GetMethods();
+            System.Reflection.MethodInfo? method = null;
+            int minParams = int.MaxValue;
+            foreach (var m in methods)
+            {
+                if (m.Name == "Commit" && m.GetParameters().Length < minParams)
+                {
+                    method = m;
+                    minParams = m.GetParameters().Length;
+                }
+            }
+            if (method == null)
+                throw new InvalidOperationException("Cannot find Commit method");
+            var paramCount = method.GetParameters().Length;
+            var args = paramCount > 0 ? new object?[paramCount] : null;
+            method.Invoke(transaction, args);
         }
 
         /// <summary>
