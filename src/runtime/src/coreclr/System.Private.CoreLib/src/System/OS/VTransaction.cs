@@ -3,6 +3,7 @@
 
 using System.Diagnostics.CodeAnalysis;
 using System.OS.Storage;
+using System.Threading;
 
 namespace System.OS
 {
@@ -27,6 +28,14 @@ namespace System.OS
     [CLSCompliant(false)]
     public sealed class VTransaction : IDisposable
     {
+        // Ambient transaction tracking - allows nested operations to use the existing transaction
+        private static readonly AsyncLocal<VTransaction?> s_ambient = new();
+
+        /// <summary>
+        /// Get the current ambient transaction, or null if none is active.
+        /// </summary>
+        public static VTransaction? Current => s_ambient.Value;
+
         private object? _voronTransaction;
         private object? _tree;
         private bool _committed;
@@ -41,6 +50,9 @@ namespace System.OS
         {
             _voronTransaction = VoronStorage.Instance.WriteTransaction();
             _tree = VoronStorage.CreateTree(_voronTransaction, "vobjects");
+
+            // Set as ambient transaction for nested operations
+            s_ambient.Value = this;
         }
 
         /// <summary>
@@ -119,6 +131,10 @@ namespace System.OS
         public void Dispose()
         {
             if (_disposed) return;
+
+            // Clear ambient transaction
+            if (s_ambient.Value == this)
+                s_ambient.Value = null;
 
             if (!_committed && !_rolledBack && _voronTransaction != null)
             {

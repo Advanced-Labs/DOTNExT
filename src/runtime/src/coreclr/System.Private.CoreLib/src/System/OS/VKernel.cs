@@ -244,6 +244,14 @@ namespace System.OS
                     "TypeDriverHelper.EnableNonDefaultRouting() first.");
             }
 
+            // Check for ambient transaction - use it to avoid nested write transaction
+            var ambientTx = VTransaction.Current;
+            if (ambientTx != null && ambientTx.IsActive)
+            {
+                ambientTx.Persist(obj);
+                return;
+            }
+
             // Ensure VUID is assigned
             var vuid = TypeDriverHelper.GetVUID(obj);
             if (vuid.IsEmpty)
@@ -252,7 +260,7 @@ namespace System.OS
                 TypeDriverHelper.SetVUID(obj, vuid);
             }
 
-            // Serialize and store
+            // Serialize and store in new transaction
             VoronStorageOps.WithWriteTransaction((tx, tree) =>
             {
                 var metaKey = VoronStorageOps.BuildMetadataKey(vuid);
