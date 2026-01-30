@@ -15,6 +15,7 @@ namespace System.OS
     ///
     /// Phase 2: Basic persistence via Voron storage.
     /// </summary>
+    [CLSCompliant(false)]
     public static class VKernel
     {
         private static bool s_initialized;
