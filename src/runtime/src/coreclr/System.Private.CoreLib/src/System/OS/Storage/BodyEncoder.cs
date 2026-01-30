@@ -23,8 +23,8 @@ namespace System.OS.Storage
     /// </summary>
     internal static partial class BodyEncoder
     {
-        // Version 2: Inline format without directory offsets
-        private const byte VERSION = 2;
+        // Version 3: Inline format with size prefix per field for validation
+        private const byte VERSION = 3;
 
         #region Serialize
 
@@ -47,16 +47,24 @@ namespace System.OS.Storage
             writer.Write((ushort)fields.Length);
             writer.Write((byte)0);  // Flags (reserved)
 
-            // Write fields inline (no separate directory - simpler and more robust)
-            // Format: [token(4)][typeCode(1)][nullFlag(1)][data...] per field
+            // Write fields inline with size prefix for validation
+            // Format: [token(4)][typeCode(1)][dataSize(4)][nullFlag(1)][data...] per field
             foreach (var field in fields)
             {
                 // Field header
                 writer.Write(field.MetadataToken);
                 writer.Write((byte)GetTypeCode(field.FieldType));
 
-                // Field data (includes null flag)
-                WriteFieldValue(writer, obj, field);
+                // Write field data to temp buffer to get size
+                using var fieldStream = new MemoryStream();
+                using var fieldWriter = new BinaryWriter(fieldStream, Encoding.UTF8, leaveOpen: true);
+                WriteFieldValue(fieldWriter, obj, field);
+                fieldWriter.Flush();
+                var fieldData = fieldStream.ToArray();
+
+                // Write size prefix then data
+                writer.Write(fieldData.Length);
+                writer.Write(fieldData);
             }
 
             writer.Flush();
@@ -107,17 +115,25 @@ namespace System.OS.Storage
             // Create instance without running constructor
             var obj = RuntimeHelpers.GetUninitializedObject(targetType);
 
-            // Read fields inline (format: [token(4)][typeCode(1)][nullFlag(1)][data...] per field)
+            // Read fields inline (format: [token(4)][typeCode(1)][dataSize(4)][nullFlag(1)][data...] per field)
             for (int i = 0; i < fieldCount; i++)
             {
                 // Read field header
                 int token = reader.ReadInt32();
                 var typeCode = (FieldTypeCode)reader.ReadByte();
+                int dataSize = reader.ReadInt32();
 
-                // Read null flag
-                byte nullFlag = reader.ReadByte();
+                // Read exactly dataSize bytes for this field
+                var fieldData = reader.ReadBytes(dataSize);
 
                 var field = FindFieldByToken(targetType, token);
+
+                // Parse field data from its own stream
+                using var fieldStream = new MemoryStream(fieldData);
+                using var fieldReader = new BinaryReader(fieldStream, Encoding.UTF8, leaveOpen: true);
+
+                // Read null flag
+                byte nullFlag = fieldReader.ReadByte();
 
                 if (nullFlag == 1)
                 {
@@ -128,7 +144,7 @@ namespace System.OS.Storage
                 }
 
                 // Read the value
-                var value = ReadFieldValue(reader, typeCode, field?.FieldType);
+                var value = ReadFieldValue(fieldReader, typeCode, field?.FieldType);
 
                 // Set field value if field exists (schema evolution support)
                 if (field != null)
