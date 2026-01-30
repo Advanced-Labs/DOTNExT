@@ -1,9 +1,11 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Reflection;
 using System.Runtime.CompilerServices;
+using System.Runtime.Serialization;
 using System.Text;
 
 namespace System.OS.Storage
@@ -83,7 +85,12 @@ namespace System.OS.Storage
         /// <summary>
         /// Deserialize a byte array into an object of the specified type.
         /// </summary>
-        public static object Deserialize(byte[] body, Type targetType)
+        public static object Deserialize(
+            byte[] body,
+            [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicFields |
+                                        DynamicallyAccessedMemberTypes.NonPublicFields |
+                                        DynamicallyAccessedMemberTypes.PublicConstructors |
+                                        DynamicallyAccessedMemberTypes.NonPublicConstructors)] Type targetType)
         {
             ArgumentNullException.ThrowIfNull(body);
             ArgumentNullException.ThrowIfNull(targetType);
@@ -146,7 +153,9 @@ namespace System.OS.Storage
 
         #region Field Discovery
 
-        private static FieldInfo[] GetSerializableFields(Type type)
+        private static FieldInfo[] GetSerializableFields(
+            [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicFields |
+                                        DynamicallyAccessedMemberTypes.NonPublicFields)] Type type)
         {
             var fields = type.GetFields(
                 BindingFlags.Instance |
@@ -158,7 +167,7 @@ namespace System.OS.Storage
             foreach (var field in fields)
             {
                 // Skip non-serialized and readonly fields
-                if (field.IsNotSerialized || field.IsInitOnly)
+                if (field.GetCustomAttribute<NonSerializedAttribute>() != null || field.IsInitOnly)
                     continue;
 
                 // Skip compiler-generated backing fields for properties (optional)
@@ -173,7 +182,10 @@ namespace System.OS.Storage
             return result.ToArray();
         }
 
-        private static FieldInfo? FindFieldByToken(Type type, int token)
+        private static FieldInfo? FindFieldByToken(
+            [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicFields |
+                                        DynamicallyAccessedMemberTypes.NonPublicFields)] Type type,
+            int token)
         {
             var fields = type.GetFields(
                 BindingFlags.Instance |
@@ -340,7 +352,7 @@ namespace System.OS.Storage
 
         #region Read Field Values
 
-        private static object? ReadFieldValue(BinaryReader reader, FieldTypeCode typeCode, Type fieldType)
+        private static object? ReadFieldValue(BinaryReader reader, FieldTypeCode typeCode, Type _fieldType)
         {
             switch (typeCode)
             {
@@ -414,10 +426,10 @@ namespace System.OS.Storage
                     return reader.ReadBytes(arrLen);
 
                 case FieldTypeCode.VObjectRef:
-                    // Read the VUID reference
-                    var refVuid = VUID.FromBytes(reader.ReadBytes(16));
+                    // Read the VUID reference (discarding for now)
+                    _ = reader.ReadBytes(16);
                     // For now, return null - lazy loading will be implemented in VKernel.Get<T>
-                    // The caller should use VKernel.Get<T>(refVuid) to load the actual object
+                    // The caller should use VKernel.Get<T>(vuid) to load the actual object
                     return null;  // TODO: Implement lazy proxy loading
 
                 case FieldTypeCode.Nested:
