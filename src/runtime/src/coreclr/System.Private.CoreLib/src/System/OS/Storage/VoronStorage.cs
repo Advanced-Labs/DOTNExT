@@ -138,9 +138,14 @@ namespace System.OS.Storage
         public object ReadTransaction()
         {
             ThrowIfDisposed();
-            var method = _environment.GetType().GetMethod("ReadTransaction", Type.EmptyTypes)
+            // Voron's ReadTransaction has optional params: (ByteStringContext context = null, TimeSpan? timeout = null)
+            // Find by name since Type.EmptyTypes won't match methods with default parameters
+            var methods = _environment.GetType().GetMethods();
+            var method = Array.Find(methods, m => m.Name == "ReadTransaction")
                 ?? throw new InvalidOperationException("Cannot find ReadTransaction method");
-            return method.Invoke(_environment, null)
+            var paramCount = method.GetParameters().Length;
+            var args = paramCount > 0 ? new object?[paramCount] : null;
+            return method.Invoke(_environment, args)
                 ?? throw new InvalidOperationException("ReadTransaction returned null");
         }
 
@@ -150,9 +155,14 @@ namespace System.OS.Storage
         public object WriteTransaction()
         {
             ThrowIfDisposed();
-            var method = _environment.GetType().GetMethod("WriteTransaction", Type.EmptyTypes)
+            // Voron's WriteTransaction has optional params: (ByteStringContext context = null, TimeSpan? timeout = null)
+            // Find by name since Type.EmptyTypes won't match methods with default parameters
+            var methods = _environment.GetType().GetMethods();
+            var method = Array.Find(methods, m => m.Name == "WriteTransaction")
                 ?? throw new InvalidOperationException("Cannot find WriteTransaction method");
-            return method.Invoke(_environment, null)
+            var paramCount = method.GetParameters().Length;
+            var args = paramCount > 0 ? new object?[paramCount] : null;
+            return method.Invoke(_environment, args)
                 ?? throw new InvalidOperationException("WriteTransaction returned null");
         }
 
