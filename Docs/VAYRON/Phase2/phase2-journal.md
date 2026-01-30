@@ -325,3 +325,51 @@ All Phase 2 T01-T04 infrastructure verified:
 - TAI: Deploy Voron.dll to Core_Root for runtime testing
 
 ---
+
+## 2026-01-30 - T05: Storage_Voron Driver
+
+### What I Did
+
+**Extended VoronStorage with tree operations:**
+- `TreeAdd(tree, key, value)` - Add key-value via reflection
+- `TreeRead(tree, key)` - Read value by key
+- `TreeDelete(tree, key)` - Delete by key
+- All methods work with Voron's `Slice` type dynamically
+
+**Created VoronStorageOps.cs:**
+
+High-level storage operations for the hybrid storage model:
+
+Key building methods:
+- `BuildMetadataKey(vuid)` → `{VUID}/meta`
+- `BuildFieldKey(vuid, token)` → `{VUID}/f/{token}`
+- `BuildReferenceKey(vuid, token)` → `{VUID}/r/{token}`
+- `BuildEmbeddedKey(vuid, token)` → `{VUID}/e/{token}`
+
+Low-level operations:
+- `Put(tree, key, value)` - Store bytes
+- `Get(tree, key)` - Read bytes
+- `Delete(tree, key)` - Delete key
+
+Object operations:
+- `Exists(vuid)` - Check if object exists
+- `DeleteObject(vuid)` - Delete all keys for object
+
+Transaction helpers:
+- `WithReadTransaction<T>(func)` - Execute in read tx
+- `WithWriteTransaction<T>(func)` - Execute in write tx
+
+Primitive serialization:
+- `SerializePrimitive(value)` - Convert to bytes
+- `DeserializePrimitive(bytes, type)` - Convert from bytes
+- `IsPrimitiveOrString(type)` - Check if searchable type
+
+### Files Changed
+- `System/OS/Storage/VoronStorage.cs` - Added TreeAdd/TreeRead/TreeDelete
+- `System/OS/Storage/VoronStorageOps.cs` - NEW - High-level storage ops
+- `System.Private.CoreLib.csproj` - Added VoronStorageOps.cs
+
+### Status
+T05 code complete. Ready for TAI build verification.
+
+---
