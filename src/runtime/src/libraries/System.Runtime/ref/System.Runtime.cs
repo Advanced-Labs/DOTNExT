@@ -11196,6 +11196,8 @@ namespace System.OS
         public static string? DataPath { get { throw null; } }
         public static bool IsInitialized { get { throw null; } }
         [System.CLSCompliantAttribute(false)]
+        public static System.OS.VTransaction BeginTransaction() { throw null; }
+        [System.CLSCompliantAttribute(false)]
         public static bool Delete(System.OS.VUID vuid) { throw null; }
         public static bool Delete(object obj) { throw null; }
         [System.CLSCompliantAttribute(false)]
@@ -11213,6 +11215,17 @@ namespace System.OS
         public static T New<T>(System.OS.VUID vuid) where T : class, new() { throw null; }
         public static void Persist(object obj) { }
         public static void Shutdown() { }
+        public static void WithTransaction(System.Action action) { }
+        public static TResult WithTransaction<TResult>(System.Func<TResult> func) { throw null; }
+    }
+    [System.CLSCompliantAttribute(false)]
+    public sealed partial class VTransaction : System.IDisposable
+    {
+        internal VTransaction() { }
+        public bool IsActive { get { throw null; } }
+        public void Commit() { }
+        public void Dispose() { }
+        public void Rollback() { }
     }
 }
 namespace System.Numerics
