@@ -10,6 +10,7 @@
 #include "tds/tdsinterfaces.h"
 #include "tds/opsroot.h"
 #include "tds/opsroottable.h"
+#include "tds/dirtyset.h"
 #include "object.h"
 #include "field.h"
 #include "methodtable.h"
@@ -288,6 +289,7 @@ void TDS_Initialize()
     CONTRACTL_END;
 
     g_OpsRootTable.Initialize();
+    TDS::g_DirtySet.Initialize();
 }
 
 void TDS_Shutdown()
@@ -300,6 +302,7 @@ void TDS_Shutdown()
     }
     CONTRACTL_END;
 
+    TDS::g_DirtySet.Destroy();
     g_OpsRootTable.Destroy();
 }
 
