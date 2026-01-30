@@ -23,7 +23,8 @@ namespace System.OS.Storage
     /// </summary>
     internal static partial class BodyEncoder
     {
-        private const byte VERSION = 1;
+        // Version 2: Inline format without directory offsets
+        private const byte VERSION = 2;
 
         #region Serialize
 
@@ -327,21 +328,21 @@ namespace System.OS.Storage
                 return;
             }
 
-            // VObject reference - store VUID only
+            // VObject reference - store VUID only (no extra type code byte)
             if (type.IsClass)
             {
                 var vuid = TypeDriverHelper.GetVUID(value);
                 if (!vuid.IsEmpty)
                 {
-                    writer.Write((byte)FieldTypeCode.VObjectRef);
+                    // Write the VUID directly (16 bytes)
                     var buffer = new byte[16];
                     vuid.WriteBytes(buffer);
                     writer.Write(buffer);
                 }
                 else
                 {
-                    // Object doesn't have a VUID yet - treat as null ref
-                    writer.Write((byte)FieldTypeCode.NullRef);
+                    // Object doesn't have a VUID yet - write empty VUID (16 zero bytes)
+                    writer.Write(new byte[16]);
                 }
                 return;
             }
@@ -430,8 +431,12 @@ namespace System.OS.Storage
                     return reader.ReadBytes(arrLen);
 
                 case FieldTypeCode.VObjectRef:
-                    // Read the VUID reference (discarding for now)
-                    _ = reader.ReadBytes(16);
+                    // Read the VUID reference (16 bytes)
+                    var vuidBytes = reader.ReadBytes(16);
+                    var vuid = VUID.FromBytes(vuidBytes);
+                    // If empty VUID, return null (object had no VUID when serialized)
+                    if (vuid.IsEmpty)
+                        return null;
                     // For now, return null - lazy loading will be implemented in VKernel.Get<T>
                     // The caller should use VKernel.Get<T>(vuid) to load the actual object
                     return null;  // TODO: Implement lazy proxy loading
