@@ -295,11 +295,11 @@ namespace System.OS.Storage
             }
 
             // Fallback: Try Read(byte[], int, int) method
-            var readMethod = reader.GetType().GetMethod("Read",
+            var readerReadMethod = reader.GetType().GetMethod("Read",
                 new[] { typeof(byte[]), typeof(int), typeof(int) });
-            if (readMethod != null)
+            if (readerReadMethod != null)
             {
-                readMethod.Invoke(reader, new object[] { result, 0, length });
+                readerReadMethod.Invoke(reader, new object[] { result, 0, length });
                 return result;
             }
 
