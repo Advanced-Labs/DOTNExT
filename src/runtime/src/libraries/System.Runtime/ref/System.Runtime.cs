@@ -11082,17 +11082,77 @@ namespace System.OS
     }
     public static partial class TypeDriverHelper
     {
+        public static void ClearDirty(object obj) { }
         public static void DisableNonDefaultRouting(object obj) { }
         public static void EnableNonDefaultRouting(object obj) { }
+        public static int GetDirtyCount() { throw null; }
         [System.CLSCompliantAttribute(false)]
         public static uint GetDriverFlags(object obj) { throw null; }
         public static int GetRoutedObjectCount() { throw null; }
+        public static System.OS.VUID GetVUID(object obj) { throw null; }
+        public static bool IsDirty(object obj) { throw null; }
         public static bool IsNonDefaultRouted(object obj) { throw null; }
+        public static void MarkDirty(object obj) { }
+        public static void SetVUID(object obj, System.OS.VUID vuid) { }
     }
     [System.AttributeUsageAttribute(System.AttributeTargets.Class | System.AttributeTargets.Struct)]
     public sealed partial class VirtualAttribute : System.Attribute
     {
         public VirtualAttribute() { }
+    }
+    [System.CLSCompliantAttribute(false)]
+    [System.Runtime.InteropServices.StructLayoutAttribute(System.Runtime.InteropServices.LayoutKind.Sequential)]
+    public readonly partial struct VUID : System.IComparable<System.OS.VUID>, System.IEquatable<System.OS.VUID>
+    {
+        public static System.OS.VUID Empty { get { throw null; } }
+        public bool IsEmpty { get { throw null; } }
+        public int CompareTo(System.OS.VUID other) { throw null; }
+        public bool Equals(System.OS.VUID other) { throw null; }
+        public override bool Equals(object? obj) { throw null; }
+        public static System.OS.VUID FromBytes(byte[] bytes) { throw null; }
+        public static System.OS.VUID FromBytes(System.ReadOnlySpan<byte> bytes) { throw null; }
+        public override int GetHashCode() { throw null; }
+        public static System.OS.VUID New() { throw null; }
+        public static bool operator ==(System.OS.VUID left, System.OS.VUID right) { throw null; }
+        public static bool operator >(System.OS.VUID left, System.OS.VUID right) { throw null; }
+        public static bool operator >=(System.OS.VUID left, System.OS.VUID right) { throw null; }
+        public static bool operator !=(System.OS.VUID left, System.OS.VUID right) { throw null; }
+        public static bool operator <(System.OS.VUID left, System.OS.VUID right) { throw null; }
+        public static bool operator <=(System.OS.VUID left, System.OS.VUID right) { throw null; }
+        public static System.OS.VUID Parse(string s) { throw null; }
+        public override string ToString() { throw null; }
+        public static bool TryParse(string s, out System.OS.VUID result) { throw null; }
+        public void WriteBytes(byte[] buffer) { }
+        public void WriteBytes(System.Span<byte> buffer) { }
+    }
+    [System.CLSCompliantAttribute(false)]
+    public sealed partial class VContext : System.IDisposable
+    {
+        public VContext() { }
+        public System.OS.VContextFlags Flags { get { throw null; } }
+        public bool HasTransaction { get { throw null; } }
+        public bool IsDirty { get { throw null; } }
+        public bool IsWriteTransaction { get { throw null; } }
+        public void ClearDirty() { }
+        public void Dispose() { }
+        public void SetDirty() { }
+    }
+    [System.CLSCompliantAttribute(false)]
+    [System.FlagsAttribute]
+    public enum VContextFlags : uint
+    {
+        None = 0u,
+        InTransaction = 1u,
+        ReadOnly = 2u,
+        WriteTx = 4u,
+        Dirty = 8u,
+    }
+    [System.CLSCompliantAttribute(false)]
+    public static partial class VContextManager
+    {
+        public static System.OS.VContext? Current { get { throw null; } }
+        public static System.OS.VContext? Pop() { throw null; }
+        public static void Push(System.OS.VContext context) { }
     }
 }
 namespace System.Numerics
