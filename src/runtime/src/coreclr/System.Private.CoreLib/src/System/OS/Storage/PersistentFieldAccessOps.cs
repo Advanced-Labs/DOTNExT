@@ -159,7 +159,9 @@ namespace System.OS.Storage
         /// to iterate the native dirty set and resolve SyncBlock indexes to objects.
         /// For now, we return an empty list - callers should track objects explicitly.
         /// </remarks>
+        #pragma warning disable CA1859 // IEnumerable is intentional for future native QCall implementation
         private static IEnumerable<object> EnumerateDirtyObjects()
+        #pragma warning restore CA1859
         {
             // TODO: Implement via QCall TDSNative_EnumerateDirtyObjects
             // This would iterate the native DirtySet and resolve each entry to an object.
