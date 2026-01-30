@@ -121,7 +121,7 @@ namespace System.OS.Storage
         /// <summary>
         /// Store bytes at a key within a transaction.
         /// </summary>
-        public void Put(object tree, byte[] key, byte[] value)
+        public static void Put(object tree, byte[] key, byte[] value)
         {
             VoronStorage.TreeAdd(tree, key, value);
         }
@@ -129,7 +129,7 @@ namespace System.OS.Storage
         /// <summary>
         /// Read bytes from a key within a transaction.
         /// </summary>
-        public byte[]? Get(object tree, byte[] key)
+        public static byte[]? Get(object tree, byte[] key)
         {
             return VoronStorage.TreeRead(tree, key);
         }
@@ -137,7 +137,7 @@ namespace System.OS.Storage
         /// <summary>
         /// Delete a key within a transaction.
         /// </summary>
-        public bool Delete(object tree, byte[] key)
+        public static bool Delete(object tree, byte[] key)
         {
             return VoronStorage.TreeDelete(tree, key);
         }
@@ -149,7 +149,7 @@ namespace System.OS.Storage
         /// <summary>
         /// Check if an object exists in storage.
         /// </summary>
-        public bool Exists(VUID vuid)
+        public static bool Exists(VUID vuid)
         {
             if (vuid.IsEmpty) return false;
 
@@ -172,7 +172,7 @@ namespace System.OS.Storage
         /// <summary>
         /// Delete all keys for an object.
         /// </summary>
-        public bool DeleteObject(VUID vuid)
+        public static bool DeleteObject(VUID vuid)
         {
             if (vuid.IsEmpty) return false;
 
@@ -211,7 +211,7 @@ namespace System.OS.Storage
         /// <summary>
         /// Execute an action within a read transaction.
         /// </summary>
-        public T WithReadTransaction<T>(Func<object, object, T> action)
+        public static T WithReadTransaction<T>(Func<object, object, T> action)
         {
             object? tx = null;
             try
@@ -231,7 +231,7 @@ namespace System.OS.Storage
         /// <summary>
         /// Execute an action within a write transaction.
         /// </summary>
-        public T WithWriteTransaction<T>(Func<object, object, T> action)
+        public static T WithWriteTransaction<T>(Func<object, object, T> action)
         {
             object? tx = null;
             try
@@ -256,7 +256,7 @@ namespace System.OS.Storage
         /// <summary>
         /// Execute an action within a write transaction (no return value).
         /// </summary>
-        public void WithWriteTransaction(Action<object, object> action)
+        public static void WithWriteTransaction(Action<object, object> action)
         {
             object? tx = null;
             try

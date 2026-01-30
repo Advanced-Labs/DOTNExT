@@ -268,24 +268,42 @@ namespace System.OS.Storage
             if (readResult == null)
                 return null;
 
-            // Get ReadResult.Reader.AsSpan()
+            // Get ReadResult.Reader and copy to byte array
             var readerProp = readResult.GetType().GetProperty("Reader")
                 ?? throw new InvalidOperationException("Cannot find Reader property");
             var reader = readerProp.GetValue(readResult);
             if (reader == null)
                 return null;
 
-            var asSpanMethod = reader.GetType().GetMethod("AsSpan", Type.EmptyTypes)
-                ?? throw new InvalidOperationException("Cannot find AsSpan method");
-            var span = asSpanMethod.Invoke(reader, null);
+            // Get the Length property from the reader
+            var lengthProp = reader.GetType().GetProperty("Length")
+                ?? throw new InvalidOperationException("Cannot find Length property");
+            var length = (int)(lengthProp.GetValue(reader) ?? 0);
+            if (length == 0)
+                return Array.Empty<byte>();
 
-            // Convert to byte array
-            if (span is ReadOnlySpan<byte> ros)
-                return ros.ToArray();
+            // Create destination array and copy using CopyTo or Read method
+            var result = new byte[length];
 
-            // Handle as Span<byte> via reflection
-            var toArrayMethod = span?.GetType().GetMethod("ToArray", Type.EmptyTypes);
-            return toArrayMethod?.Invoke(span, null) as byte[];
+            // Try to use CopyTo(int, byte[], int, int) method
+            var copyToMethod = reader.GetType().GetMethod("CopyTo",
+                new[] { typeof(int), typeof(byte[]), typeof(int), typeof(int) });
+            if (copyToMethod != null)
+            {
+                copyToMethod.Invoke(reader, new object[] { 0, result, 0, length });
+                return result;
+            }
+
+            // Fallback: Try Read(byte[], int, int) method
+            var readMethod = reader.GetType().GetMethod("Read",
+                new[] { typeof(byte[]), typeof(int), typeof(int) });
+            if (readMethod != null)
+            {
+                readMethod.Invoke(reader, new object[] { result, 0, length });
+                return result;
+            }
+
+            throw new InvalidOperationException("Cannot find method to read bytes from ValueReader");
         }
 
         /// <summary>
