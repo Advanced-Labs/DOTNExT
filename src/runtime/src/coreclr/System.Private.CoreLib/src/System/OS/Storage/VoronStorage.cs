@@ -154,8 +154,17 @@ namespace System.OS.Storage
             }
             if (method == null)
                 throw new InvalidOperationException("Cannot find ReadTransaction method");
-            var paramCount = method.GetParameters().Length;
-            var args = paramCount > 0 ? new object?[paramCount] : null;
+
+            // Use actual default values, not null (enums become 0 which may be invalid)
+            var parameters = method.GetParameters();
+            var args = parameters.Length > 0 ? new object?[parameters.Length] : null;
+            if (args != null)
+            {
+                for (int i = 0; i < parameters.Length; i++)
+                {
+                    args[i] = parameters[i].HasDefaultValue ? parameters[i].DefaultValue : Type.Missing;
+                }
+            }
             return method.Invoke(_environment, args)
                 ?? throw new InvalidOperationException("ReadTransaction returned null");
         }
@@ -182,8 +191,17 @@ namespace System.OS.Storage
             }
             if (method == null)
                 throw new InvalidOperationException("Cannot find WriteTransaction method");
-            var paramCount = method.GetParameters().Length;
-            var args = paramCount > 0 ? new object?[paramCount] : null;
+
+            // Use actual default values, not null (enums become 0 which may be invalid)
+            var parameters = method.GetParameters();
+            var args = parameters.Length > 0 ? new object?[parameters.Length] : null;
+            if (args != null)
+            {
+                for (int i = 0; i < parameters.Length; i++)
+                {
+                    args[i] = parameters[i].HasDefaultValue ? parameters[i].DefaultValue : Type.Missing;
+                }
+            }
             return method.Invoke(_environment, args)
                 ?? throw new InvalidOperationException("WriteTransaction returned null");
         }
@@ -210,9 +228,15 @@ namespace System.OS.Storage
             }
             if (method == null)
                 throw new InvalidOperationException("Cannot find CreateTree method");
-            var paramCount = method.GetParameters().Length;
-            var args = new object?[paramCount];
-            args[0] = name;  // First param is the tree name, rest are optional (null)
+
+            // Build args with actual default values (not null - enums become 0 which is invalid)
+            var parameters = method.GetParameters();
+            var args = new object?[parameters.Length];
+            args[0] = name;  // First param is the tree name
+            for (int i = 1; i < parameters.Length; i++)
+            {
+                args[i] = parameters[i].HasDefaultValue ? parameters[i].DefaultValue : Type.Missing;
+            }
             return method.Invoke(transaction, args)
                 ?? throw new InvalidOperationException("CreateTree returned null");
         }
@@ -238,9 +262,15 @@ namespace System.OS.Storage
             }
             if (method == null)
                 throw new InvalidOperationException("Cannot find ReadTree method");
-            var paramCount = method.GetParameters().Length;
-            var args = new object?[paramCount];
+
+            // Build args with actual default values
+            var parameters = method.GetParameters();
+            var args = new object?[parameters.Length];
             args[0] = name;  // First param is the tree name
+            for (int i = 1; i < parameters.Length; i++)
+            {
+                args[i] = parameters[i].HasDefaultValue ? parameters[i].DefaultValue : Type.Missing;
+            }
             return method.Invoke(transaction, args);
         }
 
@@ -263,8 +293,17 @@ namespace System.OS.Storage
             }
             if (method == null)
                 throw new InvalidOperationException("Cannot find Commit method");
-            var paramCount = method.GetParameters().Length;
-            var args = paramCount > 0 ? new object?[paramCount] : null;
+
+            // Use actual default values
+            var parameters = method.GetParameters();
+            var args = parameters.Length > 0 ? new object?[parameters.Length] : null;
+            if (args != null)
+            {
+                for (int i = 0; i < parameters.Length; i++)
+                {
+                    args[i] = parameters[i].HasDefaultValue ? parameters[i].DefaultValue : Type.Missing;
+                }
+            }
             method.Invoke(transaction, args);
         }
 
