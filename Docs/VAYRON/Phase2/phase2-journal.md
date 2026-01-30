@@ -192,3 +192,56 @@ T02 code complete. Ready for TAI build verification.
 T03 code complete. Ready for TAI build verification.
 
 ---
+
+## 2026-01-30 - Build Fixes + ADR-001: Hybrid Storage Model
+
+### Build Fixes
+
+**Fix 1: CrstTdsDirtySet undeclared**
+- Root cause: CrstTypes.def was updated but crsttypes_generated.h wasn't regenerated
+- Fix: Manually added CrstTdsDirtySet (index 119) to crsttypes_generated.h
+- Files changed: `inc/crsttypes_generated.h`
+
+**Fix 2: VContextFlags CLS compliance**
+- Root cause: `enum VContextFlags : uint` triggers CS3009 warning (treated as error)
+- Fix: Added `[CLSCompliant(false)]` attribute
+- Files changed: `System/OS/VContext.cs`
+
+### Architectural Decision: Hybrid Storage Model
+
+**Context**: The original T06 spec proposed pure blob serialization. This prevents Corax indexing and search.
+
+**Decision**: Adopt hybrid field-level storage (ADR-001):
+
+| Field Type | Storage | Searchable |
+|------------|---------|------------|
+| Primitives/strings | `{VUID}/f/{token}` | Yes |
+| `[Memorize]` refs | `{VUID}/r/{token}` (VUID only) | Traversable |
+| Non-virtual refs | `{VUID}/e/{token}` (blob) | No |
+
+**Key Points**:
+- Enables Corax indexing on primitive/string fields
+- `[Memorize]` children become independent entities with their own VUIDs
+- Non-virtual children are "owned" by parent, serialized inline
+- Collections follow element type rules
+
+**Documentation**:
+- Created `ADR-001-Hybrid-Storage-Model.md`
+- Updated `T06-Body-Encoder.md` to reflect hybrid approach
+
+### API Decisions
+
+- **Save**: `obj.Save()` on Object - manual persistence, throws if not virtual
+- **Load**: `VKernel.Get<T>(vuid)` - creates new object from storage
+- **Attributes**: `[Virtual]` + `[Memorize]` for persistent virtual types
+
+### Files Changed
+- `inc/crsttypes_generated.h` - Added CrstTdsDirtySet
+- `System/OS/VContext.cs` - Added CLSCompliant(false)
+- `Phase2/ADR-001-Hybrid-Storage-Model.md` - NEW
+- `Phase2/Tasks/T06-Body-Encoder.md` - Updated for hybrid model
+
+### Status
+Build fixes applied. TAI can retry verification.
+
+---
