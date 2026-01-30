@@ -3,6 +3,7 @@
 
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
+using System.Runtime.InteropServices;
 
 // Note: Voron namespace will be available when Voron.dll is deployed
 // TAI: Ensure Voron.dll and Sparrow.dll are copied to Core_Root
@@ -369,9 +370,51 @@ namespace System.OS.Storage
         /// <summary>
         /// Create a Slice from byte data using reflection.
         /// Voron's Slice.From returns InternalScope and outputs Slice via out param.
+        /// Uses pointer-based overload to preserve raw binary data (UTF-8 conversion corrupts binary).
         /// </summary>
         private static object CreateSlice(Type sliceType, object allocator, byte[] data)
         {
+            // CRITICAL: We must use pointer-based approach to preserve raw binary data.
+            // UTF-8 string conversion corrupts bytes that aren't valid UTF-8 sequences.
+
+            // Priority 1: Try byte[] overload (simplest if available)
+            var byteArrayMethod = FindByteArraySliceFromMethod(sliceType, allocator.GetType());
+            if (byteArrayMethod != null)
+            {
+                object?[] args = new object?[] { allocator, data, null };
+                byteArrayMethod.Invoke(null, args);
+                return args[2] ?? throw new InvalidOperationException("Slice.From (byte[]) did not return slice via out param");
+            }
+
+            // Priority 2: Try pointer-based overload: From(ByteStringContext, byte*, int, out Slice)
+            var pointerMethod = FindPointerSliceFromMethod(sliceType, allocator.GetType());
+            if (pointerMethod != null)
+            {
+                // Pin the byte array and call the pointer-based overload
+                var handle = GCHandle.Alloc(data, GCHandleType.Pinned);
+                try
+                {
+                    var ptr = handle.AddrOfPinnedObject();
+                    object?[] args = new object?[] { allocator, ptr, data.Length, null };
+                    pointerMethod.Invoke(null, args);
+                    return args[3] ?? throw new InvalidOperationException("Slice.From (pointer) did not return slice via out param");
+                }
+                finally
+                {
+                    handle.Free();
+                }
+            }
+
+            // Priority 3: Use ByteStringContext to allocate memory and copy data
+            // This avoids UTF-8 conversion entirely
+            var allocatedSlice = TryCreateSliceViaAllocation(sliceType, allocator, data);
+            if (allocatedSlice != null)
+            {
+                return allocatedSlice;
+            }
+
+            // Fallback: Try string method but ONLY for ASCII-safe data (keys like "/meta")
+            // This is NOT safe for arbitrary binary data!
             var fromMethod = FindSliceFromMethodForBytes(sliceType, allocator.GetType())
                 ?? throw new InvalidOperationException("Cannot find suitable Slice.From method for byte data");
 
@@ -379,36 +422,123 @@ namespace System.OS.Storage
             var secondParamType = parameters[1].ParameterType;
 
             // Prepare arguments array - third param is out Slice
-            object?[] args = new object?[3];
-            args[0] = allocator;
-            args[2] = null; // out parameter placeholder
+            object?[] fallbackArgs = new object?[3];
+            fallbackArgs[0] = allocator;
+            fallbackArgs[2] = null; // out parameter placeholder
 
-            if (secondParamType == typeof(ReadOnlySpan<byte>))
+            if (secondParamType == typeof(string))
             {
-                // Convert byte[] to ReadOnlySpan<byte>
-                // We need to box it properly for reflection
-                args[1] = new ReadOnlySpan<byte>(data).ToArray(); // This won't work directly...
+                // WARNING: This corrupts binary data! Only safe for ASCII keys.
+                fallbackArgs[1] = System.Text.Encoding.UTF8.GetString(data);
+                fromMethod.Invoke(null, fallbackArgs);
+                return fallbackArgs[2] ?? throw new InvalidOperationException("Slice.From did not return slice via out param");
+            }
 
-                // Actually, we can't pass ReadOnlySpan via reflection easily.
-                // Fall back to string overload which is more reflection-friendly
-                var stringMethod = FindStringSliceFromMethod(sliceType, allocator.GetType());
-                if (stringMethod != null)
+            throw new InvalidOperationException($"Unsupported Slice.From parameter type: {secondParamType}. Pointer-based method not found.");
+        }
+
+        /// <summary>
+        /// Find byte[] overload of Slice.From: From(ByteStringContext, byte[], out Slice)
+        /// </summary>
+        private static System.Reflection.MethodInfo? FindByteArraySliceFromMethod(Type sliceType, Type allocatorType)
+        {
+            var methods = sliceType.GetMethods(System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static);
+            foreach (var m in methods)
+            {
+                if (m.Name != "From")
+                    continue;
+                var parameters = m.GetParameters();
+                if (parameters.Length == 3
+                    && parameters[0].ParameterType.IsAssignableFrom(allocatorType)
+                    && parameters[1].ParameterType == typeof(byte[])
+                    && parameters[2].IsOut)
                 {
-                    args[1] = System.Text.Encoding.UTF8.GetString(data);
-                    stringMethod.Invoke(null, args);
-                    return args[2] ?? throw new InvalidOperationException("Slice.From did not return slice via out param");
+                    return m;
+                }
+            }
+            return null;
+        }
+
+        /// <summary>
+        /// Try to create a Slice by allocating memory in ByteStringContext and copying data.
+        /// This is a fallback approach that avoids UTF-8 conversion.
+        /// </summary>
+        private static object? TryCreateSliceViaAllocation(Type sliceType, object allocator, byte[] data)
+        {
+            try
+            {
+                // Look for Allocate method on ByteStringContext
+                var allocateMethod = allocator.GetType().GetMethod("Allocate",
+                    new[] { typeof(int), sliceType.MakeByRefType() });
+
+                if (allocateMethod == null)
+                    return null;
+
+                // Allocate memory: ByteStringContext.Allocate(int size, out Slice slice)
+                object?[] allocArgs = new object?[] { data.Length, null };
+                allocateMethod.Invoke(allocator, allocArgs);
+                var slice = allocArgs[1];
+                if (slice == null)
+                    return null;
+
+                // Copy our data into the slice's memory
+                // Get the slice's content pointer and copy
+                var contentProp = sliceType.GetProperty("Content");
+                if (contentProp != null)
+                {
+                    var content = contentProp.GetValue(slice);
+                    if (content != null)
+                    {
+                        // Content is typically a Span<byte> or pointer - try to copy
+                        var copyToMethod = content.GetType().GetMethod("CopyFrom");
+                        if (copyToMethod != null)
+                        {
+                            copyToMethod.Invoke(content, new object[] { data });
+                            return slice;
+                        }
+                    }
                 }
 
-                throw new InvalidOperationException("Cannot invoke Slice.From with ReadOnlySpan<byte> via reflection. String overload not available.");
-            }
-            else if (secondParamType == typeof(string))
-            {
-                args[1] = System.Text.Encoding.UTF8.GetString(data);
-                fromMethod.Invoke(null, args);
-                return args[2] ?? throw new InvalidOperationException("Slice.From did not return slice via out param");
-            }
+                // Alternative: try direct memory copy via Marshal
+                var ptrProp = sliceType.GetField("_pointer", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+                if (ptrProp != null)
+                {
+                    // Voron Slice has internal memory structure - complex to manipulate
+                    // Fall through to other methods
+                }
 
-            throw new InvalidOperationException($"Unsupported Slice.From parameter type: {secondParamType}");
+                return null;
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
+        /// <summary>
+        /// Find pointer-based Slice.From: From(ByteStringContext, byte*, int, out Slice)
+        /// This preserves raw binary data without UTF-8 conversion issues.
+        /// </summary>
+        private static System.Reflection.MethodInfo? FindPointerSliceFromMethod(Type sliceType, Type allocatorType)
+        {
+            var methods = sliceType.GetMethods(System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static);
+            foreach (var m in methods)
+            {
+                if (m.Name != "From")
+                    continue;
+                var parameters = m.GetParameters();
+                // Looking for: (ByteStringContext, byte*, int, out Slice)
+                // Use IsPointer to detect pointer types without unsafe context
+                if (parameters.Length == 4
+                    && parameters[0].ParameterType.IsAssignableFrom(allocatorType)
+                    && parameters[1].ParameterType.IsPointer  // byte* or similar
+                    && parameters[2].ParameterType == typeof(int)
+                    && parameters[3].IsOut)
+                {
+                    return m;
+                }
+            }
+            return null;
         }
 
         /// <summary>
