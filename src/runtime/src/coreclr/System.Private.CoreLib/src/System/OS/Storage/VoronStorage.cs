@@ -321,6 +321,72 @@ namespace System.OS.Storage
         #region Tree Operations
 
         /// <summary>
+        /// Find a suitable Slice.From method by name.
+        /// Voron has multiple overloads; we need one that takes allocator and byte data.
+        /// </summary>
+        private static System.Reflection.MethodInfo? FindSliceFromMethod(Type sliceType, Type allocatorType)
+        {
+            var methods = sliceType.GetMethods(System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static);
+            foreach (var m in methods)
+            {
+                if (m.Name != "From")
+                    continue;
+                var parameters = m.GetParameters();
+                // Look for a method with 2 params: (ByteStringContext, something for bytes)
+                if (parameters.Length >= 2 && parameters[0].ParameterType.IsAssignableFrom(allocatorType))
+                {
+                    return m;
+                }
+            }
+            return null;
+        }
+
+        /// <summary>
+        /// Create a Slice from byte data using reflection.
+        /// </summary>
+        private static object CreateSlice(Type sliceType, object allocator, byte[] data)
+        {
+            var fromMethod = FindSliceFromMethod(sliceType, allocator.GetType())
+                ?? throw new InvalidOperationException("Cannot find suitable Slice.From method");
+
+            var parameters = fromMethod.GetParameters();
+            object?[] args;
+
+            // Handle different overloads - the second param could be ReadOnlySpan<byte>, byte[], string, etc.
+            var secondParamType = parameters[1].ParameterType;
+
+            if (secondParamType == typeof(byte[]))
+            {
+                args = new object?[parameters.Length];
+                args[0] = allocator;
+                args[1] = data;
+                for (int i = 2; i < parameters.Length; i++)
+                    args[i] = parameters[i].HasDefaultValue ? parameters[i].DefaultValue : Type.Missing;
+            }
+            else if (secondParamType == typeof(string))
+            {
+                // Convert bytes to string (for string-based keys)
+                args = new object?[parameters.Length];
+                args[0] = allocator;
+                args[1] = System.Text.Encoding.UTF8.GetString(data);
+                for (int i = 2; i < parameters.Length; i++)
+                    args[i] = parameters[i].HasDefaultValue ? parameters[i].DefaultValue : Type.Missing;
+            }
+            else
+            {
+                // Try passing as byte[] anyway
+                args = new object?[parameters.Length];
+                args[0] = allocator;
+                args[1] = data;
+                for (int i = 2; i < parameters.Length; i++)
+                    args[i] = parameters[i].HasDefaultValue ? parameters[i].DefaultValue : Type.Missing;
+            }
+
+            return fromMethod.Invoke(null, args)
+                ?? throw new InvalidOperationException("Slice.From returned null");
+        }
+
+        /// <summary>
         /// Add a key-value pair to a tree.
         /// </summary>
         /// <param name="tree">The tree object (from CreateTree/ReadTree)</param>
@@ -340,19 +406,39 @@ namespace System.OS.Storage
             var allocator = allocatorProp.GetValue(lltx)
                 ?? throw new InvalidOperationException("Allocator is null");
 
-            // Create Slices from byte arrays using Slice.From
+            // Create Slices from byte arrays
             var sliceType = treeType.Assembly.GetType("Voron.Slice")
                 ?? throw new InvalidOperationException("Cannot find Voron.Slice type");
-            var fromMethod = sliceType.GetMethod("From", new[] { allocator.GetType(), typeof(ReadOnlySpan<byte>) })
-                ?? throw new InvalidOperationException("Cannot find Slice.From method");
 
-            var keySlice = fromMethod.Invoke(null, new object[] { allocator, key.ToArray() });
-            var valueSlice = fromMethod.Invoke(null, new object[] { allocator, value.ToArray() });
+            var keySlice = CreateSlice(sliceType, allocator, key.ToArray());
+            var valueSlice = CreateSlice(sliceType, allocator, value.ToArray());
 
-            // Call Tree.Add(Slice key, Slice value)
-            var addMethod = treeType.GetMethod("Add", new[] { sliceType, sliceType })
-                ?? throw new InvalidOperationException("Cannot find Tree.Add method");
-            addMethod.Invoke(tree, new[] { keySlice, valueSlice });
+            // Call Tree.Add - find by name since there may be multiple overloads
+            var methods = treeType.GetMethods();
+            System.Reflection.MethodInfo? addMethod = null;
+            foreach (var m in methods)
+            {
+                if (m.Name == "Add")
+                {
+                    var ps = m.GetParameters();
+                    if (ps.Length >= 2 && ps[0].ParameterType == sliceType && ps[1].ParameterType == sliceType)
+                    {
+                        addMethod = m;
+                        break;
+                    }
+                }
+            }
+            if (addMethod == null)
+                throw new InvalidOperationException("Cannot find Tree.Add method");
+
+            var addParams = addMethod.GetParameters();
+            var addArgs = new object?[addParams.Length];
+            addArgs[0] = keySlice;
+            addArgs[1] = valueSlice;
+            for (int i = 2; i < addParams.Length; i++)
+                addArgs[i] = addParams[i].HasDefaultValue ? addParams[i].DefaultValue : Type.Missing;
+
+            addMethod.Invoke(tree, addArgs);
         }
 
         /// <summary>
@@ -378,14 +464,33 @@ namespace System.OS.Storage
             // Create key Slice
             var sliceType = treeType.Assembly.GetType("Voron.Slice")
                 ?? throw new InvalidOperationException("Cannot find Voron.Slice type");
-            var fromMethod = sliceType.GetMethod("From", new[] { allocator.GetType(), typeof(ReadOnlySpan<byte>) })
-                ?? throw new InvalidOperationException("Cannot find Slice.From method");
-            var keySlice = fromMethod.Invoke(null, new object[] { allocator, key.ToArray() });
+            var keySlice = CreateSlice(sliceType, allocator, key.ToArray());
 
-            // Call Tree.Read(Slice key) -> ReadResult
-            var readMethod = treeType.GetMethod("Read", new[] { sliceType })
-                ?? throw new InvalidOperationException("Cannot find Tree.Read method");
-            var readResult = readMethod.Invoke(tree, new[] { keySlice });
+            // Call Tree.Read - find by name
+            var methods = treeType.GetMethods();
+            System.Reflection.MethodInfo? readMethod = null;
+            foreach (var m in methods)
+            {
+                if (m.Name == "Read")
+                {
+                    var ps = m.GetParameters();
+                    if (ps.Length >= 1 && ps[0].ParameterType == sliceType)
+                    {
+                        readMethod = m;
+                        break;
+                    }
+                }
+            }
+            if (readMethod == null)
+                throw new InvalidOperationException("Cannot find Tree.Read method");
+
+            var readParams = readMethod.GetParameters();
+            var readArgs = new object?[readParams.Length];
+            readArgs[0] = keySlice;
+            for (int i = 1; i < readParams.Length; i++)
+                readArgs[i] = readParams[i].HasDefaultValue ? readParams[i].DefaultValue : Type.Missing;
+
+            var readResult = readMethod.Invoke(tree, readArgs);
 
             if (readResult == null)
                 return null;
@@ -451,14 +556,33 @@ namespace System.OS.Storage
             // Create key Slice
             var sliceType = treeType.Assembly.GetType("Voron.Slice")
                 ?? throw new InvalidOperationException("Cannot find Voron.Slice type");
-            var fromMethod = sliceType.GetMethod("From", new[] { allocator.GetType(), typeof(ReadOnlySpan<byte>) })
-                ?? throw new InvalidOperationException("Cannot find Slice.From method");
-            var keySlice = fromMethod.Invoke(null, new object[] { allocator, key.ToArray() });
+            var keySlice = CreateSlice(sliceType, allocator, key.ToArray());
 
-            // Call Tree.Delete(Slice key)
-            var deleteMethod = treeType.GetMethod("Delete", new[] { sliceType })
-                ?? throw new InvalidOperationException("Cannot find Tree.Delete method");
-            var result = deleteMethod.Invoke(tree, new[] { keySlice });
+            // Call Tree.Delete - find by name
+            var methods = treeType.GetMethods();
+            System.Reflection.MethodInfo? deleteMethod = null;
+            foreach (var m in methods)
+            {
+                if (m.Name == "Delete")
+                {
+                    var ps = m.GetParameters();
+                    if (ps.Length >= 1 && ps[0].ParameterType == sliceType)
+                    {
+                        deleteMethod = m;
+                        break;
+                    }
+                }
+            }
+            if (deleteMethod == null)
+                throw new InvalidOperationException("Cannot find Tree.Delete method");
+
+            var deleteParams = deleteMethod.GetParameters();
+            var deleteArgs = new object?[deleteParams.Length];
+            deleteArgs[0] = keySlice;
+            for (int i = 1; i < deleteParams.Length; i++)
+                deleteArgs[i] = deleteParams[i].HasDefaultValue ? deleteParams[i].DefaultValue : Type.Missing;
+
+            var result = deleteMethod.Invoke(tree, deleteArgs);
 
             return result is bool b && b;
         }
