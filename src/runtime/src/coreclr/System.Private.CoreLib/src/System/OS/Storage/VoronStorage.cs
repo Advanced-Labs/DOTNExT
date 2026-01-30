@@ -75,15 +75,17 @@ namespace System.OS.Storage
             // Load Voron assembly dynamically
             var voronAssembly = System.Reflection.Assembly.Load("Voron");
 
-            // Get StorageEnvironmentOptions.ForPath method
+            // Get StorageEnvironmentOptions.ForPathForTests method (simpler API for testing/dev)
             var optionsType = voronAssembly.GetType("Voron.StorageEnvironmentOptions")
                 ?? throw new InvalidOperationException("Cannot find Voron.StorageEnvironmentOptions type");
 
-            var forPathMethod = optionsType.GetMethod("ForPath", new[] { typeof(string) })
-                ?? throw new InvalidOperationException("Cannot find StorageEnvironmentOptions.ForPath method");
+            // ForPathForTests has optional params: (string path, LoggingResource? = null, LoggingComponent? = null)
+            // Find the method by name and invoke with just the path, relying on default params
+            var forPathMethod = optionsType.GetMethod("ForPathForTests")
+                ?? throw new InvalidOperationException("Cannot find StorageEnvironmentOptions.ForPathForTests method");
 
-            var options = forPathMethod.Invoke(null, new object[] { dataPath })
-                ?? throw new InvalidOperationException("ForPath returned null");
+            var options = forPathMethod.Invoke(null, new object?[] { dataPath, null, null })
+                ?? throw new InvalidOperationException("ForPathForTests returned null");
 
             // Set initial options
             var initialFileSizeProp = optionsType.GetProperty("InitialFileSize");
