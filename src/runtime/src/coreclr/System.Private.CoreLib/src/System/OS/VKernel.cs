@@ -148,16 +148,36 @@ namespace System.OS
         /// <param name="vuid">VUID of the object to load.</param>
         /// <returns>Loaded object, or null if not found.</returns>
         [CLSCompliant(false)]
-        public static T? Get<T>(VUID vuid) where T : class
+        [UnconditionalSuppressMessage("Trimming", "IL2026:RequiresUnreferencedCode",
+            Justification = "BodyEncoder uses reflection intentionally for deserialization")]
+        public static T? Get<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicFields |
+                                                          DynamicallyAccessedMemberTypes.NonPublicFields |
+                                                          DynamicallyAccessedMemberTypes.PublicConstructors |
+                                                          DynamicallyAccessedMemberTypes.NonPublicConstructors)] T>(VUID vuid) where T : class
         {
             EnsureInitialized();
 
             if (vuid.IsEmpty)
                 return null;
 
-            // TODO: Implement in T05 (Storage_Voron Driver)
-            // This will materialize the object from Voron storage
-            throw new NotImplementedException("Get<T> will be implemented in T05: Storage_Voron Driver");
+            // Read from storage
+            var bodyBytes = VoronStorageOps.WithReadTransaction((tx, tree) =>
+            {
+                var metaKey = VoronStorageOps.BuildMetadataKey(vuid);
+                return VoronStorageOps.Get(tree, metaKey);
+            });
+
+            if (bodyBytes == null)
+                return null;
+
+            // Deserialize
+            var obj = BodyEncoder.Deserialize<T>(bodyBytes);
+
+            // Set up virtual object state
+            TypeDriverHelper.SetVUID(obj, vuid);
+            TypeDriverHelper.EnableNonDefaultRouting(obj);
+
+            return obj;
         }
 
         /// <summary>
@@ -167,7 +187,10 @@ namespace System.OS
         /// <param name="vuid">VUID to look up or assign.</param>
         /// <returns>Existing or new object.</returns>
         [CLSCompliant(false)]
-        public static T GetOrNew<T>(VUID vuid) where T : class, new()
+        public static T GetOrNew<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicFields |
+                                                              DynamicallyAccessedMemberTypes.NonPublicFields |
+                                                              DynamicallyAccessedMemberTypes.PublicConstructors |
+                                                              DynamicallyAccessedMemberTypes.NonPublicConstructors)] T>(VUID vuid) where T : class, new()
         {
             var existing = Get<T>(vuid);
             if (existing != null)
@@ -182,6 +205,8 @@ namespace System.OS
         /// <param name="vuid">VUID to check.</param>
         /// <returns>True if object exists in storage.</returns>
         [CLSCompliant(false)]
+        [UnconditionalSuppressMessage("Trimming", "IL2026:RequiresUnreferencedCode",
+            Justification = "VoronStorageOps uses reflection intentionally")]
         public static bool Exists(VUID vuid)
         {
             EnsureInitialized();
@@ -189,8 +214,7 @@ namespace System.OS
             if (vuid.IsEmpty)
                 return false;
 
-            // TODO: Implement in T05 (Storage_Voron Driver)
-            throw new NotImplementedException("Exists will be implemented in T05: Storage_Voron Driver");
+            return VoronStorageOps.Exists(vuid);
         }
 
         #endregion
@@ -201,6 +225,8 @@ namespace System.OS
         /// Persist a single object to storage.
         /// </summary>
         /// <param name="obj">Object to persist.</param>
+        [UnconditionalSuppressMessage("Trimming", "IL2026:RequiresUnreferencedCode",
+            Justification = "BodyEncoder uses reflection intentionally for serialization")]
         public static void Persist(object obj)
         {
             ArgumentNullException.ThrowIfNull(obj);
@@ -213,9 +239,21 @@ namespace System.OS
                     "TypeDriverHelper.EnableNonDefaultRouting() first.");
             }
 
-            // TODO: Implement in T05 (Storage_Voron Driver)
-            // This will serialize and store the object in Voron
-            throw new NotImplementedException("Persist will be implemented in T05: Storage_Voron Driver");
+            // Ensure VUID is assigned
+            var vuid = TypeDriverHelper.GetVUID(obj);
+            if (vuid.IsEmpty)
+            {
+                vuid = VUID.New();
+                TypeDriverHelper.SetVUID(obj, vuid);
+            }
+
+            // Serialize and store
+            VoronStorageOps.WithWriteTransaction((tx, tree) =>
+            {
+                var metaKey = VoronStorageOps.BuildMetadataKey(vuid);
+                var bodyBytes = BodyEncoder.Serialize(obj);
+                VoronStorageOps.Put(tree, metaKey, bodyBytes);
+            });
         }
 
         /// <summary>
@@ -223,32 +261,28 @@ namespace System.OS
         /// </summary>
         /// <param name="obj">Object to flush.</param>
         /// <returns>True if object was flushed, false if not dirty.</returns>
+        [UnconditionalSuppressMessage("Trimming", "IL2026:RequiresUnreferencedCode",
+            Justification = "PersistentFieldAccessOps uses reflection intentionally")]
         public static bool Flush(object obj)
         {
             ArgumentNullException.ThrowIfNull(obj);
             EnsureInitialized();
 
-            if (!TypeDriverHelper.IsDirty(obj))
-                return true;  // Nothing to do
-
-            Persist(obj);
-            TypeDriverHelper.ClearDirty(obj);
-            return true;
+            return PersistentFieldAccessOps.Flush(obj);
         }
 
         /// <summary>
         /// Flush all dirty objects to storage.
         /// </summary>
         /// <returns>Number of objects flushed.</returns>
+        [UnconditionalSuppressMessage("Trimming", "IL2026:RequiresUnreferencedCode",
+            Justification = "PersistentFieldAccessOps uses reflection intentionally")]
         public static int FlushAll()
         {
             if (!s_initialized)
                 return 0;
 
-            // TODO: Implement in T07 (FieldAccess_Persist Driver)
-            // This will iterate the dirty set and persist each object
-            // For now, return 0 as placeholder
-            return 0;
+            return PersistentFieldAccessOps.FlushAll();
         }
 
         /// <summary>
@@ -286,6 +320,8 @@ namespace System.OS
         /// <param name="vuid">VUID of object to delete.</param>
         /// <returns>True if deleted, false if not found.</returns>
         [CLSCompliant(false)]
+        [UnconditionalSuppressMessage("Trimming", "IL2026:RequiresUnreferencedCode",
+            Justification = "VoronStorageOps uses reflection intentionally")]
         public static bool Delete(VUID vuid)
         {
             EnsureInitialized();
@@ -293,8 +329,7 @@ namespace System.OS
             if (vuid.IsEmpty)
                 return false;
 
-            // TODO: Implement in T05 (Storage_Voron Driver)
-            throw new NotImplementedException("Delete will be implemented in T05: Storage_Voron Driver");
+            return VoronStorageOps.DeleteObject(vuid);
         }
 
         #endregion
