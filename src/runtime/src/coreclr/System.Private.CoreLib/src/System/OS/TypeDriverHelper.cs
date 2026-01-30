@@ -83,6 +83,7 @@ namespace System.OS
         /// <summary>
         /// Get the VUID for an object (empty if not assigned).
         /// </summary>
+        [CLSCompliant(false)]
         public static VUID GetVUID(object obj)
         {
             ArgumentNullException.ThrowIfNull(obj);
@@ -100,6 +101,7 @@ namespace System.OS
         /// <summary>
         /// Set the VUID for an object (must be TDS-routed).
         /// </summary>
+        [CLSCompliant(false)]
         public static void SetVUID(object obj, VUID vuid)
         {
             ArgumentNullException.ThrowIfNull(obj);

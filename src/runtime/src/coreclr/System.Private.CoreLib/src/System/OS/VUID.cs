@@ -12,6 +12,7 @@ namespace System.OS
     /// Globally unique, time-sortable, survives process restarts.
     /// </summary>
     [StructLayout(LayoutKind.Sequential)]
+    [CLSCompliant(false)]
     public readonly partial struct VUID : IEquatable<VUID>, IComparable<VUID>
     {
         private readonly ulong _hi;  // Timestamp (48 bits) + version (4 bits) + random (12 bits)

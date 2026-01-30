@@ -11111,8 +11111,7 @@ namespace System.OS
         public int CompareTo(System.OS.VUID other) { throw null; }
         public bool Equals(System.OS.VUID other) { throw null; }
         public override bool Equals(object? obj) { throw null; }
-        public static System.OS.VUID FromBytes(byte[] bytes) { throw null; }
-        public static System.OS.VUID FromBytes(System.ReadOnlySpan<byte> bytes) { throw null; }
+        public static System.OS.VUID FromBytes(System.ReadOnlySpan<byte> source) { throw null; }
         public override int GetHashCode() { throw null; }
         public static System.OS.VUID New() { throw null; }
         public static bool operator ==(System.OS.VUID left, System.OS.VUID right) { throw null; }
@@ -11124,8 +11123,7 @@ namespace System.OS
         public static System.OS.VUID Parse(string s) { throw null; }
         public override string ToString() { throw null; }
         public static bool TryParse(string s, out System.OS.VUID result) { throw null; }
-        public void WriteBytes(byte[] buffer) { }
-        public void WriteBytes(System.Span<byte> buffer) { }
+        public void WriteBytes(System.Span<byte> destination) { }
     }
     [System.CLSCompliantAttribute(false)]
     public sealed partial class VContext : System.IDisposable
