@@ -321,23 +321,41 @@ namespace System.OS.Storage
         #region Tree Operations
 
         /// <summary>
-        /// Find a suitable Slice.From method by name.
-        /// Voron has multiple overloads; we need one that takes allocator and byte data.
+        /// Find a suitable Slice.From method that accepts byte data.
+        /// Voron has multiple overloads; we need one that takes allocator and byte[]/string.
         /// </summary>
-        private static System.Reflection.MethodInfo? FindSliceFromMethod(Type sliceType, Type allocatorType)
+        private static System.Reflection.MethodInfo? FindSliceFromMethodForBytes(Type sliceType, Type allocatorType)
         {
             var methods = sliceType.GetMethods(System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static);
+
+            // Priority 1: Look for byte[] overload
             foreach (var m in methods)
             {
                 if (m.Name != "From")
                     continue;
                 var parameters = m.GetParameters();
-                // Look for a method with 2 params: (ByteStringContext, something for bytes)
-                if (parameters.Length >= 2 && parameters[0].ParameterType.IsAssignableFrom(allocatorType))
+                if (parameters.Length >= 2
+                    && parameters[0].ParameterType.IsAssignableFrom(allocatorType)
+                    && parameters[1].ParameterType == typeof(byte[]))
                 {
                     return m;
                 }
             }
+
+            // Priority 2: Look for string overload (we can convert bytes to string)
+            foreach (var m in methods)
+            {
+                if (m.Name != "From")
+                    continue;
+                var parameters = m.GetParameters();
+                if (parameters.Length >= 2
+                    && parameters[0].ParameterType.IsAssignableFrom(allocatorType)
+                    && parameters[1].ParameterType == typeof(string))
+                {
+                    return m;
+                }
+            }
+
             return null;
         }
 
@@ -346,41 +364,30 @@ namespace System.OS.Storage
         /// </summary>
         private static object CreateSlice(Type sliceType, object allocator, byte[] data)
         {
-            var fromMethod = FindSliceFromMethod(sliceType, allocator.GetType())
-                ?? throw new InvalidOperationException("Cannot find suitable Slice.From method");
+            var fromMethod = FindSliceFromMethodForBytes(sliceType, allocator.GetType())
+                ?? throw new InvalidOperationException("Cannot find suitable Slice.From method for byte data");
 
             var parameters = fromMethod.GetParameters();
-            object?[] args;
-
-            // Handle different overloads - the second param could be ReadOnlySpan<byte>, byte[], string, etc.
             var secondParamType = parameters[1].ParameterType;
+            object?[] args = new object?[parameters.Length];
+            args[0] = allocator;
 
             if (secondParamType == typeof(byte[]))
             {
-                args = new object?[parameters.Length];
-                args[0] = allocator;
                 args[1] = data;
-                for (int i = 2; i < parameters.Length; i++)
-                    args[i] = parameters[i].HasDefaultValue ? parameters[i].DefaultValue : Type.Missing;
             }
             else if (secondParamType == typeof(string))
             {
-                // Convert bytes to string (for string-based keys)
-                args = new object?[parameters.Length];
-                args[0] = allocator;
+                // Convert bytes to UTF-8 string
                 args[1] = System.Text.Encoding.UTF8.GetString(data);
-                for (int i = 2; i < parameters.Length; i++)
-                    args[i] = parameters[i].HasDefaultValue ? parameters[i].DefaultValue : Type.Missing;
             }
             else
             {
-                // Try passing as byte[] anyway
-                args = new object?[parameters.Length];
-                args[0] = allocator;
-                args[1] = data;
-                for (int i = 2; i < parameters.Length; i++)
-                    args[i] = parameters[i].HasDefaultValue ? parameters[i].DefaultValue : Type.Missing;
+                throw new InvalidOperationException($"Unsupported Slice.From parameter type: {secondParamType}");
             }
+
+            for (int i = 2; i < parameters.Length; i++)
+                args[i] = parameters[i].HasDefaultValue ? parameters[i].DefaultValue : Type.Missing;
 
             return fromMethod.Invoke(null, args)
                 ?? throw new InvalidOperationException("Slice.From returned null");
