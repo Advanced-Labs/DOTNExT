@@ -136,6 +136,15 @@ namespace System.OS.Storage
                     continue;  // Field removed from type - schema evolution
 
                 stream.Position = dataStart + offset;
+
+                // Read null flag first (1 byte: 0=not null, 1=null)
+                byte nullFlag = reader.ReadByte();
+                if (nullFlag == 1)
+                {
+                    field.SetValue(obj, null);
+                    continue;
+                }
+
                 var value = ReadFieldValue(reader, typeCode, field.FieldType);
                 field.SetValue(obj, value);
             }
@@ -251,11 +260,13 @@ namespace System.OS.Storage
         {
             var value = field.GetValue(obj);
 
+            // Write null flag first (1 byte: 0=not null, 1=null)
             if (value == null)
             {
-                writer.Write((byte)FieldTypeCode.Null);
+                writer.Write((byte)1);  // null flag
                 return;
             }
+            writer.Write((byte)0);  // not null flag
 
             var type = field.FieldType;
 

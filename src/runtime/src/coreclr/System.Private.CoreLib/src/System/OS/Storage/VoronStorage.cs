@@ -597,10 +597,34 @@ namespace System.OS.Storage
                 ?? throw new InvalidOperationException("Cannot find Voron.Slice type");
             var keySlice = CreateSlice(sliceType, allocator, key.ToArray());
 
+            // First check if key exists using TryRead
+            System.Reflection.MethodInfo? tryReadMethod = null;
+            foreach (var m in treeType.GetMethods())
+            {
+                if (m.Name == "TryRead")
+                {
+                    var ps = m.GetParameters();
+                    if (ps.Length == 2 && ps[0].ParameterType == sliceType && ps[1].IsOut)
+                    {
+                        tryReadMethod = m;
+                        break;
+                    }
+                }
+            }
+
+            bool existed = false;
+            if (tryReadMethod != null)
+            {
+                var tryReadArgs = new object?[] { keySlice, null };
+                existed = (bool)(tryReadMethod.Invoke(tree, tryReadArgs) ?? false);
+            }
+
+            if (!existed)
+                return false;
+
             // Call Tree.Delete - find by name
-            var methods = treeType.GetMethods();
             System.Reflection.MethodInfo? deleteMethod = null;
-            foreach (var m in methods)
+            foreach (var m in treeType.GetMethods())
             {
                 if (m.Name == "Delete")
                 {
@@ -621,9 +645,9 @@ namespace System.OS.Storage
             for (int i = 1; i < deleteParams.Length; i++)
                 deleteArgs[i] = deleteParams[i].HasDefaultValue ? deleteParams[i].DefaultValue : Type.Missing;
 
-            var result = deleteMethod.Invoke(tree, deleteArgs);
+            deleteMethod.Invoke(tree, deleteArgs);
 
-            return result is bool b && b;
+            return true;  // Key existed and was deleted
         }
 
         #endregion
