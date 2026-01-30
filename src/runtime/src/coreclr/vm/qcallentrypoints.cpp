@@ -447,7 +447,7 @@ static const Entry s_QCall[] =
     DllImportEntry(AppendExceptionStackFrame)
 #endif // FEATURE_EH_FUNCLETS
 
-    // TypeDriver System (TDS) QCalls
+    // TypeDriver System (TDS) QCalls - Phase 1
     DllImportEntry(TDSNative_IsNonDefaultRouted)
     DllImportEntry(TDSNative_EnableNonDefaultRouting)
     DllImportEntry(TDSNative_DisableNonDefaultRouting)
@@ -459,6 +459,15 @@ static const Entry s_QCall[] =
     DllImportEntry(TDSNative_WriteInt64Field)
     DllImportEntry(TDSNative_ReadRefField)
     DllImportEntry(TDSNative_WriteRefField)
+
+    // TypeDriver System (TDS) QCalls - Phase 2 (VUID, Dirty Tracking)
+    DllImportEntry(TDSNative_GenerateVUID)
+    DllImportEntry(TDSNative_GetObjectVUID)
+    DllImportEntry(TDSNative_SetObjectVUID)
+    DllImportEntry(TDSNative_MarkDirty)
+    DllImportEntry(TDSNative_ClearDirty)
+    DllImportEntry(TDSNative_IsObjectDirty)
+    DllImportEntry(TDSNative_GetDirtyCount)
 };
 
 const void* QCallResolveDllImport(const char* name)
