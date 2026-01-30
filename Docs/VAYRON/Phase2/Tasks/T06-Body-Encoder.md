@@ -9,21 +9,99 @@
 
 ## Objective
 
-Implement the Tagged Field Map encoding for serializing virtual object bodies to/from byte arrays for Voron storage.
+Implement hybrid field-level storage for virtual object persistence, enabling:
+- **Searchability**: Primitives and strings stored individually for Corax indexing
+- **Object Graph**: `[Memorize]` references stored as VUIDs
+- **Embedded Children**: Non-virtual references serialized as blobs
 
 ---
 
 ## Background
 
-Phase 2 recommends Option B: Tagged Field Map encoding:
-- Store (FieldId → bytes) pairs
-- Robust to type evolution
-- Easy to implement
-- Acceptable performance for Phase 2 vertical slice
+### Original Approach (Pure Blob)
+The original spec suggested a single blob per object. This has drawbacks:
+- Not searchable by Corax
+- No semantic search capability
+- No field-level indexing
+
+### Revised Approach: Hybrid Storage (Decided 2026-01-30)
+
+**Key insight**: VAYRON's Memory System needs to be searchable and indexable. Corax (RavenDB's indexing engine) requires field-level access to create indexes.
+
+**Decision**: Use hybrid field-level storage:
+
+| Field Type | Storage Key | Searchable | Notes |
+|------------|-------------|------------|-------|
+| Primitives (int, bool, etc.) | `{VUID}/f/{FieldToken}` | ✅ Yes | Direct value, Corax indexable |
+| String | `{VUID}/f/{FieldToken}` | ✅ Yes | UTF-8, text + semantic search |
+| `[Virtual, Memorize]` ref | `{VUID}/r/{FieldToken}` | ✅ Traversable | VUID only, child is independent |
+| Non-virtual class ref | `{VUID}/e/{FieldToken}` | ❌ No | Embedded blob, owned by parent |
+| Collections | Mixed | Depends | Elements follow same rules |
+| Metadata | `{VUID}/meta` | ✅ Yes | TypeToken, Version, Flags |
 
 ---
 
-## Body Layout Format
+## Voron Storage Layout
+
+```
+Voron Tree: "vobjects"
+│
+├── {VUID-1}/
+│   ├── meta                    → TypeToken, Version, Flags
+│   ├── f/0x04000001           → int value (searchable)
+│   ├── f/0x04000002           → string value (searchable)
+│   ├── r/0x04000003           → VUID reference to [Memorize] child
+│   └── e/0x04000004           → embedded blob (non-virtual child)
+│
+├── {VUID-2}/
+│   ├── meta                    → ...
+│   └── f/...                   → ...
+```
+
+---
+
+## Decision: How Child Objects Are Stored
+
+```
+Is the child object's type marked [Virtual, Memorize]?
+├── YES → Store as VUID reference only
+│         - Child is persisted as its own independent entity
+│         - Child has its own lifecycle
+│         - Loaded lazily when accessed
+│
+└── NO  → Serialize inline as embedded blob
+          - Child is "owned" by parent
+          - No independent identity (no VUID)
+          - Loaded when parent is loaded
+          - "Ephemeral" = no independent lifecycle
+```
+
+---
+
+## Load/Save Order
+
+### On Save (obj.Save())
+
+1. Write metadata: `{VUID}/meta` → TypeToken, Version, Flags
+2. For each field:
+   - Primitive/String → Write to `{VUID}/f/{token}`
+   - `[Memorize]` ref → Write VUID to `{VUID}/r/{token}`, ensure child is also saved
+   - Non-virtual ref → Serialize blob to `{VUID}/e/{token}`
+
+### On Load (VKernel.Get<T>(vuid))
+
+1. Create empty object instance
+2. Read metadata from `{VUID}/meta`
+3. For each stored field:
+   - `f/` entries → Deserialize and set field value
+   - `r/` entries → Store VUID reference (lazy load actual object when accessed)
+   - `e/` entries → Deserialize blob and set field value
+
+---
+
+## Body Layout Format (for embedded blobs only)
+
+Embedded non-virtual children use this blob format:
 
 ```
 ┌──────────────────────────────────────────────────────────────┐

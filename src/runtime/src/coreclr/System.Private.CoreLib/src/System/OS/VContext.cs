@@ -10,6 +10,7 @@ namespace System.OS
     /// Flags for VContext state.
     /// </summary>
     [Flags]
+    [CLSCompliant(false)]
     public enum VContextFlags : uint
     {
         None = 0x0000,
