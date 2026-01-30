@@ -282,6 +282,9 @@ namespace System.OS
                 var bodyBytes = BodyEncoder.Serialize(obj);
                 VoronStorageOps.Put(tree, metaKey, bodyBytes);
             });
+
+            // Clear dirty flag after successful persist
+            TypeDriverHelper.ClearDirty(obj);
         }
 
         /// <summary>
