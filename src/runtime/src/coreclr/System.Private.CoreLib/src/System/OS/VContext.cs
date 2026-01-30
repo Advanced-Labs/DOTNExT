@@ -148,6 +148,7 @@ namespace System.OS
     /// <summary>
     /// Static methods for per-thread VContext management.
     /// </summary>
+    [CLSCompliant(false)]
     public static partial class VContextManager
     {
         /// <summary>
