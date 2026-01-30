@@ -1,9 +1,9 @@
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
 // VKernel intentionally calls VoronStorage which uses reflection to load Voron dynamically.
 // Suppress IL2026 to prevent the attribute from propagating to all VKernel callers.
 #pragma warning disable IL2026
-
-// Licensed to the .NET Foundation under one or more agreements.
-// The .NET Foundation licenses this file to you under the MIT license.
 
 using System.OS.Storage;
 
