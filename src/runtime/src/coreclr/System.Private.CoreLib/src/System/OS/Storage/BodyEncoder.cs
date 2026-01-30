@@ -46,25 +46,17 @@ namespace System.OS.Storage
             writer.Write((ushort)fields.Length);
             writer.Write((byte)0);  // Flags (reserved)
 
-            // Build field directory and data separately
-            using var dataStream = new MemoryStream();
-            using var dataWriter = new BinaryWriter(dataStream, Encoding.UTF8, leaveOpen: true);
-
+            // Write fields inline (no separate directory - simpler and more robust)
+            // Format: [token(4)][typeCode(1)][nullFlag(1)][data...] per field
             foreach (var field in fields)
             {
-                // Field directory entry
+                // Field header
                 writer.Write(field.MetadataToken);
                 writer.Write((byte)GetTypeCode(field.FieldType));
-                writer.Write((uint)dataStream.Position);
 
-                // Field data
-                WriteFieldValue(dataWriter, obj, field);
+                // Field data (includes null flag)
+                WriteFieldValue(writer, obj, field);
             }
-
-            dataWriter.Flush();
-
-            // Append data section
-            writer.Write(dataStream.ToArray());
 
             writer.Flush();
             return stream.ToArray();
@@ -114,39 +106,32 @@ namespace System.OS.Storage
             // Create instance without running constructor
             var obj = RuntimeHelpers.GetUninitializedObject(targetType);
 
-            // Read field directory
-            var directory = new (int token, FieldTypeCode typeCode, uint offset)[fieldCount];
+            // Read fields inline (format: [token(4)][typeCode(1)][nullFlag(1)][data...] per field)
             for (int i = 0; i < fieldCount; i++)
             {
-                directory[i] = (
-                    reader.ReadInt32(),
-                    (FieldTypeCode)reader.ReadByte(),
-                    reader.ReadUInt32()
-                );
-            }
+                // Read field header
+                int token = reader.ReadInt32();
+                var typeCode = (FieldTypeCode)reader.ReadByte();
 
-            // Data section starts here
-            long dataStart = stream.Position;
-
-            // Read each field
-            foreach (var (token, typeCode, offset) in directory)
-            {
-                var field = FindFieldByToken(targetType, token);
-                if (field == null)
-                    continue;  // Field removed from type - schema evolution
-
-                stream.Position = dataStart + offset;
-
-                // Read null flag first (1 byte: 0=not null, 1=null)
+                // Read null flag
                 byte nullFlag = reader.ReadByte();
+
+                var field = FindFieldByToken(targetType, token);
+
                 if (nullFlag == 1)
                 {
-                    field.SetValue(obj, null);
+                    // Null value - set if field exists
+                    if (field != null)
+                        field.SetValue(obj, null);
                     continue;
                 }
 
-                var value = ReadFieldValue(reader, typeCode, field.FieldType);
-                field.SetValue(obj, value);
+                // Read the value
+                var value = ReadFieldValue(reader, typeCode, field?.FieldType);
+
+                // Set field value if field exists (schema evolution support)
+                if (field != null)
+                    field.SetValue(obj, value);
             }
 
             return obj;
