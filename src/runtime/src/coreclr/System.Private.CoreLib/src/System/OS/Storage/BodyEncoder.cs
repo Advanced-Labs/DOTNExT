@@ -23,8 +23,8 @@ namespace System.OS.Storage
     /// </summary>
     internal static partial class BodyEncoder
     {
-        // Version 4: Simple inline format - no size prefix, no temp buffers
-        private const byte VERSION = 4;
+        // Version 5: Simple inline format with total length validation
+        private const byte VERSION = 5;
 
         #region Serialize
 
