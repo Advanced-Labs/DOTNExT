@@ -25,6 +25,7 @@ namespace System.OS
     /// Carries transaction handles and state through driver operations.
     /// Phase 2: Transaction support for persistence.
     /// </summary>
+    [CLSCompliant(false)]
     public sealed partial class VContext : IDisposable
     {
         private IntPtr _nativeHandle;
