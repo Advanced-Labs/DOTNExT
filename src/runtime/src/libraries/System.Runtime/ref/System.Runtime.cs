@@ -11075,11 +11075,6 @@ namespace System.Net
 }
 namespace System.OS
 {
-    [System.AttributeUsageAttribute(System.AttributeTargets.Class | System.AttributeTargets.Struct)]
-    public sealed partial class PersistentAttribute : System.Attribute
-    {
-        public PersistentAttribute() { }
-    }
     public static partial class TypeDriverHelper
     {
         public static void ClearDirty(object obj) { }
