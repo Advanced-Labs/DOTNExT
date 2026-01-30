@@ -513,41 +513,33 @@ namespace System.OS.Storage
                 ?? throw new InvalidOperationException("Cannot find Voron.Slice type");
             var keySlice = CreateSlice(sliceType, allocator, key.ToArray());
 
-            // Call Tree.Read - find by name
+            // Call Tree.TryRead(Slice key, out ValueReader value) - returns bool
             var methods = treeType.GetMethods();
-            System.Reflection.MethodInfo? readMethod = null;
+            System.Reflection.MethodInfo? tryReadMethod = null;
             foreach (var m in methods)
             {
-                if (m.Name == "Read")
+                if (m.Name == "TryRead")
                 {
                     var ps = m.GetParameters();
-                    if (ps.Length >= 1 && ps[0].ParameterType == sliceType)
+                    // Looking for TryRead(Slice, out ValueReader)
+                    if (ps.Length == 2 && ps[0].ParameterType == sliceType && ps[1].IsOut)
                     {
-                        readMethod = m;
+                        tryReadMethod = m;
                         break;
                     }
                 }
             }
-            if (readMethod == null)
-                throw new InvalidOperationException("Cannot find Tree.Read method");
+            if (tryReadMethod == null)
+                throw new InvalidOperationException("Cannot find Tree.TryRead method");
 
-            var readParams = readMethod.GetParameters();
-            var readArgs = new object?[readParams.Length];
-            readArgs[0] = keySlice;
-            for (int i = 1; i < readParams.Length; i++)
-                readArgs[i] = readParams[i].HasDefaultValue ? readParams[i].DefaultValue : Type.Missing;
+            // Invoke TryRead with out parameter
+            var args = new object?[] { keySlice, null };
+            var found = (bool)(tryReadMethod.Invoke(tree, args) ?? false);
 
-            var readResult = readMethod.Invoke(tree, readArgs);
-
-            if (readResult == null)
+            if (!found || args[1] == null)
                 return null;
 
-            // Get ReadResult.Reader and copy to byte array
-            var readerProp = readResult.GetType().GetProperty("Reader")
-                ?? throw new InvalidOperationException("Cannot find Reader property");
-            var reader = readerProp.GetValue(readResult);
-            if (reader == null)
-                return null;
+            var reader = args[1];
 
             // Get the Length property from the reader
             var lengthProp = reader.GetType().GetProperty("Length")
