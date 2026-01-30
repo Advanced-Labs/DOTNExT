@@ -11154,6 +11154,29 @@ namespace System.OS
         public static System.OS.VContext? Pop() { throw null; }
         public static void Push(System.OS.VContext context) { }
     }
+    public static partial class VKernel
+    {
+        public static string? DataPath { get { throw null; } }
+        public static bool IsInitialized { get { throw null; } }
+        [System.CLSCompliantAttribute(false)]
+        public static bool Delete(System.OS.VUID vuid) { throw null; }
+        public static bool Delete(object obj) { throw null; }
+        [System.CLSCompliantAttribute(false)]
+        public static bool Exists(System.OS.VUID vuid) { throw null; }
+        public static bool Flush(object obj) { throw null; }
+        public static int FlushAll() { throw null; }
+        [System.CLSCompliantAttribute(false)]
+        public static T? Get<T>(System.OS.VUID vuid) where T : class { throw null; }
+        [System.CLSCompliantAttribute(false)]
+        public static T GetOrNew<T>(System.OS.VUID vuid) where T : class, new() { throw null; }
+        public static int GetPendingFlushCount() { throw null; }
+        public static void Initialize() { }
+        public static T New<T>() where T : class, new() { throw null; }
+        [System.CLSCompliantAttribute(false)]
+        public static T New<T>(System.OS.VUID vuid) where T : class, new() { throw null; }
+        public static void Persist(object obj) { }
+        public static void Shutdown() { }
+    }
 }
 namespace System.Numerics
 {
