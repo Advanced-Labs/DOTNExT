@@ -151,6 +151,7 @@
     <Compile Include="$(BclSourcesRoot)\System\OS\VirtualAttribute.cs" />
     <Compile Include="$(BclSourcesRoot)\System\OS\VUID.cs" />
     <Compile Include="$(BclSourcesRoot)\System\OS\VKernel.cs" />
+    <Compile Include="$(BclSourcesRoot)\System\OS\VTransaction.cs" />
     <Compile Include="$(BclSourcesRoot)\System\OS\TypeDriverRegistry.cs" />
     <Compile Include="$(BclSourcesRoot)\System\OS\Storage\VoronStorage.cs" />
     <Compile Include="$(BclSourcesRoot)\System\OS\Storage\VoronStorageOps.cs" />

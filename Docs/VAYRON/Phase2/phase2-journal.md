@@ -536,3 +536,47 @@ Managed registry for type-to-driver mapping:
 T08 code complete. Ready for TAI build verification.
 
 ---
+
+## 2026-01-30 - T08 Build Verified
+
+**Build: PASSED ✓**
+
+Build fixes:
+1. CS0579/CS0111 - Removed duplicate PersistentAttribute
+2. CP0015 - Aligned AttributeUsage args with implementation
+
+---
+
+## 2026-01-30 - T09: VKernel Managed API
+
+### What I Did
+
+**Created VTransaction.cs:**
+
+Transaction scope for batched virtual object operations:
+- `IsActive` - Check if transaction is still active
+- `Commit()` - Commit all changes
+- `Rollback()` - Discard all changes
+- `Dispose()` - Auto-rollback if not committed
+- Internal `Persist(obj)` for transaction-aware persistence
+- Uses VoronStorage for underlying transaction management
+
+**Updated VKernel.cs with transaction methods:**
+
+- `BeginTransaction()` - Create new VTransaction
+- `WithTransaction(Action)` - Execute action in transaction
+- `WithTransaction<T>(Func<T>)` - Execute function in transaction
+
+VKernel already had most API from T07:
+- New<T>(), Get<T>(), Persist(), Flush(), FlushAll(), Delete()
+
+### Files Changed
+- `System/OS/VTransaction.cs` - NEW
+- `System/OS/VKernel.cs` - Added transaction methods
+- `System.Private.CoreLib.csproj` - Added VTransaction
+- `System.Runtime/ref/System.Runtime.cs` - Added VTransaction, transaction methods
+
+### Status
+T09 code complete. Ready for TAI build verification.
+
+---

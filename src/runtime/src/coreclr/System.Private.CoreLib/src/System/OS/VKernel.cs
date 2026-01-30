@@ -334,6 +334,76 @@ namespace System.OS
 
         #endregion
 
+        #region Transactions
+
+        /// <summary>
+        /// Begin a new transaction for batched operations.
+        /// </summary>
+        /// <returns>A new VTransaction that must be committed or disposed.</returns>
+        [CLSCompliant(false)]
+        [UnconditionalSuppressMessage("Trimming", "IL2026:RequiresUnreferencedCode",
+            Justification = "VTransaction uses VoronStorage which loads Voron dynamically")]
+        public static VTransaction BeginTransaction()
+        {
+            EnsureInitialized();
+            return new VTransaction();
+        }
+
+        /// <summary>
+        /// Execute an action within a transaction.
+        /// The transaction is committed on success, rolled back on exception.
+        /// </summary>
+        /// <param name="action">Action to execute.</param>
+        [UnconditionalSuppressMessage("Trimming", "IL2026:RequiresUnreferencedCode",
+            Justification = "VTransaction uses VoronStorage which loads Voron dynamically")]
+        public static void WithTransaction(Action action)
+        {
+            ArgumentNullException.ThrowIfNull(action);
+            EnsureInitialized();
+
+            using var tx = new VTransaction();
+            try
+            {
+                action();
+                tx.Commit();
+            }
+            catch
+            {
+                tx.Rollback();
+                throw;
+            }
+        }
+
+        /// <summary>
+        /// Execute a function within a transaction.
+        /// The transaction is committed on success, rolled back on exception.
+        /// </summary>
+        /// <typeparam name="TResult">Return type.</typeparam>
+        /// <param name="func">Function to execute.</param>
+        /// <returns>Result from the function.</returns>
+        [UnconditionalSuppressMessage("Trimming", "IL2026:RequiresUnreferencedCode",
+            Justification = "VTransaction uses VoronStorage which loads Voron dynamically")]
+        public static TResult WithTransaction<TResult>(Func<TResult> func)
+        {
+            ArgumentNullException.ThrowIfNull(func);
+            EnsureInitialized();
+
+            using var tx = new VTransaction();
+            try
+            {
+                var result = func();
+                tx.Commit();
+                return result;
+            }
+            catch
+            {
+                tx.Rollback();
+                throw;
+            }
+        }
+
+        #endregion
+
         #region Diagnostics
 
         /// <summary>
