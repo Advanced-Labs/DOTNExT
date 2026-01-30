@@ -107,8 +107,10 @@ namespace System.OS
             var vuid = VUID.New();
 
             // Set up for virtual operation
-            TypeDriverHelper.SetVUID(obj, vuid);
+            // NOTE: EnableNonDefaultRouting MUST come first - it creates the OpsRootTable entry
+            // SetVUID only updates an existing entry, it doesn't create one
             TypeDriverHelper.EnableNonDefaultRouting(obj);
+            TypeDriverHelper.SetVUID(obj, vuid);
 
             return obj;
         }
@@ -130,9 +132,11 @@ namespace System.OS
             // Create the managed object
             var obj = new T();
 
-            // Set VUID
-            TypeDriverHelper.SetVUID(obj, vuid);
+            // Set up for virtual operation
+            // NOTE: EnableNonDefaultRouting MUST come first - it creates the OpsRootTable entry
+            // SetVUID only updates an existing entry, it doesn't create one
             TypeDriverHelper.EnableNonDefaultRouting(obj);
+            TypeDriverHelper.SetVUID(obj, vuid);
 
             return obj;
         }
@@ -174,8 +178,9 @@ namespace System.OS
             var obj = BodyEncoder.Deserialize<T>(bodyBytes);
 
             // Set up virtual object state
-            TypeDriverHelper.SetVUID(obj, vuid);
+            // NOTE: EnableNonDefaultRouting MUST come first - it creates the OpsRootTable entry
             TypeDriverHelper.EnableNonDefaultRouting(obj);
+            TypeDriverHelper.SetVUID(obj, vuid);
 
             return obj;
         }
