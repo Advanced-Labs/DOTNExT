@@ -5,7 +5,6 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.OS;
-using System.OS.Storage;
 using static TDS.Tests.Phase2.AssertHelper;
 
 namespace TDS.Tests.Phase2
