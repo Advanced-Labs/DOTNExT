@@ -153,6 +153,8 @@
     <Compile Include="$(BclSourcesRoot)\System\OS\VKernel.cs" />
     <Compile Include="$(BclSourcesRoot)\System\OS\Storage\VoronStorage.cs" />
     <Compile Include="$(BclSourcesRoot)\System\OS\Storage\VoronStorageOps.cs" />
+    <Compile Include="$(BclSourcesRoot)\System\OS\Storage\BodyEncoder.cs" />
+    <Compile Include="$(BclSourcesRoot)\System\OS\Storage\BodyEncoder.TypeCodes.cs" />
     <Compile Include="$(BclSourcesRoot)\System\Reflection\Assembly.CoreCLR.cs" />
     <Compile Include="$(BclSourcesRoot)\System\Reflection\AssemblyName.CoreCLR.cs" />
     <Compile Include="$(BclSourcesRoot)\System\Reflection\Associates.cs" />
