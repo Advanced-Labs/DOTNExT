@@ -136,9 +136,11 @@ namespace System.OS
             if (s_ambient.Value == this)
                 s_ambient.Value = null;
 
-            if (!_committed && !_rolledBack && _voronTransaction != null)
+            // Always dispose the Voron transaction (unless already rolled back which disposes it)
+            if (!_rolledBack && _voronTransaction != null)
             {
-                // Auto-rollback on dispose without commit
+                // Dispose the Voron transaction - whether committed or not
+                // If not committed, this acts as a rollback
                 VoronStorage.DisposeTransaction(_voronTransaction);
             }
 
