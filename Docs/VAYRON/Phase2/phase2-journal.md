@@ -245,3 +245,55 @@ T03 code complete. Ready for TAI build verification.
 Build fixes applied. TAI can retry verification.
 
 ---
+
+## 2026-01-30 - T01-T03 Build Verified + T04: Voron Embedding Complete
+
+### What I Did
+
+**TAI Build Verification (T01-T03)**
+Multiple build fixes were required:
+1. CrstTdsDirtySet undeclared - manually updated crsttypes_generated.h
+2. VContextFlags CLS compliance - added [CLSCompliant(false)]
+3. VContext class CLS compliance - added attribute
+4. VContextManager CLS compliance - added attribute
+5. Reference assembly API compatibility - added T01-T03 types to System.Runtime.cs
+6. VUID GetVUID/SetVUID CLS attributes in ref assembly
+7. VUID signature mismatches (byte[] vs Span) - fixed in ref assembly
+
+**Final result: 10/10 tests passed. T01-T03 verified.**
+
+**T04: Voron Embedding (Scaffolding)**
+
+Created VoronStorage.cs in System.OS.Storage namespace:
+- Singleton pattern for Voron StorageEnvironment access
+- Reflection-based Voron loading (avoids compile-time dependency)
+- InitializeVoronEnvironment() dynamically loads Voron.dll
+- ReadTransaction/WriteTransaction wrappers
+- CreateTree/ReadTree/Commit helpers via reflection
+- Default data path: `./vayron-data/` or `VAYRON_DATA_PATH` env var
+- Initialize/Shutdown lifecycle methods
+
+Created VKernel.cs - main VAYRON entry point:
+- Initialize/Shutdown lifecycle
+- New<T>() and New<T>(VUID) object creation
+- Get<T>(VUID) and GetOrNew<T>(VUID) loading
+- Exists(VUID) for existence check
+- Persist(object) for explicit save
+- Flush(object) and FlushAll() for dirty object writes
+- Delete(object)/Delete(VUID) for removal
+- DataPath property for diagnostics
+
+Updated reference assembly with VKernel API.
+
+### Files Changed
+- `System/OS/Storage/VoronStorage.cs` - NEW - Voron wrapper
+- `System/OS/VKernel.cs` - NEW - Kernel entry point
+- `System.Private.CoreLib.csproj` - Added new files
+- `System.Runtime.cs` - Added VKernel to ref assembly
+
+### Status
+T04 scaffolding complete. Pending:
+- TAI build verification
+- TAI: Deploy Voron.dll and Sparrow.dll to Core_Root
+
+---
