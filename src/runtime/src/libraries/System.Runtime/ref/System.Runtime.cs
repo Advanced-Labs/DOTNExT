@@ -11222,6 +11222,7 @@ namespace System.OS
     public sealed partial class VTransaction : System.IDisposable
     {
         internal VTransaction() { }
+        public static System.OS.VTransaction? Current { get { throw null; } }
         public bool IsActive { get { throw null; } }
         [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCodeAttribute("Uses VoronStorage which loads Voron dynamically")]
         public void Commit() { }

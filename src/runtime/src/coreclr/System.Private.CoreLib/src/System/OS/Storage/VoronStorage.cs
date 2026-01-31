@@ -669,7 +669,7 @@ namespace System.OS.Storage
             if (!found || args[1] == null)
                 return null;
 
-            var reader = args[1];
+            var reader = args[1]!;  // Not null - checked above
 
             // Get the Length property from the reader
             var lengthProp = reader.GetType().GetProperty("Length")

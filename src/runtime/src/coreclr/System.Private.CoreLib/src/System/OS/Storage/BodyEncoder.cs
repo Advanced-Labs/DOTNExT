@@ -122,8 +122,7 @@ namespace System.OS.Storage
                 if (nullFlag == 1)
                 {
                     // Null value - set if field exists
-                    if (field != null)
-                        field.SetValue(obj, null);
+                    field?.SetValue(obj, null);
                     continue;
                 }
 
@@ -131,8 +130,7 @@ namespace System.OS.Storage
                 var value = ReadFieldValue(reader, typeCode, field?.FieldType);
 
                 // Set field value if field exists (schema evolution support)
-                if (field != null)
-                    field.SetValue(obj, value);
+                field?.SetValue(obj, value);
             }
 
             return obj;
@@ -355,7 +353,7 @@ namespace System.OS.Storage
         #region Read Field Values
 
         #pragma warning disable IDE0060 // Remove unused parameter - fieldType reserved for nested object deserialization
-        private static object? ReadFieldValue(BinaryReader reader, FieldTypeCode typeCode, Type fieldType)
+        private static object? ReadFieldValue(BinaryReader reader, FieldTypeCode typeCode, Type? fieldType)
         #pragma warning restore IDE0060
         {
             // Note: fieldType is reserved for future nested object deserialization support
