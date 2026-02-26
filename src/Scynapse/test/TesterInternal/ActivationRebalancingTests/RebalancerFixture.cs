@@ -1,6 +1,6 @@
 ﻿using TestExtensions;
-using Orleans.Configuration;
-using Orleans.TestingHost;
+using Scynapse.Configuration;
+using Scynapse.TestingHost;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace UnitTests.ActivationRebalancingTests;
@@ -15,7 +15,7 @@ public class RebalancerFixture : BaseInProcessTestClusterFixture
         builder.Options.InitialSilosCount = 4;
         builder.Options.UseRealEnvironmentStatistics = true;
         builder.ConfigureSilo((options, siloBuilder)
-#pragma warning disable ORLEANSEXP002
+#pragma warning disable SCYNAPSEEXP002
             => siloBuilder
                 .Configure<SiloMessagingOptions>(o =>
                 {
@@ -28,6 +28,6 @@ public class RebalancerFixture : BaseInProcessTestClusterFixture
                     o.SessionCyclePeriod = SessionCyclePeriod;
                 })
                 .AddActivationRebalancer());
-#pragma warning restore ORLEANSEXP002
+#pragma warning restore SCYNAPSEEXP002
     }
 }

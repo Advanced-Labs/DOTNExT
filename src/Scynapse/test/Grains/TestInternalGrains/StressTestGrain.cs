@@ -1,10 +1,10 @@
 using System.Net;
-using Orleans.Concurrency;
-using Orleans.Runtime;
+using Scynapse.Concurrency;
+using Scynapse.Runtime;
 using UnitTests.GrainInterfaces;
-using Orleans.Runtime.Configuration;
+using Scynapse.Runtime.Configuration;
 using Microsoft.Extensions.Logging;
-using Orleans.Internal;
+using Scynapse.Internal;
 
 namespace UnitTests.Grains
 {
@@ -255,7 +255,7 @@ namespace UnitTests.Grains
 
             if (numItems != results.Count)
             {
-                //throw new OrleansException(String.Format("numItems != results.Count, {0} != {1}", numItems, results.Count));
+                //throw new ScynapseException(String.Format("numItems != results.Count, {0} != {1}", numItems, results.Count));
             }
 
         }

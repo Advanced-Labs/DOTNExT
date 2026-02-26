@@ -1,8 +1,8 @@
 using System.Net;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Orleans.Internal;
-using Orleans.TestingHost;
+using Scynapse.Internal;
+using Scynapse.TestingHost;
 using UnitTests.GrainInterfaces;
 using Xunit;
 
@@ -11,7 +11,7 @@ namespace Tester
     /// <summary>
     /// Tests for localhost clustering mode, designed for local development and testing.
     /// 
-    /// UseLocalhostClustering configures Orleans to run on localhost without external dependencies
+    /// UseLocalhostClustering configures Scynapse to run on localhost without external dependencies
     /// like Azure Storage or SQL Server. This mode:
     /// - Uses in-memory membership provider
     /// - Configures silos to communicate via localhost
@@ -19,7 +19,7 @@ namespace Tester
     /// - Ideal for unit tests, development, and debugging
     /// 
     /// These tests verify that localhost clustering works correctly for both single-silo
-    /// and multi-silo scenarios, ensuring developers can easily run Orleans locally.
+    /// and multi-silo scenarios, ensuring developers can easily run Scynapse locally.
     /// </summary>
     [TestCategory("Functional")]
     public class LocalhostClusterTests
@@ -30,7 +30,7 @@ namespace Tester
         /// - Silo can start with localhost clustering
         /// - Client can connect using localhost clustering
         /// - Basic grain calls work in this configuration
-        /// This is the simplest Orleans setup for local development.
+        /// This is the simplest Scynapse setup for local development.
         /// </summary>
         [Fact]
         public async Task LocalhostSiloTest()
@@ -40,14 +40,14 @@ namespace Tester
             // Configure a single silo with localhost clustering
             // siloPort: for silo-to-silo communication (not used in single silo)
             // gatewayPort: for client-to-silo communication
-            var host = new HostBuilder().UseOrleans((ctx, siloBuilder) =>
+            var host = new HostBuilder().UseScynapse((ctx, siloBuilder) =>
             {
                 siloBuilder.AddMemoryGrainStorage("MemoryStore")
                 .UseLocalhostClustering(siloPort, gatewayPort);
             }).Build();
 
             // Configure client to connect to the localhost silo
-            var clientHost = new HostBuilder().UseOrleansClient((ctx, clientBuilder) =>
+            var clientHost = new HostBuilder().UseScynapseClient((ctx, clientBuilder) =>
             {
                 clientBuilder.UseLocalhostClustering(gatewayPort);
             }).Build();
@@ -64,8 +64,8 @@ namespace Tester
             }
             finally
             {
-                await OrleansTaskExtentions.SafeExecute(() => host.StopAsync());
-                await OrleansTaskExtentions.SafeExecute(() => clientHost.StopAsync());
+                await ScynapseTaskExtentions.SafeExecute(() => host.StopAsync());
+                await ScynapseTaskExtentions.SafeExecute(() => clientHost.StopAsync());
                 Utils.SafeExecute(() => host.Dispose());
                 Utils.SafeExecute(() => clientHost.Dispose());
             }
@@ -86,31 +86,31 @@ namespace Tester
             using var portAllocator = new TestClusterPortAllocator();
             var (baseSiloPort, baseGatewayPort) = portAllocator.AllocateConsecutivePortPairs(2);
             // Silo 1: Primary silo that others will connect to
-            var silo1 = new HostBuilder().UseOrleans((ctx, siloBuilder) =>
+            var silo1 = new HostBuilder().UseScynapse((ctx, siloBuilder) =>
             {
                 siloBuilder
                 .AddMemoryGrainStorage("MemoryStore")
                 .UseLocalhostClustering(baseSiloPort, baseGatewayPort);
-#pragma warning disable ORLEANSEXP003 // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
+#pragma warning disable SCYNAPSEEXP003 // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
                 // Distributed grain directory allows grain activations across multiple silos
                 siloBuilder.AddDistributedGrainDirectory();
-#pragma warning restore ORLEANSEXP003 // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
+#pragma warning restore SCYNAPSEEXP003 // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
             }).Build();
 
             // Silo 2: Secondary silo that connects to the primary
             // Note the third parameter: primary silo endpoint for cluster discovery
-            var silo2 = new HostBuilder().UseOrleans((ctx, siloBuilder) =>
+            var silo2 = new HostBuilder().UseScynapse((ctx, siloBuilder) =>
             {
                 siloBuilder
                 .AddMemoryGrainStorage("MemoryStore")
                 .UseLocalhostClustering(baseSiloPort + 1, baseGatewayPort + 1, new IPEndPoint(IPAddress.Loopback, baseSiloPort));
-#pragma warning disable ORLEANSEXP003 // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
+#pragma warning disable SCYNAPSEEXP003 // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
                 siloBuilder.AddDistributedGrainDirectory();
-#pragma warning restore ORLEANSEXP003 // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
+#pragma warning restore SCYNAPSEEXP003 // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
             }).Build();
 
             // Client configured with multiple gateway ports for load balancing/failover
-            var clientHost = new HostBuilder().UseOrleansClient((ctx, clientBuilder) =>
+            var clientHost = new HostBuilder().UseScynapseClient((ctx, clientBuilder) =>
             {
                 clientBuilder.UseLocalhostClustering(new[] {baseGatewayPort, baseGatewayPort + 1});
             }).Build();

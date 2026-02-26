@@ -1,8 +1,8 @@
 using Microsoft.Extensions.DependencyInjection;
 using Xunit.Abstractions;
-using Orleans.Configuration;
+using Scynapse.Configuration;
 using Microsoft.Extensions.Options;
-using Orleans.TestingHost;
+using Scynapse.TestingHost;
 using TestExtensions;
 using TestExtensions.Runners;
 

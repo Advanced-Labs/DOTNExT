@@ -1,0 +1,12 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <RootNamespace>TestInternalDtosRefScynapse</RootNamespace>
+    <AssemblyName>TestInternalDtosRefScynapse</AssemblyName>
+    <TargetFramework>$(MinTestTargetFramework)</TargetFramework>
+    <ScynapseBuildTimeCodeGen>true</ScynapseBuildTimeCodeGen>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="$(SourceRoot)test\Grains\TestGrainInterfaces\TestGrainInterfaces.csproj" />
+  </ItemGroup>
+</Project>

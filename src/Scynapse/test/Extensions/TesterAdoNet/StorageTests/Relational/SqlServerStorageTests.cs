@@ -1,4 +1,4 @@
-using Orleans.Tests.SqlUtils;
+using Scynapse.Tests.SqlUtils;
 using UnitTests.StorageTests.Relational.TestDataSets;
 using Xunit;
 

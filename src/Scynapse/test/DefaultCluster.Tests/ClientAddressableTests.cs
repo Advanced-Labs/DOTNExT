@@ -1,5 +1,5 @@
 using Microsoft.Extensions.DependencyInjection;
-using Orleans.Runtime;
+using Scynapse.Runtime;
 using TestExtensions;
 using UnitTests.GrainInterfaces;
 using Xunit;
@@ -7,7 +7,7 @@ using Xunit;
 namespace DefaultCluster.Tests
 {
     /// <summary>
-    /// Tests client-addressable objects in Orleans, which allow grains to call back to client-side objects.
+    /// Tests client-addressable objects in Scynapse, which allow grains to call back to client-side objects.
     /// This feature enables bidirectional communication where grains can invoke methods on objects hosted in the client.
     /// Key scenarios include:
     /// - Observer patterns where grains notify clients of events
@@ -166,7 +166,7 @@ namespace DefaultCluster.Tests
         /// Stress tests serial execution of many client object invocations.
         /// Verifies that:
         /// - Client objects maintain correct state across many sequential calls
-        /// - Orleans properly serializes access to client objects
+        /// - Scynapse properly serializes access to client objects
         /// - No race conditions occur in the serial execution model
         /// </summary>
         [Fact, TestCategory("BVT"), TestCategory("ClientAddressable")]
@@ -190,7 +190,7 @@ namespace DefaultCluster.Tests
         /// - Client objects can handle concurrent access from grains
         /// - All parallel invocations are processed without data loss
         /// - Thread-safety is maintained in the client object
-        /// This tests Orleans' ability to handle high-throughput client callbacks.
+        /// This tests Scynapse' ability to handle high-throughput client callbacks.
         /// </summary>
         [Fact, TestCategory("BVT"), TestCategory("ClientAddressable")]
         public async Task MicroClientAddressableParallelStressTest()

@@ -1,6 +1,6 @@
 using System.Data;
 using System.Data.Common;
-using Orleans.Tests.SqlUtils;
+using Scynapse.Tests.SqlUtils;
 using UnitTests.General;
 using Xunit;
 

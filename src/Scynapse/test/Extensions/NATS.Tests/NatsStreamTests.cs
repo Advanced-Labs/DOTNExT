@@ -1,8 +1,8 @@
 using Microsoft.Extensions.Configuration;
 using NATS.Client.Core;
 using NATS.Client.JetStream;
-using Orleans.Streaming.NATS.Hosting;
-using Orleans.TestingHost;
+using Scynapse.Streaming.NATS.Hosting;
+using Scynapse.TestingHost;
 using UnitTests.StreamingTests;
 using Xunit;
 using TestExtensions;

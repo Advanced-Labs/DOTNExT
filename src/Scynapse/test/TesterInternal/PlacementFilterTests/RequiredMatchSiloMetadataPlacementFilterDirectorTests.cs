@@ -1,6 +1,6 @@
 using System.Net;
-using Orleans.Runtime.MembershipService.SiloMetadata;
-using Orleans.Runtime.Placement.Filtering;
+using Scynapse.Runtime.MembershipService.SiloMetadata;
+using Scynapse.Runtime.Placement.Filtering;
 using Xunit;
 
 namespace UnitTests.PlacementFilterTests;

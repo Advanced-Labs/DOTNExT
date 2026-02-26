@@ -1,18 +1,18 @@
 ﻿
-using Orleans.Runtime;
+using Scynapse.Runtime;
 using Xunit;
 
 namespace UnitTests
 {
     /// <summary>
-    /// Tests for Orleans management and monitoring components, particularly the SystemStatus enumeration.
-    /// SystemStatus is used throughout Orleans to track the lifecycle state of silos and other runtime components.
+    /// Tests for Scynapse management and monitoring components, particularly the SystemStatus enumeration.
+    /// SystemStatus is used throughout Scynapse to track the lifecycle state of silos and other runtime components.
     /// </summary>
     public class ManagementAgentTests
     {
         /// <summary>
         /// Tests the equality implementation of SystemStatus values to ensure proper comparison behavior.
-        /// This is important for state management and monitoring throughout the Orleans runtime.
+        /// This is important for state management and monitoring throughout the Scynapse runtime.
         /// </summary>
         [Fact, TestCategory("Functional"), TestCategory("Management")]
         public void SystemStatusEquals()

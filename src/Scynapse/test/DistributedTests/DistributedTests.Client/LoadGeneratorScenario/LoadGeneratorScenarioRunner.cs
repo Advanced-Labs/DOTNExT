@@ -4,7 +4,7 @@ using Microsoft.Crank.EventSources;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using Orleans.Configuration;
+using Scynapse.Configuration;
 
 namespace DistributedTests.Client.LoadGeneratorScenario
 {
@@ -45,7 +45,7 @@ namespace DistributedTests.Client.LoadGeneratorScenario
             BenchmarksEventSource.Register("failures", Operations.Sum, Operations.Sum, "Failures", "Number of failures", "n0");
             BenchmarksEventSource.Register("rps", Operations.Sum, Operations.Median, "Median RPS", "Rate per second", "n0");
 
-            var hostBuilder = new HostBuilder().UseOrleansClient((ctx, builder) =>
+            var hostBuilder = new HostBuilder().UseScynapseClient((ctx, builder) =>
                 builder.Configure<ClusterOptions>(options => { options.ClusterId = clientParams.ClusterId; options.ServiceId = clientParams.ServiceId; })
                        .Configure<ConnectionOptions>(options => clientParams.ConnectionsPerEndpoint = 2)
                        .UseAzureStorageClustering(options => options.TableServiceClient = clientParams.AzureTableUri.CreateTableServiceClient()));

@@ -1,4 +1,4 @@
-using Orleans.BroadcastChannel;
+using Scynapse.BroadcastChannel;
 
 namespace UnitTests.Grains.BroadcastChannel
 {

@@ -1,4 +1,4 @@
-using Orleans.TestingHost;
+using Scynapse.TestingHost;
 using TestExtensions;
 using UnitTests.GrainInterfaces;
 using Xunit;
@@ -6,7 +6,7 @@ using Xunit;
 namespace UnitTests.General
 {
     [TestCategory("BVT"), TestCategory("GrainLevelCallFilter")]
-    public class GrainLevelCallFilterTests : OrleansTestingBase, IClassFixture<GrainLevelCallFilterTests.Fixture>
+    public class GrainLevelCallFilterTests : ScynapseTestingBase, IClassFixture<GrainLevelCallFilterTests.Fixture>
     {
         public class Fixture : PluginLoadingTestClusterFixture
         {

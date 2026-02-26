@@ -1,7 +1,7 @@
 #nullable enable
 using System.Diagnostics;
 using Microsoft.Extensions.Logging;
-using Orleans.Internal;
+using Scynapse.Internal;
 using TestExtensions;
 using UnitTests.GrainInterfaces;
 using Xunit;
@@ -10,9 +10,9 @@ namespace DefaultCluster.Tests;
 
 /// <summary>
 /// Tests support for grain methods which return <see cref="IAsyncEnumerable{T}"/>.
-/// These tests verify Orleans' ability to handle streaming results from grain methods,
+/// These tests verify Scynapse' ability to handle streaming results from grain methods,
 /// including batching, error handling, cancellation, and proper resource cleanup.
-/// Orleans uses a grain extension mechanism to manage the lifecycle of async enumerators
+/// Scynapse uses a grain extension mechanism to manage the lifecycle of async enumerators
 /// across the distributed system.
 /// </summary>
 public class AsyncEnumerableGrainCallTests : HostedTestClusterEnsureDefaultStarted
@@ -24,7 +24,7 @@ public class AsyncEnumerableGrainCallTests : HostedTestClusterEnsureDefaultStart
     /// <summary>
     /// Tests basic async enumerable functionality where a grain produces values that are consumed by the client.
     /// Verifies that values are correctly transmitted and the enumerator is properly disposed after use.
-    /// This demonstrates Orleans' support for streaming data from grains without keeping all data in memory.
+    /// This demonstrates Scynapse' support for streaming data from grains without keeping all data in memory.
     /// </summary>
     [Fact, TestCategory("BVT"), TestCategory("Observable")]
     public async Task ObservableGrain_AsyncEnumerable()
@@ -102,7 +102,7 @@ public class AsyncEnumerableGrainCallTests : HostedTestClusterEnsureDefaultStart
     /// <summary>
     /// Tests cancellation handling in async enumerable streams when the grain cancels the enumeration.
     /// Verifies that OperationCanceledException is properly propagated and resources are cleaned up.
-    /// This tests Orleans' ability to handle cooperative cancellation in distributed streaming scenarios.
+    /// This tests Scynapse' ability to handle cooperative cancellation in distributed streaming scenarios.
     /// </summary>
     [Theory, TestCategory("BVT"), TestCategory("Observable")]
     [InlineData(0, false)]
@@ -214,7 +214,7 @@ public class AsyncEnumerableGrainCallTests : HostedTestClusterEnsureDefaultStart
     /// <summary>
     /// Tests client-side cancellation using the WithCancellation extension method.
     /// Similar to CancellationToken test but uses the extension method approach for cancellation.
-    /// Verifies that the WithCancellation extension properly integrates with Orleans' async enumerable support.
+    /// Verifies that the WithCancellation extension properly integrates with Scynapse' async enumerable support.
     /// </summary>
     [Theory, TestCategory("BVT"), TestCategory("Observable")]
     [InlineData(0, false)]
@@ -278,7 +278,7 @@ public class AsyncEnumerableGrainCallTests : HostedTestClusterEnsureDefaultStart
 
     /// <summary>
     /// Tests batching optimization for async enumerable streams.
-    /// Verifies that Orleans automatically batches multiple values to reduce network round-trips.
+    /// Verifies that Scynapse automatically batches multiple values to reduce network round-trips.
     /// This optimization is crucial for performance when streaming many small values.
     /// </summary>
     [Fact, TestCategory("BVT"), TestCategory("Observable")]
@@ -439,7 +439,7 @@ public class AsyncEnumerableGrainCallTests : HostedTestClusterEnsureDefaultStart
     /// <summary>
     /// Tests async enumerable behavior with a slow-producing grain.
     /// Verifies that the client can stop consuming before all values are produced.
-    /// This tests Orleans' ability to handle backpressure and early termination in streaming scenarios.
+    /// This tests Scynapse' ability to handle backpressure and early termination in streaming scenarios.
     /// </summary>
     [Fact, TestCategory("BVT"), TestCategory("Observable")]
     public async Task ObservableGrain_AsyncEnumerable_SlowProducer()
@@ -524,7 +524,7 @@ public class AsyncEnumerableGrainCallTests : HostedTestClusterEnsureDefaultStart
 
     /// <summary>
     /// Tests enumerator eviction when a client consumes too slowly.
-    /// Verifies that Orleans properly cleans up abandoned enumerators after a timeout period.
+    /// Verifies that Scynapse properly cleans up abandoned enumerators after a timeout period.
     /// This prevents resource leaks when clients fail to complete enumeration.
     /// The test ensures proper error handling when trying to continue after eviction.
     /// </summary>
@@ -668,7 +668,7 @@ public class AsyncEnumerableGrainCallTests : HostedTestClusterEnsureDefaultStart
         void IObserver<DiagnosticListener>.OnError(Exception error) { }
         void IObserver<DiagnosticListener>.OnNext(DiagnosticListener value)
         {
-            if (value.Name == "Orleans.Runtime.AsyncEnumerableGrainExtension")
+            if (value.Name == "Scynapse.Runtime.AsyncEnumerableGrainExtension")
             {
                 _instanceSubscription = value.Subscribe(this);
             }

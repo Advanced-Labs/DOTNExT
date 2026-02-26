@@ -1,12 +1,12 @@
 using Microsoft.CodeAnalysis;
-using Orleans.Analyzers;
+using Scynapse.Analyzers;
 using Xunit;
 
 namespace Analyzers.Tests;
 
 /// <summary>
 /// Tests for the AliasClashAttributeAnalyzer which ensures that alias attributes don't have conflicting values.
-/// Orleans uses aliases for type identification in serialization and RPC, so duplicate aliases would cause 
+/// Scynapse uses aliases for type identification in serialization and RPC, so duplicate aliases would cause 
 /// runtime conflicts. This analyzer catches these issues at compile time.
 /// </summary>
 [TestCategory("BVT"), TestCategory("Analyzer")]
@@ -152,7 +152,7 @@ public class AliasClashAttributeAnalyzerTest : DiagnosticAnalyzerTestBase<AliasC
 
     /// <summary>
     /// Verifies that the analyzer does NOT trigger for non-grain interfaces with the same alias,
-    /// as aliases are only meaningful for grain interfaces in Orleans.
+    /// as aliases are only meaningful for grain interfaces in Scynapse.
     /// </summary>
     [Fact]
     public Task NonGrainInterface_ShouldNotTriggerDiagnostic()

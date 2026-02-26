@@ -1,17 +1,17 @@
 using System.Net;
 using System.Net.Sockets;
 using Microsoft.Extensions.Configuration;
-using Orleans.Messaging;
-using Orleans.Runtime;
-using Orleans.TestingHost;
+using Scynapse.Messaging;
+using Scynapse.Runtime;
+using Scynapse.TestingHost;
 using TestExtensions;
 using UnitTests.GrainInterfaces;
 using Xunit;
 using Microsoft.Extensions.DependencyInjection;
-using Orleans.Configuration;
-using Orleans.Configuration.Internal;
+using Scynapse.Configuration;
+using Scynapse.Configuration.Internal;
 using Microsoft.Extensions.Hosting;
-using Orleans.Runtime.Messaging;
+using Scynapse.Runtime.Messaging;
 
 namespace Tester
 {
@@ -59,7 +59,7 @@ namespace Tester
         {
             public void Configure(IHostBuilder hostBuilder)
             {
-                hostBuilder.UseOrleans((ctx, siloBuilder) =>
+                hostBuilder.UseScynapse((ctx, siloBuilder) =>
                 {
                     siloBuilder.UseLocalhostClustering();
                 });
@@ -177,7 +177,7 @@ namespace Tester
 
             // Close current client connection
             await this.HostedCluster.StopClusterClientAsync();
-            var hostBuilder = new HostBuilder().UseOrleansClient(
+            var hostBuilder = new HostBuilder().UseScynapseClient(
                 (ctx, clientBuilder) =>
                 {
                     clientBuilder.Configure<ClientMessagingOptions>(

@@ -1,7 +1,7 @@
 ﻿using System.Text;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Orleans.Configuration;
+using Scynapse.Configuration;
 using Xunit;
 
 namespace Tester.AzureUtils;
@@ -19,7 +19,7 @@ public class AzureQueueStreamProviderBuilderTests
 	{
 		string json = """
 		{
-			"Orleans": {
+			"Scynapse": {
 				"Streaming": {
 					"AzureQueueProvider": {
 						"ProviderType": "AzureQueueStorage",
@@ -45,7 +45,7 @@ public class AzureQueueStreamProviderBuilderTests
 	{
 		string json = """
 		{
-			"Orleans": {
+			"Scynapse": {
 				"Streaming": {
 					"AzureQueueProvider": {
 						"ProviderType": "AzureQueueStorage",
@@ -75,7 +75,7 @@ public class AzureQueueStreamProviderBuilderTests
 	{
 		string json = """
 		{
-			"Orleans": {
+			"Scynapse": {
 				"Streaming": {
 					"AzureQueueProvider": {
 						"ProviderType": "AzureQueueStorage",
@@ -103,7 +103,7 @@ public class AzureQueueStreamProviderBuilderTests
 	{
 		var siloBuilder = new TestSiloBuilder(json);
 		var aqsBuilder = new AzureQueueStreamProviderBuilder();
-		aqsBuilder.Configure(siloBuilder, null, siloBuilder.Configuration.GetSection("Orleans:Streaming:AzureQueueProvider"));
+		aqsBuilder.Configure(siloBuilder, null, siloBuilder.Configuration.GetSection("Scynapse:Streaming:AzureQueueProvider"));
 		return siloBuilder;
 	}
 

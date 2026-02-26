@@ -3,19 +3,19 @@ using System.Diagnostics;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Orleans.Configuration;
-using Orleans.Placement;
-using Orleans.Placement.Repartitioning;
-using Orleans.Runtime.Placement;
-using Orleans.Runtime.Placement.Repartitioning;
-using Orleans.TestingHost;
+using Scynapse.Configuration;
+using Scynapse.Placement;
+using Scynapse.Placement.Repartitioning;
+using Scynapse.Runtime.Placement;
+using Scynapse.Runtime.Placement.Repartitioning;
+using Scynapse.TestingHost;
 using TestExtensions;
 using Xunit;
 using Xunit.Abstractions;
 
 namespace UnitTests.ActivationRepartitioningTests;
 
-// Scenarios can be seen visually here: https://github.com/dotnet/orleans/pull/8877
+// Scenarios can be seen visually here: https://github.com/dotnet/scynapse/pull/8877
 [TestCategory("Functional"), TestCategory("ActivationRepartitioning"), Category("BVT")]
 public class CustomToleranceTests(CustomToleranceTests.Fixture fixture, ITestOutputHelper output) : RepartitioningTestBase<CustomToleranceTests.Fixture>(fixture), IClassFixture<CustomToleranceTests.Fixture>
 {
@@ -244,7 +244,7 @@ public class CustomToleranceTests(CustomToleranceTests.Fixture fixture, ITestOut
         private class SiloConfigurator : ISiloConfigurator
         {
             public void Configure(ISiloBuilder hostBuilder)
-#pragma warning disable ORLEANSEXP001 // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
+#pragma warning disable SCYNAPSEEXP001 // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
                 => hostBuilder
                     .Configure<SiloMessagingOptions>(o =>
                     {
@@ -263,9 +263,9 @@ public class CustomToleranceTests(CustomToleranceTests.Fixture fixture, ITestOut
                         o.AnchoringFilterEnabled = false;
                     })
                     .AddActivationRepartitioner<HardLimitRule>()
-                    .ConfigureLogging(logging => logging.AddFilter("Orleans.Runtime.Placement.Repartitioning", LogLevel.Trace))
+                    .ConfigureLogging(logging => logging.AddFilter("Scynapse.Runtime.Placement.Repartitioning", LogLevel.Trace))
                     .ConfigureServices(service => service.AddSingleton<IRepartitionerMessageFilter, TestMessageFilter>());
-#pragma warning restore ORLEANSEXP001 // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
+#pragma warning restore SCYNAPSEEXP001 // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
         }
 
         private class HardLimitRule : IImbalanceToleranceRule

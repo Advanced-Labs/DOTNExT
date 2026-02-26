@@ -1,9 +1,9 @@
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using Orleans.AzureUtils;
-using Orleans.Clustering.AzureStorage;
-using Orleans.Messaging;
-using Orleans.Runtime.MembershipService;
+using Scynapse.AzureUtils;
+using Scynapse.Clustering.AzureStorage;
+using Scynapse.Messaging;
+using Scynapse.Runtime.MembershipService;
 using TestExtensions;
 using UnitTests;
 using UnitTests.MembershipTests;
@@ -12,9 +12,9 @@ using Xunit;
 namespace Tester.AzureUtils
 {
     /// <summary>
-    /// Tests for operation of Orleans Membership Table using AzureStore - Requires access to external Azure storage
+    /// Tests for operation of Scynapse Membership Table using AzureStore - Requires access to external Azure storage
     /// 
-    /// Azure Table Storage provides a scalable, highly available membership table implementation for Orleans.
+    /// Azure Table Storage provides a scalable, highly available membership table implementation for Scynapse.
     /// Key features include:
     /// - Automatic partitioning and load balancing
     /// - Strong consistency guarantees within partitions
@@ -35,9 +35,9 @@ namespace Tester.AzureUtils
         private static LoggerFilterOptions CreateFilters()
         {
             var filters = new LoggerFilterOptions();
-            filters.AddFilter(typeof(Orleans.Clustering.AzureStorage.AzureTableDataManager<>).FullName, LogLevel.Trace);
-            filters.AddFilter(typeof(OrleansSiloInstanceManager).FullName, LogLevel.Trace);
-            filters.AddFilter("Orleans.Storage", LogLevel.Trace);
+            filters.AddFilter(typeof(Scynapse.Clustering.AzureStorage.AzureTableDataManager<>).FullName, LogLevel.Trace);
+            filters.AddFilter(typeof(ScynapseSiloInstanceManager).FullName, LogLevel.Trace);
+            filters.AddFilter("Scynapse.Storage", LogLevel.Trace);
             return filters;
         }
 

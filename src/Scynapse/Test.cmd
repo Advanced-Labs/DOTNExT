@@ -34,11 +34,11 @@ set TESTS=^
 '%CMDHOME%\test\Extensions\ServiceBus.Tests',^
 '%CMDHOME%\test\Extensions\TesterAdoNet',^
 '%CMDHOME%\test\Extensions\TesterZooKeeperUtils',^
-'%CMDHOME%\test\Transactions\Orleans.Transactions.Tests',^
-'%CMDHOME%\test\Transactions\Orleans.Transactions.Azure.Test',^
-'%CMDHOME%\test\TestInfrastructure\Orleans.TestingHost.Tests',^
+'%CMDHOME%\test\Transactions\Scynapse.Transactions.Tests',^
+'%CMDHOME%\test\Transactions\Scynapse.Transactions.Azure.Test',^
+'%CMDHOME%\test\TestInfrastructure\Scynapse.TestingHost.Tests',^
 '%CMDHOME%\test\DependencyInjection.Tests',^
-'%CMDHOME%\test\Orleans.Connections.Security.Tests',^
+'%CMDHOME%\test\Scynapse.Connections.Security.Tests',^
 '%CMDHOME%\test\Analyzers.Tests'"
 
 @Echo Test assemblies = %TESTS%

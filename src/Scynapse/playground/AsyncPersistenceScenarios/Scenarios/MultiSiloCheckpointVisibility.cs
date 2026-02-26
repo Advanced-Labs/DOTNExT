@@ -8,7 +8,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Scynapse.AsyncPlus;
 using Scynapse.AsyncPlus.Services;
-using Orleans;
+using Scynapse;
 using Spectre.Console;
 
 namespace AsyncPersistenceScenarios.Scenarios;

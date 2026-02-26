@@ -1,5 +1,5 @@
 using Microsoft.Extensions.Configuration;
-using Orleans.TestingHost;
+using Scynapse.TestingHost;
 using Tester.StreamingTests;
 using TestExtensions;
 using Xunit;
@@ -13,9 +13,9 @@ namespace ServiceBus.Tests.Streaming
     [TestCategory("EventHub"), TestCategory("Streaming"), TestCategory("Functional")]
     public class EHProgrammaticSubscribeTest : ProgrammaticSubscribeTestsRunner, IClassFixture<EHProgrammaticSubscribeTest.Fixture>
     {
-        private const string EHPath = "ehorleanstest4";
-        private const string EHPath2 = "ehorleanstest3";
-        private const string EHConsumerGroup = "orleansnightly";
+        private const string EHPath = "ehscynapsetest4";
+        private const string EHPath2 = "ehscynapsetest3";
+        private const string EHConsumerGroup = "scynapsenightly";
         public class Fixture : BaseEventHubTestClusterFixture
         {
             protected override void ConfigureTestCluster(TestClusterBuilder builder)

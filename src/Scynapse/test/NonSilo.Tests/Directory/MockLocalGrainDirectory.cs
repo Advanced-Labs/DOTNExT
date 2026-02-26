@@ -1,6 +1,6 @@
-using Orleans.GrainDirectory;
-using Orleans.Runtime;
-using Orleans.Runtime.GrainDirectory;
+using Scynapse.GrainDirectory;
+using Scynapse.Runtime;
+using Scynapse.Runtime.GrainDirectory;
 
 namespace UnitTests.Directory
 {

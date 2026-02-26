@@ -1,10 +1,10 @@
-using Orleans.Configuration;
-using Orleans.Providers.Streams.Common;
-using Orleans.Runtime;
-using Orleans.Streaming.EventHubs.Testing;
-using Orleans.Streams;
-using Orleans.TestingHost;
-using Orleans.TestingHost.Utils;
+using Scynapse.Configuration;
+using Scynapse.Providers.Streams.Common;
+using Scynapse.Runtime;
+using Scynapse.Streaming.EventHubs.Testing;
+using Scynapse.Streams;
+using Scynapse.TestingHost;
+using Scynapse.TestingHost.Utils;
 using ServiceBus.Tests.TestStreamProviders;
 using TestExtensions;
 using UnitTests.GrainInterfaces;
@@ -16,7 +16,7 @@ namespace ServiceBus.Tests.SlowConsumingTests
     /// Tests for EventHub slow consumer detection and back pressure algorithm behavior.
     /// </summary>
     [TestCategory("EventHub"), TestCategory("Streaming")]
-    public class EHSlowConsumingTests : OrleansTestingBase, IClassFixture<EHSlowConsumingTests.Fixture>
+    public class EHSlowConsumingTests : ScynapseTestingBase, IClassFixture<EHSlowConsumingTests.Fixture>
     {
         private const string StreamProviderName = "EventHubStreamProvider";
         private const string StreamNamespace = "EHTestsNamespace";

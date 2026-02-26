@@ -2,10 +2,10 @@ using System;
 using System.Linq;
 using System.Text.RegularExpressions;
 
-#if ORLEANS_PERSISTENCE
-namespace Orleans.Persistence.AzureStorage
-#elif ORLEANS_STREAMING
-namespace Orleans.Streaming.AzureStorage
+#if SCYNAPSE_PERSISTENCE
+namespace Scynapse.Persistence.AzureStorage
+#elif SCYNAPSE_STREAMING
+namespace Scynapse.Streaming.AzureStorage
 #else
 // No default namespace intentionally to cause compile errors if something is not defined
 #endif

@@ -6,7 +6,7 @@ using Xunit;
 namespace DefaultCluster.Tests.General
 {
     /// <summary>
-    /// Tests for polymorphic grain interfaces in Orleans.
+    /// Tests for polymorphic grain interfaces in Scynapse.
     /// Demonstrates how grains can implement multiple interfaces with inheritance
     /// hierarchies, and how grain references can be cast between compatible interfaces.
     /// This enables object-oriented patterns where grains expose different levels

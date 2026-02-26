@@ -5,10 +5,10 @@ namespace Tester.CodeGenTests
     using System.Collections.Generic;
     using System.Linq;
     using System.Threading.Tasks;
-    using Orleans;
-    using Orleans.Providers;
+    using Scynapse;
+    using Scynapse.Providers;
 
-    // Regression test for explicit interface method implementations https://github.com/dotnet/orleans/issues/8991
+    // Regression test for explicit interface method implementations https://github.com/dotnet/scynapse/issues/8991
     public interface IExplicitInterfaceMethodImplementationTestGenericBase<in T>
     {
         Task M(T arg);
@@ -31,7 +31,7 @@ namespace Tester.CodeGenTests
         }
     }
 
-    // End regression test for https://github.com/dotnet/orleans/issues/8991
+    // End regression test for https://github.com/dotnet/scynapse/issues/8991
 
     public interface IGrainWithNonPublicMethods : IGrainWithGuidKey
     {

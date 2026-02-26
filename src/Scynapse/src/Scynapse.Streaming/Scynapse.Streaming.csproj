@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <PackageId>Genesa.Scynapse.Streaming</PackageId>
+    <Title>Microsoft Scynapse Streaming Library</Title>
+    <Description>Streaming library for Microsoft Scynapse used both on the client and server.</Description>
+    <TargetFrameworks>$(DefaultTargetFrameworks)</TargetFrameworks>
+    <ScynapseBuildTimeCodeGen>true</ScynapseBuildTimeCodeGen>
+    <ProduceReferenceAssembly>false</ProduceReferenceAssembly>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Scynapse.Runtime\Scynapse.Runtime.csproj" />
+  </ItemGroup>
+</Project>

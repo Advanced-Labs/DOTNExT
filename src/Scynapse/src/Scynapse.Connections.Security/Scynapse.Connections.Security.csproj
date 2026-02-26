@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <PackageId>Genesa.Scynapse.Connections.Security</PackageId>
+    <Title>Microsoft Scynapse TLS support</Title>
+    <Description>Support for security communication using TLS in Microsoft Scynapse.</Description>
+    <PackageTags>$(PackageTags) TLS SSL</PackageTags>
+    <TargetFrameworks>$(DefaultTargetFrameworks)</TargetFrameworks>
+    <ScynapseBuildTimeCodeGen>true</ScynapseBuildTimeCodeGen>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Scynapse.Runtime\Scynapse.Runtime.csproj" />
+  </ItemGroup>
+</Project>

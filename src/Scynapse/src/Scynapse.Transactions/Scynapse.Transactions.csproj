@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <PackageId>Genesa.Scynapse.Transactions</PackageId>
+    <Title>Microsoft Scynapse Transactions support</Title>
+    <Description>Core Transaction library of Microsoft Scynapse used on the server.</Description>
+    <PackageTags>$(PackageTags) Transactions</PackageTags>
+    <TargetFrameworks>$(DefaultTargetFrameworks)</TargetFrameworks>
+    <AssemblyName>Scynapse.Transactions</AssemblyName>
+    <RootNamespace>Scynapse.Transactions</RootNamespace>
+    <ScynapseBuildTimeCodeGen>true</ScynapseBuildTimeCodeGen>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Scynapse.Runtime\Scynapse.Runtime.csproj" />
+  </ItemGroup>
+</Project>

@@ -1,5 +1,5 @@
 using Microsoft.Extensions.Logging;
-using Orleans.Concurrency;
+using Scynapse.Concurrency;
 using UnitTests.GrainInterfaces;
 
 

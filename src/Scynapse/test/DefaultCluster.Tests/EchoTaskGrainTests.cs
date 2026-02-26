@@ -1,7 +1,7 @@
 using System.Diagnostics;
 using Microsoft.Extensions.Logging;
-using Orleans.Internal;
-using Orleans.Runtime;
+using Scynapse.Internal;
+using Scynapse.Runtime;
 using TestExtensions;
 using UnitTests.GrainInterfaces;
 using Xunit;
@@ -11,7 +11,7 @@ namespace DefaultCluster.Tests.General
     /// <summary>
     /// Tests basic grain communication patterns using Echo grains.
     /// Echo grains are simple test grains that return or process the input they receive.
-    /// These tests verify fundamental Orleans features:
+    /// These tests verify fundamental Scynapse features:
     /// - Basic request/response communication
     /// - Error propagation from grains to clients
     /// - Timeout handling and recovery
@@ -103,7 +103,7 @@ namespace DefaultCluster.Tests.General
         /// - Long-running grain methods timeout according to configuration
         /// - TimeoutException is properly thrown
         /// - Timeout occurs within expected time bounds
-        /// This tests Orleans' ability to prevent hung calls from blocking indefinitely.
+        /// This tests Scynapse' ability to prevent hung calls from blocking indefinitely.
         /// </summary>
         [Fact, TestCategory("SlowBVT"), TestCategory("Echo"), TestCategory("Timeout")]
         public async Task EchoGrain_Timeout_ContinueWith()
@@ -289,7 +289,7 @@ namespace DefaultCluster.Tests.General
         /// <summary>
         /// Tests grain's ability to ping specific remote silos.
         /// Verifies cross-silo communication where a grain can target specific silos.
-        /// This demonstrates Orleans' ability to route messages to specific cluster nodes.
+        /// This demonstrates Scynapse' ability to route messages to specific cluster nodes.
         /// </summary>
         [Fact, TestCategory("BVT"), TestCategory("Echo")]
         public async Task EchoGrain_PingSilo_Remote()
@@ -339,7 +339,7 @@ namespace DefaultCluster.Tests.General
         /// <summary>
         /// Tests grain's ability to interact with cluster membership.
         /// Verifies that grains can query and use membership information to communicate
-        /// with other cluster members. This demonstrates Orleans' membership awareness.
+        /// with other cluster members. This demonstrates Scynapse' membership awareness.
         /// </summary>
         [Fact, TestCategory("BVT"), TestCategory("Echo")]
         public async Task EchoGrain_PingSilo_OtherSilo_Membership()
@@ -383,7 +383,7 @@ namespace DefaultCluster.Tests.General
         /// <summary>
         /// Tests various async/await patterns in reentrant grains.
         /// Similar to EchoTaskGrain_Await but with reentrant grains that can process
-        /// multiple messages concurrently. This verifies Orleans' reentrancy support.
+        /// multiple messages concurrently. This verifies Scynapse' reentrancy support.
         /// </summary>
         [Fact, TestCategory("BVT"), TestCategory("Echo")]
         public async Task EchoTaskGrain_Await_Reentrant()
@@ -405,7 +405,7 @@ namespace DefaultCluster.Tests.General
         /// Verifies that:
         /// - Nullable values are correctly serialized when non-null
         /// - Null values are properly handled and returned as null
-        /// This ensures Orleans correctly handles .NET nullable value types.
+        /// This ensures Scynapse correctly handles .NET nullable value types.
         /// </summary>
         [Fact, TestCategory("BVT"), TestCategory("Echo")]
         public async Task EchoGrain_EchoNullable()

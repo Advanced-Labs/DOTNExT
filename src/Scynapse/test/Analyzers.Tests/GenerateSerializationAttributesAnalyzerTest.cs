@@ -1,12 +1,12 @@
 using Microsoft.CodeAnalysis;
-using Orleans.Analyzers;
+using Scynapse.Analyzers;
 using Xunit;
 
 namespace Analyzers.Tests;
 
 /// <summary>
 /// Tests for the analyzer that ensures types marked with [GenerateSerializer] have proper field attributes.
-/// In Orleans serialization, each serializable field must be marked with an [Id] attribute to ensure
+/// In Scynapse serialization, each serializable field must be marked with an [Id] attribute to ensure
 /// version tolerance and efficient serialization. This analyzer helps developers identify missing
 /// field attributes that could cause serialization issues.
 /// </summary>
@@ -27,7 +27,7 @@ public class GenerateSerializationAttributesAnalyzerTest : DiagnosticAnalyzerTes
 
     /// <summary>
     /// Verifies that the analyzer detects when a class with [GenerateSerializer]
-    /// has fields without [Id] attributes, which are required for proper Orleans serialization.
+    /// has fields without [Id] attributes, which are required for proper Scynapse serialization.
     /// </summary>
     [Fact]
     public Task SerializableClass()
@@ -35,7 +35,7 @@ public class GenerateSerializationAttributesAnalyzerTest : DiagnosticAnalyzerTes
 
     /// <summary>
     /// Verifies that the analyzer detects when a struct with [GenerateSerializer]
-    /// has fields without [Id] attributes, which are required for proper Orleans serialization.
+    /// has fields without [Id] attributes, which are required for proper Scynapse serialization.
     /// </summary>
     [Fact]
     public Task SerializableStruct()
@@ -43,7 +43,7 @@ public class GenerateSerializationAttributesAnalyzerTest : DiagnosticAnalyzerTes
 
     /// <summary>
     /// Verifies that the analyzer detects when a record with [GenerateSerializer]
-    /// has fields without [Id] attributes, which are required for proper Orleans serialization.
+    /// has fields without [Id] attributes, which are required for proper Scynapse serialization.
     /// </summary>
     [Fact]
     public Task SerializableRecord()
@@ -51,7 +51,7 @@ public class GenerateSerializationAttributesAnalyzerTest : DiagnosticAnalyzerTes
 
     /// <summary>
     /// Verifies that the analyzer detects when a record class with [GenerateSerializer]
-    /// has fields without [Id] attributes, which are required for proper Orleans serialization.
+    /// has fields without [Id] attributes, which are required for proper Scynapse serialization.
     /// </summary>
     [Fact]
     public Task SerializableRecordClass()
@@ -59,7 +59,7 @@ public class GenerateSerializationAttributesAnalyzerTest : DiagnosticAnalyzerTes
 
     /// <summary>
     /// Verifies that the analyzer detects when a record struct with [GenerateSerializer]
-    /// has fields without [Id] attributes, which are required for proper Orleans serialization.
+    /// has fields without [Id] attributes, which are required for proper Scynapse serialization.
     /// </summary>
     [Fact]
     public Task SerializableRecordStruct()

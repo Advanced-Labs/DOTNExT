@@ -1,4 +1,4 @@
-using Orleans.TestingHost;
+using Scynapse.TestingHost;
 using Tester.StreamingTests;
 using TestExtensions;
 using Xunit;
@@ -6,8 +6,8 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using NATS.Client.Core;
 using NATS.Client.JetStream;
-using Orleans.Configuration;
-using Orleans.Streaming.NATS.Hosting;
+using Scynapse.Configuration;
+using Scynapse.Streaming.NATS.Hosting;
 
 namespace NATS.Tests;
 

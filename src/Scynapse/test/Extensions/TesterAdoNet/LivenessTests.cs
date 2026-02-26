@@ -1,5 +1,5 @@
-using Orleans.Tests.SqlUtils;
-using Orleans.TestingHost;
+using Scynapse.Tests.SqlUtils;
+using Scynapse.TestingHost;
 using UnitTests.General;
 using Xunit.Abstractions;
 using Microsoft.Extensions.Hosting;
@@ -7,12 +7,12 @@ using Microsoft.Extensions.Hosting;
 namespace UnitTests.MembershipTests
 {
     /// <summary>
-    /// Tests for Orleans silo membership liveness functionality using SQL Server as the membership provider.
+    /// Tests for Scynapse silo membership liveness functionality using SQL Server as the membership provider.
     /// </summary>
     [TestCategory("SqlServer"), TestCategory("Functional"), TestCategory("Membership"), TestCategory("AdoNet")]
     public class LivenessTests_SqlServer : LivenessTestsBase
     {
-        public const string TestDatabaseName = "OrleansTest_SqlServer_Liveness";
+        public const string TestDatabaseName = "ScynapseTest_SqlServer_Liveness";
         private const string AdoNetInvariantName = AdoNetInvariants.InvariantNameSqlServer;
         public LivenessTests_SqlServer(ITestOutputHelper output) : base(output)
         {
@@ -34,7 +34,7 @@ namespace UnitTests.MembershipTests
             {
                 var cfg = hostBuilder.GetConfiguration();
                 var connectionString = cfg["RelationalStorageConnectionString"];
-                hostBuilder.UseOrleans((ctx, siloBuilder) =>
+                hostBuilder.UseScynapse((ctx, siloBuilder) =>
                 {
                     siloBuilder.UseAdoNetClustering(options =>
                     {
@@ -77,12 +77,12 @@ namespace UnitTests.MembershipTests
     }
 
     /// <summary>
-    /// Tests for Orleans silo membership liveness functionality using PostgreSQL as the membership provider.
+    /// Tests for Scynapse silo membership liveness functionality using PostgreSQL as the membership provider.
     /// </summary>
     [TestCategory("PostgreSql"), TestCategory("Functional"), TestCategory("Membership"), TestCategory("AdoNet")]
     public class LivenessTests_PostgreSql : LivenessTestsBase
     {
-        public const string TestDatabaseName = "OrleansTest_Postgres_Liveness";
+        public const string TestDatabaseName = "ScynapseTest_Postgres_Liveness";
         private const string AdoNetInvariantName = AdoNetInvariants.InvariantNamePostgreSql;
         public LivenessTests_PostgreSql(ITestOutputHelper output) : base(output)
         {
@@ -104,7 +104,7 @@ namespace UnitTests.MembershipTests
             {
                 var cfg = hostBuilder.GetConfiguration();
                 var connectionString = cfg["RelationalStorageConnectionString"];
-                hostBuilder.UseOrleans((ctx, siloBuilder) =>
+                hostBuilder.UseScynapse((ctx, siloBuilder) =>
                 {
                     siloBuilder.UseAdoNetClustering(options =>
                     {
@@ -147,12 +147,12 @@ namespace UnitTests.MembershipTests
     }
 
     /// <summary>
-    /// Tests for Orleans silo membership liveness functionality using MySQL as the membership provider.
+    /// Tests for Scynapse silo membership liveness functionality using MySQL as the membership provider.
     /// </summary>
     [TestCategory("MySql"), TestCategory("Functional"), TestCategory("Membership"), TestCategory("AdoNet")]
     public class LivenessTests_MySql : LivenessTestsBase
     {
-        public const string TestDatabaseName = "OrleansTest_MySql_Liveness";
+        public const string TestDatabaseName = "ScynapseTest_MySql_Liveness";
         private const string AdoNetInvariantName = AdoNetInvariants.InvariantNamePostgreSql;
         public LivenessTests_MySql(ITestOutputHelper output) : base(output)
         {
@@ -174,7 +174,7 @@ namespace UnitTests.MembershipTests
             {
                 var cfg = hostBuilder.GetConfiguration();
                 var connectionString = cfg["RelationalStorageConnectionString"];
-                hostBuilder.UseOrleans((ctx, siloBuilder) =>
+                hostBuilder.UseScynapse((ctx, siloBuilder) =>
                 {
                     siloBuilder.UseAdoNetClustering(options =>
                     {

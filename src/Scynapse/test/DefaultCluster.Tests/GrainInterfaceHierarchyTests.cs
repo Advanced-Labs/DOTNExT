@@ -5,7 +5,7 @@ using Xunit;
 namespace DefaultCluster.Tests
 {
     /// <summary>
-    /// Tests for Orleans' support of grain interface inheritance hierarchies.
+    /// Tests for Scynapse' support of grain interface inheritance hierarchies.
     /// Validates that grains can properly implement interfaces that extend other interfaces,
     /// support multiple inheritance paths, and correctly expose methods from all levels
     /// of the interface hierarchy.

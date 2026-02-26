@@ -1,5 +1,5 @@
 ﻿using Microsoft.CodeAnalysis;
-using Orleans.Analyzers;
+using Scynapse.Analyzers;
 using Xunit;
 
 namespace Analyzers.Tests;
@@ -30,7 +30,7 @@ public class AbstractPropertiesCannotBeSerializedAnalyzerTest : DiagnosticAnalyz
     [Fact]
     public Task AliasedAttribute()
         => VerifyGeneratedDiagnostic("""
-using alias = Orleans;
+using alias = Scynapse;
 [alias::GenerateSerializer]
 public abstract class D { [alias::Id(0)] public abstract int F { get; set; } }
 """);
@@ -41,8 +41,8 @@ public abstract class D { [alias::Id(0)] public abstract int F { get; set; } }
     [Fact]
     public Task GloballyQualifiedAttribute()
         => VerifyGeneratedDiagnostic("""
-[global::Orleans.GenerateSerializer]
-public abstract class D { [global::Orleans.Id(0)] public abstract int F { get; set; } }
+[global::Scynapse.GenerateSerializer]
+public abstract class D { [global::Scynapse.Id(0)] public abstract int F { get; set; } }
 """);
 
     /// <summary>

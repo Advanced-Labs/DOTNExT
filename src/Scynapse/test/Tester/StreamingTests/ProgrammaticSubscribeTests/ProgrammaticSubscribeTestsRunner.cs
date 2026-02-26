@@ -1,12 +1,12 @@
-using Orleans.Runtime;
-using Orleans.TestingHost;
+using Scynapse.Runtime;
+using Scynapse.TestingHost;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Orleans.Streams.Core;
+using Scynapse.Streams.Core;
 using TestExtensions;
 using Xunit;
 using UnitTests.GrainInterfaces;
-using Orleans.TestingHost.Utils;
+using Scynapse.TestingHost.Utils;
 using UnitTests.Grains.ProgrammaticSubscribe;
 
 namespace Tester.StreamingTests
@@ -71,7 +71,7 @@ namespace Tester.StreamingTests
             await Task.WhenAll(tasks);
         }
 
-        [SkippableFact(Skip = "https://github.com/dotnet/orleans/issues/5635")]
+        [SkippableFact(Skip = "https://github.com/dotnet/scynapse/issues/5635")]
         public async Task StreamingTests_Consumer_Producer_UnSubscribe()
         {
             var subscriptionManager = new SubscriptionManager(this.fixture.HostedCluster);
@@ -160,12 +160,12 @@ namespace Tester.StreamingTests
 
             //get subscription count now, should be all removed/unsubscribed 
             var subscriptions = await subscriptionManager.GetSubscriptions(streamId);
-            Assert.True( subscriptions.Count<Orleans.Streams.Core.StreamSubscription>()== 0);
+            Assert.True( subscriptions.Count<Scynapse.Streams.Core.StreamSubscription>()== 0);
             // clean up tests
         }
 
 
-        [SkippableFact(Skip = "https://github.com/dotnet/orleans/issues/5650")]
+        [SkippableFact(Skip = "https://github.com/dotnet/scynapse/issues/5650")]
         public async Task StreamingTests_Consumer_Producer_SubscribeToTwoStream_MessageWithPolymorphism()
         {
             var subscriptionManager = new SubscriptionManager(this.fixture.HostedCluster);
@@ -261,7 +261,7 @@ namespace Tester.StreamingTests
             var numProduced = await producer.GetNumberProduced();
             if (assertIsTrue)
             {
-                throw new OrleansException($"Producer has not produced since last check");
+                throw new ScynapseException($"Producer has not produced since last check");
             }
             else
             {

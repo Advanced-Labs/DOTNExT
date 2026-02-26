@@ -1,13 +1,13 @@
 using System.Collections.Specialized;
-using Orleans.Serialization.TypeSystem;
+using Scynapse.Serialization.TypeSystem;
 using Xunit;
 using Xunit.Abstractions;
 
 namespace NonSilo.Tests
 {
     /// <summary>
-    /// Tests for the Orleans RuntimeTypeNameFormatter, which is responsible for formatting and parsing .NET type names
-    /// in a way that is recoverable and consistent across different environments. This is crucial for Orleans' serialization
+    /// Tests for the Scynapse RuntimeTypeNameFormatter, which is responsible for formatting and parsing .NET type names
+    /// in a way that is recoverable and consistent across different environments. This is crucial for Scynapse' serialization
     /// system and type resolution when communicating between silos and clients.
     /// </summary>
     [TestCategory("BVT")]
@@ -90,7 +90,7 @@ namespace NonSilo.Tests
 
         /// <summary>
         /// Tests that parsing invalid type names produces descriptive error messages with position indicators.
-        /// This helps developers debug type resolution issues in Orleans serialization.
+        /// This helps developers debug type resolution issues in Scynapse serialization.
         /// </summary>
         [Fact]
         public void InvalidNamesThrowDescriptiveErrorMessage()

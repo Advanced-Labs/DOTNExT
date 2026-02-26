@@ -2,7 +2,7 @@
 
 namespace UnitTests.Grains
 {
-    [Orleans.Providers.StorageProvider(ProviderName = "MemoryStore")]
+    [Scynapse.Providers.StorageProvider(ProviderName = "MemoryStore")]
     public class ValueTypeTestGrain : Grain<ValueTypeTestData>, IValueTypeTestGrain
     {
         public ValueTypeTestGrain()

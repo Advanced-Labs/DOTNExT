@@ -7,8 +7,8 @@ using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
 using FluentAssertions;
-using Orleans.Runtime;
-using Orleans.DurableJobs.AzureStorage;
+using Scynapse.Runtime;
+using Scynapse.DurableJobs.AzureStorage;
 using Xunit;
 
 namespace Tester.AzureUtils.DurableJobs;

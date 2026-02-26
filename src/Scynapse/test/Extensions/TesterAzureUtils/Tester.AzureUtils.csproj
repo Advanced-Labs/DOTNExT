@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <OrleansBuildTimeCodeGen>true</OrleansBuildTimeCodeGen>
-    <DefineConstants>TRACE;TESTER_AZUREUTILS;ORLEANS_PERSISTENCE</DefineConstants>
+    <ScynapseBuildTimeCodeGen>true</ScynapseBuildTimeCodeGen>
+    <DefineConstants>TRACE;TESTER_AZUREUTILS;SCYNAPSE_PERSISTENCE</DefineConstants>
     <OutputType>Exe</OutputType>
     <TargetFrameworks>$(TestTargetFrameworks)</TargetFrameworks>
     <GenerateProgramFile>false</GenerateProgramFile>
@@ -19,10 +19,10 @@
 
   <ItemGroup>
     <ProjectReference Include="$(SourceRoot)test\TesterInternal\TesterInternal.csproj" />
-    <ProjectReference Include="$(SourceRoot)\src\Azure\Orleans.Reminders.AzureStorage\Orleans.Reminders.AzureStorage.csproj" />
-    <ProjectReference Include="$(SourceRoot)\src\Azure\Orleans.DurableJobs.AzureStorage\Orleans.DurableJobs.AzureStorage.csproj" />
-    <ProjectReference Include="$(SourceRoot)\src\Azure\Orleans.GrainDirectory.AzureStorage\Orleans.GrainDirectory.AzureStorage.csproj" />
-    <ProjectReference Include="$(SourceRoot)\src\Azure\Orleans.Streaming.AzureStorage\Orleans.Streaming.AzureStorage.csproj" />
+    <ProjectReference Include="$(SourceRoot)\src\Azure\Scynapse.Reminders.AzureStorage\Scynapse.Reminders.AzureStorage.csproj" />
+    <ProjectReference Include="$(SourceRoot)\src\Azure\Scynapse.DurableJobs.AzureStorage\Scynapse.DurableJobs.AzureStorage.csproj" />
+    <ProjectReference Include="$(SourceRoot)\src\Azure\Scynapse.GrainDirectory.AzureStorage\Scynapse.GrainDirectory.AzureStorage.csproj" />
+    <ProjectReference Include="$(SourceRoot)\src\Azure\Scynapse.Streaming.AzureStorage\Scynapse.Streaming.AzureStorage.csproj" />
   </ItemGroup>
 
   <ItemGroup>

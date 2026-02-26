@@ -3,8 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Orleans.Concurrency;
-using Orleans.DurableJobs;
+using Scynapse.Concurrency;
+using Scynapse.DurableJobs;
 
 namespace UnitTests.GrainInterfaces;
 

@@ -1,8 +1,8 @@
 #nullable enable
 
 using Microsoft.Extensions.Logging;
-using Orleans.Concurrency;
-using Orleans.Runtime;
+using Scynapse.Concurrency;
+using Scynapse.Runtime;
 using UnitTests.GrainInterfaces;
 
 namespace UnitTests.Grains

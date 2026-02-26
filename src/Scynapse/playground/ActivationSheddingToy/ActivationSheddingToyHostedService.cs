@@ -1,7 +1,7 @@
 using Microsoft.Extensions.Hosting;
-using Orleans;
-using Orleans.Runtime;
-using Orleans.Statistics;
+using Scynapse;
+using Scynapse.Runtime;
+using Scynapse.Statistics;
 
 internal sealed class ActivationSheddingToyHostedService(IGrainFactory grainFactory, IEnvironmentStatisticsProvider environmentStatisticsProvider) : BackgroundService
 {

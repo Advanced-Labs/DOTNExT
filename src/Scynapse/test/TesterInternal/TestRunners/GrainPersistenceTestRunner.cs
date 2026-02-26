@@ -1,7 +1,7 @@
 using System.Diagnostics;
 using System.Globalization;
 using Microsoft.Extensions.Logging;
-using Orleans.TestingHost;
+using Scynapse.TestingHost;
 using Tester;
 using UnitTests.GrainInterfaces;
 using Xunit;
@@ -9,7 +9,7 @@ using Xunit.Abstractions;
 
 namespace TestExtensions.Runners;
 
-public abstract class GrainPersistenceTestsRunner : OrleansTestingBase
+public abstract class GrainPersistenceTestsRunner : ScynapseTestingBase
 {
     private readonly ITestOutputHelper output;
     private readonly string grainNamespace;

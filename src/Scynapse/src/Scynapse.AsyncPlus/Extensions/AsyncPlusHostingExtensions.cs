@@ -4,26 +4,26 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Scynapse.AsyncPlus.Services;
 using Scynapse.AsyncPlus.Storage;
-using Orleans.Configuration;
-using Orleans.Hosting;
-using Orleans.Providers;
-using Orleans.Runtime;
-using Orleans.Storage;
+using Scynapse.Configuration;
+using Scynapse.Hosting;
+using Scynapse.Providers;
+using Scynapse.Runtime;
+using Scynapse.Storage;
 
 namespace Scynapse.AsyncPlus.Extensions;
 
 /// <summary>
-/// Extension methods for configuring Async+ persistence in Orleans.
+/// Extension methods for configuring Async+ persistence in Scynapse.
 /// </summary>
 public static class AsyncPlusHostingExtensions
 {
     /// <summary>
-    /// Adds Async+ persistence support to the Orleans silo.
+    /// Adds Async+ persistence support to the Scynapse silo.
     /// Registers ScynapseAsyncPersistenceService as the IAsyncPersistenceService implementation.
     /// </summary>
     /// <param name="siloBuilder">The silo builder</param>
     /// <param name="storageName">
-    /// Name of the Orleans storage provider to use for Async+ state.
+    /// Name of the Scynapse storage provider to use for Async+ state.
     /// Default is "AsyncPlusStorage". Make sure to configure this storage provider.
     /// </param>
     /// <example>
@@ -39,7 +39,7 @@ public static class AsyncPlusHostingExtensions
     {
         siloBuilder.ConfigureServices(services =>
         {
-            // Register the Orleans-backed persistence service
+            // Register the Scynapse-backed persistence service
             services.AddSingleton<DOTNExT.Persistence.IAsyncPersistenceService, ScynapseAsyncPersistenceService>();
 
             // Configure options
@@ -53,7 +53,7 @@ public static class AsyncPlusHostingExtensions
     }
 
     /// <summary>
-    /// Adds Async+ persistence support to an Orleans client.
+    /// Adds Async+ persistence support to an Scynapse client.
     /// Allows client-side code to use the persistence service.
     /// </summary>
     public static IClientBuilder UseAsyncPlusPersistence(this IClientBuilder clientBuilder)
@@ -73,14 +73,14 @@ public static class AsyncPlusHostingExtensions
 public class AsyncPlusOptions
 {
     /// <summary>
-    /// Name of the Orleans storage provider to use.
+    /// Name of the Scynapse storage provider to use.
     /// Must match a configured grain storage provider name.
     /// </summary>
     public string StorageProviderName { get; set; } = "AsyncPlusStorage";
 }
 
 /// <summary>
-/// Extension methods for configuring RavenDB grain storage in Orleans.
+/// Extension methods for configuring RavenDB grain storage in Scynapse.
 /// </summary>
 public static class RavenDbSiloBuilderExtensions
 {
@@ -113,7 +113,7 @@ public static class RavenDbSiloBuilderExtensions
 
     /// <summary>
     /// Configures RavenDB as a named grain storage provider with default options.
-    /// Uses localhost:8080 and database "OrleansGrainState".
+    /// Uses localhost:8080 and database "ScynapseGrainState".
     /// </summary>
     public static ISiloBuilder AddRavenDbGrainStorage(
         this ISiloBuilder builder,
@@ -148,7 +148,7 @@ public static class RavenDbServiceCollectionExtensions
 {
     /// <summary>
     /// Adds RavenDB grain storage to the service collection.
-    /// Uses the proper Orleans lifecycle pattern - storage participates before silo starts.
+    /// Uses the proper Scynapse lifecycle pattern - storage participates before silo starts.
     /// </summary>
     public static IServiceCollection AddRavenDbGrainStorage(
         this IServiceCollection services,
@@ -173,7 +173,7 @@ public static class RavenDbServiceCollectionExtensions
         });
 
         // CRITICAL: Also register as lifecycle participant so Participate() is called BEFORE silo starts
-        // This is the Orleans pattern - without this, storage.Participate() would be called lazily
+        // This is the Scynapse pattern - without this, storage.Participate() would be called lazily
         // when the first grain requests storage, by which time the lifecycle has already started.
         services.AddSingleton<ILifecycleParticipant<ISiloLifecycle>>(sp =>
             (ILifecycleParticipant<ISiloLifecycle>)sp.GetRequiredKeyedService<IGrainStorage>(name));

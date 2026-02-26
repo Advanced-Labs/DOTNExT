@@ -1,6 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <OrleansBuildTimeCodeGen>true</OrleansBuildTimeCodeGen>
+    <ScynapseBuildTimeCodeGen>true</ScynapseBuildTimeCodeGen>
     <TargetFrameworks>$(TestTargetFrameworks)</TargetFrameworks>
   </PropertyGroup>
 
@@ -10,9 +10,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="$(SourceRoot)src\Orleans.Serialization\Orleans.Serialization.csproj" />
-    <ProjectReference Include="$(SourceRoot)src\Orleans.Serialization.FSharp\Orleans.Serialization.FSharp.csproj" />
+    <ProjectReference Include="$(SourceRoot)src\Scynapse.Serialization\Scynapse.Serialization.csproj" />
+    <ProjectReference Include="$(SourceRoot)src\Scynapse.Serialization.FSharp\Scynapse.Serialization.FSharp.csproj" />
     <ProjectReference Include="$(SourceRoot)test\Tester\Tester.csproj" />
-    <ProjectReference Include="$(SourceRoot)test\Misc\TestInternalDtosRefOrleans\TestInternalDtosRefOrleans.csproj" />
+    <ProjectReference Include="$(SourceRoot)test\Misc\TestInternalDtosRefScynapse\TestInternalDtosRefScynapse.csproj" />
   </ItemGroup>
 </Project>

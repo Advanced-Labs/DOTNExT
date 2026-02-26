@@ -1,13 +1,13 @@
 using System.Data.SqlClient;
 using BenchmarkDotNet.Attributes;
 using BenchmarkDotNet.Engines;
-using Orleans.Tests.SqlUtils;
+using Scynapse.Tests.SqlUtils;
 using UnitTests.General;
 using static System.String;
 
 namespace Benchmarks.AdoNet.Streaming;
 
-public class SqlServerMessageQueueingBenchmark() : MessageQueueingBenchmark(AdoNetInvariants.InvariantNameSqlServer, "OrleansStreamTest")
+public class SqlServerMessageQueueingBenchmark() : MessageQueueingBenchmark(AdoNetInvariants.InvariantNameSqlServer, "ScynapseStreamTest")
 {
     public override void GlobalSetup()
     {
@@ -27,7 +27,7 @@ public abstract class MessageQueueingBenchmark(string invariant, string database
 
     private readonly Consumer _consumer = new();
     private IRelationalStorage _storage = default!;
-    private RelationalOrleansQueries _queries = default!;
+    private RelationalScynapseQueries _queries = default!;
     private byte[] _payload = [];
     private string[] _queueIds = default!;
 
@@ -66,11 +66,11 @@ public abstract class MessageQueueingBenchmark(string invariant, string database
 
         _storage = RelationalStorage.CreateInstance(invariant, testing.CurrentConnectionString);
 
-        _queries = RelationalOrleansQueries.CreateInstance(invariant, testing.CurrentConnectionString).GetAwaiter().GetResult();
+        _queries = RelationalScynapseQueries.CreateInstance(invariant, testing.CurrentConnectionString).GetAwaiter().GetResult();
     }
 
     [IterationSetup]
-    public void IterationSetup() => _storage.ExecuteAsync("TRUNCATE TABLE OrleansStreamMessage").GetAwaiter().GetResult();
+    public void IterationSetup() => _storage.ExecuteAsync("TRUNCATE TABLE ScynapseStreamMessage").GetAwaiter().GetResult();
 
     [Benchmark(OperationsPerInvoke = OperationsPerInvoke)]
     public Task QueueStreamMessage()

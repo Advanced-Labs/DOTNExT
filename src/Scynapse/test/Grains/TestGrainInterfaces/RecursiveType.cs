@@ -6,7 +6,7 @@ namespace UnitTests.GrainInterfaces
     }
 
     /// <summary>
-    /// These classes form a repro for https://github.com/dotnet/orleans/issues/5473, which resulted in a
+    /// These classes form a repro for https://github.com/dotnet/scynapse/issues/5473, which resulted in a
     /// StackOverflowException during code generation.
     /// </summary>
     [Serializable]

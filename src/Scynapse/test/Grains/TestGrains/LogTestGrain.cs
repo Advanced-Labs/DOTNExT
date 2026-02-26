@@ -1,4 +1,4 @@
-using Orleans.EventSourcing;
+using Scynapse.EventSourcing;
 using UnitTests.GrainInterfaces;
 
 namespace TestGrains
@@ -10,14 +10,14 @@ namespace TestGrains
     /// it started from SimpleGrain, but a lot of stuff got added over time 
     /// </summary>
     [Serializable]
-    [Orleans.GenerateSerializer]
+    [Scynapse.GenerateSerializer]
     public class MyGrainState
     {
-        [Orleans.Id(0)]
+        [Scynapse.Id(0)]
         public int A;
-        [Orleans.Id(1)]
+        [Scynapse.Id(1)]
         public int B;
-        [Orleans.Id(2)]
+        [Scynapse.Id(2)]
         public Dictionary<string, int> Reservations;
 
         public MyGrainState()
@@ -41,20 +41,20 @@ namespace TestGrains
  
 
     [Serializable]
-    [Orleans.GenerateSerializer]
-    public class UpdateA {[Orleans.Id(0)] public int Val; }
+    [Scynapse.GenerateSerializer]
+    public class UpdateA {[Scynapse.Id(0)] public int Val; }
     [Serializable]
-    [Orleans.GenerateSerializer]
-    public class UpdateB  {[Orleans.Id(0)] public int Val; }
+    [Scynapse.GenerateSerializer]
+    public class UpdateB  {[Scynapse.Id(0)] public int Val; }
     [Serializable]
-    [Orleans.GenerateSerializer]
-    public class IncrementA  {[Orleans.Id(0)] public int Val; }
+    [Scynapse.GenerateSerializer]
+    public class IncrementA  {[Scynapse.Id(0)] public int Val; }
     [Serializable]
-    [Orleans.GenerateSerializer]
-    public class AddReservation {[Orleans.Id(0)] public int Val; }
+    [Scynapse.GenerateSerializer]
+    public class AddReservation {[Scynapse.Id(0)] public int Val; }
     [Serializable]
-    [Orleans.GenerateSerializer]
-    public class RemoveReservation {[Orleans.Id(0)] public int Val; }
+    [Scynapse.GenerateSerializer]
+    public class RemoveReservation {[Scynapse.Id(0)] public int Val; }
 
 
 

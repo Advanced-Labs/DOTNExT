@@ -1,9 +1,9 @@
-using Orleans;
+using Scynapse;
 
 namespace PluginGrainScenarios.Grains;
 
 // ============================================================================
-// NEWORLEANS EVENTS TEST GRAINS
+// SCYNAPSE EVENTS TEST GRAINS
 // ============================================================================
 //
 // This file tests the Scynapse Events v1 feature which enables standard C#
@@ -77,13 +77,13 @@ public partial class EventTestGrain : Grain, IEventTestGrain
 
     /// <summary>
     /// Event raised when a chat message is sent.
-    /// This will be distributed via Orleans Simple Message Streams (SMS).
+    /// This will be distributed via Scynapse Simple Message Streams (SMS).
     /// </summary>
     public event EventHandler<string>? ChatMessage;
 
     /// <summary>
     /// Event raised when the score changes.
-    /// This will be distributed via Orleans Simple Message Streams (SMS).
+    /// This will be distributed via Scynapse Simple Message Streams (SMS).
     /// </summary>
     public event EventHandler<int>? ScoreChanged;
 

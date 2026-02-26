@@ -1,5 +1,5 @@
 using Microsoft.Extensions.Logging;
-using Orleans.Runtime;
+using Scynapse.Runtime;
 using TestGrainInterfaces;
 
 namespace TestGrains

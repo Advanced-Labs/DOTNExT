@@ -1,5 +1,5 @@
-﻿using Orleans.Concurrency;
-using Orleans.Providers;
+﻿using Scynapse.Concurrency;
+using Scynapse.Providers;
 
 namespace TestGrains
 {

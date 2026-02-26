@@ -1,7 +1,7 @@
 using TestExtensions;
 using Xunit.Abstractions;
-using Orleans.TestingHost;
-using Orleans.Runtime.Placement;
+using Scynapse.TestingHost;
+using Scynapse.Runtime.Placement;
 
 namespace UnitTests.ActivationRebalancingTests;
 

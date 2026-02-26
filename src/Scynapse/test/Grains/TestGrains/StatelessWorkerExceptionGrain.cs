@@ -1,4 +1,4 @@
-using Orleans.Concurrency;
+using Scynapse.Concurrency;
 using UnitTests.GrainInterfaces;
 
 

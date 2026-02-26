@@ -1,6 +1,6 @@
 using Microsoft.Extensions.Logging;
-using Orleans.Providers;
-using Orleans.Runtime;
+using Scynapse.Providers;
+using Scynapse.Runtime;
 using UnitTests.GrainInterfaces;
 
 namespace UnitTests.Grains
@@ -75,7 +75,7 @@ namespace UnitTests.Grains
             }
 
             logger.LogWarning("ChainGrain Id={Id} is in an invalid state. Next={Next}", State.Id, State.Next);
-            throw new OrleansException($"ChainGrain Id={State.Id} is in an invalid state. Next={State.Next}");
+            throw new ScynapseException($"ChainGrain Id={State.Id} is in an invalid state. Next={State.Next}");
         }
 
         public Task PassThis(IChainedGrain next)

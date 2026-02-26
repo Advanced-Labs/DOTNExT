@@ -1,6 +1,6 @@
 using DistributedTests.Server.Configurator;
 using Microsoft.Extensions.Hosting;
-using Orleans.Configuration;
+using Scynapse.Configuration;
 using DistributedTests.Common.MessageChannel;
 using Microsoft.Extensions.Logging;
 using Azure.Identity;
@@ -42,9 +42,9 @@ namespace DistributedTests.Server
                     .CreateDefaultBuilder()
                     .ConfigureLogging(logging =>
                     {
-                        logging.AddFilter("Orleans.Runtime.Placement.Repartitioning", LogLevel.Debug);
+                        logging.AddFilter("Scynapse.Runtime.Placement.Repartitioning", LogLevel.Debug);
                     })
-                    .UseOrleans((ctx, siloBuilder) => ConfigureOrleans(siloBuilder, commonParameters, configuratorParameters))
+                    .UseScynapse((ctx, siloBuilder) => ConfigureScynapse(siloBuilder, commonParameters, configuratorParameters))
                     .Build();
 
                 var hostTask = host.RunAsync();
@@ -68,7 +68,7 @@ namespace DistributedTests.Server
             }
         }
 
-        private void ConfigureOrleans(ISiloBuilder siloBuilder, CommonParameters commonParameters, T configuratorParameters)
+        private void ConfigureScynapse(ISiloBuilder siloBuilder, CommonParameters commonParameters, T configuratorParameters)
         {
             siloBuilder
                 .Configure<SiloOptions>(options => options.SiloName = _siloName)
@@ -78,9 +78,9 @@ namespace DistributedTests.Server
 
             if (commonParameters.ActivationRepartitioning)
             {
-#pragma warning disable ORLEANSEXP001 // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
+#pragma warning disable SCYNAPSEEXP001 // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
                 siloBuilder.AddActivationRepartitioner();
-#pragma warning restore ORLEANSEXP001 // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
+#pragma warning restore SCYNAPSEEXP001 // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
             }
 
             _siloConfigurator.Configure(siloBuilder, configuratorParameters);

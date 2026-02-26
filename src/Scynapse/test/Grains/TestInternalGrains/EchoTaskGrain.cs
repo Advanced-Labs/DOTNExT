@@ -1,9 +1,9 @@
 using System.Diagnostics;
 using Microsoft.Extensions.Logging;
-using Orleans.Concurrency;
-using Orleans.Providers;
-using Orleans.Runtime;
-using Orleans.Runtime.Utilities;
+using Scynapse.Concurrency;
+using Scynapse.Providers;
+using Scynapse.Runtime;
+using Scynapse.Runtime.Utilities;
 using UnitTests.GrainInterfaces;
 using Xunit;
 
@@ -198,18 +198,18 @@ namespace UnitTests.Grains
             return this.internalGrainFactory.GetSystemTarget<ISiloControl>(Constants.SiloControlType, silo);
         }
 
-        public Task OrleansDebuggerHelper_GetGrainInstance_Test()
+        public Task ScynapseDebuggerHelper_GetGrainInstance_Test()
         {
-            var result = OrleansDebuggerHelper.GetGrainInstance(null);
+            var result = ScynapseDebuggerHelper.GetGrainInstance(null);
             Assert.Null(result);
 
-            result = OrleansDebuggerHelper.GetGrainInstance(this);
+            result = ScynapseDebuggerHelper.GetGrainInstance(this);
             Assert.Same(this, result);
 
-            result = OrleansDebuggerHelper.GetGrainInstance(this.AsReference<IDebuggerHelperTestGrain>());
+            result = ScynapseDebuggerHelper.GetGrainInstance(this.AsReference<IDebuggerHelperTestGrain>());
             Assert.Same(this, result);
 
-            result = OrleansDebuggerHelper.GetGrainInstance(this.GrainFactory.GetGrain<IEchoGrain>(Guid.NewGuid()));
+            result = ScynapseDebuggerHelper.GetGrainInstance(this.GrainFactory.GetGrain<IEchoGrain>(Guid.NewGuid()));
             Assert.Null(result);
 
             return Task.CompletedTask;

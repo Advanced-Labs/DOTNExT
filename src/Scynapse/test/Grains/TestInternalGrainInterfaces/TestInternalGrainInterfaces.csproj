@@ -2,7 +2,7 @@
   <PropertyGroup>
     <RootNamespace>UnitTests.GrainInterfaces</RootNamespace>
     <AssemblyName>TestInternalGrainInterfaces</AssemblyName>
-    <OrleansBuildTimeCodeGen>true</OrleansBuildTimeCodeGen>
+    <ScynapseBuildTimeCodeGen>true</ScynapseBuildTimeCodeGen>
     <TargetFramework>$(MinTestTargetFramework)</TargetFramework>
   </PropertyGroup>
 

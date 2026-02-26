@@ -1,4 +1,4 @@
-using Orleans.TestingHost;
+using Scynapse.TestingHost;
 using Microsoft.Extensions.Configuration;
 using UnitTests.MembershipTests;
 using Xunit;
@@ -7,7 +7,7 @@ using Xunit.Abstractions;
 namespace Consul.Tests
 {
     /// <summary>
-    /// Tests Orleans cluster liveness functionality using Consul as the membership provider.
+    /// Tests Scynapse cluster liveness functionality using Consul as the membership provider.
     /// </summary>
     [TestCategory("Membership"), TestCategory("Consul")]
     public class LivenessTests_Consul : LivenessTestsBase

@@ -1,0 +1,17 @@
+global using System;
+global using System.Collections.Concurrent;
+global using System.Collections.Generic;
+global using System.Diagnostics.CodeAnalysis;
+global using System.Linq;
+global using System.Threading.Tasks;
+global using Microsoft.Extensions.DependencyInjection;
+global using Microsoft.Extensions.Logging;
+global using Microsoft.Extensions.Options;
+global using Scynapse.Configuration;
+global using Scynapse.Configuration.Overrides;
+global using Scynapse.Hosting;
+global using Scynapse.Providers.Streams.Common;
+global using Scynapse.Runtime;
+global using Scynapse.Serialization;
+global using Scynapse.Streaming.AdoNet.Storage;
+global using Scynapse.Streams;

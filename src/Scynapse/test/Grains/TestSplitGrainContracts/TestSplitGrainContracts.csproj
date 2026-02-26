@@ -2,15 +2,15 @@
   <PropertyGroup>
     <RootNamespace>UnitTests.SplitGrain.Contracts</RootNamespace>
     <TargetFramework>$(MinTestTargetFramework)</TargetFramework>
-    <OrleansBuildTimeCodeGen>true</OrleansBuildTimeCodeGen>
+    <ScynapseBuildTimeCodeGen>true</ScynapseBuildTimeCodeGen>
     <EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
   </PropertyGroup>
 
   <ItemGroup>
-    <Using Remove="Orleans.Hosting" />
+    <Using Remove="Scynapse.Hosting" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="$(SourceRoot)src\Orleans.Core.Abstractions\Orleans.Core.Abstractions.csproj" />
+    <ProjectReference Include="$(SourceRoot)src\Scynapse.Core.Abstractions\Scynapse.Core.Abstractions.csproj" />
   </ItemGroup>
 </Project>

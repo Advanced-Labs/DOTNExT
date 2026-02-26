@@ -1,6 +1,6 @@
 using Microsoft.Extensions.Options;
-using Orleans.Configuration;
-using Orleans.TestingHost;
+using Scynapse.Configuration;
+using Scynapse.TestingHost;
 using TestExtensions;
 using UnitTests.GrainInterfaces;
 using Xunit;
@@ -11,7 +11,7 @@ namespace Tester.AzureUtils.General
     /// Tests for generic grain types using Azure Table Storage as the persistence provider.
     /// </summary>
     [TestCategory("AzureStorage"), TestCategory("Generics")]
-    public class GenericGrainsInAzureTableStorageTests : OrleansTestingBase, IClassFixture<GenericGrainsInAzureTableStorageTests.Fixture>
+    public class GenericGrainsInAzureTableStorageTests : ScynapseTestingBase, IClassFixture<GenericGrainsInAzureTableStorageTests.Fixture>
     {
         private readonly Fixture fixture;
 
@@ -70,7 +70,7 @@ namespace Tester.AzureUtils.General
     /// Tests for generic grain types using Azure Blob Storage as the persistence provider.
     /// </summary>
     [TestCategory("AzureStorage"), TestCategory("Generics")]
-    public class GenericGrainsInAzureBlobStorageTests : OrleansTestingBase, IClassFixture<GenericGrainsInAzureBlobStorageTests.Fixture>
+    public class GenericGrainsInAzureBlobStorageTests : ScynapseTestingBase, IClassFixture<GenericGrainsInAzureBlobStorageTests.Fixture>
     {
         private readonly Fixture fixture;
 

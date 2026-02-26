@@ -1,12 +1,12 @@
 using System.Net.Sockets;
-using Orleans.TestingHost;
+using Scynapse.TestingHost;
 using TestExtensions;
 using Xunit;
 
 namespace Tester.TransportTests;
 
 /// <summary>
-/// Tests for Orleans cluster communication using Unix domain socket transport.
+/// Tests for Scynapse cluster communication using Unix domain socket transport.
 /// </summary>
 public class UnixSocketTransportTests : TransportTestsBase, IClassFixture<UnixSocketTransportTests.Fixture>
 {

@@ -1,19 +1,19 @@
 using AWSUtils.Tests.StorageTests;
-using Orleans.TestingHost;
+using Scynapse.TestingHost;
 using Microsoft.Extensions.Logging.Abstractions;
 using Tester.StreamingTests;
 using TestExtensions;
 using Xunit;
 using Xunit.Abstractions;
-using OrleansAWSUtils.Streams;
+using ScynapseAWSUtils.Streams;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
-using Orleans.Configuration;
+using Scynapse.Configuration;
 
 namespace AWSUtils.Tests.Streaming
 {
     /// <summary>
-    /// Tests SQS streaming functionality from Orleans client perspective including producer dropout scenarios.
+    /// Tests SQS streaming functionality from Scynapse client perspective including producer dropout scenarios.
     /// </summary>
     public class SQSClientStreamTests : TestClusterPerTest
     {

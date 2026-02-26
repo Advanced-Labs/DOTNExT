@@ -1,10 +1,10 @@
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using Orleans.Configuration;
-using Orleans.Providers;
-using Orleans.Providers.Streams.Common;
-using Orleans.TestingHost;
-using Orleans.TestingHost.Utils;
+using Scynapse.Configuration;
+using Scynapse.Providers;
+using Scynapse.Providers.Streams.Common;
+using Scynapse.TestingHost;
+using Scynapse.TestingHost.Utils;
 using TestExtensions;
 using Xunit;
 
@@ -73,7 +73,7 @@ namespace Tester.AzureUtils.Lease
             await TestingUtils.WaitUntilAsync(lastTry => AgentManagerOwnCorrectAmountOfAgents(2, 2, mgmtGrain, lastTry), TimeOut);
         }
 
-        [SkippableFact(Skip = "https://github.com/dotnet/orleans/issues/9559")]
+        [SkippableFact(Skip = "https://github.com/dotnet/scynapse/issues/9559")]
         public async Task LeaseBalancedQueueBalancer_SupportUnexpectedNodeFailureScenerio()
         {
             var mgmtGrain = this.GrainFactory.GetGrain<IManagementGrain>(0);
@@ -102,7 +102,7 @@ namespace Tester.AzureUtils.Lease
                 pass = totalQueueCount == sum &&
                     counts.All(startedAgentInEachSilo => startedAgentInEachSilo <= expectedAgentCountMax && startedAgentInEachSilo >= expectedAgentCountMin);
                 if(!pass && assertIsTrue)
-                    throw new OrleansException($"AgentManager doesn't own correct amount of agents: {string.Join(",", counts.Select(startedAgentInEachSilo => startedAgentInEachSilo.ToString()))}");
+                    throw new ScynapseException($"AgentManager doesn't own correct amount of agents: {string.Join(",", counts.Select(startedAgentInEachSilo => startedAgentInEachSilo.ToString()))}");
             }
             catch
             {

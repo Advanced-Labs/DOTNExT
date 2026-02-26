@@ -7,7 +7,7 @@ namespace DefaultCluster.Tests.General
     /// <summary>
     /// Tests grain state persistence using concrete state classes.
     /// Verifies that grain state survives deactivation and reactivation cycles.
-    /// Orleans supports automatic state persistence where grain state is:
+    /// Scynapse supports automatic state persistence where grain state is:
     /// - Loaded when the grain activates
     /// - Saved when state changes (or on demand)
     /// - Preserved across grain deactivations

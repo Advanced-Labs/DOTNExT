@@ -1,8 +1,8 @@
 #nullable enable
 using Microsoft.Extensions.DependencyInjection;
-using Orleans.GrainDirectory;
-using Orleans.Runtime.GrainDirectory;
-using Orleans.TestingHost;
+using Scynapse.GrainDirectory;
+using Scynapse.Runtime.GrainDirectory;
+using Scynapse.TestingHost;
 using Tester.Directories;
 using TestExtensions;
 using Xunit;

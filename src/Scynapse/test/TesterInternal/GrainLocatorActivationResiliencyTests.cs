@@ -3,10 +3,10 @@ using System.Net;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
-using Orleans.Runtime;
-using Orleans.Runtime.GrainDirectory;
-using Orleans.Runtime.Placement;
-using Orleans.TestingHost;
+using Scynapse.Runtime;
+using Scynapse.Runtime.GrainDirectory;
+using Scynapse.Runtime.Placement;
+using Scynapse.TestingHost;
 using TestExtensions;
 using UnitTests.GrainInterfaces;
 using Xunit;
@@ -22,12 +22,12 @@ namespace UnitTests
     /// - Network partitions causing inconsistent state
     /// - Race conditions during activation/deactivation
     /// 
-    /// Orleans must be resilient to these scenarios by:
+    /// Scynapse must be resilient to these scenarios by:
     /// - Detecting invalid entries during activation
     /// - Retrying registration with proper previousRegistration parameter
     /// - Forwarding calls to the correct silo based on directory entries
     /// 
-    /// These tests verify Orleans can recover from poison directory entries
+    /// These tests verify Scynapse can recover from poison directory entries
     /// and maintain the single activation constraint.
     /// </summary>
     public class GrainLocatorActivationResiliencyTests : HostedTestClusterEnsureDefaultStarted

@@ -58,7 +58,7 @@ namespace BenchmarkGrains.MapReduce
         {
             if (this._processingStarted) return;
 
-            var orleansTs = TaskScheduler.Current;
+            var scynapseTs = TaskScheduler.Current;
             if (ProcessOnThreadPool)
             {
                 Task.Run(async () =>
@@ -74,7 +74,7 @@ namespace BenchmarkGrains.MapReduce
 
                         var processed = this._processor.Process(itemToProcess);
                         await Task.Factory.StartNew(
-                            async () => await this._target.SendAsync(processed), CancellationToken.None, TaskCreationOptions.None, orleansTs);
+                            async () => await this._target.SendAsync(processed), CancellationToken.None, TaskCreationOptions.None, scynapseTs);
                     }
                 });
             }

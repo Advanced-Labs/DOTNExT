@@ -1,10 +1,10 @@
 using System.Net;
 using System.Text;
 using Microsoft.Extensions.Logging;
-using Orleans.Configuration;
-using Orleans.Runtime;
-using Orleans.Runtime.Placement;
-using Orleans.TestingHost;
+using Scynapse.Configuration;
+using Scynapse.Runtime;
+using Scynapse.Runtime.Placement;
+using Scynapse.TestingHost;
 using TestExtensions;
 using UnitTests.GrainInterfaces;
 using Xunit;
@@ -37,7 +37,7 @@ namespace UnitTests.General
         /// Test placement behaviour for newly added silos. The grain placement strategy should favor them
         /// until they reach a similar load as the other silos.
         /// </summary>
-        [SkippableFact(Skip = "https://github.com/dotnet/orleans/issues/4008"), TestCategory("Functional")]
+        [SkippableFact(Skip = "https://github.com/dotnet/scynapse/issues/4008"), TestCategory("Functional")]
         public async Task ElasticityTest_CatchingUp()
         {
 
@@ -91,7 +91,7 @@ namespace UnitTests.General
         /// This evaluates the how the placement strategy behaves once silos are stopped: The strategy should
         /// balance the activations from the stopped silo evenly among the remaining silos.
         /// </summary>
-        [SkippableFact(Skip = "https://github.com/dotnet/orleans/issues/4008"), TestCategory("Functional")]
+        [SkippableFact(Skip = "https://github.com/dotnet/scynapse/issues/4008"), TestCategory("Functional")]
         public async Task ElasticityTest_StoppingSilos()
         {
             List<SiloHandle> runtimes = await this.HostedCluster.StartAdditionalSilosAsync(2);
@@ -132,7 +132,7 @@ namespace UnitTests.General
         /// <summary>
         /// Do not place activation in case all silos are at 100 CPU utilization.
         /// </summary>
-        [SkippableFact(Skip = "https://github.com/dotnet/orleans/issues/4008"), TestCategory("Functional")]
+        [SkippableFact(Skip = "https://github.com/dotnet/scynapse/issues/4008"), TestCategory("Functional")]
         public async Task ElasticityTest_AllSilosCPUTooHigh()
         {
             var taintedGrainPrimary = await GetGrainAtSilo(this.HostedCluster.Primary.SiloAddress);
@@ -144,14 +144,14 @@ namespace UnitTests.General
             await taintedGrainPrimary.LatchCpuUsage(100.0f);
             await taintedGrainSecondary.LatchCpuUsage(100.0f);
 
-            await Assert.ThrowsAsync<OrleansException>(() =>
+            await Assert.ThrowsAsync<ScynapseException>(() =>
                 this.AddTestGrains(1));
         }
 
         /// <summary>
         /// Do not place activation in case all silos are at 100 CPU utilization or have overloaded flag set.
         /// </summary>
-        [SkippableFact(Skip = "https://github.com/dotnet/orleans/issues/4008"), TestCategory("Functional")]
+        [SkippableFact(Skip = "https://github.com/dotnet/scynapse/issues/4008"), TestCategory("Functional")]
         public async Task ElasticityTest_AllSilosOverloaded()
         {
             var taintedGrainPrimary = await GetGrainAtSilo(this.HostedCluster.Primary.SiloAddress);
@@ -160,11 +160,11 @@ namespace UnitTests.General
             await taintedGrainPrimary.LatchCpuUsage(100.0f);
             await taintedGrainSecondary.LatchOverloaded();
 
-            // OrleansException or GateWayTooBusyException
+            // ScynapseException or GateWayTooBusyException
             var exception = await Assert.ThrowsAnyAsync<Exception>(() =>
                 this.AddTestGrains(1));
 
-            Assert.True(exception is OrleansException || exception is GatewayTooBusyException);
+            Assert.True(exception is ScynapseException || exception is GatewayTooBusyException);
         }
 
 

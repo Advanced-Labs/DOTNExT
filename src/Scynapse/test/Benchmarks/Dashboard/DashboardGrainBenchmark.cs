@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using BenchmarkDotNet.Attributes;
-using Orleans.Dashboard.Metrics.History;
+using Scynapse.Dashboard.Metrics.History;
 using System.Collections;
 
 namespace Benchmarks.Dashboard

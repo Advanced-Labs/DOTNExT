@@ -1,9 +1,9 @@
-using Orleans.Hosting;
+using Scynapse.Hosting;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.AddKeyedRedisClient("orleans-redis");
-builder.UseOrleansClient();
+builder.AddKeyedRedisClient("scynapse-redis");
+builder.UseScynapseClient();
 builder.Services.AddControllers();
 
 var app = builder.Build();

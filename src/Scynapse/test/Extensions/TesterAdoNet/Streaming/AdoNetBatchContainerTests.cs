@@ -1,6 +1,6 @@
-using Orleans.Providers.Streams.Common;
-using Orleans.Runtime;
-using Orleans.Streaming.AdoNet;
+using Scynapse.Providers.Streams.Common;
+using Scynapse.Runtime;
+using Scynapse.Streaming.AdoNet;
 using TestExtensions;
 
 namespace Tester.AdoNet.Streaming;

@@ -1,17 +1,17 @@
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using Orleans.Configuration;
-using Orleans.Messaging;
-using Orleans.Runtime.Membership;
-using Orleans.Runtime.MembershipService;
-using Orleans.Tests.SqlUtils;
+using Scynapse.Configuration;
+using Scynapse.Messaging;
+using Scynapse.Runtime.Membership;
+using Scynapse.Runtime.MembershipService;
+using Scynapse.Tests.SqlUtils;
 using TestExtensions;
 using UnitTests.General;
 
 namespace UnitTests.MembershipTests
 {
     /// <summary>
-    /// Tests for operation of Orleans Membership Table using SQL Server
+    /// Tests for operation of Scynapse Membership Table using SQL Server
     /// </summary>
     [TestCategory("Membership"), TestCategory("SQLServer"), TestCategory("Functional")]
     public class SqlServerMembershipTableTests : MembershipTableTestsBase

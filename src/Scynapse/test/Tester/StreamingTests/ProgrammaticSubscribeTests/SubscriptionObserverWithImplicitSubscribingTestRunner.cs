@@ -1,4 +1,4 @@
-using Orleans.TestingHost.Utils;
+using Scynapse.TestingHost.Utils;
 using TestExtensions;
 using UnitTests.GrainInterfaces;
 using UnitTests.Grains;
@@ -7,7 +7,7 @@ using Xunit;
 
 namespace Tester.StreamingTests.ProgrammaticSubscribeTests
 {
-    public abstract class SubscriptionObserverWithImplicitSubscribingTestRunner : OrleansTestingBase
+    public abstract class SubscriptionObserverWithImplicitSubscribingTestRunner : ScynapseTestingBase
     {
         private static readonly TimeSpan _timeout = TimeSpan.FromSeconds(30);
         //test utilities and statics

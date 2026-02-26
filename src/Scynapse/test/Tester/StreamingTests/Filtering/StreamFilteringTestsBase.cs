@@ -1,7 +1,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Orleans.Runtime;
-using Orleans.Streams.Filtering;
+using Scynapse.Runtime;
+using Scynapse.Streams.Filtering;
 using TestExtensions;
 using UnitTests.GrainInterfaces;
 using Xunit;
@@ -64,7 +64,7 @@ namespace Tester.StreamingTests.Filtering
         }
     }
 
-    public abstract class StreamFilteringTestsBase : OrleansTestingBase
+    public abstract class StreamFilteringTestsBase : ScynapseTestingBase
     {
         protected readonly BaseTestClusterFixture fixture;
         private IClusterClient clusterClient => this.fixture.Client;

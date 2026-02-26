@@ -1,12 +1,12 @@
 using Microsoft.Extensions.Logging.Abstractions;
 using MySql.Data.MySqlClient;
-using Orleans.Configuration;
-using Orleans.Streaming.AdoNet;
-using Orleans.Tests.SqlUtils;
+using Scynapse.Configuration;
+using Scynapse.Streaming.AdoNet;
+using Scynapse.Tests.SqlUtils;
 using TestExtensions;
 using UnitTests.General;
 using static System.String;
-using RelationalOrleansQueries = Orleans.Streaming.AdoNet.Storage.RelationalOrleansQueries;
+using RelationalScynapseQueries = Scynapse.Streaming.AdoNet.Storage.RelationalScynapseQueries;
 
 namespace Tester.AdoNet.Streaming;
 
@@ -45,9 +45,9 @@ public abstract class AdoNetQueueAdapterReceiverTests(string invariant, TestEnvi
     private readonly TestEnvironmentFixture _fixture = fixture;
     private RelationalStorageForTesting _testing;
     private IRelationalStorage _storage;
-    private RelationalOrleansQueries _queries;
+    private RelationalScynapseQueries _queries;
 
-    private const string TestDatabaseName = "OrleansStreamTest";
+    private const string TestDatabaseName = "ScynapseStreamTest";
 
     public async Task InitializeAsync()
     {
@@ -55,7 +55,7 @@ public abstract class AdoNetQueueAdapterReceiverTests(string invariant, TestEnvi
         Skip.If(IsNullOrEmpty(_testing.CurrentConnectionString), $"Database '{TestDatabaseName}' not initialized");
 
         _storage = _testing.Storage;
-        _queries = await RelationalOrleansQueries.CreateInstance(invariant, _storage.ConnectionString);
+        _queries = await RelationalScynapseQueries.CreateInstance(invariant, _storage.ConnectionString);
     }
 
     /// <summary>
@@ -103,11 +103,11 @@ public abstract class AdoNetQueueAdapterReceiverTests(string invariant, TestEnvi
 
         // act - dequeue messages via receiver
         var dequeued = await receiver.GetQueueMessagesAsync(maxCount);
-        var storedDequeued = (await _storage.ReadAsync<AdoNetStreamMessage>("SELECT * FROM OrleansStreamMessage")).ToDictionary(x => x.MessageId);
+        var storedDequeued = (await _storage.ReadAsync<AdoNetStreamMessage>("SELECT * FROM ScynapseStreamMessage")).ToDictionary(x => x.MessageId);
 
         // act - confirm messages via receiver
         await receiver.MessagesDeliveredAsync(dequeued);
-        var storedConfirmed = (await _storage.ReadAsync<AdoNetStreamMessage>("SELECT * FROM OrleansStreamMessage")).ToDictionary(x => x.MessageId);
+        var storedConfirmed = (await _storage.ReadAsync<AdoNetStreamMessage>("SELECT * FROM ScynapseStreamMessage")).ToDictionary(x => x.MessageId);
 
         // assert - dequeued messages are as expected
         Assert.NotNull(dequeued);

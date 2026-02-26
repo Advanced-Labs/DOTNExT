@@ -1,16 +1,16 @@
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using Orleans.Runtime.ReminderService;
+using Scynapse.Runtime.ReminderService;
 using Tester;
 using TestExtensions;
 using Xunit;
-using Orleans.Reminders.AzureStorage;
+using Scynapse.Reminders.AzureStorage;
 using Tester.AzureUtils;
 
 namespace UnitTests.RemindersTest
 {
     /// <summary>
-    /// Tests for operation of Orleans Reminders Table using Azure
+    /// Tests for operation of Scynapse Reminders Table using Azure
     /// </summary>
     [TestCategory("Reminders"), TestCategory("AzureStorage")]
     public class AzureRemindersTableTests : ReminderTableTestsBase
@@ -24,7 +24,7 @@ namespace UnitTests.RemindersTest
         {
             var filters = new LoggerFilterOptions();
             filters.AddFilter("AzureTableDataManager", LogLevel.Trace);
-            filters.AddFilter("OrleansSiloInstanceManager", LogLevel.Trace);
+            filters.AddFilter("ScynapseSiloInstanceManager", LogLevel.Trace);
             filters.AddFilter("Storage", LogLevel.Trace);
             return filters;
         }

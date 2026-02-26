@@ -1,10 +1,10 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using Orleans.Configuration;
-using Orleans.Runtime;
-using Orleans.Serialization.TypeSystem;
-using Orleans.TestingHost;
+using Scynapse.Configuration;
+using Scynapse.Runtime;
+using Scynapse.Serialization.TypeSystem;
+using Scynapse.TestingHost;
 using Tester;
 using TestExtensions;
 using UnitTestGrains;
@@ -17,7 +17,7 @@ namespace UnitTests.ActivationsLifeCycleTests
     /// <summary>
     /// Tests for the activation collector that manages grain activation lifecycle and garbage collection.
     /// </summary>
-    public class ActivationCollectorTests : OrleansTestingBase, IAsyncLifetime
+    public class ActivationCollectorTests : ScynapseTestingBase, IAsyncLifetime
     {
         private static readonly TimeSpan DEFAULT_COLLECTION_QUANTUM = TimeSpan.FromSeconds(10);
         private static readonly TimeSpan DEFAULT_IDLE_TIMEOUT = DEFAULT_COLLECTION_QUANTUM + TimeSpan.FromSeconds(1);
@@ -45,7 +45,7 @@ namespace UnitTests.ActivationsLifeCycleTests
                 var config = hostBuilder.GetConfiguration();
                 var collectionAgeLimit = TimeSpan.Parse(config["DefaultCollectionAgeLimit"]);
                 var quantum = TimeSpan.Parse(config["CollectionQuantum"]);
-                hostBuilder.UseOrleans((ctx, siloBuilder) =>
+                hostBuilder.UseScynapse((ctx, siloBuilder) =>
                 {
                     siloBuilder
                         .ConfigureServices(services => services.Where(s => s.ServiceType == typeof(IConfigurationValidator)).ToList().ForEach(s => services.Remove(s)));

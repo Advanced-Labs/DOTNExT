@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging.Abstractions;
-using Orleans.Utilities;
+using Scynapse.Utilities;
 using Xunit;
 
 namespace NonSilo.Tests;

@@ -1,6 +1,6 @@
 using Microsoft.Extensions.DependencyInjection;
-using Orleans;
-using Orleans.Runtime.DynamicGrains;
+using Scynapse;
+using Scynapse.Runtime.DynamicGrains;
 using Spectre.Console;
 using System.Runtime;
 
@@ -193,7 +193,7 @@ public static class AssemblyUnloadMemoryReclaim
             if (retainedPercent > 10)
             {
                 AnsiConsole.MarkupLine("[yellow]⚠ Significant memory retained after unload. Possible causes:[/]");
-                AnsiConsole.MarkupLine("  - Orleans caches (serializers, type metadata, etc.)");
+                AnsiConsole.MarkupLine("  - Scynapse caches (serializers, type metadata, etc.)");
                 AnsiConsole.MarkupLine("  - Weak references not yet collected");
                 AnsiConsole.MarkupLine("  - JIT-compiled code retained in memory");
                 AnsiConsole.MarkupLine("  - Actual memory leak");

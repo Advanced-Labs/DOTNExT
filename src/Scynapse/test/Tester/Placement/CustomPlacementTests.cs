@@ -1,11 +1,11 @@
 using Microsoft.Extensions.DependencyInjection;
-using Orleans.Runtime;
-using Orleans.Runtime.Placement;
-using Orleans.TestingHost;
+using Scynapse.Runtime;
+using Scynapse.Runtime.Placement;
+using Scynapse.TestingHost;
 using TestExtensions;
 using UnitTests.GrainInterfaces;
 using Xunit;
-using Orleans.Configuration;
+using Scynapse.Configuration;
 
 namespace Tester.CustomPlacementTests
 {
@@ -13,7 +13,7 @@ namespace Tester.CustomPlacementTests
     /// Tests custom grain placement strategies including fixed silo placement, exclusion-based placement, and hash-based placement.
     /// </summary>
     [TestCategory("Functional"), TestCategory("Placement")]
-    public class CustomPlacementTests : OrleansTestingBase, IClassFixture<CustomPlacementTests.Fixture>
+    public class CustomPlacementTests : ScynapseTestingBase, IClassFixture<CustomPlacementTests.Fixture>
     {
         private const short nSilos = 3;
         private readonly Fixture fixture;

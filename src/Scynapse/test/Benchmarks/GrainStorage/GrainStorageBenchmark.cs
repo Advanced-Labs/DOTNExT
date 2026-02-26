@@ -1,5 +1,5 @@
 using System.Diagnostics;
-using Orleans.TestingHost;
+using Scynapse.TestingHost;
 using TestExtensions;
 using BenchmarkGrainInterfaces.GrainStorage;
 

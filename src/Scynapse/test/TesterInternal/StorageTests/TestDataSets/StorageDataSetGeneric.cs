@@ -1,5 +1,5 @@
 using System.Collections;
-using Orleans.Runtime;
+using Scynapse.Runtime;
 
 namespace UnitTests.StorageTests.Relational.TestDataSets
 {

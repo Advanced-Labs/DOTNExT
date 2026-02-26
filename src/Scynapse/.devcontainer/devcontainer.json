@@ -1,7 +1,7 @@
 // For format details, see https://aka.ms/devcontainer.json. For config options, see the README at:
 // https://github.com/devcontainers/images/tree/main/src/dotnet
 {
-	"name": "Orleans",
+	"name": "Scynapse",
 	"image": "mcr.microsoft.com/devcontainers/dotnet:latest",
 
 	// Features to add to the dev container. More info: https://containers.dev/features
@@ -28,7 +28,7 @@
 				"remote.otherPortsAttributes": {
 					"onAutoForward": "ignore"
 				},
-				"dotnet.defaultSolution": "Orleans.slnx"
+				"dotnet.defaultSolution": "Scynapse.slnx"
 			}
 		}
 	},

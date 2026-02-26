@@ -1,9 +1,9 @@
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.Extensions.DependencyInjection;
-using Orleans.Messaging;
-using Orleans.Runtime.Membership;
-using Orleans.Configuration;
+using Scynapse.Messaging;
+using Scynapse.Runtime.Membership;
+using Scynapse.Configuration;
 using TestExtensions;
 using Xunit;
 using Tester.ZooKeeperUtils;
@@ -11,10 +11,10 @@ using Tester.ZooKeeperUtils;
 namespace UnitTests.MembershipTests
 {
     /// <summary>
-    /// Tests for operation of Orleans SiloInstanceManager using ZookeeperStore - Requires access to external Zookeeper storage
+    /// Tests for operation of Scynapse SiloInstanceManager using ZookeeperStore - Requires access to external Zookeeper storage
     /// 
     /// Apache ZooKeeper provides a hierarchical namespace for distributed coordination.
-    /// Orleans uses ZooKeeper for:
+    /// Scynapse uses ZooKeeper for:
     /// - Distributed membership management using znodes (ZooKeeper nodes)
     /// - Leader election and distributed consensus
     /// - Ephemeral nodes for automatic cleanup on silo failure

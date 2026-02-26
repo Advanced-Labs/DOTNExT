@@ -1,5 +1,5 @@
 using BenchmarkGrainInterfaces.Ping;
-using Orleans.Runtime;
+using Scynapse.Runtime;
 
 namespace BenchmarkGrains.Ping
 {

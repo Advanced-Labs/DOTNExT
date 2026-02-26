@@ -1,6 +1,6 @@
 using Xunit;
-using Orleans.Runtime;
-using Orleans.TestingHost;
+using Scynapse.Runtime;
+using Scynapse.TestingHost;
 using TestExtensions;
 using UnitTests.GrainInterfaces;
 using UnitTests.Grains;
@@ -8,13 +8,13 @@ using UnitTests.Grains;
 namespace DefaultCluster.Tests
 {
     /// <summary>
-    /// Tests for Orleans providers and grain extensions.
+    /// Tests for Scynapse providers and grain extensions.
     /// Providers are pluggable components that extend grain functionality,
     /// while grain extensions allow grains to expose additional interfaces
     /// that can be dynamically installed. This enables modular grain design
     /// where optional functionality can be added as needed.
     /// </summary>
-    public class ProviderTests : OrleansTestingBase, IClassFixture<ProviderTests.Fixture>
+    public class ProviderTests : ScynapseTestingBase, IClassFixture<ProviderTests.Fixture>
     {
         private readonly Fixture fixture;
 

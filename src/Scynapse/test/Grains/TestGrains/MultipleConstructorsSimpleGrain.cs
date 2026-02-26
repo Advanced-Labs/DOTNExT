@@ -11,7 +11,7 @@ namespace UnitTests.Grains
         public MultipleConstructorsSimpleGrain(ILoggerFactory loggerFactory)
             : this(loggerFactory, ValueUsedByParameterlessConstructor)
         {
-            // orleans will use this constructor when DI is not configured
+            // scynapse will use this constructor when DI is not configured
         }
 
         public MultipleConstructorsSimpleGrain(ILoggerFactory loggerFactory, int initialValueofA) : base(loggerFactory)

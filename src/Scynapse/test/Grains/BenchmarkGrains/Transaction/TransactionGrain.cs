@@ -1,4 +1,4 @@
-using Orleans.Transactions.Abstractions;
+using Scynapse.Transactions.Abstractions;
 using BenchmarkGrainInterfaces.Transaction;
 
 namespace BenchmarkGrains.Transaction

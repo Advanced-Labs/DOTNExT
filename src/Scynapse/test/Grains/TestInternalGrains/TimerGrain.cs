@@ -1,6 +1,6 @@
 using Microsoft.Extensions.Logging;
-using Orleans.Runtime;
-using Orleans.Runtime.Scheduler;
+using Scynapse.Runtime;
+using Scynapse.Runtime.Scheduler;
 using UnitTests.GrainInterfaces;
 using UnitTests.Grains;
 using Xunit;

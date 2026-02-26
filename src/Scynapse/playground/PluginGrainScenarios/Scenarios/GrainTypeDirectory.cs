@@ -1,9 +1,9 @@
 using System.Collections.Immutable;
 using Microsoft.Extensions.DependencyInjection;
-using Orleans;
-using Orleans.DynamicGrains;
-using Orleans.Metadata;
-using Orleans.Runtime;
+using Scynapse;
+using Scynapse.DynamicGrains;
+using Scynapse.Metadata;
+using Scynapse.Runtime;
 using Spectre.Console;
 
 namespace PluginGrainScenarios.Scenarios;

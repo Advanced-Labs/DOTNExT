@@ -1,9 +1,9 @@
 using System.Net;
 using Microsoft.Extensions.Configuration;
-using Orleans.Configuration;
-using Orleans.Runtime;
-using Orleans.Runtime.Placement;
-using Orleans.TestingHost;
+using Scynapse.Configuration;
+using Scynapse.Runtime;
+using Scynapse.Runtime.Placement;
+using Scynapse.TestingHost;
 using TestExtensions;
 using UnitTests.GrainInterfaces;
 using Xunit;

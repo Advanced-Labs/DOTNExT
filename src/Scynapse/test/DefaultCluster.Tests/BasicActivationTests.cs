@@ -8,14 +8,14 @@ using Xunit;
 namespace DefaultCluster.Tests.General
 {
     /// <summary>
-    /// Tests fundamental grain activation and lifecycle behaviors in Orleans.
+    /// Tests fundamental grain activation and lifecycle behaviors in Scynapse.
     /// These tests verify core functionality including:
     /// - Grain activation and identity management
     /// - State persistence across activations
     /// - Error handling during activation
     /// - Support for different key types (long, Guid, ulong)
     /// - Request context propagation
-    /// Orleans uses an activation model where grains are activated on-demand and can be deactivated when idle.
+    /// Scynapse uses an activation model where grains are activated on-demand and can be deactivated when idle.
     /// </summary>
     public class BasicActivationTests : HostedTestClusterEnsureDefaultStarted
     {
@@ -32,7 +32,7 @@ namespace DefaultCluster.Tests.General
         /// - Grains are properly activated when accessed
         /// - State changes persist within the same activation
         /// - Multiple grain references to the same identity share the same activation
-        /// This demonstrates Orleans' virtual actor model where grains exist logically even when not activated.
+        /// This demonstrates Scynapse' virtual actor model where grains exist logically even when not activated.
         /// </summary>
         [Fact, TestCategory("BVT"), TestCategory("ActivateDeactivate"), TestCategory("GetGrain")]
         public async Task BasicActivation_ActivateAndUpdate()
@@ -85,7 +85,7 @@ namespace DefaultCluster.Tests.General
         /// <summary>
         /// Tests error handling when grain activation fails due to invalid parameters.
         /// Verifies that grains can enforce constraints during activation (e.g., rejecting certain key values).
-        /// This demonstrates Orleans' ability to fail fast when grain invariants are violated.
+        /// This demonstrates Scynapse' ability to fail fast when grain invariants are violated.
         /// </summary>
         [Fact, TestCategory("BVT"), TestCategory("ActivateDeactivate"), TestCategory("ErrorHandling"), TestCategory("GetGrain")]
         public async Task BasicActivation_Fail()
@@ -109,7 +109,7 @@ namespace DefaultCluster.Tests.General
 
         /// <summary>
         /// Tests error handling when multiple concurrent requests fail during grain activation.
-        /// Verifies that Orleans properly handles burst failures without resource leaks or deadlocks.
+        /// Verifies that Scynapse properly handles burst failures without resource leaks or deadlocks.
         /// All concurrent requests should receive the same activation failure.
         /// </summary>
         [Fact, TestCategory("BVT"), TestCategory("ActivateDeactivate"), TestCategory("ErrorHandling"), TestCategory("GetGrain")]
@@ -249,7 +249,7 @@ namespace DefaultCluster.Tests.General
         /// <summary>
         /// Tests grain activation when grains implement multiple interfaces.
         /// Verifies that grains can return references to other grains through various collection types.
-        /// This demonstrates Orleans' support for complex grain interface hierarchies.
+        /// This demonstrates Scynapse' support for complex grain interface hierarchies.
         /// </summary>
         [Fact, TestCategory("BVT"), TestCategory("ActivateDeactivate")]
         public async Task BasicActivation_MultipleGrainInterfaces()
@@ -270,7 +270,7 @@ namespace DefaultCluster.Tests.General
         /// - Grains can recover from expired messages in their queues
         /// - Subsequent valid requests succeed after timeouts
         /// - The system properly cleans up expired messages
-        /// This tests Orleans' resilience to transient failures and timeout conditions.
+        /// This tests Scynapse' resilience to transient failures and timeout conditions.
         /// </summary>
         [Fact, TestCategory("SlowBVT"), TestCategory("ActivateDeactivate"),
          TestCategory("Reentrancy")]
@@ -321,7 +321,7 @@ namespace DefaultCluster.Tests.General
 
         /// <summary>
         /// Tests request context propagation from client to grain.
-        /// Verifies that Orleans properly flows ambient context (like trace IDs or user context)
+        /// Verifies that Scynapse properly flows ambient context (like trace IDs or user context)
         /// from the client through to grain method executions.
         /// Request context is essential for distributed tracing and multi-tenancy scenarios.
         /// </summary>

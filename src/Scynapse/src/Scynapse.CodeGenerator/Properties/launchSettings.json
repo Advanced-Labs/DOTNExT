@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "Roslyn": {
+      "commandName": "DebugRoslynComponent",
+      "targetProject": "..\\..\\test\\Scynapse.Serialization.UnitTests\\Scynapse.Serialization.UnitTests.csproj"
+    }
+  }
+}

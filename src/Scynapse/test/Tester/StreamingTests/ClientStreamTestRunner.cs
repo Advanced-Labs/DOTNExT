@@ -1,7 +1,7 @@
-using Orleans.Runtime;
-using Orleans.Streams;
-using Orleans.TestingHost;
-using Orleans.TestingHost.Utils;
+using Scynapse.Runtime;
+using Scynapse.Streams;
+using Scynapse.TestingHost;
+using Scynapse.TestingHost.Utils;
 using UnitTests.GrainInterfaces;
 using Xunit;
 using Xunit.Abstractions;

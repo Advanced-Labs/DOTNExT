@@ -1,9 +1,9 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
-using Orleans.Configuration;
-using Orleans.Providers.Streams.AzureQueue;
-using Orleans.TestingHost;
+using Scynapse.Configuration;
+using Scynapse.Providers.Streams.AzureQueue;
+using Scynapse.TestingHost;
 using Tester.StreamingTests;
 using TestExtensions;
 using Xunit;

@@ -1,12 +1,12 @@
 using AWSUtils.Tests.StorageTests;
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Configuration;
-using Orleans.TestingHost;
+using Scynapse.TestingHost;
 using UnitTests.StreamingTests;
 using Xunit;
 using TestExtensions;
 using UnitTests.Streaming;
-using OrleansAWSUtils.Streams;
+using ScynapseAWSUtils.Streams;
 
 namespace AWSUtils.Tests.Streaming
 {
@@ -65,7 +65,7 @@ namespace AWSUtils.Tests.Streaming
             public void Configure(IConfiguration configuration, IClientBuilder clientBuilder)
             {
                 clientBuilder
-                    .AddSqsStreams("SQSProvider", (System.Action<Orleans.Configuration.SqsOptions>)(options =>
+                    .AddSqsStreams("SQSProvider", (System.Action<Scynapse.Configuration.SqsOptions>)(options =>
                     {
                         options.ConnectionString = AWSTestConstants.SqsConnectionString;
                     }));

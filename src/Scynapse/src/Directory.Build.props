@@ -26,11 +26,11 @@
 
   <PropertyGroup>
     <SourceLinkCreate>true</SourceLinkCreate>
-    <SourceLinkOriginUrl>https://github.com/dotnet/orleans</SourceLinkOriginUrl>
+    <SourceLinkOriginUrl>https://github.com/dotnet/scynapse</SourceLinkOriginUrl>
   </PropertyGroup>
 
   <ItemGroup>
-    <AssemblyAttribute Include="Orleans.Metadata.FrameworkPartAttribute" />
+    <AssemblyAttribute Include="Scynapse.Metadata.FrameworkPartAttribute" />
   </ItemGroup>
 
   <ItemGroup>

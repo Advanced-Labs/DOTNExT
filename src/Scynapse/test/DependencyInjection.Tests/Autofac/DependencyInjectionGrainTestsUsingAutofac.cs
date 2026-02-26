@@ -1,6 +1,6 @@
 using Autofac.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Orleans.TestingHost;
+using Scynapse.TestingHost;
 using TestExtensions;
 using UnitTests.GrainInterfaces;
 using Xunit;
@@ -10,7 +10,7 @@ namespace DependencyInjection.Tests.Autofac
 // Autofac doesn't support keyed service yet
 #if false
     /// <summary>
-    /// Tests dependency injection functionality using Autofac as the DI container for Orleans grains.
+    /// Tests dependency injection functionality using Autofac as the DI container for Scynapse grains.
     /// </summary>
     [TestCategory("DI"), TestCategory("Functional")]
     public class DependencyInjectionGrainTestsUsingAutofac : DependencyInjectionGrainTestRunner, IClassFixture<DependencyInjectionGrainTestsUsingAutofac.Fixture>
@@ -40,7 +40,7 @@ namespace DependencyInjection.Tests.Autofac
     }
 
     /// <summary>
-    /// Tests that Orleans silos can start successfully when configured to use Autofac as the DI container.
+    /// Tests that Scynapse silos can start successfully when configured to use Autofac as the DI container.
     /// </summary>
     [TestCategory("DI"), TestCategory("Functional")]
     public class DependencyInjectionSiloStartsUsingAutofac : IClassFixture<DependencyInjectionSiloStartsUsingAutofac.Fixture>

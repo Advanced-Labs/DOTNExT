@@ -3,12 +3,12 @@
 using System.Diagnostics;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
-using Orleans.Configuration;
-using Orleans.Internal;
-using Orleans.Providers;
-using Orleans.Runtime;
-using Orleans.Storage;
-using Orleans.TestingHost;
+using Scynapse.Configuration;
+using Scynapse.Internal;
+using Scynapse.Providers;
+using Scynapse.Runtime;
+using Scynapse.Storage;
+using Scynapse.TestingHost;
 using TesterInternal;
 using TestExtensions;
 using UnitTests.GrainInterfaces;
@@ -25,7 +25,7 @@ namespace UnitTests.StorageTests
     /// <summary>
     /// PersistenceGrainTests - Run with only local unit test silo -- no external dependency on Azure storage
     /// </summary>
-    public class PersistenceGrainTests_Local : OrleansTestingBase, IClassFixture<PersistenceGrainTests_Local.Fixture>, IDisposable, IAsyncLifetime
+    public class PersistenceGrainTests_Local : ScynapseTestingBase, IClassFixture<PersistenceGrainTests_Local.Fixture>, IDisposable, IAsyncLifetime
     {
         public class Fixture : BaseTestClusterFixture
         {
@@ -46,9 +46,9 @@ namespace UnitTests.StorageTests
                     hostBuilder.AddTestStorageProvider(MockStorageProviderNameLowerCase, (sp, name) => ActivatorUtilities.CreateInstance<MockStorageProvider>(sp, name));
                     hostBuilder.AddTestStorageProvider(ErrorInjectorProviderName, (sp, name) => ActivatorUtilities.CreateInstance<ErrorInjectionStorageProvider>(sp));
 
-                    hostBuilder.Services.AddSingleton<OrleansGrainStorageSerializer>();
-                    hostBuilder.AddMemoryGrainStorage("OrleansSerializerMemoryStore", (OptionsBuilder<MemoryGrainStorageOptions> optionsBuilder) =>
-                        optionsBuilder.Configure<OrleansGrainStorageSerializer>((options, serializer) => options.GrainStorageSerializer = serializer));
+                    hostBuilder.Services.AddSingleton<ScynapseGrainStorageSerializer>();
+                    hostBuilder.AddMemoryGrainStorage("ScynapseSerializerMemoryStore", (OptionsBuilder<MemoryGrainStorageOptions> optionsBuilder) =>
+                        optionsBuilder.Configure<ScynapseGrainStorageSerializer>((options, serializer) => options.GrainStorageSerializer = serializer));
                 }
             }
         }
@@ -972,20 +972,20 @@ namespace UnitTests.StorageTests
         }
 
         [Fact, TestCategory("Functional"), TestCategory("Persistence")]
-        public void OrleansException_BadProvider()
+        public void ScynapseException_BadProvider()
         {
             string msg1 = "BadProvider";
             string msg2 = "Wrapper";
             string msg3 = "Aggregate";
 
             var bpce = new BadProviderConfigException(msg1);
-            var oe = new OrleansException(msg2, bpce);
+            var oe = new ScynapseException(msg2, bpce);
             var ae = new AggregateException(msg3, oe);
 
             Assert.NotNull(ae.InnerException); // AggregateException.InnerException should not be null
-            Assert.IsAssignableFrom<OrleansException>(ae.InnerException);
+            Assert.IsAssignableFrom<ScynapseException>(ae.InnerException);
             Exception exc = ae.InnerException;
-            Assert.NotNull(exc.InnerException); // OrleansException.InnerException should not be null
+            Assert.NotNull(exc.InnerException); // ScynapseException.InnerException should not be null
             Assert.IsAssignableFrom<BadProviderConfigException>(exc.InnerException);
 
             exc = ae.GetBaseException();
@@ -993,7 +993,7 @@ namespace UnitTests.StorageTests
             Assert.IsAssignableFrom<BadProviderConfigException>(exc.InnerException);
 
             Assert.StartsWith(msg3,  ae.Message);  //  "AggregateException.Message should be '{0}'", msg3
-            Assert.Equal(msg2,  exc.Message);  //  "OrleansException.Message should be '{0}'", msg2
+            Assert.Equal(msg2,  exc.Message);  //  "ScynapseException.Message should be '{0}'", msg2
             Assert.Equal(msg1,  exc.InnerException.Message);  //  "InnerException.Message should be '{0}'", msg1
         }
 
@@ -1238,7 +1238,7 @@ namespace UnitTests.StorageTests
             {
                 output.WriteLine("Exception caught: {0}", e);
                 var baseException = e.GetBaseException();
-                if (baseException is OrleansException && baseException.InnerException != null)
+                if (baseException is ScynapseException && baseException.InnerException != null)
                 {
                     baseException = baseException.InnerException;
                 }

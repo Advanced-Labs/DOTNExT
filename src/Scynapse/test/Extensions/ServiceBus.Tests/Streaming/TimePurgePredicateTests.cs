@@ -1,4 +1,4 @@
-using Orleans.Providers.Streams.Common;
+using Scynapse.Providers.Streams.Common;
 using Xunit;
 
 namespace ServiceBus.Tests.StreamingTests

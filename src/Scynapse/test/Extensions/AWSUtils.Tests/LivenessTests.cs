@@ -1,6 +1,6 @@
 using AWSUtils.Tests.StorageTests;
 using Microsoft.Extensions.Configuration;
-using Orleans.TestingHost;
+using Scynapse.TestingHost;
 using UnitTests.MembershipTests;
 using Xunit;
 using Xunit.Abstractions;
@@ -10,7 +10,7 @@ namespace AWSUtils.Tests.Liveness
     /// <summary>
     /// Liveness tests for AWS DynamoDB membership provider.
     /// 
-    /// These tests verify that Orleans cluster membership management works correctly
+    /// These tests verify that Scynapse cluster membership management works correctly
     /// when using DynamoDB as the membership table provider. DynamoDB provides:
     /// - Distributed membership tracking across silos
     /// - Failure detection and recovery

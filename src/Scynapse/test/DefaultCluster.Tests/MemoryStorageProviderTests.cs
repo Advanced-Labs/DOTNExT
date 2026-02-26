@@ -1,5 +1,5 @@
-using Orleans.Storage;
-using Orleans.Storage.Internal;
+using Scynapse.Storage;
+using Scynapse.Storage.Internal;
 using TestExtensions;
 using UnitTests.GrainInterfaces;
 using Xunit;
@@ -7,7 +7,7 @@ using Xunit;
 namespace DefaultCluster.Tests.StorageTests
 {
     /// <summary>
-    /// Tests for the Orleans Memory Storage Provider.
+    /// Tests for the Scynapse Memory Storage Provider.
     /// The memory storage provider stores grain state in memory (non-persistent)
     /// and is typically used for development, testing, and scenarios where
     /// state persistence across restarts is not required.

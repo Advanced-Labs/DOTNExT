@@ -1,4 +1,4 @@
-using Orleans;
+using Scynapse;
 
 namespace DynamicGrainLoading.TestGrains;
 

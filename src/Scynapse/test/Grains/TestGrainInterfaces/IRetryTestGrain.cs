@@ -1,8 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Orleans.Concurrency;
-using Orleans.DurableJobs;
+using Scynapse.Concurrency;
+using Scynapse.DurableJobs;
 
 namespace UnitTests.GrainInterfaces;
 

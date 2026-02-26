@@ -1,20 +1,20 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using Orleans;
-using Orleans.Hosting;
-using Orleans.Runtime;
-using Orleans.Runtime.DynamicGrains;
+using Scynapse;
+using Scynapse.Hosting;
+using Scynapse.Runtime;
+using Scynapse.Runtime.DynamicGrains;
 
 Console.WriteLine("═══════════════════════════════════════════════════════");
-Console.WriteLine("  Orleans Plugin Grain Loading - Single Silo Test");
+Console.WriteLine("  Scynapse Plugin Grain Loading - Single Silo Test");
 Console.WriteLine("═══════════════════════════════════════════════════════");
 Console.WriteLine();
 
-// Build the host with Orleans silo
+// Build the host with Scynapse silo
 // Note: Plugin grain loading is enabled by default - no explicit configuration needed
 var host = Host.CreateDefaultBuilder(args)
-    .UseOrleans((context, siloBuilder) =>
+    .UseScynapse((context, siloBuilder) =>
     {
         siloBuilder.UseLocalhostClustering();
     })
@@ -25,7 +25,7 @@ var host = Host.CreateDefaultBuilder(args)
         logging.SetMinimumLevel(LogLevel.Information);
 
         // Enable detailed logging for plugin grain loading
-        logging.AddFilter("Orleans.Runtime.DynamicGrains", LogLevel.Debug);
+        logging.AddFilter("Scynapse.Runtime.DynamicGrains", LogLevel.Debug);
     })
     .Build();
 
@@ -34,7 +34,7 @@ Console.WriteLine("✓ Plugin grain loading enabled");
 Console.WriteLine();
 
 // Start the silo
-Console.WriteLine("Starting Orleans silo...");
+Console.WriteLine("Starting Scynapse silo...");
 await host.StartAsync();
 Console.WriteLine("✓ Silo started successfully");
 Console.WriteLine();
@@ -221,7 +221,7 @@ try
     complexDataType!.GetProperty("Name")!.SetValue(complexData, "Test Data");
     complexDataType.GetProperty("Value")!.SetValue(complexData, 42);
     complexDataType.GetProperty("Timestamp")!.SetValue(complexData, DateTime.UtcNow);
-    complexDataType.GetProperty("Tags")!.SetValue(complexData, new List<string> { "dynamic", "test", "orleans" });
+    complexDataType.GetProperty("Tags")!.SetValue(complexData, new List<string> { "dynamic", "test", "scynapse" });
 
     Console.WriteLine("Sending complex data:");
     Console.WriteLine($"  Name: {complexDataType.GetProperty("Name")!.GetValue(complexData)}");

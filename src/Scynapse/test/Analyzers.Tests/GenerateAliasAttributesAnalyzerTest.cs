@@ -1,12 +1,12 @@
 using Microsoft.CodeAnalysis;
-using Orleans.Analyzers;
+using Scynapse.Analyzers;
 using Xunit;
 
 namespace Analyzers.Tests;
 
 /// <summary>
 /// Tests for the GenerateAliasAttributesAnalyzer which suggests adding [Alias] attributes to types and methods
-/// that need them. Orleans uses aliases for stable type identification across versions and deployments.
+/// that need them. Scynapse uses aliases for stable type identification across versions and deployments.
 /// This analyzer helps developers remember to add aliases to grain interfaces, serializable types, and RPC methods.
 /// </summary>
 [TestCategory("BVT"), TestCategory("Analyzer")]
@@ -77,7 +77,7 @@ public class GenerateAliasAttributesAnalyzerTest : DiagnosticAnalyzerTestBase<Ge
 
     /// <summary>
     /// Verifies that the analyzer does not suggest aliases for non-grain interfaces,
-    /// as aliases are only needed for grain interfaces in the Orleans RPC system.
+    /// as aliases are only needed for grain interfaces in the Scynapse RPC system.
     /// </summary>
     [Fact]
     public Task NonGrainInterfaceWithoutAliasAttribute_ShouldNotTriggerDiagnostic()

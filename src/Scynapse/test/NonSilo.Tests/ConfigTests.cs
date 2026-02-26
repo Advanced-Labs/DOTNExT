@@ -1,4 +1,4 @@
-using Orleans.Runtime.Configuration;
+using Scynapse.Runtime.Configuration;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -9,8 +9,8 @@ using Xunit.Abstractions;
 namespace UnitTests
 {
     /// <summary>
-    /// Tests for Orleans configuration utilities, particularly the security features for handling sensitive connection strings.
-    /// These tests verify that Orleans properly redacts sensitive information from configuration strings for logging and diagnostics.
+    /// Tests for Scynapse configuration utilities, particularly the security features for handling sensitive connection strings.
+    /// These tests verify that Scynapse properly redacts sensitive information from configuration strings for logging and diagnostics.
     /// </summary>
     public class ConfigTests
     {

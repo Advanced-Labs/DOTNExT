@@ -1,9 +1,9 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
-using Orleans.Providers;
-using Orleans.Streams;
-using Orleans.TestingHost;
-using Orleans.TestingHost.Utils;
+using Scynapse.Providers;
+using Scynapse.Streams;
+using Scynapse.TestingHost;
+using Scynapse.TestingHost.Utils;
 using TestExtensions;
 using UnitTests.GrainInterfaces;
 using Xunit;
@@ -13,7 +13,7 @@ namespace Tester.StreamingTests
     /// <summary>
     /// Tests for persistent streaming over single gateway configurations, validating system target routing behavior.
     /// </summary>
-    public class SystemTargetRouteTests : OrleansTestingBase, IClassFixture<SystemTargetRouteTests.Fixture>
+    public class SystemTargetRouteTests : ScynapseTestingBase, IClassFixture<SystemTargetRouteTests.Fixture>
     {
         private static readonly TimeSpan Timeout = TimeSpan.FromSeconds(30);
         private int eventsConsumed = 0;
@@ -53,7 +53,7 @@ namespace Tester.StreamingTests
             this.fixture = fixture;
         }
 
-        [SkippableFact(Skip = "https://github.com/dotnet/orleans/issues/4320"), TestCategory("Functional"), TestCategory("Streaming")]
+        [SkippableFact(Skip = "https://github.com/dotnet/scynapse/issues/4320"), TestCategory("Functional"), TestCategory("Streaming")]
         public async Task PersistentStreamingOverSingleGatewayTest()
         {
             const int streamCount = 100;

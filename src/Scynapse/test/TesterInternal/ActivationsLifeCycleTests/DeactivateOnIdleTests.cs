@@ -1,12 +1,12 @@
-using Orleans.Runtime;
-using Orleans.TestingHost;
+using Scynapse.Runtime;
+using Scynapse.TestingHost;
 using TestExtensions;
 using UnitTests.GrainInterfaces;
 using UnitTests.TestHelper;
 using Xunit;
 using Xunit.Abstractions;
-using Orleans.Internal;
-using Orleans.Configuration;
+using Scynapse.Internal;
+using Scynapse.Configuration;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -17,7 +17,7 @@ namespace UnitTests.ActivationsLifeCycleTests
     /// Tests for grain deactivation on idle behavior and related stress scenarios.
     /// </summary>
     [TestCategory("ActivationCollector")]
-    public class DeactivateOnIdleTests : OrleansTestingBase, IDisposable
+    public class DeactivateOnIdleTests : ScynapseTestingBase, IDisposable
     {
         private readonly ITestOutputHelper output;
         private TestCluster testCluster;

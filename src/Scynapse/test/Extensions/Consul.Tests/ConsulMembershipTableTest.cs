@@ -1,8 +1,8 @@
-using Orleans.Messaging;
+using Scynapse.Messaging;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using Orleans.Configuration;
-using Orleans.Runtime.Membership;
+using Scynapse.Configuration;
+using Scynapse.Runtime.Membership;
 using TestExtensions;
 using UnitTests;
 using UnitTests.MembershipTests;
@@ -11,9 +11,9 @@ using Xunit;
 namespace Consul.Tests
 {
     /// <summary>
-    /// Tests for operation of Orleans Membership Table using Consul - Requires access to external Consul cluster
+    /// Tests for operation of Scynapse Membership Table using Consul - Requires access to external Consul cluster
     /// 
-    /// Consul provides a distributed key-value store that Orleans uses for:
+    /// Consul provides a distributed key-value store that Scynapse uses for:
     /// - Cluster membership management
     /// - Service discovery
     /// - Health checking and failure detection

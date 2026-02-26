@@ -1,14 +1,14 @@
-using Orleans.Runtime;
-using Orleans.Streams;
-using Orleans.TestingHost;
+using Scynapse.Runtime;
+using Scynapse.Streams;
+using Scynapse.TestingHost;
 using ServiceBus.Tests.TestStreamProviders;
 using TestExtensions;
 using UnitTests.Grains.ProgrammaticSubscribe;
 using Xunit;
 using ServiceBus.Tests.SlowConsumingTests;
-using Orleans.Providers.Streams.Common;
-using Orleans.Streaming.EventHubs.Testing;
-using Orleans.Configuration;
+using Scynapse.Providers.Streams.Common;
+using Scynapse.Streaming.EventHubs.Testing;
+using Scynapse.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace ServiceBus.Tests.MonitorTests
@@ -17,7 +17,7 @@ namespace ServiceBus.Tests.MonitorTests
     /// Tests for EventHub statistics monitoring including receiver, cache, and object pool monitor counters.
     /// </summary>
     [TestCategory("EventHub"), TestCategory("Streaming")]
-    public class EHStatisticMonitorTests : OrleansTestingBase, IClassFixture<EHStatisticMonitorTests.Fixture>
+    public class EHStatisticMonitorTests : ScynapseTestingBase, IClassFixture<EHStatisticMonitorTests.Fixture>
     {
         private const string StreamProviderName = "EventHubStreamProvider";
         private const string StreamNamespace = "EHTestsNamespace";
@@ -70,7 +70,7 @@ namespace ServiceBus.Tests.MonitorTests
             seed = new Random();
         }
 
-        [Fact(Skip = "https://github.com/dotnet/orleans/issues/4594"), TestCategory("Functional")]
+        [Fact(Skip = "https://github.com/dotnet/scynapse/issues/4594"), TestCategory("Functional")]
         public async Task EHStatistics_MonitorCalledAccordingly()
         {
             var streamId = new FullStreamIdentity(Guid.NewGuid(), StreamNamespace, StreamProviderName);

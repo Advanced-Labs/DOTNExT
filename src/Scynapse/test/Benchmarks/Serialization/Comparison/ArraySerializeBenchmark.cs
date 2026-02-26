@@ -7,23 +7,23 @@ using Benchmarks.Serialization.Models;
 using Benchmarks.Utilities;
 using MessagePack;
 using Microsoft.Extensions.DependencyInjection;
-using Orleans.Serialization;
+using Scynapse.Serialization;
 
 namespace Benchmarks.Serialization.Comparison;
 
 #pragma warning disable IDE1006 // Naming Styles
 /// <summary>
-/// Compares Orleans deserialization performance against other popular serializers for array types.
+/// Compares Scynapse deserialization performance against other popular serializers for array types.
 /// </summary>
 [GroupBenchmarksBy(BenchmarkLogicalGroupRule.ByCategory)]
 [Config(typeof(BenchmarkConfig))]
 public class ArrayDeserializeBenchmark
 {
     private static readonly MyVector3[] _value;
-    private static readonly Serializer<MyVector3[]> _orleansSerializer;
+    private static readonly Serializer<MyVector3[]> _scynapseSerializer;
     private static readonly byte[] _stjPayload;
     private static readonly byte[] _protobufPayload;
-    private static readonly byte[] _orleansPayload;
+    private static readonly byte[] _scynapsePayload;
     private static readonly byte[] _messagePackPayload;
 
     static ArrayDeserializeBenchmark()
@@ -32,10 +32,10 @@ public class ArrayDeserializeBenchmark
         var serviceProvider = new ServiceCollection()
             .AddSerializer(builder => builder.AddAssembly(typeof(ArraySerializeBenchmark).Assembly))
             .BuildServiceProvider();
-        _orleansSerializer = serviceProvider.GetRequiredService<Serializer<MyVector3[]>>();
+        _scynapseSerializer = serviceProvider.GetRequiredService<Serializer<MyVector3[]>>();
 
 
-        _orleansPayload = _orleansSerializer.SerializeToArray(_value);
+        _scynapsePayload = _scynapseSerializer.SerializeToArray(_value);
         _messagePackPayload = MessagePackSerializer.Serialize(_value);
 
         var stream = new MemoryStream();
@@ -55,6 +55,6 @@ public class ArrayDeserializeBenchmark
     public MyVector3[] SystemTextJsonDeserialize() => JsonSerializer.Deserialize<MyVector3[]>(_stjPayload);
 
     [Benchmark]
-    public MyVector3[] OrleansDeserialize() => _orleansSerializer.Deserialize(_orleansPayload);
+    public MyVector3[] ScynapseDeserialize() => _scynapseSerializer.Deserialize(_scynapsePayload);
 }
 #pragma warning restore IDE1006 // Naming Styles

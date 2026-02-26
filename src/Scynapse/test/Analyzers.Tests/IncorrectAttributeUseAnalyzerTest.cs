@@ -1,5 +1,5 @@
 using Microsoft.CodeAnalysis;
-using Orleans.Analyzers;
+using Scynapse.Analyzers;
 using Xunit;
 
 namespace Analyzers.Tests;
@@ -35,7 +35,7 @@ public class IncorrectAttributeUseAnalyzerTest : DiagnosticAnalyzerTestBase<Inco
     /// <summary>
     /// Verifies that the analyzer detects when a class inheriting from Grain has
     /// serialization attributes applied. Grains are not serialized themselves,
-    /// so these attributes are meaningless and indicate a misunderstanding of the Orleans model.
+    /// so these attributes are meaningless and indicate a misunderstanding of the Scynapse model.
     /// </summary>
     [Theory]
     [MemberData(nameof(Attributes))]

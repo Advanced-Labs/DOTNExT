@@ -3,16 +3,16 @@ using TestGrainInterfaces;
 namespace TestGrains
 {
     [Serializable]
-    [Orleans.GenerateSerializer]
+    [Scynapse.GenerateSerializer]
     public class PersonState
     {
-        [Orleans.Id(0)]
+        [Scynapse.Id(0)]
         public string FirstName { get; set; }
-        [Orleans.Id(1)]
+        [Scynapse.Id(1)]
         public string LastName { get; set; }
-        [Orleans.Id(2)]
+        [Scynapse.Id(2)]
         public GenderType Gender { get; set; }
-        [Orleans.Id(3)]
+        [Scynapse.Id(3)]
         public bool IsMarried { get; set; }
 
         public void Apply(PersonRegistered @event)

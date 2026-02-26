@@ -1,14 +1,14 @@
 using BenchmarkDotNet.Attributes;
 using Benchmarks.Models;
 using Benchmarks.Utilities;
-using Orleans.Serialization;
-using Orleans.Serialization.Session;
+using Scynapse.Serialization;
+using Scynapse.Serialization.Session;
 using Microsoft.Extensions.DependencyInjection;
 using Newtonsoft.Json;
 using System.Text;
 using System.Text.Json;
 using Xunit;
-using SerializerSession = Orleans.Serialization.Session.SerializerSession;
+using SerializerSession = Scynapse.Serialization.Session.SerializerSession;
 using Utf8JsonNS = Utf8Json;
 using Hyperion;
 using ZeroFormatter;
@@ -16,7 +16,7 @@ using ZeroFormatter;
 namespace Benchmarks.Comparison
 {
     /// <summary>
-    /// Compares Orleans serialization performance against other popular serializers for struct types.
+    /// Compares Scynapse serialization performance against other popular serializers for struct types.
     /// </summary>
     [Trait("Category", "Benchmark")]
     [Config(typeof(BenchmarkConfig))]
@@ -56,7 +56,7 @@ namespace Benchmarks.Comparison
         }
 
         [Benchmark(Baseline = true)]
-        public long Orleans()
+        public long Scynapse()
         {
             Session.Reset();
             return Serializer.Serialize(Input, Data, Session);

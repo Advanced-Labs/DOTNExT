@@ -1,4 +1,4 @@
-using Orleans.Tests.SqlUtils;
+using Scynapse.Tests.SqlUtils;
 using UnitTests.General;
 using Xunit;
 
@@ -10,7 +10,7 @@ namespace UnitTests.StorageTests.AdoNet
     [TestCategory("Persistence"), TestCategory("PostgreSql")]
     public class PostgreSqlRelationalStoreTests : RelationalStoreTestsBase, IClassFixture<PostgreSqlRelationalStoreTests.Fixture>
     {
-        private const string TestDatabaseName = "OrleansStreamTest";
+        private const string TestDatabaseName = "ScynapseStreamTest";
         private const string AdoNetInvariantName = AdoNetInvariants.InvariantNamePostgreSql;
 
         private readonly RelationalStorageForTesting _storage;

@@ -1,5 +1,5 @@
-using Orleans.Runtime.Placement;
-using Orleans.Runtime.Placement.Repartitioning;
+using Scynapse.Runtime.Placement;
+using Scynapse.Runtime.Placement.Repartitioning;
 
 namespace UnitTests.ActivationRepartitioningTests;
 

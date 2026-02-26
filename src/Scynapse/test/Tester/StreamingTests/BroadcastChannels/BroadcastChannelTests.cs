@@ -1,6 +1,6 @@
 using Microsoft.Extensions.Configuration;
-using Orleans.BroadcastChannel;
-using Orleans.TestingHost;
+using Scynapse.BroadcastChannel;
+using Scynapse.TestingHost;
 using TestExtensions;
 using UnitTests.Grains.BroadcastChannel;
 using Xunit;
@@ -11,7 +11,7 @@ namespace Tester.StreamingTests.BroadcastChannel
     /// Tests broadcast channel functionality including fire-and-forget and non-fire-and-forget delivery modes with multiple subscribers.
     /// </summary>
     [TestCategory("BVT")]
-    public class BroadcastChannelTests : OrleansTestingBase, IClassFixture<BroadcastChannelTests.Fixture>
+    public class BroadcastChannelTests : ScynapseTestingBase, IClassFixture<BroadcastChannelTests.Fixture>
     {
         private const string ProviderName = "BroadcastChannel";
         private const string ProviderNameNonFireAndForget = "BroadcastChannelNonFireAndForget";

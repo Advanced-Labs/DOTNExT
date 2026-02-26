@@ -2,15 +2,15 @@ using System.Collections.Concurrent;
 using System.Globalization;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Orleans.Configuration;
-using Orleans.Providers.Streams.AzureQueue;
-using Orleans.Providers.Streams.Common;
-using Orleans.Runtime;
-using Orleans.Streams;
+using Scynapse.Configuration;
+using Scynapse.Providers.Streams.AzureQueue;
+using Scynapse.Providers.Streams.Common;
+using Scynapse.Runtime;
+using Scynapse.Streams;
 using TestExtensions;
 using Xunit;
 using Xunit.Abstractions;
-using Orleans.Serialization;
+using Scynapse.Serialization;
 
 namespace Tester.AzureUtils.Streaming
 {

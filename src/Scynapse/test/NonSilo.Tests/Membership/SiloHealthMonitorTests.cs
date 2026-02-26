@@ -4,12 +4,12 @@ using Microsoft.Extensions.Options;
 using NonSilo.Tests.Utilities;
 using NSubstitute;
 using NSubstitute.ExceptionExtensions;
-using Orleans.Configuration;
-using Orleans.Runtime.MembershipService;
+using Scynapse.Configuration;
+using Scynapse.Runtime.MembershipService;
 using TestExtensions;
 using Xunit;
 using Xunit.Abstractions;
-using static Orleans.Runtime.MembershipService.SiloHealthMonitor;
+using static Scynapse.Runtime.MembershipService.SiloHealthMonitor;
 
 namespace NonSilo.Tests.Membership
 {

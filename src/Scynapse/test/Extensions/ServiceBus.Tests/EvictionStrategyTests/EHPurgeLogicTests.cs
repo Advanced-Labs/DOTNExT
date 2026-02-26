@@ -1,16 +1,16 @@
-using Orleans.Providers.Streams.Common;
-using Orleans.Streaming.EventHubs;
-using Orleans.Streams;
+using Scynapse.Providers.Streams.Common;
+using Scynapse.Streaming.EventHubs;
+using Scynapse.Streams;
 using System.Collections.Concurrent;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
-using Orleans.Configuration;
+using Scynapse.Configuration;
 using Xunit;
-using Orleans.Streaming.EventHubs.Testing;
+using Scynapse.Streaming.EventHubs.Testing;
 using Azure.Messaging.EventHubs;
 using Microsoft.Extensions.DependencyInjection;
-using Orleans.Serialization;
-using Orleans.Statistics;
+using Scynapse.Serialization;
+using Scynapse.Statistics;
 using System.Globalization;
 
 namespace ServiceBus.Tests.EvictionStrategyTests

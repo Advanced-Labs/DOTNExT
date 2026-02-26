@@ -1,4 +1,4 @@
-using Orleans.TestingHost;
+using Scynapse.TestingHost;
 using TestExtensions;
 using Tester.AzureUtils;
 using UnitTests.Grains.Directories;

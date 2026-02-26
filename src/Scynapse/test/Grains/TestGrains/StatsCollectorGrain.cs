@@ -1,4 +1,4 @@
-﻿using Orleans.Placement;
+﻿using Scynapse.Placement;
 
 namespace UnitTests.Stats
 {

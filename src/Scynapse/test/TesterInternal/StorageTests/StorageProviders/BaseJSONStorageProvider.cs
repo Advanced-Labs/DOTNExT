@@ -15,8 +15,8 @@
 //*********************************************************
 
 using Newtonsoft.Json;
-using Orleans.Runtime;
-using Orleans.Storage;
+using Scynapse.Runtime;
+using Scynapse.Storage;
 
 namespace Samples.StorageProviders
 {

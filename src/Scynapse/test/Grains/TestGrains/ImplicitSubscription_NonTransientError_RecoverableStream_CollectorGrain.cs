@@ -1,9 +1,9 @@
 using System.Collections.Concurrent;
 using Microsoft.Extensions.Logging;
-using Orleans.Placement;
-using Orleans.Providers.Streams.Generator;
-using Orleans.Runtime;
-using Orleans.Streams;
+using Scynapse.Placement;
+using Scynapse.Providers.Streams.Generator;
+using Scynapse.Runtime;
+using Scynapse.Streams;
 using TestGrainInterfaces;
 using UnitTests.Grains;
 

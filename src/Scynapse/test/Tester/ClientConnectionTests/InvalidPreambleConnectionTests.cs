@@ -1,8 +1,8 @@
 using System.Net.Sockets;
 using Microsoft.Extensions.DependencyInjection;
-using Orleans.Messaging;
-using Orleans.Runtime;
-using Orleans.TestingHost;
+using Scynapse.Messaging;
+using Scynapse.Runtime;
+using Scynapse.TestingHost;
 using TestExtensions;
 using Xunit;
 

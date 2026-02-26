@@ -3,13 +3,13 @@ using Projects;
 
 var builder = DistributedApplication.CreateBuilder(args);
 
-var redis = builder.AddRedis("orleans-redis");
+var redis = builder.AddRedis("scynapse-redis");
 
-var orleans = builder.AddOrleans("cluster")
+var scynapse = builder.AddScynapse("cluster")
     .WithClustering(redis);
 
 builder.AddProject<DashboardToy_Frontend>("frontend")
-    .WithReference(orleans)
+    .WithReference(scynapse)
     .WaitFor(redis)
     .WithReplicas(5);
 

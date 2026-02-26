@@ -2,8 +2,8 @@ namespace UnitTests.FSharpGrains
 
 open System.Threading.Tasks
 open UnitTests.GrainInterfaces
-open Orleans
-open Orleans.Metadata
+open Scynapse
+open Scynapse.Metadata
 
 [<GrainType("fsharp.generic`1")>]
 type Generic1ArgumentGrain<'T>() = 

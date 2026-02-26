@@ -1,10 +1,10 @@
 using System.Diagnostics;
 using System.Globalization;
-using Orleans.TestingHost.Utils;
+using Scynapse.TestingHost.Utils;
 using Xunit;
 using Xunit.Abstractions;
-using Orleans.Internal;
-using AzureStoragePolicyOptions = Orleans.Clustering.AzureStorage.AzureStoragePolicyOptions;
+using Scynapse.Internal;
+using AzureStoragePolicyOptions = Scynapse.Clustering.AzureStorage.AzureStoragePolicyOptions;
 
 namespace Tester.AzureUtils
 {

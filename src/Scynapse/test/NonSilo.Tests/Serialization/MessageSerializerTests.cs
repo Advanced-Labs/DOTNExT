@@ -4,13 +4,13 @@ using System.IO.Pipelines;
 using System.Net;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
-using Orleans.CodeGeneration;
-using Orleans.Configuration;
-using Orleans.Runtime;
-using Orleans.Runtime.Messaging;
-using Orleans.Serialization.Buffers;
-using Orleans.Serialization.Codecs;
-using Orleans.Serialization.Session;
+using Scynapse.CodeGeneration;
+using Scynapse.Configuration;
+using Scynapse.Runtime;
+using Scynapse.Runtime.Messaging;
+using Scynapse.Serialization.Buffers;
+using Scynapse.Serialization.Codecs;
+using Scynapse.Serialization.Session;
 using TestExtensions;
 using Xunit;
 using Xunit.Abstractions;
@@ -18,7 +18,7 @@ using Xunit.Abstractions;
 namespace UnitTests.Serialization
 {
     /// <summary>
-    /// Tests for Orleans message serialization functionality.
+    /// Tests for Scynapse message serialization functionality.
     /// </summary>
     [Collection(TestEnvironmentFixture.DefaultCollection)]
     public class MessageSerializerTests

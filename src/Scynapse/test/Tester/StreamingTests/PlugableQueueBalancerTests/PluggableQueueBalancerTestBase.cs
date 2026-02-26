@@ -1,12 +1,12 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Xunit;
-using Orleans.TestingHost;
-using Orleans.TestingHost.Utils;
+using Scynapse.TestingHost;
+using Scynapse.TestingHost.Utils;
 using TestExtensions;
 
 namespace Tester.StreamingTests
 {
-    public class PluggableQueueBalancerTestBase : OrleansTestingBase
+    public class PluggableQueueBalancerTestBase : ScynapseTestingBase
     {
         private readonly TimeSpan Timeout = TimeSpan.FromSeconds(30);
         private static readonly Type QueueBalancerType = typeof(LeaseBasedQueueBalancerForTest);

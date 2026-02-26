@@ -1,6 +1,6 @@
-using Orleans.SqlUtils.StorageProvider.GrainInterfaces;
+using Scynapse.SqlUtils.StorageProvider.GrainInterfaces;
 
-namespace Orleans.SqlUtils.StorageProvider.GrainClasses
+namespace Scynapse.SqlUtils.StorageProvider.GrainClasses
 {
     [Serializable]
     [GenerateSerializer]

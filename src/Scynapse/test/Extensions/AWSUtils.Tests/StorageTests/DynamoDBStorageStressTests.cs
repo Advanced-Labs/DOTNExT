@@ -1,5 +1,5 @@
 using Amazon.DynamoDBv2.Model;
-using Orleans.TestingHost.Utils;
+using Scynapse.TestingHost.Utils;
 using System.Diagnostics;
 using System.Globalization;
 using AWSUtils.Tests.StorageTests.AWSUtils;

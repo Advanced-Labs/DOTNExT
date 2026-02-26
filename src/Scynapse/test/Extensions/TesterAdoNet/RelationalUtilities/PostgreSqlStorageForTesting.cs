@@ -1,5 +1,5 @@
 using Npgsql;
-using Orleans.Tests.SqlUtils;
+using Scynapse.Tests.SqlUtils;
 using TestExtensions;
 using UnitTests.General;
 

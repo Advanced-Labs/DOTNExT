@@ -1,6 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <OrleansBuildTimeCodeGen>true</OrleansBuildTimeCodeGen>
+    <ScynapseBuildTimeCodeGen>true</ScynapseBuildTimeCodeGen>
     <TargetFrameworks>$(TestTargetFrameworks)</TargetFrameworks>
     <OutputType>Exe</OutputType>
     <GenerateProgramFile>false</GenerateProgramFile>
@@ -19,15 +19,15 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="$(SourceRoot)src\Azure\Orleans.Clustering.AzureStorage\Orleans.Clustering.AzureStorage.csproj" />
-    <ProjectReference Include="$(SourceRoot)src\Azure\Orleans.GrainDirectory.AzureStorage\Orleans.GrainDirectory.AzureStorage.csproj" />
+    <ProjectReference Include="$(SourceRoot)src\Azure\Scynapse.Clustering.AzureStorage\Scynapse.Clustering.AzureStorage.csproj" />
+    <ProjectReference Include="$(SourceRoot)src\Azure\Scynapse.GrainDirectory.AzureStorage\Scynapse.GrainDirectory.AzureStorage.csproj" />
     <ProjectReference Include="$(SourceRoot)test\Grains\TestInternalGrains\TestInternalGrains.csproj" />
     <ProjectReference Include="$(SourceRoot)test\TestInfrastructure\TestExtensions\TestExtensions.csproj" />
     <ProjectReference Include="$(SourceRoot)test\Grains\TestVersionGrains\TestVersionGrains.csproj" />
     <ProjectReference Include="$(SourceRoot)test\Grains\TestFSharp\TestFSharp.fsproj" />
-    <ProjectReference Include="$(SourceRoot)src\Orleans.Reminders\Orleans.Reminders.csproj" />
-    <ProjectReference Include="$(SourceRoot)src\Orleans.Sdk\Orleans.Sdk.csproj" />
-    <ProjectReference Include="$(SourceRoot)src\Orleans.Serialization.SystemTextJson\Orleans.Serialization.SystemTextJson.csproj" />
-    <ProjectReference Include="$(SourceRoot)src\Orleans.BroadcastChannel\Orleans.BroadcastChannel.csproj" />
+    <ProjectReference Include="$(SourceRoot)src\Scynapse.Reminders\Scynapse.Reminders.csproj" />
+    <ProjectReference Include="$(SourceRoot)src\Scynapse.Sdk\Scynapse.Sdk.csproj" />
+    <ProjectReference Include="$(SourceRoot)src\Scynapse.Serialization.SystemTextJson\Scynapse.Serialization.SystemTextJson.csproj" />
+    <ProjectReference Include="$(SourceRoot)src\Scynapse.BroadcastChannel\Scynapse.BroadcastChannel.csproj" />
   </ItemGroup>
 </Project>

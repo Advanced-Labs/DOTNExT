@@ -1,12 +1,12 @@
 using Microsoft.CodeAnalysis;
-using Orleans.Analyzers;
+using Scynapse.Analyzers;
 using Xunit;
 
 namespace Analyzers.Tests;
 
 /// <summary>
 /// Tests for the analyzer that prevents properties in grain interfaces.
-/// Orleans grain interfaces cannot have properties because grain calls are RPC-based
+/// Scynapse grain interfaces cannot have properties because grain calls are RPC-based
 /// and properties would create ambiguity between local state and remote calls.
 /// All grain interaction must be through explicit method calls to maintain clarity
 /// about distributed communication boundaries.
@@ -19,13 +19,13 @@ public class GrainInterfacePropertyDiagnosticAnalyzerTest : DiagnosticAnalyzerTe
 
     /// <summary>
     /// Verifies that grain interfaces with only methods (no properties) pass validation.
-    /// This is the correct pattern for Orleans grain interfaces.
+    /// This is the correct pattern for Scynapse grain interfaces.
     /// </summary>
     [Fact]
     public async Task GrainInterfacePropertyNoError()
     {
         var code = """
-                    public interface I : Orleans.IGrain
+                    public interface I : Scynapse.IGrain
                     {
                         Task GetSomeOtherThing(int a);
                     }
@@ -44,7 +44,7 @@ public class GrainInterfacePropertyDiagnosticAnalyzerTest : DiagnosticAnalyzerTe
     public async Task NoPropertiesAllowedInGrainInterface()
     {
         var code = """
-                    public interface I : Orleans.IGrain
+                    public interface I : Scynapse.IGrain
                     {
                         int MyProperty { get; set; }
                     }
@@ -70,7 +70,7 @@ public class GrainInterfacePropertyDiagnosticAnalyzerTest : DiagnosticAnalyzerTe
     public async Task NoPropertiesAllowedInIAddressableInterface()
     {
         var code = """
-                    public interface I : Orleans.Runtime.IAddressable
+                    public interface I : Scynapse.Runtime.IAddressable
                     {
                         int MyProperty { get; set; }
                     }
@@ -96,7 +96,7 @@ public class GrainInterfacePropertyDiagnosticAnalyzerTest : DiagnosticAnalyzerTe
     public async Task NoPropertiesAllowedInIGrainObserverInterface()
     {
         var code = """
-                    public interface I : Orleans.IGrainObserver
+                    public interface I : Scynapse.IGrainObserver
                     {
                         int MyProperty { get; set; }
                     }
@@ -122,7 +122,7 @@ public class GrainInterfacePropertyDiagnosticAnalyzerTest : DiagnosticAnalyzerTe
     public async Task StaticInterfacePropertiesAllowedInGrainInterface()
     {
         var code = """
-                    public interface I : Orleans.IGrain
+                    public interface I : Scynapse.IGrain
                     {
                         public static int MyProperty => 0;
                         public static virtual int MyVirtualProperty => 0;
@@ -142,7 +142,7 @@ public class GrainInterfacePropertyDiagnosticAnalyzerTest : DiagnosticAnalyzerTe
     public async Task StaticInterfacePropertiesAllowedInAddressableInterface()
     {
         var code = """
-                    public interface I : Orleans.Runtime.IAddressable
+                    public interface I : Scynapse.Runtime.IAddressable
                     {
                         public static int MyProperty => 0;
                         public static virtual int MyVirtualProperty => 0;

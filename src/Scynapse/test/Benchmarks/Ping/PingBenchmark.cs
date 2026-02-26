@@ -5,7 +5,7 @@ using BenchmarkGrains.Ping;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using Orleans.Configuration;
+using Scynapse.Configuration;
 
 namespace Benchmarks.Ping
 {
@@ -28,15 +28,15 @@ namespace Benchmarks.Ping
             for (var i = 0; i < numSilos; ++i)
             {
                 var primary = i == 0 ? null : new IPEndPoint(IPAddress.Loopback, 11111);
-                var hostBuilder = new HostBuilder().UseOrleans((ctx, siloBuilder) =>
+                var hostBuilder = new HostBuilder().UseScynapse((ctx, siloBuilder) =>
                 {
-#pragma warning disable ORLEANSEXP001 // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
+#pragma warning disable SCYNAPSEEXP001 // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
                     siloBuilder.AddActivationRepartitioner();
-#pragma warning restore ORLEANSEXP001 // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
+#pragma warning restore SCYNAPSEEXP001 // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
                     siloBuilder.ConfigureLogging(l =>
                     {
                         l.AddConsole();
-                        l.AddFilter("Orleans.Runtime.Placement.Repartitioning", LogLevel.Debug);
+                        l.AddFilter("Scynapse.Runtime.Placement.Repartitioning", LogLevel.Debug);
                     });
                     siloBuilder.Configure<ActivationRepartitionerOptions>(o =>
                     {
@@ -62,7 +62,7 @@ namespace Benchmarks.Ping
 
             if (startClient)
             {
-                var hostBuilder = new HostBuilder().UseOrleansClient((ctx, clientBuilder) =>
+                var hostBuilder = new HostBuilder().UseScynapseClient((ctx, clientBuilder) =>
                 {
                     if (numSilos == 1)
                     {

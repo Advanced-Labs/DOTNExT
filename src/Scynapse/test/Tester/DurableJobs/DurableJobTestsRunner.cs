@@ -2,9 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Orleans;
-using Orleans.Internal;
-using Orleans.DurableJobs;
+using Scynapse;
+using Scynapse.Internal;
+using Scynapse.DurableJobs;
 using Xunit;
 using UnitTests.GrainInterfaces;
 

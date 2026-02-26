@@ -1,5 +1,5 @@
-using Orleans.Placement;
-using Orleans.Runtime;
+using Scynapse.Placement;
+using Scynapse.Runtime;
 
 namespace UnitTests.GrainInterfaces
 {
@@ -13,7 +13,7 @@ namespace UnitTests.GrainInterfaces
     }
 
     [Serializable]
-    [Orleans.GenerateSerializer]
+    [Scynapse.GenerateSerializer]
     public class VersionAwarePlacementStrategy : PlacementStrategy
     {
         internal static VersionAwarePlacementStrategy Singleton { get; } = new VersionAwarePlacementStrategy();

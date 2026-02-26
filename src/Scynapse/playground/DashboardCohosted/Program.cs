@@ -1,9 +1,9 @@
-using Orleans.Dashboard;
+using Scynapse.Dashboard;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Configure Orleans
-builder.UseOrleans(siloBuilder =>
+// Configure Scynapse
+builder.UseScynapse(siloBuilder =>
 {
     siloBuilder.UseLocalhostClustering();
     siloBuilder.UseInMemoryReminderService();
@@ -16,6 +16,6 @@ builder.UseOrleans(siloBuilder =>
 var app = builder.Build();
 
 // Map dashboard endpoints at the root
-app.MapOrleansDashboard();
+app.MapScynapseDashboard();
 
 app.Run();

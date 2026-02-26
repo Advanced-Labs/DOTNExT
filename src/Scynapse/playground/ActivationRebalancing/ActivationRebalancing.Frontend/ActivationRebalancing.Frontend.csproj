@@ -4,7 +4,7 @@
     <TargetFramework>net8.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
-    <OrleansBuildTimeCodeGen>true</OrleansBuildTimeCodeGen>
+    <ScynapseBuildTimeCodeGen>true</ScynapseBuildTimeCodeGen>
   </PropertyGroup>
 
   <ItemGroup>
@@ -12,9 +12,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\..\src\Orleans.Server\Orleans.Server.csproj" />
+    <ProjectReference Include="..\..\..\src\Scynapse.Server\Scynapse.Server.csproj" />
     <ProjectReference Include="..\ActivationRebalancing.Cluster\ActivationRebalancing.Cluster.csproj" />
-    <ProjectReference Include="..\..\..\src\Redis\Orleans.Clustering.Redis\Orleans.Clustering.Redis.csproj" />
+    <ProjectReference Include="..\..\..\src\Redis\Scynapse.Clustering.Redis\Scynapse.Clustering.Redis.csproj" />
   </ItemGroup>
 
 </Project>

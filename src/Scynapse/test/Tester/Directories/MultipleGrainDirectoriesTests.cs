@@ -1,6 +1,6 @@
-using Orleans.Internal;
-using Orleans.Runtime.Placement;
-using Orleans.TestingHost;
+using Scynapse.Internal;
+using Scynapse.Runtime.Placement;
+using Scynapse.TestingHost;
 using TestExtensions;
 using UnitTests.GrainInterfaces.Directories;
 using Xunit;

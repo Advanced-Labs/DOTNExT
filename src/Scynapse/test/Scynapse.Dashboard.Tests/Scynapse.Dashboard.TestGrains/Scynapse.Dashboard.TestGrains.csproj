@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+	<TargetFramework>net8.0</TargetFramework>
+	<IsPackable>false</IsPackable>
+	<ScynapseBuildTimeCodeGen>true</ScynapseBuildTimeCodeGen>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\src\Scynapse.Core\Scynapse.Core.csproj" />
+    <ProjectReference Include="..\..\..\src\Scynapse.Reminders\Scynapse.Reminders.csproj" />
+    <ProjectReference Include="..\..\..\src\Dashboard\Scynapse.Dashboard\Scynapse.Dashboard.csproj" />
+    <ProjectReference Include="..\..\..\src\Dashboard\Scynapse.Dashboard.Abstractions\Scynapse.Dashboard.Abstractions.csproj" />
+    <ProjectReference Include="..\..\..\src\Scynapse.Sdk\Scynapse.Sdk.csproj" />
+  </ItemGroup>
+</Project>

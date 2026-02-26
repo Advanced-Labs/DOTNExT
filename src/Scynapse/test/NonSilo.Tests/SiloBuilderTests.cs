@@ -1,13 +1,13 @@
 using System.Net;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Orleans;
-using Orleans.Configuration;
-using Orleans.Configuration.Internal;
-using Orleans.Configuration.Validators;
-using Orleans.Hosting;
-using Orleans.Runtime;
-using Orleans.Statistics;
+using Scynapse;
+using Scynapse.Configuration;
+using Scynapse.Configuration.Internal;
+using Scynapse.Configuration.Validators;
+using Scynapse.Hosting;
+using Scynapse.Runtime;
+using Scynapse.Statistics;
 using UnitTests.Grains;
 using Xunit;
 
@@ -61,9 +61,9 @@ namespace NonSilo.Tests
     }
 
     /// <summary>
-    /// Tests for the Orleans SiloBuilder, which is responsible for configuring and building Orleans silo instances.
+    /// Tests for the Scynapse SiloBuilder, which is responsible for configuring and building Scynapse silo instances.
     /// These tests verify configuration validation, service registration, and proper initialization of silo components
-    /// without requiring a full Orleans cluster. Silos are the primary hosting units for grains in Orleans.
+    /// without requiring a full Scynapse cluster. Silos are the primary hosting units for grains in Scynapse.
     /// </summary>
     [TestCategory("BVT")]
     [TestCategory("Hosting")]
@@ -77,7 +77,7 @@ namespace NonSilo.Tests
         public void SiloBuilderTest()
         {
             var host = new HostBuilder()
-                .UseOrleans((ctx, siloBuilder) =>
+                .UseScynapse((ctx, siloBuilder) =>
                 {
                     siloBuilder
                         .UseLocalhostClustering()
@@ -100,9 +100,9 @@ namespace NonSilo.Tests
         [Fact]
         public async Task SiloBuilder_GrainCollectionOptionsForZeroSecondsAgeLimitTest()
         {
-            await Assert.ThrowsAsync<OrleansConfigurationException>(async () =>
+            await Assert.ThrowsAsync<ScynapseConfigurationException>(async () =>
             {
-                await new HostBuilder().UseOrleans((ctx, siloBuilder) =>
+                await new HostBuilder().UseScynapse((ctx, siloBuilder) =>
                 {
                     siloBuilder
                         .Configure<ClusterOptions>(options => { options.ClusterId = "GrainCollectionClusterId"; options.ServiceId = "GrainCollectionServiceId"; })
@@ -121,9 +121,9 @@ namespace NonSilo.Tests
         [Fact]
         public async Task SiloBuilder_ClusterMembershipOptionsValidators()
         {
-            await Assert.ThrowsAsync<OrleansConfigurationException>(async () =>
+            await Assert.ThrowsAsync<ScynapseConfigurationException>(async () =>
             {
-                await new HostBuilder().UseOrleans((ctx, siloBuilder) =>
+                await new HostBuilder().UseScynapse((ctx, siloBuilder) =>
                 {
                     siloBuilder
                         .UseLocalhostClustering()
@@ -131,9 +131,9 @@ namespace NonSilo.Tests
                 }).RunConsoleAsync();
             });
 
-            await Assert.ThrowsAsync<OrleansConfigurationException>(async () =>
+            await Assert.ThrowsAsync<ScynapseConfigurationException>(async () =>
             {
-                await new HostBuilder().UseOrleans((ctx, siloBuilder) =>
+                await new HostBuilder().UseScynapse((ctx, siloBuilder) =>
                 {
                     siloBuilder
                         .UseLocalhostClustering()
@@ -148,9 +148,9 @@ namespace NonSilo.Tests
         [Fact]
         public async Task SiloBuilder_LoadSheddingValidatorAbove100ShouldFail()
         {
-            await Assert.ThrowsAsync<OrleansConfigurationException>(async () =>
+            await Assert.ThrowsAsync<ScynapseConfigurationException>(async () =>
             {
-                await new HostBuilder().UseOrleans((ctx, siloBuilder) =>
+                await new HostBuilder().UseScynapse((ctx, siloBuilder) =>
                 {
                     siloBuilder
                         .UseLocalhostClustering()
@@ -174,7 +174,7 @@ namespace NonSilo.Tests
         public async Task SiloBuilderThrowsDuringStartupIfNoGrainsAdded()
         {
             using var host = new HostBuilder()
-                .UseOrleans((ctx, siloBuilder) =>
+                .UseScynapse((ctx, siloBuilder) =>
                 {
                     // Add only an assembly with generated serializers but no grain interfaces or grain classes
                     siloBuilder.UseLocalhostClustering()
@@ -185,24 +185,24 @@ namespace NonSilo.Tests
                     });
                 }).Build();
 
-            await Assert.ThrowsAsync<OrleansConfigurationException>(() => host.StartAsync());
+            await Assert.ThrowsAsync<ScynapseConfigurationException>(() => host.StartAsync());
         }
 
         /// <summary>
         /// Tests that attempting to configure both a client and a silo in the same host throws an exception.
-        /// Orleans requires separate hosts for silos and clients.
+        /// Scynapse requires separate hosts for silos and clients.
         /// </summary>
         [Fact]
         public void SiloBuilderThrowsDuringStartupIfClientBuildersAdded()
         {
-            Assert.Throws<OrleansConfigurationException>(() =>
+            Assert.Throws<ScynapseConfigurationException>(() =>
             {
                 _ = new HostBuilder()
-                    .UseOrleansClient((ctx, clientBuilder) =>
+                    .UseScynapseClient((ctx, clientBuilder) =>
                     {
                         clientBuilder.UseLocalhostClustering();
                     })
-                    .UseOrleans((ctx, siloBuilder) =>
+                    .UseScynapse((ctx, siloBuilder) =>
                     {
                         siloBuilder.UseLocalhostClustering();
                     });
@@ -216,14 +216,14 @@ namespace NonSilo.Tests
         [Fact]
         public void SiloBuilderWithHotApplicationBuilderThrowsDuringStartupIfClientBuildersAdded()
         {
-            Assert.Throws<OrleansConfigurationException>(() =>
+            Assert.Throws<ScynapseConfigurationException>(() =>
             {
                 _ = Host.CreateApplicationBuilder()
-                    .UseOrleansClient(clientBuilder =>
+                    .UseScynapseClient(clientBuilder =>
                     {
                         clientBuilder.UseLocalhostClustering();
                     })
-                    .UseOrleans(siloBuilder =>
+                    .UseScynapse(siloBuilder =>
                     {
                         siloBuilder.UseLocalhostClustering();
                     });

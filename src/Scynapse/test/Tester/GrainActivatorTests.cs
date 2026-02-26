@@ -1,19 +1,19 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging.Abstractions;
-using Orleans.Runtime;
-using Orleans.TestingHost;
+using Scynapse.Runtime;
+using Scynapse.TestingHost;
 using TestExtensions;
 using UnitTests.GrainInterfaces;
 using UnitTests.Grains;
 using Xunit;
-using Orleans.Metadata;
+using Scynapse.Metadata;
 
 namespace UnitTests.General
 {
     /// <summary>
     /// Tests for custom grain activators, which allow complete control over grain instantiation and disposal.
     /// 
-    /// Orleans uses IGrainActivator to create and destroy grain instances. By default, it uses
+    /// Scynapse uses IGrainActivator to create and destroy grain instances. By default, it uses
     /// dependency injection, but applications can provide custom activators for scenarios like:
     /// - Object pooling for expensive grain instances
     /// - Custom initialization logic that can't be done in constructors
@@ -24,7 +24,7 @@ namespace UnitTests.General
     /// and tracks the number of disposed instances.
     /// </summary>
     [TestCategory("DI")]
-    public class GrainActivatorTests : OrleansTestingBase, IClassFixture<GrainActivatorTests.Fixture>
+    public class GrainActivatorTests : ScynapseTestingBase, IClassFixture<GrainActivatorTests.Fixture>
     {
         private readonly Fixture fixture;
 

@@ -1,7 +1,7 @@
 using System.Diagnostics;
 using BenchmarkGrainInterfaces.GrainStorage;
 using Microsoft.Extensions.Logging;
-using Orleans.Runtime;
+using Scynapse.Runtime;
 
 namespace BenchmarkGrains.GrainStorage
 {

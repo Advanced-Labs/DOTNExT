@@ -1,7 +1,7 @@
 namespace UnitTests.FSharpTypes
 
 open System.Runtime.CompilerServices
-open Orleans
+open Scynapse
 
 [<Immutable; GenerateSerializer>]
 type EnumStyleDU =

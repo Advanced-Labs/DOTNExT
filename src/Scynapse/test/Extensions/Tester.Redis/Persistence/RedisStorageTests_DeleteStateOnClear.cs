@@ -20,7 +20,7 @@ namespace Tester.Redis.Persistence
         {
             TestUtils.CheckForRedis();
             this.fixture = commonFixture;
-            this.commonStorageTests = new CommonStorageTests(commonFixture.CreateRedisGrainStorage(useOrleansSerializer: false, deleteStateOnClear: true).GetAwaiter().GetResult());      
+            this.commonStorageTests = new CommonStorageTests(commonFixture.CreateRedisGrainStorage(useScynapseSerializer: false, deleteStateOnClear: true).GetAwaiter().GetResult());      
         }
 
         [SkippableTheory, ClassData(typeof(StorageDataSet2CyrillicIdsAndGrainNames<string>))]

@@ -1,7 +1,7 @@
 using Microsoft.Extensions.Configuration;
-using Orleans.Streams;
-using Orleans.TestingHost;
-using Orleans.TestingHost.Utils;
+using Scynapse.Streams;
+using Scynapse.TestingHost;
+using Scynapse.TestingHost.Utils;
 using ServiceBus.Tests.TestStreamProviders.EventHub;
 using TestExtensions;
 using UnitTests.GrainInterfaces;
@@ -15,12 +15,12 @@ namespace ServiceBus.Tests.StreamingTests
     /// Tests for EventHub stream-per-partition data adapter functionality.
     /// </summary>
     [TestCategory("EventHub"), TestCategory("Streaming"), TestCategory("Functional")]
-    public class EHStreamPerPartitionTests : OrleansTestingBase, IClassFixture<EHStreamPerPartitionTests.Fixture>
+    public class EHStreamPerPartitionTests : ScynapseTestingBase, IClassFixture<EHStreamPerPartitionTests.Fixture>
     {
         private readonly Fixture fixture;
         private const string StreamProviderName = "EHStreamPerPartition";
-        private const string EHPath = "ehorleanstest5";
-        private const string EHConsumerGroup = "orleansnightly";
+        private const string EHPath = "ehscynapsetest5";
+        private const string EHConsumerGroup = "scynapsenightly";
 
         public class Fixture : BaseEventHubTestClusterFixture
         {

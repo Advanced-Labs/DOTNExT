@@ -6,7 +6,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Scynapse.AsyncPlus;
 using Scynapse.AsyncPlus.Services;
-using Orleans;
+using Scynapse;
 using Spectre.Console;
 
 namespace AsyncPersistenceScenarios.Scenarios;
@@ -36,7 +36,7 @@ namespace AsyncPersistenceScenarios.Scenarios;
 ///
 /// LOGGING:
 /// - Roslyn+ logs to: /tmp/dotnext-roslyn-codegen.log (or DOTNEXT_ROSLYN_LOG env var)
-/// - Orleans persistence logs to: Console and orleans-grain-storage-debug.log
+/// - Scynapse persistence logs to: Console and scynapse-grain-storage-debug.log
 /// - Scenario logs detailed progress to console
 ///
 /// This scenario is SELF-MANAGING - it starts and stops its own silo.
@@ -265,7 +265,7 @@ namespace RoslynPlusWorkflows
         try
         {
             silo1 = await AnsiConsole.Status()
-                .StartAsync("Starting Orleans silo with RavenDB...", async ctx =>
+                .StartAsync("Starting Scynapse silo with RavenDB...", async ctx =>
                 {
                     var host = SiloHelper.BuildSingleSiloWithRavenDb(
                         siloPort: 11116,
@@ -431,7 +431,7 @@ namespace RoslynPlusWorkflows
         try
         {
             silo2 = await AnsiConsole.Status()
-                .StartAsync("Starting Orleans silo (restart)...", async ctx =>
+                .StartAsync("Starting Scynapse silo (restart)...", async ctx =>
                 {
                     var host = SiloHelper.BuildSingleSiloWithRavenDb(
                         siloPort: 11116,

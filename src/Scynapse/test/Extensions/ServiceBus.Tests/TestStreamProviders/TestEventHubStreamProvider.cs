@@ -1,10 +1,10 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Orleans.Configuration;
-using Orleans.Serialization;
-using Orleans.Streaming.EventHubs;
-using Orleans.Streams;
-using Orleans.Statistics;
+using Scynapse.Configuration;
+using Scynapse.Serialization;
+using Scynapse.Streaming.EventHubs;
+using Scynapse.Streams;
+using Scynapse.Statistics;
 
 namespace ServiceBus.Tests.TestStreamProviders.EventHub
 {

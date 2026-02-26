@@ -1,10 +1,10 @@
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using Orleans.Messaging;
-using Orleans.Runtime.Membership;
-using Orleans.Runtime.MembershipService;
-using Orleans.Tests.SqlUtils;
-using Orleans.Configuration;
+using Scynapse.Messaging;
+using Scynapse.Runtime.Membership;
+using Scynapse.Runtime.MembershipService;
+using Scynapse.Tests.SqlUtils;
+using Scynapse.Configuration;
 using TestExtensions;
 using UnitTests.General;
 using Xunit;
@@ -12,7 +12,7 @@ using Xunit;
 namespace UnitTests.MembershipTests
 {
     /// <summary>
-    /// Tests for Orleans membership table operations using PostgreSQL as the storage backend.
+    /// Tests for Scynapse membership table operations using PostgreSQL as the storage backend.
     /// </summary>
     [TestCategory("Membership"), TestCategory("PostgreSql"), TestCategory("Functional")]
     public class PostgreSqlMembershipTableTests : MembershipTableTestsBase

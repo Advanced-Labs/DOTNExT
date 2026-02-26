@@ -1,11 +1,11 @@
 using System.Diagnostics;
 using Microsoft.Extensions.DependencyInjection;
-using Orleans.Configuration;
-using Orleans.Placement;
-using Orleans.Runtime.Placement;
-using Orleans.Runtime.Placement.Repartitioning;
-using Orleans.Streams;
-using Orleans.TestingHost;
+using Scynapse.Configuration;
+using Scynapse.Placement;
+using Scynapse.Runtime.Placement;
+using Scynapse.Runtime.Placement.Repartitioning;
+using Scynapse.Streams;
+using Scynapse.TestingHost;
 using TestExtensions;
 using Xunit;
 
@@ -14,7 +14,7 @@ namespace UnitTests.ActivationRepartitioningTests;
 /// <summary>
 /// Tests for default tolerance scenarios in activation repartitioning, including grain movement and placement decisions.
 /// </summary>
-// Scenarious can be seen visually here: https://github.com/dotnet/orleans/pull/8877
+// Scenarious can be seen visually here: https://github.com/dotnet/scynapse/pull/8877
 [TestCategory("Functional"), TestCategory("ActivationRepartitioning")]
 public class DefaultToleranceTests(DefaultToleranceTests.Fixture fixture) : RepartitioningTestBase<DefaultToleranceTests.Fixture>(fixture), IClassFixture<DefaultToleranceTests.Fixture>
 {
@@ -540,7 +540,7 @@ public class DefaultToleranceTests(DefaultToleranceTests.Fixture fixture) : Repa
         private class SiloConfigurator : ISiloConfigurator
         {
             public void Configure(ISiloBuilder hostBuilder)
-#pragma warning disable ORLEANSEXP001 // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
+#pragma warning disable SCYNAPSEEXP001 // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
                 => hostBuilder
                     .Configure<SiloMessagingOptions>(o =>
                     {
@@ -562,7 +562,7 @@ public class DefaultToleranceTests(DefaultToleranceTests.Fixture fixture) : Repa
                     })
                     .AddActivationRepartitioner()
                     .ConfigureServices(service => service.AddSingleton<IRepartitionerMessageFilter, TestMessageFilter>());
-#pragma warning restore ORLEANSEXP001 // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
+#pragma warning restore SCYNAPSEEXP001 // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
         }
     }
 }

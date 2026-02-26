@@ -1,7 +1,7 @@
 using Microsoft.Extensions.Configuration;
 using MySql.Data.MySqlClient;
-using Orleans.Streaming.AdoNet.Storage;
-using Orleans.TestingHost;
+using Scynapse.Streaming.AdoNet.Storage;
+using Scynapse.TestingHost;
 using Tester.StreamingTests.Filtering;
 using TestExtensions;
 using UnitTests.General;
@@ -40,7 +40,7 @@ public class PostgreSqlAdoNetStreamFilteringTests() : AdoNetStreamFilteringTests
 [TestCategory("AdoNet"), TestCategory("Streaming")]
 public abstract class AdoNetStreamFilteringTests : StreamFilteringTestsBase, IAsyncLifetime
 {
-    private const string TestDatabaseName = "OrleansStreamTest";
+    private const string TestDatabaseName = "ScynapseStreamTest";
     private const string AdoNetStreamProviderName = "AdoNet";
 
     private static RelationalStorageForTesting _testing;

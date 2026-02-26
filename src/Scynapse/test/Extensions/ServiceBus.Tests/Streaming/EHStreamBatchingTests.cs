@@ -1,6 +1,6 @@
 using Microsoft.Extensions.Configuration;
-using Orleans.Streams;
-using Orleans.TestingHost;
+using Scynapse.Streams;
+using Scynapse.TestingHost;
 using TestExtensions;
 using UnitTests.GrainInterfaces;
 using UnitTests.StreamingTests;
@@ -17,8 +17,8 @@ namespace ServiceBus.Tests.Streaming
     {
         public class Fixture : BaseEventHubTestClusterFixture
         {
-            private const string EHPath = "ehorleanstest7";
-            private const string EHConsumerGroup = "orleansnightly";
+            private const string EHPath = "ehscynapsetest7";
+            private const string EHConsumerGroup = "scynapsenightly";
 
             protected override void ConfigureTestCluster(TestClusterBuilder builder)
             {

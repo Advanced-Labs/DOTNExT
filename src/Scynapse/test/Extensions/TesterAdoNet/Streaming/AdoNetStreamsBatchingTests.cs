@@ -1,10 +1,10 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
 using MySql.Data.MySqlClient;
-using Orleans.Configuration;
-using Orleans.Streaming.AdoNet.Storage;
-using Orleans.Streams;
-using Orleans.TestingHost;
+using Scynapse.Configuration;
+using Scynapse.Streaming.AdoNet.Storage;
+using Scynapse.Streams;
+using Scynapse.TestingHost;
 using TestExtensions;
 using UnitTests.General;
 using UnitTests.GrainInterfaces;
@@ -45,7 +45,7 @@ public class PostgreSqlAdoNetStreamsBatchingTests(ITestOutputHelper output) : Ad
 [TestCategory("AdoNet"), TestCategory("Streaming")]
 public abstract class AdoNetStreamsBatchingTests : StreamBatchingTestRunner, IAsyncLifetime
 {
-    private const string TestDatabaseName = "OrleansStreamTest";
+    private const string TestDatabaseName = "ScynapseStreamTest";
     private static RelationalStorageForTesting _testing;
 
     protected AdoNetStreamsBatchingTests(Fixture fixture, ITestOutputHelper output) : base(fixture, output)

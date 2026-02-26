@@ -3,8 +3,8 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using NonSilo.Tests.Utilities;
 using NSubstitute;
-using Orleans.Configuration;
-using Orleans.Runtime.MembershipService;
+using Scynapse.Configuration;
+using Scynapse.Runtime.MembershipService;
 using TestExtensions;
 using Xunit;
 using Xunit.Abstractions;
@@ -12,7 +12,7 @@ using Xunit.Abstractions;
 namespace NonSilo.Tests.Membership
 {
     /// <summary>
-    /// Tests for Orleans' cluster health monitoring system, which is responsible for detecting failed silos
+    /// Tests for Scynapse' cluster health monitoring system, which is responsible for detecting failed silos
     /// and maintaining cluster membership consistency. The health monitor performs periodic probes of other silos
     /// and uses voting mechanisms to declare silos as dead, preventing split-brain scenarios in the distributed system.
     /// </summary>

@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <PackageId>Genesa.Scynapse.EventSourcing</PackageId>
+    <Title>Microsoft Scynapse Event-Sourcing</Title>
+    <Description>Base types for creating Microsoft Scynapse grains with event-sourced state.</Description>
+    <PackageTags>$(PackageTags) EventSourcing</PackageTags>
+    <TargetFrameworks>$(DefaultTargetFrameworks)</TargetFrameworks>
+    <ScynapseBuildTimeCodeGen>true</ScynapseBuildTimeCodeGen>
+    <AssemblyName>Scynapse.EventSourcing</AssemblyName>
+    <RootNamespace>ScynapseEventSourcing</RootNamespace>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Scynapse.Runtime\Scynapse.Runtime.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="README.md" Pack="true" PackagePath="\" />
+  </ItemGroup>
+</Project>

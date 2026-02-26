@@ -2,9 +2,9 @@ using System.Diagnostics;
 using System.Text;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using Orleans.Configuration;
-using Orleans.Runtime;
-using Orleans.Storage;
+using Scynapse.Configuration;
+using Scynapse.Runtime;
+using Scynapse.Storage;
 using Raven.Client.Documents;
 using Raven.Client.Documents.Operations;
 using Raven.Client.Documents.Session;
@@ -15,7 +15,7 @@ using Raven.Client.ServerWide.Operations;
 namespace Scynapse.AsyncPlus.Storage;
 
 /// <summary>
-/// RavenDB-based grain storage provider for Orleans.
+/// RavenDB-based grain storage provider for Scynapse.
 /// Provides durable persistence for grain state using RavenDB.
 /// </summary>
 public class RavenDbGrainStorage : IGrainStorage, ILifecycleParticipant<ISiloLifecycle>, IDisposable
@@ -168,7 +168,7 @@ public class RavenDbGrainStorage : IGrainStorage, ILifecycleParticipant<ISiloLif
             var jsonPreview = rawJsonString.Length > 800 ? rawJsonString.Substring(0, 800) + "..." : rawJsonString;
             try
             {
-                var logPath = Path.Combine(Path.GetTempPath(), "orleans-grain-storage-debug.log");
+                var logPath = Path.Combine(Path.GetTempPath(), "scynapse-grain-storage-debug.log");
                 File.AppendAllText(logPath, $"[{DateTime.UtcNow:O}] ReadState BEFORE DESERIALIZE: GrainId={grainId}, ByteCount={doc.StateData.Length}, TypeT={typeof(T).FullName}" + Environment.NewLine);
                 File.AppendAllText(logPath, $"[{DateTime.UtcNow:O}] ReadState RAW JSON: {jsonPreview}" + Environment.NewLine);
             }
@@ -188,7 +188,7 @@ public class RavenDbGrainStorage : IGrainStorage, ILifecycleParticipant<ISiloLif
                 var logMessage = $"[{DateTime.UtcNow:O}] ReadState DESERIALIZED: GrainId={grainId}, StateNumber={asyncState.StateNumber}, IsCompleted={asyncState.IsCompleted}, IsFaulted={asyncState.IsFaulted}, HasSerializedData={asyncState.SerializedStateMachine != null}, TypeName={asyncState.StateMachineTypeName ?? "null"}";
                 try
                 {
-                    var logPath = Path.Combine(Path.GetTempPath(), "orleans-grain-storage-debug.log");
+                    var logPath = Path.Combine(Path.GetTempPath(), "scynapse-grain-storage-debug.log");
                     File.AppendAllText(logPath, logMessage + Environment.NewLine);
                 }
                 catch { /* Ignore file write errors */ }
@@ -222,7 +222,7 @@ public class RavenDbGrainStorage : IGrainStorage, ILifecycleParticipant<ISiloLif
             // Write to file to survive shutdown
             try
             {
-                var logPath = Path.Combine(Path.GetTempPath(), "orleans-grain-storage-debug.log");
+                var logPath = Path.Combine(Path.GetTempPath(), "scynapse-grain-storage-debug.log");
                 File.AppendAllText(logPath, logMessage + Environment.NewLine);
             }
             catch { /* Ignore file write errors */ }
@@ -245,7 +245,7 @@ public class RavenDbGrainStorage : IGrainStorage, ILifecycleParticipant<ISiloLif
             var jsonPreview = rawJsonString.Length > 800 ? rawJsonString.Substring(0, 800) + "..." : rawJsonString;
             try
             {
-                var logPath = Path.Combine(Path.GetTempPath(), "orleans-grain-storage-debug.log");
+                var logPath = Path.Combine(Path.GetTempPath(), "scynapse-grain-storage-debug.log");
                 File.AppendAllText(logPath, $"[{DateTime.UtcNow:O}] WriteState SERIALIZED: GrainId={grainId}, ByteCount={stateBytes.Length}, TypeT={typeof(T).FullName}" + Environment.NewLine);
                 File.AppendAllText(logPath, $"[{DateTime.UtcNow:O}] WriteState RAW JSON: {jsonPreview}" + Environment.NewLine);
             }
@@ -344,13 +344,13 @@ public class RavenDbGrainStorage : IGrainStorage, ILifecycleParticipant<ISiloLif
     private string GetDocumentId(string stateName, GrainId grainId)
     {
         // Create a document ID that's unique per service, state name, and grain
-        // Format: orleans/{serviceId}/grains/{stateName}/{grainIdKey}
+        // Format: scynapse/{serviceId}/grains/{stateName}/{grainIdKey}
         var grainIdKey = Convert.ToBase64String(
             Encoding.UTF8.GetBytes(grainId.ToString()))
             .Replace('/', '_')
             .Replace('+', '-');
 
-        return $"orleans/{_serviceId}/grains/{stateName}/{grainIdKey}";
+        return $"scynapse/{_serviceId}/grains/{stateName}/{grainIdKey}";
     }
 
     private void EnsureInitialized()

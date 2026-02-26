@@ -1,5 +1,5 @@
 using Microsoft.Extensions.Configuration;
-using Orleans.TestingHost;
+using Scynapse.TestingHost;
 using UnitTests.MembershipTests;
 using Xunit;
 using Xunit.Abstractions;

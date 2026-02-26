@@ -1,5 +1,5 @@
-using Orleans.Runtime;
-using Orleans.Runtime.Placement;
+using Scynapse.Runtime;
+using Scynapse.Runtime.Placement;
 
 namespace UnitTests.Grains
 {

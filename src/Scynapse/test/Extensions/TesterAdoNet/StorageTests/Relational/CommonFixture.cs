@@ -2,15 +2,15 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
-using Orleans.Configuration;
-using Orleans.Providers;
-using Orleans.Runtime;
-using Orleans.Tests.SqlUtils;
-using Orleans.Storage;
+using Scynapse.Configuration;
+using Scynapse.Providers;
+using Scynapse.Runtime;
+using Scynapse.Tests.SqlUtils;
+using Scynapse.Storage;
 using TestExtensions;
 using UnitTests.General;
-using Orleans.Serialization;
-using Orleans.Serialization.Serializers;
+using Scynapse.Serialization;
+using Scynapse.Serialization.Serializers;
 
 namespace UnitTests.StorageTests.Relational
 {
@@ -89,7 +89,7 @@ namespace UnitTests.StorageTests.Relational
                             {
                                 ConnectionString = Storage.Storage.ConnectionString,
                                 Invariant = storageInvariant,
-                                GrainStorageSerializer = new JsonGrainStorageSerializer(this.DefaultProviderRuntime.ServiceProvider.GetService<OrleansJsonSerializer>())
+                                GrainStorageSerializer = new JsonGrainStorageSerializer(this.DefaultProviderRuntime.ServiceProvider.GetService<ScynapseJsonSerializer>())
                             };
                             var clusterOptions = new ClusterOptions()
                             {

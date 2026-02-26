@@ -1,6 +1,6 @@
-using Orleans.Metadata;
-using Orleans.Placement;
-using Orleans.Runtime;
+using Scynapse.Metadata;
+using Scynapse.Placement;
+using Scynapse.Runtime;
 
 namespace UnitTests.GrainInterfaces
 {

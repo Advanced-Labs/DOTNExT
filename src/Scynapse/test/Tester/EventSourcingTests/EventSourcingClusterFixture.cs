@@ -1,7 +1,7 @@
 using Microsoft.Extensions.Logging;
-using Orleans.EventSourcing.CustomStorage;
-using Orleans.Storage;
-using Orleans.TestingHost;
+using Scynapse.EventSourcing.CustomStorage;
+using Scynapse.Storage;
+using Scynapse.TestingHost;
 using TestExtensions;
 
 namespace Tester.EventSourcingTests

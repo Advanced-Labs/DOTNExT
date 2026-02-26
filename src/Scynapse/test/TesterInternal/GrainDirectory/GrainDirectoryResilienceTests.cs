@@ -3,11 +3,11 @@ using System.Diagnostics;
 using System.Globalization;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Orleans.Configuration;
-using Orleans.Runtime.GrainDirectory;
-using Orleans.Serialization;
-using Orleans.Storage;
-using Orleans.TestingHost;
+using Scynapse.Configuration;
+using Scynapse.Runtime.GrainDirectory;
+using Scynapse.Serialization;
+using Scynapse.Storage;
+using Scynapse.TestingHost;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -66,7 +66,7 @@ public sealed class GrainDirectoryResilienceTests
                 {
                     log.LogInformation(sue, "Swallowed transient exception.");
                 }
-                catch (OrleansMessageRejectionException omre)
+                catch (ScynapseMessageRejectionException omre)
                 {
                    log.LogInformation(omre, "Swallowed rejection.");
                 }
@@ -173,9 +173,9 @@ public sealed class GrainDirectoryResilienceTests
         public void Configure(ISiloBuilder siloBuilder)
         {
             siloBuilder.Configure<SiloMessagingOptions>(o => o.ResponseTimeout = o.SystemResponseTimeout = TimeSpan.FromMinutes(2));
-#pragma warning disable ORLEANSEXP003 // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
+#pragma warning disable SCYNAPSEEXP003 // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
             siloBuilder.AddDistributedGrainDirectory();
-#pragma warning restore ORLEANSEXP003 // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
+#pragma warning restore SCYNAPSEEXP003 // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
         }
     }
 }

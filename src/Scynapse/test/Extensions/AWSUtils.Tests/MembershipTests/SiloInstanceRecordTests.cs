@@ -1,7 +1,7 @@
 ﻿using System.Net;
 using Amazon.DynamoDBv2.Model;
-using Orleans.Runtime;
-using Orleans.Runtime.MembershipService;
+using Scynapse.Runtime;
+using Scynapse.Runtime.MembershipService;
 using Xunit;
 
 namespace AWSUtils.Tests.MembershipTests

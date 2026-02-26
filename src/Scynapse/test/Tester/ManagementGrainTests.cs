@@ -1,7 +1,7 @@
 using System.Text;
-using Orleans.Runtime;
-using Orleans.Serialization.TypeSystem;
-using Orleans.TestingHost;
+using Scynapse.Runtime;
+using Scynapse.Serialization.TypeSystem;
+using Scynapse.TestingHost;
 using TestExtensions;
 using UnitTests.GrainInterfaces;
 using UnitTests.Grains;
@@ -13,7 +13,7 @@ using Xunit.Abstractions;
 namespace UnitTests.Management
 {
     /// <summary>
-    /// Tests for the Orleans Management Grain, which provides runtime statistics and cluster management.
+    /// Tests for the Scynapse Management Grain, which provides runtime statistics and cluster management.
     /// 
     /// The Management Grain (IManagementGrain) is a system grain that provides:
     /// - Cluster topology information (active silos, their status)
@@ -26,7 +26,7 @@ namespace UnitTests.Management
     /// - Building management dashboards
     /// - Implementing custom placement strategies based on current load
     /// </summary>
-    public class ManagementGrainTests :  OrleansTestingBase, IClassFixture<ManagementGrainTests.Fixture>
+    public class ManagementGrainTests :  ScynapseTestingBase, IClassFixture<ManagementGrainTests.Fixture>
     {
         private readonly Fixture fixture;
         private readonly ITestOutputHelper output;
@@ -165,7 +165,7 @@ namespace UnitTests.Management
             StringBuilder sb = new StringBuilder();
             foreach (var s in stats) sb.AppendLine().Append(s);
             sb.AppendLine();
-            output.WriteLine("Grain statistics returned by Orleans Management Grain - " + when + " : " + sb);
+            output.WriteLine("Grain statistics returned by Scynapse Management Grain - " + when + " : " + sb);
             return stats;
         }
     }

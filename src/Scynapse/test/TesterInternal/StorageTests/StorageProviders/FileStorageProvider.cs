@@ -17,25 +17,25 @@
 namespace Samples.StorageProviders
 {
     /// <summary>
-    /// Orleans storage provider implementation for file-backed stores.
+    /// Scynapse storage provider implementation for file-backed stores.
     /// </summary>
     /// <remarks>
-    /// The storage provider should be included in a deployment by adding this line to the Orleans server configuration file:
+    /// The storage provider should be included in a deployment by adding this line to the Scynapse server configuration file:
     /// 
-    ///     <Provider Type="Samples.StorageProviders.OrleansFileStorage" Name="FileStore" RooDirectory="SOME FILE PATH" />
+    ///     <Provider Type="Samples.StorageProviders.ScynapseFileStorage" Name="FileStore" RooDirectory="SOME FILE PATH" />
     ///
     /// and this line to any grain that uses it:
     /// 
-    ///     [Orleans.Providers.StorageProvider(ProviderName = "FileStore")]
+    ///     [Scynapse.Providers.StorageProvider(ProviderName = "FileStore")]
     /// 
     /// The name 'FileStore' is an arbitrary choice.
     /// 
     /// Note that unless the root directory path is a network path available to all silos in a deployment, grain state
     /// will not transport from one silo to another.
     /// </remarks>
-    public class OrleansFileStorage : BaseJSONStorageProvider
+    public class ScynapseFileStorage : BaseJSONStorageProvider
     {
-        public OrleansFileStorage(string rootDirectory)
+        public ScynapseFileStorage(string rootDirectory)
         {
             this.RootDirectory = rootDirectory;
             if (string.IsNullOrWhiteSpace(RootDirectory)) throw new ArgumentException("RootDirectory property not set");

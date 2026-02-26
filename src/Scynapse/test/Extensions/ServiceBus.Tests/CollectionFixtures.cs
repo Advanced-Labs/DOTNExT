@@ -1,4 +1,4 @@
-using Orleans.Runtime;
+using Scynapse.Runtime;
 using Tester;
 using TestExtensions;
 using Xunit;
@@ -8,7 +8,7 @@ namespace ServiceBus.Tests
     // Assembly collections must be defined once in each assembly
     
     /// <summary>
-    /// Defines a test collection for tests that require a default Orleans cluster setup.
+    /// Defines a test collection for tests that require a default Scynapse cluster setup.
     /// Tests in this collection share a single cluster instance for improved performance.
     /// </summary>
     [CollectionDefinition("DefaultCluster")]
@@ -37,7 +37,7 @@ namespace ServiceBus.Tests
         public override async Task InitializeAsync()
         {
             await base.InitializeAsync();
-            var collector = new Microsoft.Extensions.Diagnostics.Metrics.Testing.MetricCollector<long>(Instruments.Meter, "orleans-streams-queue-read-duration");
+            var collector = new Microsoft.Extensions.Diagnostics.Metrics.Testing.MetricCollector<long>(Instruments.Meter, "scynapse-streams-queue-read-duration");
             using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(30));
             // Wait for 10 queue read
             await collector.WaitForMeasurementsAsync(10, cts.Token);

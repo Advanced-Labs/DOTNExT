@@ -1,18 +1,18 @@
-# Contributing to Orleans
+# Contributing to Scynapse
 
-Some notes and guidelines for developers who want to contribute to Orleans.
+Some notes and guidelines for developers who want to contribute to Scynapse.
 
 ## Contributing to this project
 
-Here are some pointers for anyone looking for mini-features and work items that would make a positive contribution to Orleans.
+Here are some pointers for anyone looking for mini-features and work items that would make a positive contribution to Scynapse.
 
-These are just a few ideas, so if you think of something else that would be useful, then spin up a [discussion thread](https://github.com/dotnet/orleans/issues) on GitHub to discuss the proposal, and go for it.
+These are just a few ideas, so if you think of something else that would be useful, then spin up a [discussion thread](https://github.com/dotnet/scynapse/issues) on GitHub to discuss the proposal, and go for it.
 
-* **[Orleans GitHub Repository](https://github.com/dotnet/orleans)**
+* **[Scynapse GitHub Repository](https://github.com/dotnet/scynapse)**
 
 Pull requests are always welcome.
 
-* **[Intern and Student Projects](https://docs.microsoft.com/dotnet/orleans/resources/student-projects)**
+* **[Intern and Student Projects](https://docs.microsoft.com/dotnet/scynapse/resources/student-projects)**
 
 Some suggestions for possible intern / student projects.
 
@@ -48,7 +48,7 @@ There are lots of other useful documents on the [.NET](https://github.com/dotnet
 
 ## Source code organization
 
-Orleans has not religiously followed a "One Class Per File" rule, but instead we have tried to use pragmatic judgment to maximize the change of "code understand-ability" for developers on the team. If lots of small-ish classes share a "common theme" and/or are always dealt with together, then it is OK to place those into one source code file in most cases. See for example the various "log consumer" classes were originally placed in single source file, as they represented a single unit of code comprehension.
+Scynapse has not religiously followed a "One Class Per File" rule, but instead we have tried to use pragmatic judgment to maximize the change of "code understand-ability" for developers on the team. If lots of small-ish classes share a "common theme" and/or are always dealt with together, then it is OK to place those into one source code file in most cases. See for example the various "log consumer" classes were originally placed in single source file, as they represented a single unit of code comprehension.
 
 As a corollary, it is much easier to find the source code for a class if it is in a file with the same name as the class [similar to Java file naming rules], so there is a tension and value judgment here between code find-ability and minimizing / constraining the number of projects in a solution and files within a project [which both have direct impact on the Visual Studio "Opening" and "Building" times for large projects].
 
@@ -65,17 +65,17 @@ References between projects in a solution must always use "**Project References*
 **Right**:
 
 ```xml
-<ProjectReference Include="..\Orleans\Orleans.csproj">
+<ProjectReference Include="..\Scynapse\Scynapse.csproj">
     <Project>{BC1BD60C-E7D8-4452-A21C-290AEC8E2E74}</Project>
-    <Name>Orleans</Name>
+    <Name>Scynapse</Name>
 </ProjectReference>
 ```
 
 _Wrong_:
 
 ```xml
-<Reference Include="Orleans" >
-    <HintPath>..\Orleans\bin\Debug\Orleans.dll</HintPath>
+<Reference Include="Scynapse" >
+    <HintPath>..\Scynapse\bin\Debug\Scynapse.dll</HintPath>
 </Reference>
 ```
 
@@ -83,11 +83,11 @@ In order to help ensure we keep inter-project references clean, then on the buil
 
 ### Unified component versions
 
-We use the same unified versions of external component throughout the Orleans code base, and so should never need to add `bindingRedirect` entries in `App.config` files.
+We use the same unified versions of external component throughout the Scynapse code base, and so should never need to add `bindingRedirect` entries in `App.config` files.
 
-Also, in general it should almost never be necessary to have `Private=True` elements in Orleans project files, except to override a conflict with a Windows / VS "system" component.
+Also, in general it should almost never be necessary to have `Private=True` elements in Scynapse project files, except to override a conflict with a Windows / VS "system" component.
 Some package management tools can occasionally get confused when making version changes, and sometimes think that we are using multiple versions of the same assembly within a solution, which of course we never do.
 
 We long for the day when package management tools for .NET can make version changes transactionally. Until then, it is occasionally necessary to "fix" the misguided actions of some .NET package management tools by hand-editing the .csproj files (they are just XML text files) back to sanity and/or using the "Discard Edited Line" functions that most good Git tools such as [Atlassian SourceTree](https://www.sourcetreeapp.com/) provide.
 
-Using "sort" references and unified component versions avoids creating brittle links between Orleans run-time and/or external components, and has proved highly effective in the last several years at reducing stress levels for the Orleans Team during important deployment milestones. :)
+Using "sort" references and unified component versions avoids creating brittle links between Scynapse run-time and/or external components, and has proved highly effective in the last several years at reducing stress levels for the Scynapse Team during important deployment milestones. :)

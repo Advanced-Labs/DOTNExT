@@ -1,7 +1,7 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
-using Orleans.TestingHost;
-using Orleans.Tests.SqlUtils;
+using Scynapse.TestingHost;
+using Scynapse.Tests.SqlUtils;
 using TestExtensions;
 using TestExtensions.Runners;
 using UnitTests.General;
@@ -11,12 +11,12 @@ using Xunit.Abstractions;
 namespace Tester.AdoNet.Persistence
 {
     /// <summary>
-    /// Tests for Orleans grain state persistence functionality using MySQL as the storage provider.
+    /// Tests for Scynapse grain state persistence functionality using MySQL as the storage provider.
     /// </summary>
     [TestCategory("Persistence"), TestCategory("MySql")]
     public class PersistenceGrainTests_MySql : GrainPersistenceTestsRunner, IClassFixture<PersistenceGrainTests_MySql.Fixture>
     {
-        public const string TestDatabaseName = "OrleansTest_MySql_Storage";
+        public const string TestDatabaseName = "ScynapseTest_MySql_Storage";
         public const string AdoInvariant = AdoNetInvariants.InvariantNameMySql;
         public const string ConnectionStringKey = "AdoNetConnectionString";
 
@@ -46,7 +46,7 @@ namespace Tester.AdoNet.Persistence
                 public void Configure(IHostBuilder hostBuilder)
                 {
                     var connectionString = hostBuilder.GetConfiguration()[ConnectionStringKey];
-                    hostBuilder.UseOrleans((ctx, siloBuilder) =>
+                    hostBuilder.UseScynapse((ctx, siloBuilder) =>
                     {
                         siloBuilder
                             .AddAdoNetGrainStorage("GrainStorageForTest", options =>

@@ -1,4 +1,4 @@
-using Orleans.Streams;
+using Scynapse.Streams;
 
 namespace UnitTests.GrainInterfaces
 {

@@ -20,7 +20,7 @@ Do this in a separate terminal.
 crank-agent --url http://*:5010
 ```
 
-### Build Orleans
+### Build Scynapse
 
 ```sh
 dotnet build -c Release
@@ -28,7 +28,7 @@ dotnet build -c Release
 
 ### Run crank scenario
 
-Run this from the root of the repository (next to Orleans.slnx):
+Run this from the root of the repository (next to Scynapse.slnx):
 
 ```sh
 crank --config .\distributed-tests.yml --scenario ping --profile local

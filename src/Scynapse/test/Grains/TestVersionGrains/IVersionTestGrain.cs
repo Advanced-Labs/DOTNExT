@@ -1,4 +1,4 @@
-using Orleans.CodeGeneration;
+using Scynapse.CodeGeneration;
 
 namespace TestVersionGrainInterfaces
 {

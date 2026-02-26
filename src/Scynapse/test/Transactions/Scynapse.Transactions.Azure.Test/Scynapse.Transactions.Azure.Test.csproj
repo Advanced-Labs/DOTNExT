@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <RootNamespace>Scynapse.Transactions.Azure.Tests</RootNamespace>
+    <AssemblyName>Scynapse.Transactions.Azure.Tests</AssemblyName>
+    <TargetFrameworks>$(TestTargetFrameworks)</TargetFrameworks>
+    <ScynapseBuildTimeCodeGen>true</ScynapseBuildTimeCodeGen>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="$(SourceRoot)test\Transactions\Scynapse.Transactions.Tests\Scynapse.Transactions.Tests.csproj" />
+    <ProjectReference Include="$(SourceRoot)src\Azure\Scynapse.Clustering.AzureStorage\Scynapse.Clustering.AzureStorage.csproj" />
+    <ProjectReference Include="$(SourceRoot)src\Azure\Scynapse.Transactions.AzureStorage\Scynapse.Transactions.AzureStorage.csproj" />
+    <ProjectReference Include="..\..\Extensions\TesterAzureUtils\Tester.AzureUtils.csproj" />
+  </ItemGroup>
+</Project>

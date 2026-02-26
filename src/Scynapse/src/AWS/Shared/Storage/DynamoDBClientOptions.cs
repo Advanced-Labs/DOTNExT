@@ -1,9 +1,9 @@
 #if CLUSTERING_DYNAMODB
-namespace Orleans.Clustering.DynamoDB
+namespace Scynapse.Clustering.DynamoDB
 #elif PERSISTENCE_DYNAMODB
-namespace Orleans.Persistence.DynamoDB
+namespace Scynapse.Persistence.DynamoDB
 #elif REMINDERS_DYNAMODB
-namespace Orleans.Reminders.DynamoDB
+namespace Scynapse.Reminders.DynamoDB
 #else
 // No default namespace intentionally to cause compile errors if something is not defined
 #endif

@@ -6,11 +6,11 @@ using Xunit;
 namespace DefaultCluster.Tests.General
 {
     /// <summary>
-    /// Basic tests for simple grain functionality in Orleans.
+    /// Basic tests for simple grain functionality in Scynapse.
     /// These tests verify fundamental grain operations including activation,
     /// method invocation, state management, and basic control flow.
     /// SimpleGrain represents the most basic grain pattern with getter/setter
-    /// methods and demonstrates core Orleans programming model concepts.
+    /// methods and demonstrates core Scynapse programming model concepts.
     /// </summary>
     public class SimpleGrainTests : HostedTestClusterEnsureDefaultStarted
     {
@@ -63,7 +63,7 @@ namespace DefaultCluster.Tests.General
         /// Verifies that multiple method calls can be issued concurrently
         /// (using Task.WhenAll) and that the grain properly handles
         /// concurrent operations while maintaining state consistency.
-        /// Demonstrates Orleans' turn-based concurrency model.
+        /// Demonstrates Scynapse' turn-based concurrency model.
         /// </summary>
         [Fact, TestCategory("BVT")]
         public async Task SimpleGrainDataFlow()
@@ -83,7 +83,7 @@ namespace DefaultCluster.Tests.General
         /// Would verify that grains with multiple constructors activate
         /// using the default (parameterless) constructor.
         /// NOTE: Currently skipped as grains with multiple constructors
-        /// require explicit registration in the current Orleans version.
+        /// require explicit registration in the current Scynapse version.
         /// </summary>
         [Fact(Skip = "Grains with multiple constructors are not supported without being explicitly registered.")]
         [TestCategory("BVT")]

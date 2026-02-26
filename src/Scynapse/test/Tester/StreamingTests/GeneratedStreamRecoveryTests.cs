@@ -1,10 +1,10 @@
 using Microsoft.Extensions.Logging;
-using Orleans.Configuration;
-using Orleans.Providers.Streams.Common;
-using Orleans.Providers.Streams.Generator;
-using Orleans.Runtime;
-using Orleans.Streams;
-using Orleans.TestingHost;
+using Scynapse.Configuration;
+using Scynapse.Providers.Streams.Common;
+using Scynapse.Providers.Streams.Generator;
+using Scynapse.Runtime;
+using Scynapse.Streams;
+using Scynapse.TestingHost;
 using Tester.StreamingTests;
 using TestExtensions;
 using TestGrains;
@@ -16,7 +16,7 @@ namespace UnitTests.StreamingTests
     /// <summary>
     /// Tests implicit subscription stream recovery scenarios with generated events, including transient and non-transient error handling.
     /// </summary>
-    public class GeneratedImplicitSubscriptionStreamRecoveryTests : OrleansTestingBase, IClassFixture<GeneratedImplicitSubscriptionStreamRecoveryTests.Fixture>
+    public class GeneratedImplicitSubscriptionStreamRecoveryTests : ScynapseTestingBase, IClassFixture<GeneratedImplicitSubscriptionStreamRecoveryTests.Fixture>
     {
         private static readonly string StreamProviderTypeName = typeof(PersistentStreamProvider).FullName;
         private const int TotalQueueCount = 4;

@@ -1,6 +1,6 @@
 using System.Runtime.Serialization;
 using UnitTests.GrainInterfaces;
-using Orleans.Runtime;
+using Scynapse.Runtime;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using System.Runtime.CompilerServices;

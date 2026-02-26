@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <PackageId>Genesa.Scynapse.Clustering.ZooKeeper</PackageId>
+    <Title>Microsoft Scynapse clustering provider for ZooKeeper</Title>
+    <Description>Microsoft Scynapse clustering provider backed by ZooKeeper</Description>
+    <PackageTags>$(PackageTags) ZooKeeper</PackageTags>
+    <TargetFrameworks>$(DefaultTargetFrameworks)</TargetFrameworks>
+    <AssemblyName>Scynapse.Clustering.ZooKeeper</AssemblyName>
+    <ScynapseBuildTimeCodeGen>true</ScynapseBuildTimeCodeGen>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Scynapse.Runtime\Scynapse.Runtime.csproj" />
+    <PackageReference Include="ZooKeeperNetEx" />
+  </ItemGroup>
+
+</Project>

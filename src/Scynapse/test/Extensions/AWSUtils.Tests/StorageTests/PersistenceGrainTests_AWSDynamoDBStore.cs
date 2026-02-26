@@ -1,14 +1,14 @@
 using Microsoft.Extensions.DependencyInjection;
-using Orleans.Configuration;
-using Orleans.Providers;
-using Orleans.Storage;
-using Orleans.TestingHost;
+using Scynapse.Configuration;
+using Scynapse.Providers;
+using Scynapse.Storage;
+using Scynapse.TestingHost;
 using Microsoft.Extensions.Logging.Abstractions;
 using TesterInternal;
 using UnitTests.GrainInterfaces;
 using Xunit;
 using Xunit.Abstractions;
-using static Orleans.Storage.DynamoDBGrainStorage;
+using static Scynapse.Storage.DynamoDBGrainStorage;
 using TestExtensions.Runners;
 
 namespace AWSUtils.Tests.StorageTests
@@ -105,7 +105,7 @@ namespace AWSUtils.Tests.StorageTests
         {
             var options = new DynamoDBStorageOptions();
             options.Service = AWSTestConstants.DynamoDbService;
-            options.GrainStorageSerializer = ActivatorUtilities.CreateInstance<OrleansGrainStorageSerializer>(runtime.ServiceProvider);
+            options.GrainStorageSerializer = ActivatorUtilities.CreateInstance<ScynapseGrainStorageSerializer>(runtime.ServiceProvider);
 
             DynamoDBGrainStorage store = ActivatorUtilities.CreateInstance<DynamoDBGrainStorage>(runtime.ServiceProvider, "PersistenceGrainTests", options);
             ISiloLifecycleSubject lifecycle = ActivatorUtilities.CreateInstance<SiloLifecycleSubject>(runtime.ServiceProvider, NullLogger<SiloLifecycleSubject>.Instance);

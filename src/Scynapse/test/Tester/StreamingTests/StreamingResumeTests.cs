@@ -1,4 +1,4 @@
-using Orleans.Streams;
+using Scynapse.Streams;
 using TestExtensions;
 using UnitTests.GrainInterfaces;
 using Xunit;

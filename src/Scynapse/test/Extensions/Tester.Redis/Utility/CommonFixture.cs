@@ -2,13 +2,13 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
-using Orleans.Configuration;
-using Orleans.Persistence;
-using Orleans.Providers;
-using Orleans.Runtime;
-using Orleans.Serialization;
-using Orleans.Serialization.Serializers;
-using Orleans.Storage;
+using Scynapse.Configuration;
+using Scynapse.Persistence;
+using Scynapse.Providers;
+using Scynapse.Runtime;
+using Scynapse.Serialization;
+using Scynapse.Serialization.Serializers;
+using Scynapse.Storage;
 using StackExchange.Redis;
 using Tester;
 using TestExtensions;
@@ -37,11 +37,11 @@ public class CommonFixture : TestEnvironmentFixture
     /// </summary>
     /// <remarks>If the environment invariants have failed to hold upon creation of the storage provider,
     /// a <em>null</em> value will be provided.</remarks>
-    public async Task<IGrainStorage> CreateRedisGrainStorage(bool useOrleansSerializer = false, bool deleteStateOnClear = false)
+    public async Task<IGrainStorage> CreateRedisGrainStorage(bool useScynapseSerializer = false, bool deleteStateOnClear = false)
     {
         TestUtils.CheckForRedis();
-        IGrainStorageSerializer grainStorageSerializer = useOrleansSerializer ? new OrleansGrainStorageSerializer(this.DefaultProviderRuntime.ServiceProvider.GetService<Serializer>())
-                                                                              : new JsonGrainStorageSerializer(this.DefaultProviderRuntime.ServiceProvider.GetService<OrleansJsonSerializer>());
+        IGrainStorageSerializer grainStorageSerializer = useScynapseSerializer ? new ScynapseGrainStorageSerializer(this.DefaultProviderRuntime.ServiceProvider.GetService<Serializer>())
+                                                                              : new JsonGrainStorageSerializer(this.DefaultProviderRuntime.ServiceProvider.GetService<ScynapseJsonSerializer>());
         var options = new RedisStorageOptions()
         {
             ConfigurationOptions = ConfigurationOptions.Parse(TestDefaultConfiguration.RedisConnectionString),

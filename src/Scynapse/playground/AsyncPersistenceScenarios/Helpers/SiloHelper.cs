@@ -3,13 +3,13 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Scynapse.AsyncPlus.Extensions;
-using Orleans.Configuration;
-using Orleans.Hosting;
+using Scynapse.Configuration;
+using Scynapse.Hosting;
 
 namespace AsyncPersistenceScenarios.Helpers;
 
 /// <summary>
-/// Helper class for building Orleans silos in Async+ scenarios.
+/// Helper class for building Scynapse silos in Async+ scenarios.
 /// Follows the patterns established in PluginGrainScenarios.
 /// </summary>
 public static class SiloHelper
@@ -28,7 +28,7 @@ public static class SiloHelper
         LogLevel logLevel = LogLevel.Warning)
     {
         return Host.CreateDefaultBuilder()
-            .UseOrleans(silo =>
+            .UseScynapse(silo =>
             {
                 silo.UseLocalhostClustering(siloPort, gatewayPort)
                     .Configure<ClusterOptions>(options =>
@@ -69,7 +69,7 @@ public static class SiloHelper
         LogLevel logLevel = LogLevel.Warning)
     {
         return Host.CreateDefaultBuilder()
-            .UseOrleans(silo =>
+            .UseScynapse(silo =>
             {
                 silo.UseLocalhostClustering(siloPort, gatewayPort)
                     .Configure<ClusterOptions>(options =>
@@ -105,7 +105,7 @@ public static class SiloHelper
         LogLevel logLevel = LogLevel.Warning)
     {
         return Host.CreateDefaultBuilder()
-            .UseOrleans(silo =>
+            .UseScynapse(silo =>
             {
                 silo.Configure<ClusterOptions>(options =>
                     {
@@ -132,7 +132,7 @@ public static class SiloHelper
                 logging.AddConsole();
                 logging.SetMinimumLevel(logLevel);
                 logging.AddFilter("Scynapse.AsyncPlus", LogLevel.Debug);
-                logging.AddFilter($"Orleans.{name}", LogLevel.Information);
+                logging.AddFilter($"Scynapse.{name}", LogLevel.Information);
                 logging.AddFilter("Microsoft.Hosting", LogLevel.Warning);
             })
             .Build();

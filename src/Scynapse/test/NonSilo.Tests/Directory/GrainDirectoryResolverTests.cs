@@ -2,12 +2,12 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
-using Orleans;
-using Orleans.GrainDirectory;
-using Orleans.Hosting;
-using Orleans.Runtime;
-using Orleans.Runtime.Hosting;
-using Orleans.Runtime.GrainDirectory;
+using Scynapse;
+using Scynapse.GrainDirectory;
+using Scynapse.Hosting;
+using Scynapse.Runtime;
+using Scynapse.Runtime.Hosting;
+using Scynapse.Runtime.GrainDirectory;
 using TestExtensions;
 using UnitTests.GrainInterfaces.Directories;
 using UnitTests.Grains.Directories;
@@ -33,7 +33,7 @@ namespace NonSilo.Tests.Directory
             this.azureDirectory = Substitute.For<IGrainDirectory>();
 
             var hostBuilder = new HostBuilder();
-            hostBuilder.UseOrleans((ctx, siloBuilder) =>
+            hostBuilder.UseScynapse((ctx, siloBuilder) =>
             {
                 siloBuilder
                     .AddGrainDirectory(CustomDirectoryGrain.DIRECTORY, (sp, nameof) => this.azureDirectory)

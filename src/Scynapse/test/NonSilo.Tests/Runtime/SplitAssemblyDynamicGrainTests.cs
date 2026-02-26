@@ -3,9 +3,9 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
-using Orleans.Hosting;
-using Orleans.Runtime.DynamicGrains;
-using Orleans.TestingHost;
+using Scynapse.Hosting;
+using Scynapse.Runtime.DynamicGrains;
+using Scynapse.TestingHost;
 using TestExtensions;
 using UnitTests.SplitGrain.Contracts;
 using Xunit;
@@ -186,7 +186,7 @@ public class SplitAssemblyDynamicGrainTests : IClassFixture<SplitAssemblyDynamic
 
             // Navigate up to find the repository root
             var currentDir = new DirectoryInfo(baseDir);
-            while (currentDir != null && !File.Exists(Path.Combine(currentDir.FullName, "Orleans.slnx")))
+            while (currentDir != null && !File.Exists(Path.Combine(currentDir.FullName, "Scynapse.slnx")))
             {
                 currentDir = currentDir.Parent;
             }

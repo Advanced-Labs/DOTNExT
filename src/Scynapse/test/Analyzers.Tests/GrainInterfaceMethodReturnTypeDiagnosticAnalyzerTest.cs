@@ -1,15 +1,15 @@
 using Microsoft.CodeAnalysis;
-using Orleans.Analyzers;
+using Scynapse.Analyzers;
 using Xunit;
 
 namespace Analyzers.Tests;
 
 /// <summary>
 /// Tests for the analyzer that enforces proper return types for grain interface methods.
-/// Orleans grain methods must return Task, Task&lt;T&gt;, ValueTask, ValueTask&lt;T&gt;, or void
+/// Scynapse grain methods must return Task, Task&lt;T&gt;, ValueTask, ValueTask&lt;T&gt;, or void
 /// because grain calls are inherently asynchronous across distributed systems.
 /// This analyzer prevents developers from using synchronous return types that would
-/// break the Orleans programming model.
+/// break the Scynapse programming model.
 /// </summary>
 [TestCategory("BVT"), TestCategory("Analyzer")]
 public class GrainInterfaceMethodReturnTypeDiagnosticAnalyzerTest : DiagnosticAnalyzerTestBase<GrainInterfaceMethodReturnTypeDiagnosticAnalyzer>
@@ -20,13 +20,13 @@ public class GrainInterfaceMethodReturnTypeDiagnosticAnalyzerTest : DiagnosticAn
     /// <summary>
     /// Verifies that the analyzer accepts valid return types for grain interface methods:
     /// Task, Task&lt;T&gt;, ValueTask, ValueTask&lt;T&gt;, and void are all allowed because they
-    /// support the asynchronous nature of grain calls in Orleans.
+    /// support the asynchronous nature of grain calls in Scynapse.
     /// </summary>
     [Fact]
     public async Task GrainInterfaceMethodReturnTypeNoError()
     {
         var code = """
-                    public interface IG : Orleans.IGrain
+                    public interface IG : Scynapse.IGrain
                     {
                         Task TaskMethod(int a);
                         Task<int> TaskOfIntMethod(int a);
@@ -35,7 +35,7 @@ public class GrainInterfaceMethodReturnTypeDiagnosticAnalyzerTest : DiagnosticAn
                         void VoidMethod(int a);
                     }
 
-                    public interface IA : Orleans.Runtime.IAddressable
+                    public interface IA : Scynapse.Runtime.IAddressable
                     {
                         Task TaskMethod(int a);
                         Task<int> TaskOfIntMethod(int a);
@@ -44,7 +44,7 @@ public class GrainInterfaceMethodReturnTypeDiagnosticAnalyzerTest : DiagnosticAn
                         void VoidMethod(int a);
                     }
 
-                    public interface IGO : Orleans.IGrainObserver
+                    public interface IGO : Scynapse.IGrainObserver
                     {
                         Task TaskMethod(int a);
                         Task<int> TaskOfIntMethod(int a);
@@ -66,7 +66,7 @@ public class GrainInterfaceMethodReturnTypeDiagnosticAnalyzerTest : DiagnosticAn
     public async Task IncompatibleGrainInterfaceMethodReturnType()
     {
         var code = """
-                    public interface I : Orleans.IGrain
+                    public interface I : Scynapse.IGrain
                     {
                         int MyMethod(int a);
                     }
@@ -92,7 +92,7 @@ public class GrainInterfaceMethodReturnTypeDiagnosticAnalyzerTest : DiagnosticAn
     public async Task StaticInterfaceMethodsWithRegularReturnsAreAllowed()
     {
         var code = """
-                    public interface I : Orleans.IGrain
+                    public interface I : Scynapse.IGrain
                     {
                         public static int GetSomeOtherThing(int a) => 0;
                         public static virtual int GetSomeOtherThingVirtual(int a) => 0;

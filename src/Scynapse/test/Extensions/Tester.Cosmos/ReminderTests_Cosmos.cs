@@ -1,7 +1,7 @@
 using Microsoft.Extensions.Logging;
-using Orleans.Runtime;
-using Orleans.Internal;
-using Orleans.TestingHost;
+using Scynapse.Runtime;
+using Scynapse.Internal;
+using Scynapse.TestingHost;
 using TestExtensions;
 using UnitTests.TimerTests;
 using UnitTests.GrainInterfaces;
@@ -9,7 +9,7 @@ using UnitTests.GrainInterfaces;
 namespace Tester.Cosmos.Reminders;
 
 /// <summary>
-/// Tests for Orleans reminders functionality using Azure Cosmos DB as the reminder service backing store.
+/// Tests for Scynapse reminders functionality using Azure Cosmos DB as the reminder service backing store.
 /// </summary>
 [TestCategory("Reminders"), TestCategory("Cosmos")]
 public class ReminderTests_Cosmos : ReminderTests_Base, IClassFixture<ReminderTests_Cosmos.Fixture>
@@ -303,7 +303,7 @@ public class ReminderTests_Cosmos : ReminderTests_Base, IClassFixture<ReminderTe
         Assert.Equal(4, curr2); // CopyGrain fault
     }
 
-    [SkippableFact(Skip = "https://github.com/dotnet/orleans/issues/4319"), TestCategory("Functional")]
+    [SkippableFact(Skip = "https://github.com/dotnet/scynapse/issues/4319"), TestCategory("Functional")]
     public async Task Rem_Azure_GT_1F1J_MultiGrain()
     {
         List<SiloHandle> silos = await HostedCluster.StartAdditionalSilosAsync(1);

@@ -2,15 +2,15 @@ using FluentAssertions;
 using System.Collections;
 using Xunit;
 using Xunit.Abstractions;
-using Orleans.Caching;
-using Orleans.Caching.Internal;
+using Scynapse.Caching;
+using Scynapse.Caching.Internal;
 
 namespace NonSilo.Tests.Caching;
 
 /// <summary>
-/// Tests for the ConcurrentLruCache, which is a thread-safe LRU (Least Recently Used) cache implementation used in Orleans.
+/// Tests for the ConcurrentLruCache, which is a thread-safe LRU (Least Recently Used) cache implementation used in Scynapse.
 /// This cache is designed with a multi-generation architecture (Hot, Warm, Cold) to efficiently manage frequently accessed items.
-/// It's used throughout Orleans for caching grain directory entries, grain references, and other frequently accessed data.
+/// It's used throughout Scynapse for caching grain directory entries, grain references, and other frequently accessed data.
 /// </summary>
 [TestCategory("BVT")]
 public class ConcurrentLruTests(ITestOutputHelper testOutputHelper)

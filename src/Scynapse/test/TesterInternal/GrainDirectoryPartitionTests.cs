@@ -1,15 +1,15 @@
 using System.Collections.Immutable;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using Orleans.Configuration;
-using Orleans.Runtime;
-using Orleans.Runtime.GrainDirectory;
+using Scynapse.Configuration;
+using Scynapse.Runtime;
+using Scynapse.Runtime.GrainDirectory;
 using Xunit;
 
 namespace UnitTests;
 
 /// <summary>
-/// Tests for the Orleans grain directory partition functionality.
+/// Tests for the Scynapse grain directory partition functionality.
 /// 
 /// The grain directory is a distributed data structure that maps grain identities
 /// to their current activation locations (silo addresses). Key concepts:
@@ -25,7 +25,7 @@ namespace UnitTests;
 /// - Conditional updates using previousAddress parameter
 /// - Filtering out entries for dead silos during lookups
 /// 
-/// This is essential for maintaining Orleans' single activation guarantee.
+/// This is essential for maintaining Scynapse' single activation guarantee.
 /// </summary>
 [TestCategory("BVT"), TestCategory("GrainDirectory")]
 public class GrainDirectoryPartitionTests
@@ -85,7 +85,7 @@ public class GrainDirectoryPartitionTests
         var grainAddress = GrainAddress.NewActivationAddress(OtherSiloAddress, grainId);
 
         // Insert invalid entry, pointing to dead silo
-       Assert.Throws<OrleansException>(() => _target.AddSingleActivation(grainAddress, previousAddress: null));
+       Assert.Throws<ScynapseException>(() => _target.AddSingleActivation(grainAddress, previousAddress: null));
     }
 
     /// <summary>

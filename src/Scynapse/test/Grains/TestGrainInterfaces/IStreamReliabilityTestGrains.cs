@@ -1,7 +1,7 @@
 ﻿//#define USE_GENERICS
 
-using Orleans.Runtime;
-using Orleans.Streams;
+using Scynapse.Runtime;
+using Scynapse.Streams;
 
 namespace UnitTests.GrainInterfaces
 {

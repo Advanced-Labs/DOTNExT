@@ -5,7 +5,7 @@ using Xunit;
 namespace DefaultCluster.Tests.General
 {
     /// <summary>
-    /// Tests for multifaceted grain functionality in Orleans.
+    /// Tests for multifaceted grain functionality in Scynapse.
     /// Multifaceted grains can implement multiple interfaces and be accessed
     /// through different interface references using AsReference<T>().
     /// This enables grains to expose different APIs to different consumers

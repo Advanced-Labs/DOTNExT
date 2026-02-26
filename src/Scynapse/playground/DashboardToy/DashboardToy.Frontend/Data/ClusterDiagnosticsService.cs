@@ -1,5 +1,5 @@
 using System.Runtime.InteropServices;
-using Orleans.Core.Internal;
+using Scynapse.Core.Internal;
 
 namespace DashboardToy.Frontend.Data;
 

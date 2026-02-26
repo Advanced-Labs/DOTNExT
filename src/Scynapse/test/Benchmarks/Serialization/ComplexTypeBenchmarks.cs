@@ -4,20 +4,20 @@ using BenchmarkDotNet.Attributes;
 using Benchmarks.Models;
 using Benchmarks.Utilities;
 using Microsoft.Extensions.DependencyInjection;
-using Orleans.Configuration;
-using Orleans.Networking.Shared;
-using Orleans.Runtime;
-using Orleans.Runtime.Messaging;
-using Orleans.Serialization;
-using Orleans.Serialization.Buffers;
-using Orleans.Serialization.Invocation;
-using Orleans.Serialization.Session;
+using Scynapse.Configuration;
+using Scynapse.Networking.Shared;
+using Scynapse.Runtime;
+using Scynapse.Runtime.Messaging;
+using Scynapse.Serialization;
+using Scynapse.Serialization.Buffers;
+using Scynapse.Serialization.Invocation;
+using Scynapse.Serialization.Session;
 using Xunit;
 
 namespace Benchmarks
 {
     /// <summary>
-    /// Benchmarks Orleans serialization performance for complex object graphs with circular references.
+    /// Benchmarks Scynapse serialization performance for complex object graphs with circular references.
     /// </summary>
     [Trait("Category", "Benchmark")]
     [Config(typeof(BenchmarkConfig))]
@@ -111,7 +111,7 @@ namespace Benchmarks
         }
 
         [Benchmark]
-        public SimpleStruct OrleansStructRoundTrip()
+        public SimpleStruct ScynapseStructRoundTrip()
         {
             var writer = Buffer.CreateWriter(_session);
             _session.Reset();
@@ -127,7 +127,7 @@ namespace Benchmarks
 /*
         [Fact]
         [Benchmark]
-        public void OrleansMessageSerializerStructRoundTrip()
+        public void ScynapseMessageSerializerStructRoundTrip()
         {
             var buffer = new PooledBuffer();
             var (headerLength, bodyLength) = _messageSerializer.Write(ref buffer, _structMessage);
@@ -140,7 +140,7 @@ namespace Benchmarks
         */
 
         //[Benchmark]
-        public object OrleansClassRoundTrip()
+        public object ScynapseClassRoundTrip()
         {
             var writer = Buffer.CreateWriter(_session);
             _session.Reset();
@@ -156,7 +156,7 @@ namespace Benchmarks
         /*
         [Fact]
         //[Benchmark]
-        public void OrleansMessageSerializerClassRoundTrip()
+        public void ScynapseMessageSerializerClassRoundTrip()
         {
             var buffer = new PooledBuffer();
             var (headerLength, bodyLength) = _messageSerializer.Write(ref buffer, _message);
@@ -173,7 +173,7 @@ namespace Benchmarks
         */
 
         //[Benchmark]
-        public object OrleansSerialize()
+        public object ScynapseSerialize()
         {
             var writer = Buffer.CreateWriter(_session);
             _session.Reset();
@@ -183,7 +183,7 @@ namespace Benchmarks
         }
 
         //[Benchmark]
-        public object OrleansDeserialize()
+        public object ScynapseDeserialize()
         {
             _session.Reset();
             var reader = Reader.Create(_serializedPayload, _session);
@@ -191,7 +191,7 @@ namespace Benchmarks
         }
 
         //[Benchmark]
-        public int OrleansReadEachByte()
+        public int ScynapseReadEachByte()
         {
             var sum = 0;
             var reader = Reader.Create(_serializedPayload, _session);

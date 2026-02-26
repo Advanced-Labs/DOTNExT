@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageId>Genesa.Scynapse.Hosting.AzureCloudServices</PackageId>
+    <Title>Microsoft Scynapse Hosting on Azure Cloud Services</Title>
+    <Description>Hosting utilities for Azure Cloud Services of Microsoft Scynapse.</Description>
+    <PackageTags>$(PackageTags) Azure Cloud Services</PackageTags>
+    <TargetFrameworks>$(DefaultTargetFrameworks)</TargetFrameworks>
+    <AssemblyName>Scynapse.Hosting.AzureCloudServices</AssemblyName>
+    <RootNamespace>Scynapse.Hosting.AzureCloudServices</RootNamespace>
+    <ScynapseBuildTimeCodeGen>true</ScynapseBuildTimeCodeGen>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="$(SourceRoot)src\Scynapse.Streaming\Scynapse.Streaming.csproj" />
+  </ItemGroup>
+
+
+  <ItemGroup>
+    <None Include="README.md" Pack="true" PackagePath="\" />
+  </ItemGroup>
+</Project>

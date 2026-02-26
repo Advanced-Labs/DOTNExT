@@ -3,11 +3,11 @@
     <RootNamespace>UnitTests.SplitGrain.Grains</RootNamespace>
     <TargetFramework>$(MinTestTargetFramework)</TargetFramework>
     <!-- IMPORTANT: No codegen here - codegen is in the Contracts assembly -->
-    <OrleansBuildTimeCodeGen>false</OrleansBuildTimeCodeGen>
+    <ScynapseBuildTimeCodeGen>false</ScynapseBuildTimeCodeGen>
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="$(SourceRoot)src\Orleans.Runtime\Orleans.Runtime.csproj" />
+    <ProjectReference Include="$(SourceRoot)src\Scynapse.Runtime\Scynapse.Runtime.csproj" />
     <ProjectReference Include="$(SourceRoot)test\Grains\TestSplitGrainContracts\TestSplitGrainContracts.csproj" />
   </ItemGroup>
 </Project>

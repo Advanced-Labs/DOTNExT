@@ -1,7 +1,7 @@
 using System.Collections.Concurrent;
-using Orleans.Configuration;
-using Orleans.Runtime;
-using Orleans.Runtime.GrainDirectory;
+using Scynapse.Configuration;
+using Scynapse.Runtime;
+using Scynapse.Runtime.GrainDirectory;
 
 namespace UnitTests.General
 {

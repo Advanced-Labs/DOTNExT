@@ -1,8 +1,8 @@
 using Microsoft.Extensions.Options;
-using Orleans.Configuration;
-using Orleans.Providers.Streams.Common;
-using Orleans.Runtime;
-using Orleans.TestingHost;
+using Scynapse.Configuration;
+using Scynapse.Providers.Streams.Common;
+using Scynapse.Runtime;
+using Scynapse.TestingHost;
 using Tester;
 using Tester.AzureUtils;
 using TestExtensions;
@@ -10,7 +10,7 @@ using Xunit;
 
 namespace UnitTests.StreamingTests
 {
-    public class PullingAgentManagementTests : OrleansTestingBase, IClassFixture<PullingAgentManagementTests.Fixture>
+    public class PullingAgentManagementTests : ScynapseTestingBase, IClassFixture<PullingAgentManagementTests.Fixture>
     {
         private readonly Fixture fixture;
         public class Fixture : BaseTestClusterFixture

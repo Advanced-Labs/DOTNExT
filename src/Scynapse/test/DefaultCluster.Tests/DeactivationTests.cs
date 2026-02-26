@@ -7,8 +7,8 @@ using Xunit;
 namespace DefaultCluster.Tests.General
 {
     /// <summary>
-    /// Tests grain deactivation and reactivation behaviors in Orleans.
-    /// Grain deactivation is a key part of Orleans' resource management:
+    /// Tests grain deactivation and reactivation behaviors in Scynapse.
+    /// Grain deactivation is a key part of Scynapse' resource management:
     /// - Grains can be explicitly deactivated or automatically deactivated when idle
     /// - Deactivation releases memory and other resources
     /// - Reactivation occurs transparently when a deactivated grain is called again
@@ -27,7 +27,7 @@ namespace DefaultCluster.Tests.General
         /// - Explicit deactivation followed by reactivation completes quickly (under 1 second)
         /// - The grain gets a new activation (new version) after deactivation
         /// - State is preserved across the deactivation/reactivation cycle
-        /// This ensures Orleans can efficiently manage grain lifecycle without significant overhead.
+        /// This ensures Scynapse can efficiently manage grain lifecycle without significant overhead.
         /// </summary>
         [Fact, TestCategory("BVT")]
         public async Task DeactivateReactivateTiming()

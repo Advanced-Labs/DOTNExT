@@ -1,4 +1,4 @@
-using Orleans.Runtime;
+using Scynapse.Runtime;
 using TestExtensions;
 using UnitTests.GrainInterfaces;
 using UnitTests.Grains;
@@ -9,7 +9,7 @@ namespace DefaultCluster.Tests
     using Microsoft.Extensions.DependencyInjection;
 
     /// <summary>
-    /// Tests for Orleans' grain reference casting capabilities.
+    /// Tests for Scynapse' grain reference casting capabilities.
     /// Validates that grain references can be safely cast between compatible interfaces,
     /// including upcasting to base interfaces, casting between multiple implemented interfaces,
     /// and proper error handling for invalid casts. Tests both pre- and post-activation scenarios.

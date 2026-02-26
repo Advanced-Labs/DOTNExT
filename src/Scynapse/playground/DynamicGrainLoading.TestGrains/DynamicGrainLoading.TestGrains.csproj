@@ -5,12 +5,12 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <OutputType>Library</OutputType>
-    <OrleansBuildTimeCodeGen>true</OrleansBuildTimeCodeGen>
+    <ScynapseBuildTimeCodeGen>true</ScynapseBuildTimeCodeGen>
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\Orleans.Sdk\Orleans.Sdk.csproj" />
-    <ProjectReference Include="..\..\src\Orleans.Core.Abstractions\Orleans.Core.Abstractions.csproj" />
+    <ProjectReference Include="..\..\src\Scynapse.Sdk\Scynapse.Sdk.csproj" />
+    <ProjectReference Include="..\..\src\Scynapse.Core.Abstractions\Scynapse.Core.Abstractions.csproj" />
   </ItemGroup>
 
 </Project>

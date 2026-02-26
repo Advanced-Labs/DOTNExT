@@ -4,10 +4,10 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
-using Orleans.Configuration;
-using Orleans.Providers.Streams.AzureQueue;
-using Orleans.Runtime;
-using Orleans.TestingHost;
+using Scynapse.Configuration;
+using Scynapse.Providers.Streams.AzureQueue;
+using Scynapse.Runtime;
+using Scynapse.TestingHost;
 using Tester;
 using Tester.AzureUtils.Streaming;
 using TestExtensions;
@@ -17,9 +17,9 @@ using UnitTests.StreamingTests;
 using Xunit;
 using Xunit.Abstractions;
 using Tester.AzureUtils;
-using Orleans.Serialization.TypeSystem;
+using Scynapse.Serialization.TypeSystem;
 using Microsoft.Extensions.Logging;
-using Orleans.Providers;
+using Scynapse.Providers;
 
 // ReSharper disable ConvertToConstant.Local
 // ReSharper disable CheckNamespace
@@ -637,7 +637,7 @@ namespace UnitTests.Streaming.Reliability
                     await consumerGrain.UnSubscribeFromAllStreams();
                     break;
                 }
-                catch (OrleansMessageRejectionException ex)
+                catch (ScynapseMessageRejectionException ex)
                 {
                     if (!ex.Message.Contains("No gateways available"))
                         throw;
@@ -904,7 +904,7 @@ namespace UnitTests.Streaming.Reliability
             await CheckReceivedCounts(when, consumerGrain, expectedReceived, 0);
 
             // Add new silo
-            //SiloHandle newSilo = StartAdditionalOrleans();
+            //SiloHandle newSilo = StartAdditionalScynapse();
             //WaitForLivenessToStabilize();
             SiloHandle newSilo = await this.HostedCluster.StartAdditionalSiloAsync();
             await this.HostedCluster.WaitForLivenessToStabilizeAsync();

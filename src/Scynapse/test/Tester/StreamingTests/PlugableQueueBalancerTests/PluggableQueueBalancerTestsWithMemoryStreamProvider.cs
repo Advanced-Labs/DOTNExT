@@ -1,6 +1,6 @@
 using Microsoft.Extensions.Configuration;
-using Orleans.Providers;
-using Orleans.TestingHost;
+using Scynapse.Providers;
+using Scynapse.TestingHost;
 using TestExtensions;
 using Xunit;
 using Microsoft.Extensions.DependencyInjection;
@@ -62,7 +62,7 @@ namespace Tester.StreamingTests.PlugableQueueBalancerTests
             this.fixture = fixture;
         }
 
-        [Fact(Skip = "https://github.com/dotnet/orleans/issues/4317"), TestCategory("BVT")]
+        [Fact(Skip = "https://github.com/dotnet/scynapse/issues/4317"), TestCategory("BVT")]
         public Task PluggableQueueBalancerTest_ShouldUseInjectedQueueBalancerAndBalanceCorrectly()
         {
             return base.ShouldUseInjectedQueueBalancerAndBalanceCorrectly(this.fixture, StreamProviderName, siloCount, totalQueueCount);

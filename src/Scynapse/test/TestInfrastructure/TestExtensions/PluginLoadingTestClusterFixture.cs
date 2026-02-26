@@ -6,9 +6,9 @@ using System.Reflection;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Orleans.Hosting;
-using Orleans.Runtime.DynamicGrains;
-using Orleans.TestingHost;
+using Scynapse.Hosting;
+using Scynapse.Runtime.DynamicGrains;
+using Scynapse.TestingHost;
 
 namespace TestExtensions
 {
@@ -36,9 +36,9 @@ namespace TestExtensions
         {
             var baseDir = AppContext.BaseDirectory;
 
-            // Try to find the Orleans repository root
+            // Try to find the Scynapse repository root
             var currentDir = new DirectoryInfo(baseDir);
-            while (currentDir != null && !File.Exists(Path.Combine(currentDir.FullName, "Orleans.slnx")))
+            while (currentDir != null && !File.Exists(Path.Combine(currentDir.FullName, "Scynapse.slnx")))
             {
                 currentDir = currentDir.Parent;
             }

@@ -2,7 +2,7 @@ using Amazon.DynamoDBv2;
 using Amazon.DynamoDBv2.Model;
 using Amazon.Runtime;
 using Microsoft.Extensions.Logging;
-using Orleans.Runtime;
+using Scynapse.Runtime;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -12,15 +12,15 @@ using System.Threading.Tasks;
 using Amazon.Runtime.CredentialManagement;
 
 #if CLUSTERING_DYNAMODB
-namespace Orleans.Clustering.DynamoDB
+namespace Scynapse.Clustering.DynamoDB
 #elif PERSISTENCE_DYNAMODB
-namespace Orleans.Persistence.DynamoDB
+namespace Scynapse.Persistence.DynamoDB
 #elif REMINDERS_DYNAMODB
-namespace Orleans.Reminders.DynamoDB
+namespace Scynapse.Reminders.DynamoDB
 #elif AWSUTILS_TESTS
-namespace Orleans.AWSUtils.Tests
+namespace Scynapse.AWSUtils.Tests
 #elif TRANSACTIONS_DYNAMODB
-namespace Orleans.Transactions.DynamoDB
+namespace Scynapse.Transactions.DynamoDB
 #else
 // No default namespace intentionally to cause compile errors if something is not defined
 #endif
@@ -287,7 +287,7 @@ namespace Orleans.Transactions.DynamoDB
 
                 // Wait for all table indexes to become ACTIVE.
                 // We can only have one GSI in CREATING state at one time.
-                // We also wait for all indexes to finish UPDATING as the table is not ready to receive queries from Orleans until all indexes are created.
+                // We also wait for all indexes to finish UPDATING as the table is not ready to receive queries from Scynapse until all indexes are created.
                 List<GlobalSecondaryIndexDescription> globalSecondaryIndexes = tableDescription.GlobalSecondaryIndexes;
                 foreach (var globalSecondaryIndex in globalSecondaryIndexes)
                 {
@@ -827,7 +827,7 @@ namespace Orleans.Transactions.DynamoDB
             catch (Exception exc)
             {
                 LogWarningFailedToReadTable(_logger, exc, tableName);
-                throw new OrleansException($"Failed to read table {tableName}: {exc.Message}", exc);
+                throw new ScynapseException($"Failed to read table {tableName}: {exc.Message}", exc);
             }
         }
 

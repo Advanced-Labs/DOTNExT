@@ -1,5 +1,5 @@
 using System.Globalization;
-using Orleans.Runtime;
+using Scynapse.Runtime;
 using TestExtensions;
 using TestGrainInterfaces;
 using UnitTests.GrainInterfaces;
@@ -9,8 +9,8 @@ using Xunit;
 namespace DefaultCluster.Tests.General
 {
     /// <summary>
-    /// Comprehensive tests for Orleans' support of generic grains and interfaces.
-    /// Validates that Orleans can correctly handle grain classes and interfaces with type parameters,
+    /// Comprehensive tests for Scynapse' support of generic grains and interfaces.
+    /// Validates that Scynapse can correctly handle grain classes and interfaces with type parameters,
     /// including complex scenarios like multiple type parameters, inheritance hierarchies, type constraints,
     /// and proper grain activation/routing based on generic type arguments.
     /// </summary>
@@ -34,7 +34,7 @@ namespace DefaultCluster.Tests.General
         }
 
         /// <summary>
-        /// Tests that Orleans can instantiate multiple concrete grain types implementing different
+        /// Tests that Scynapse can instantiate multiple concrete grain types implementing different
         /// specializations of the same generic interface. Validates that type-specific grain
         /// implementations are correctly resolved and activated based on generic type arguments.
         /// </summary>
@@ -60,7 +60,7 @@ namespace DefaultCluster.Tests.General
 
         /// <summary>
         /// Validates grain identity preservation: multiple GetGrain calls with the same ID
-        /// return references to the same grain activation. This ensures Orleans' single-activation
+        /// return references to the same grain activation. This ensures Scynapse' single-activation
         /// guarantee holds for generic grains.
         /// </summary>
         [Fact]
@@ -78,7 +78,7 @@ namespace DefaultCluster.Tests.General
         }
 
         /// <summary>
-        /// Tests Orleans' ability to instantiate generic grain specializations with various type arguments.
+        /// Tests Scynapse' ability to instantiate generic grain specializations with various type arguments.
         /// Uses theory-based testing to validate that generic grains work correctly with different
         /// primitive types (float, string), demonstrating type parameter flexibility.
         /// </summary>
@@ -103,7 +103,7 @@ namespace DefaultCluster.Tests.General
 
         /// <summary>
         /// Tests generic grains with array type parameters.
-        /// Validates that Orleans can handle complex type arguments like arrays in generic grain interfaces.
+        /// Validates that Scynapse can handle complex type arguments like arrays in generic grain interfaces.
         /// </summary>
         [Fact]
         public async Task GenericGrainTests_SimpleGenericGrainGetGrain_ArrayTypeParameter()
@@ -123,7 +123,7 @@ namespace DefaultCluster.Tests.General
 
         /// <summary>
         /// Tests generic grains that work with arrays through inheritance.
-        /// Validates Orleans' handling of generic grains that register and manage array-based state.
+        /// Validates Scynapse' handling of generic grains that register and manage array-based state.
         /// </summary>
         [Fact]
         public async Task GenericGrainTests_GenericGrainInheritingArray()
@@ -140,7 +140,7 @@ namespace DefaultCluster.Tests.General
 
         /// <summary>
         /// Tests grains implementing generic interfaces with nested generic type parameters.
-        /// Validates Orleans' ability to handle complex generic scenarios like List<T> as a type argument.
+        /// Validates Scynapse' ability to handle complex generic scenarios like List<T> as a type argument.
         /// </summary>
         [Fact]
         public async Task GenericGrainTests_GenericInterfaceWithGenericParametersGetGrain()
@@ -160,7 +160,7 @@ namespace DefaultCluster.Tests.General
 
         /// <summary>
         /// Validates that multiple GetGrain calls for the same generic grain type and ID
-        /// return the same activation. Ensures Orleans' single-activation semantics apply to generic grains.
+        /// return the same activation. Ensures Scynapse' single-activation semantics apply to generic grains.
         /// </summary>
         [Fact]
         public async Task GenericGrainTests_SimpleGenericGrainMultiplicity()
@@ -178,8 +178,8 @@ namespace DefaultCluster.Tests.General
         }
 
         /// <summary>
-        /// Tests Orleans' type resolution preference rules: when both a concrete implementation
-        /// and a generic implementation exist for a generic interface, Orleans should prefer
+        /// Tests Scynapse' type resolution preference rules: when both a concrete implementation
+        /// and a generic implementation exist for a generic interface, Scynapse should prefer
         /// the more specific concrete implementation. This validates proper type matching precedence.
         /// </summary>
         [Fact]
@@ -203,7 +203,7 @@ namespace DefaultCluster.Tests.General
         }
 
         /// <summary>
-        /// Validates activation identity when Orleans prefers concrete implementations.
+        /// Validates activation identity when Scynapse prefers concrete implementations.
         /// Ensures that the preference for concrete implementations doesn't break
         /// the single-activation guarantee.
         /// </summary>
@@ -226,7 +226,7 @@ namespace DefaultCluster.Tests.General
 
         /// <summary>
         /// Tests grains implementing multiple generic interfaces.
-        /// Validates that Orleans correctly handles grains with complex interface hierarchies
+        /// Validates that Scynapse correctly handles grains with complex interface hierarchies
         /// involving multiple generic interfaces.
         /// </summary>
         [Fact]
@@ -539,7 +539,7 @@ namespace DefaultCluster.Tests.General
 
         /// <summary>
         /// Tests generic grains with non-primitive type arguments like Guid and byte arrays.
-        /// Validates that Orleans correctly differentiates grain activations based on complex
+        /// Validates that Scynapse correctly differentiates grain activations based on complex
         /// generic type arguments, ensuring proper type-based routing.
         /// </summary>
         [Fact]
@@ -719,7 +719,7 @@ namespace DefaultCluster.Tests.General
 
         /// <summary>
         /// Tests scheduled operations and deactivation for generic grains.
-        /// Validates that Orleans' activation lifecycle management works correctly with generic grains,
+        /// Validates that Scynapse' activation lifecycle management works correctly with generic grains,
         /// including delayed operations and explicit deactivation.
         /// </summary>
         [Fact, TestCategory("ActivateDeactivate")]
@@ -738,7 +738,7 @@ namespace DefaultCluster.Tests.General
 
         /// <summary>
         /// Tests serialization of generic grains with circular references in their state.
-        /// Validates that Orleans' serialization system can handle complex object graphs
+        /// Validates that Scynapse' serialization system can handle complex object graphs
         /// in generic grain contexts without infinite loops.
         /// </summary>
         [Fact, TestCategory("Serialization")]
@@ -751,7 +751,7 @@ namespace DefaultCluster.Tests.General
 
         /// <summary>
         /// Tests generic grains with type constraints (where T : class, new(), etc.).
-        /// Validates that Orleans correctly enforces and works with C# generic type constraints,
+        /// Validates that Scynapse correctly enforces and works with C# generic type constraints,
         /// including unmanaged constraints and reference type constraints.
         /// </summary>
         [Fact]
@@ -784,7 +784,7 @@ namespace DefaultCluster.Tests.General
 
         /// <summary>
         /// Tests generic grains with value type state persistence.
-        /// Validates that Orleans' persistence system correctly handles value types (structs)
+        /// Validates that Scynapse' persistence system correctly handles value types (structs)
         /// as grain state in generic grain contexts.
         /// </summary>
         [Fact, TestCategory("Persistence")]
@@ -805,7 +805,7 @@ namespace DefaultCluster.Tests.General
 
         /// <summary>
         /// Tests casting non-generic grain references to generic interfaces after activation.
-        /// Validates Orleans' support for late-bound interface discovery on already-activated grains.
+        /// Validates Scynapse' support for late-bound interface discovery on already-activated grains.
         /// </summary>
         [Fact, TestCategory("Cast")]
         public async Task Generic_CastToGenericInterfaceAfterActivation()
@@ -822,7 +822,7 @@ namespace DefaultCluster.Tests.General
 
         /// <summary>
         /// Tests casting to generic interfaces with different type arguments before activation.
-        /// Validates that Orleans can handle interface casts that involve different generic
+        /// Validates that Scynapse can handle interface casts that involve different generic
         /// type specializations before the grain is activated.
         /// </summary>
         [Fact, TestCategory("Cast")]
@@ -839,7 +839,7 @@ namespace DefaultCluster.Tests.General
 
         /// <summary>
         /// Tests casting between independently concretized generic interfaces.
-        /// Validates Orleans' ability to handle complex interface hierarchies where interfaces
+        /// Validates Scynapse' ability to handle complex interface hierarchies where interfaces
         /// are specialized independently of the grain's generic parameters.
         /// </summary>
         [Fact, TestCategory("Cast")]
@@ -856,7 +856,7 @@ namespace DefaultCluster.Tests.General
 
         /// <summary>
         /// Tests casting from generic to non-generic interfaces.
-        /// Validates that Orleans supports interface casts that cross the generic/non-generic boundary.
+        /// Validates that Scynapse supports interface casts that cross the generic/non-generic boundary.
         /// </summary>
         [Fact, TestCategory("Cast")]
         public async Task Generic_CastGenericInterfaceToNonGenericInterfaceBeforeActivation()
@@ -890,7 +890,7 @@ namespace DefaultCluster.Tests.General
         using UnitTests.Grains.Generic.EdgeCases;
 
         /// <summary>
-        /// Tests for edge cases in Orleans' generic grain type system.
+        /// Tests for edge cases in Scynapse' generic grain type system.
         /// Validates complex scenarios including partial type specialization, repeated type parameters,
         /// rearranged generic arguments, type parameter constraints in inheritance hierarchies,
         /// and advanced type inference scenarios that push the boundaries of the generic type resolver.
@@ -910,7 +910,7 @@ namespace DefaultCluster.Tests.General
 
             /// <summary>
             /// Tests partial specialization of generic grain types.
-            /// Validates Orleans' ability to handle grains that partially specify generic parameters,
+            /// Validates Scynapse' ability to handle grains that partially specify generic parameters,
             /// leaving some to be inferred from the interface implementation.
             /// Note: Currently unsupported feature.
             /// </summary>
@@ -985,7 +985,7 @@ namespace DefaultCluster.Tests.General
 
             /// <summary>
             /// Tests type resolution with repeated generic arguments across interfaces.
-            /// Validates that Orleans correctly handles scenarios where the same type parameter
+            /// Validates that Scynapse correctly handles scenarios where the same type parameter
             /// is used multiple times across different interfaces in the hierarchy.
             /// </summary>
             [Fact]
@@ -1027,7 +1027,7 @@ namespace DefaultCluster.Tests.General
 
             /// <summary>
             /// Tests resolution of rearranged generic arguments.
-            /// Validates that Orleans can handle interfaces where generic parameters
+            /// Validates that Scynapse can handle interfaces where generic parameters
             /// appear in different orders than in the grain implementation.
             /// Note: Currently unsupported feature.
             /// </summary>
@@ -1139,7 +1139,7 @@ namespace DefaultCluster.Tests.General
 
             /// <summary>
             /// Tests specialization of generic parameters into array types.
-            /// Validates that Orleans can handle scenarios where generic parameters
+            /// Validates that Scynapse can handle scenarios where generic parameters
             /// are specialized as array types (T[]).
             /// Note: Currently unsupported feature.
             /// </summary>

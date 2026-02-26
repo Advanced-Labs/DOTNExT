@@ -1,0 +1,33 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageId>Genesa.Scynapse.Clustering.DynamoDB</PackageId>
+    <Title>Microsoft Scynapse AWS DynamoDB Clustering Provider</Title>
+    <Description>Microsoft Scynapse clustering provider backed by AWS DynamoDB</Description>
+    <PackageTags>$(PackageTags) AWS DynamoDB</PackageTags>
+    <TargetFrameworks>$(DefaultTargetFrameworks)</TargetFrameworks>
+    <ScynapseBuildTimeCodeGen>true</ScynapseBuildTimeCodeGen>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <AssemblyName>Scynapse.Clustering.DynamoDB</AssemblyName>
+    <RootNamespace>Scynapse.Clustering.DynamoDB</RootNamespace>
+    <DefineConstants>$(DefineConstants);CLUSTERING_DYNAMODB</DefineConstants>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="..\Shared\Storage\DynamoDBStorage.cs" Link="Storage\DynamoDBStorage.cs" />
+    <Compile Include="..\Shared\Storage\DynamoDBClientOptions.cs" Link="Storage\DynamoDBClientOptions.cs" />
+    <Compile Include="..\Shared\AWSUtils.cs" Link="AWSUtils.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="$(SourceRoot)src\Scynapse.Runtime\Scynapse.Runtime.csproj" />
+    <PackageReference Include="AWSSDK.DynamoDBv2" />
+  </ItemGroup>
+
+
+  <ItemGroup>
+    <None Include="README.md" Pack="true" PackagePath="\" />
+  </ItemGroup>
+</Project>

@@ -1,4 +1,4 @@
-using Orleans.TestingHost;
+using Scynapse.TestingHost;
 using TestExtensions;
 using Xunit;
 
@@ -7,7 +7,7 @@ namespace UnitTests.General
     /// <summary>
     /// Tests for disabled call chain reentrancy behavior on non-reentrant grains.
     /// </summary>
-    public class DisabledCallChainReentrancyTests : OrleansTestingBase, IClassFixture<DisabledCallChainReentrancyTests.Fixture>
+    public class DisabledCallChainReentrancyTests : ScynapseTestingBase, IClassFixture<DisabledCallChainReentrancyTests.Fixture>
     {
         private readonly DisabledCallChainReentrancyTestRunner runner;
 

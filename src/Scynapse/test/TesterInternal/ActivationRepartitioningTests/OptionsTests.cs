@@ -1,6 +1,6 @@
 using Microsoft.Extensions.Options;
-using Orleans.Runtime;
-using Orleans.Configuration;
+using Scynapse.Runtime;
+using Scynapse.Configuration;
 using Xunit;
 
 namespace UnitTests.ActivationRepartitioningTests;
@@ -50,6 +50,6 @@ public class OptionsTests
         };
 
         var validator = new ActivationRepartitionerOptionsValidator(Options.Create(options));
-        Assert.Throws<OrleansConfigurationException>(validator.ValidateConfiguration);
+        Assert.Throws<ScynapseConfigurationException>(validator.ValidateConfiguration);
     }
 }

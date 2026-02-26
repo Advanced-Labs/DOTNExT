@@ -1,4 +1,4 @@
-using Orleans.EventSourcing;
+using Scynapse.EventSourcing;
 using TestGrainInterfaces;
 
 namespace TestGrains

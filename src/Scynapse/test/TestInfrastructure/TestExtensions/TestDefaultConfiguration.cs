@@ -3,7 +3,7 @@ using Azure.Identity;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Primitives;
-using Orleans.TestingHost;
+using Scynapse.TestingHost;
 
 namespace TestExtensions
 {
@@ -91,11 +91,11 @@ namespace TestExtensions
             {
                 { nameof(ZooKeeperConnectionString), "127.0.0.1:2181" }
             });
-            if (!TryAddJsonFileFromEnvironmentVariable(builder, "ORLEANS_SECRETFILE"))
+            if (!TryAddJsonFileFromEnvironmentVariable(builder, "SCYNAPSE_SECRETFILE"))
             {
-                TryAddJsonFileInAncestorFolder(builder, "OrleansTestSecrets.json");
+                TryAddJsonFileInAncestorFolder(builder, "ScynapseTestSecrets.json");
             }
-            builder.AddEnvironmentVariables("Orleans");
+            builder.AddEnvironmentVariables("Scynapse");
         }
 
         /// <summary>

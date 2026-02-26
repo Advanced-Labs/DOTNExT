@@ -1,9 +1,9 @@
 using Azure.Storage.Queues.Models;
 using Microsoft.Extensions.Logging;
-using Orleans.AzureUtils;
-using Orleans.Configuration;
-using Orleans.Runtime;
-using Orleans.TestingHost.Utils;
+using Scynapse.AzureUtils;
+using Scynapse.Configuration;
+using Scynapse.Runtime;
+using Scynapse.TestingHost.Utils;
 using Xunit;
 
 namespace Tester.AzureUtils
@@ -127,7 +127,7 @@ namespace Tester.AzureUtils
             await Task.WhenAll(promises);
         }
 
-        [SkippableFact(Skip = "https://github.com/dotnet/orleans/issues/9552"), TestCategory("Functional")]
+        [SkippableFact(Skip = "https://github.com/dotnet/scynapse/issues/9552"), TestCategory("Functional")]
         public async Task AQ_Standalone_4()
         {
             TimeSpan visibilityTimeout = TimeSpan.FromSeconds(2);

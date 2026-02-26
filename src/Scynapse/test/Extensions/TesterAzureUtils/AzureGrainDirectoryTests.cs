@@ -1,8 +1,8 @@
 #nullable enable
 using Microsoft.Extensions.Options;
-using Orleans.Configuration;
-using Orleans.GrainDirectory.AzureStorage;
-using Orleans.TestingHost.Utils;
+using Scynapse.Configuration;
+using Scynapse.GrainDirectory.AzureStorage;
+using Scynapse.TestingHost.Utils;
 using Tester.Directories;
 using Xunit;
 using Xunit.Abstractions;

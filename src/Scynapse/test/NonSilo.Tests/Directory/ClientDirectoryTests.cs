@@ -7,12 +7,12 @@ using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
 using NonSilo.Tests.Utilities;
 using NSubstitute;
-using Orleans;
-using Orleans.Configuration;
-using Orleans.Runtime;
-using Orleans.Runtime.GrainDirectory;
-using Orleans.Runtime.Messaging;
-using Orleans.Runtime.Scheduler;
+using Scynapse;
+using Scynapse.Configuration;
+using Scynapse.Runtime;
+using Scynapse.Runtime.GrainDirectory;
+using Scynapse.Runtime.Messaging;
+using Scynapse.Runtime.Scheduler;
 using UnitTests.Directory;
 using Xunit;
 

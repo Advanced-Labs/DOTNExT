@@ -1,4 +1,4 @@
-using Orleans.Runtime;
+using Scynapse.Runtime;
 using TestExtensions;
 using UnitTests.GrainInterfaces;
 using Xunit;
@@ -6,10 +6,10 @@ using Xunit;
 namespace UnitTDefaultCluster.Tests.General
 {
     /// <summary>
-    /// Tests for Orleans Request Context functionality.
+    /// Tests for Scynapse Request Context functionality.
     /// Request Context allows flowing ambient data (like correlation IDs, user context,
     /// or request metadata) along with grain calls without explicitly passing it as
-    /// parameters. This is Orleans' equivalent of thread-local storage or async-local
+    /// parameters. This is Scynapse' equivalent of thread-local storage or async-local
     /// storage, but designed for distributed calls across grains and silos.
     /// </summary>
     public class RequestContextTests : HostedTestClusterEnsureDefaultStarted

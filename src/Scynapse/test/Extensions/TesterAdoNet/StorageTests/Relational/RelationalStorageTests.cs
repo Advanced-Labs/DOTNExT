@@ -1,7 +1,7 @@
 using Microsoft.Extensions.DependencyInjection;
-using Orleans.Runtime;
-using Orleans.Serialization;
-using Orleans.Storage;
+using Scynapse.Runtime;
+using Scynapse.Serialization;
+using Scynapse.Storage;
 using UnitTests.StorageTests.Relational.TestDataSets;
 
 
@@ -73,20 +73,20 @@ namespace UnitTests.StorageTests.Relational
 
         internal Task Relational_Binary_WriteRead(string grainType, GrainId grainId, GrainState<TestStateGeneric1<string>> grainState)
         {
-            ((AdoNetGrainStorage)PersistenceStorageTests.Storage).Serializer = GetOrleansGrainStorageSerializer();
+            ((AdoNetGrainStorage)PersistenceStorageTests.Storage).Serializer = GetScynapseGrainStorageSerializer();
             return PersistenceStorageTests.Store_WriteRead(grainType, grainId, grainState);
         }
 
         private JsonGrainStorageSerializer GetJsonGrainStorageSerializer()
         {
-            var serializer = this.Fixture.Services.GetRequiredService<OrleansJsonSerializer>();
+            var serializer = this.Fixture.Services.GetRequiredService<ScynapseJsonSerializer>();
             return new JsonGrainStorageSerializer(serializer);
         }
 
-        private OrleansGrainStorageSerializer GetOrleansGrainStorageSerializer()
+        private ScynapseGrainStorageSerializer GetScynapseGrainStorageSerializer()
         {
             var serializer = this.Fixture.Services.GetRequiredService<Serializer>();
-            return new OrleansGrainStorageSerializer(serializer);
+            return new ScynapseGrainStorageSerializer(serializer);
         }
     }
 }

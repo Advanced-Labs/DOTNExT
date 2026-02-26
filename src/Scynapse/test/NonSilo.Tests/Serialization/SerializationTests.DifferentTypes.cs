@@ -1,5 +1,5 @@
 using System.Globalization;
-using Orleans.Serialization;
+using Scynapse.Serialization;
 using TestExtensions;
 using UnitTests.GrainInterfaces;
 using Xunit;

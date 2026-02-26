@@ -2,16 +2,16 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using TestExtensions;
 using UnitTests.MembershipTests;
-using Orleans.Messaging;
-using Orleans.Clustering.Cosmos;
+using Scynapse.Messaging;
+using Scynapse.Clustering.Cosmos;
 using UnitTests;
 
 namespace Tester.Cosmos.Clustering;
 
 /// <summary>
-/// Tests for operation of Orleans Membership Table using Azure Cosmos DB - Requires access to external Azure Cosmos DB account
+/// Tests for operation of Scynapse Membership Table using Azure Cosmos DB - Requires access to external Azure Cosmos DB account
 /// 
-/// Azure Cosmos DB provides a globally distributed, multi-model database service that Orleans can use for cluster membership
+/// Azure Cosmos DB provides a globally distributed, multi-model database service that Scynapse can use for cluster membership
 /// management.
 /// 
 /// These tests verify the Cosmos DB membership provider correctly implements
@@ -31,7 +31,7 @@ public class CosmosMembershipTableTests : MembershipTableTestsBase
     {
         var filters = new LoggerFilterOptions();
         filters.AddFilter(typeof(CosmosMembershipTable).FullName, LogLevel.Trace);
-        filters.AddFilter("Orleans.Storage", LogLevel.Trace);
+        filters.AddFilter("Scynapse.Storage", LogLevel.Trace);
         return filters;
     }
 

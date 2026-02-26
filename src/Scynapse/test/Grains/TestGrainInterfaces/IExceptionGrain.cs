@@ -1,9 +1,9 @@
 using System.Buffers;
-using Orleans.Runtime;
-using Orleans.Serialization.Buffers;
-using Orleans.Serialization.Cloning;
-using Orleans.Serialization.Codecs;
-using Orleans.Serialization.WireProtocol;
+using Scynapse.Runtime;
+using Scynapse.Serialization.Buffers;
+using Scynapse.Serialization.Cloning;
+using Scynapse.Serialization.Codecs;
+using Scynapse.Serialization.WireProtocol;
 
 namespace UnitTests.GrainInterfaces
 {

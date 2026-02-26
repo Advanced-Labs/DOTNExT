@@ -1,7 +1,7 @@
 using MySql.Data.MySqlClient;
 using Npgsql;
-using Orleans.TestingHost;
-using Orleans.Tests.SqlUtils;
+using Scynapse.TestingHost;
+using Scynapse.Tests.SqlUtils;
 using Tester.Directories;
 using UnitTests.General;
 using UnitTests.Grains.Directories;
@@ -47,7 +47,7 @@ public class MySqlAdoNetGrainDirectoryClusterTests : AdoNetGrainDirectoryCluster
 [TestCategory("Functional"), TestCategory("AdoNet"), TestCategory("GrainDirectory")]
 public abstract class AdoNetGrainDirectoryClusterTests : MultipleGrainDirectoriesTests
 {
-    private const string TestDatabaseName = "OrleansGrainDirectoryTest";
+    private const string TestDatabaseName = "ScynapseGrainDirectoryTest";
 
     private static RelationalStorageForTesting _testing;
     private static string _invariant;

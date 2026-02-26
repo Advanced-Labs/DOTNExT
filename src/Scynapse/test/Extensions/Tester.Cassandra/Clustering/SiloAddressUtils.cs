@@ -1,5 +1,5 @@
 using System.Net;
-using Orleans.Runtime;
+using Scynapse.Runtime;
 
 namespace Tester.Cassandra.Clustering;
 

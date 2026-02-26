@@ -1,8 +1,8 @@
 using System.Net;
 using Microsoft.Extensions.Logging;
-using Orleans.GrainDirectory;
-using Orleans.Runtime;
-using Orleans.Runtime.GrainDirectory;
+using Scynapse.GrainDirectory;
+using Scynapse.Runtime;
+using Scynapse.Runtime.GrainDirectory;
 using TestExtensions;
 using UnitTests.SchedulerTests;
 using UnitTests.TesterInternal;

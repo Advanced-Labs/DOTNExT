@@ -1,7 +1,7 @@
 using Microsoft.Extensions.Logging;
-using Orleans.Concurrency;
-using Orleans.Serialization.Invocation;
-using Orleans.Streams;
+using Scynapse.Concurrency;
+using Scynapse.Serialization.Invocation;
+using Scynapse.Streams;
 
 using UnitTests.GrainInterfaces;
 

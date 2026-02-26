@@ -1,7 +1,7 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Orleans.Streaming.EventHubs;
-using Orleans.TestingHost;
+using Scynapse.Streaming.EventHubs;
+using Scynapse.TestingHost;
 using Tester;
 using Tester.StreamingTests;
 using TestExtensions;
@@ -14,8 +14,8 @@ namespace ServiceBus.Tests.Streaming
     [TestCategory("Functional"), TestCategory("Streaming"), TestCategory("StreamingResume")]
     public class EHStreamingResumeTests : StreamingResumeTests
     {
-        private const string EHPath = "ehorleanstest";
-        private const string EHConsumerGroup = "orleansnightly";
+        private const string EHPath = "ehscynapsetest";
+        private const string EHConsumerGroup = "scynapsenightly";
 
         private class MySiloBuilderConfigurator : ISiloConfigurator
         {

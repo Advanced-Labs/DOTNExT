@@ -1,8 +1,8 @@
 using System.Diagnostics;
-using Orleans.Core.Internal;
-using Orleans.Placement;
-using Orleans.Runtime;
-using Orleans.Runtime.Placement;
+using Scynapse.Core.Internal;
+using Scynapse.Placement;
+using Scynapse.Runtime;
+using Scynapse.Runtime.Placement;
 using TestExtensions;
 using Xunit;
 

@@ -1,13 +1,13 @@
 //#define USE_SQL_SERVER
 
 using Microsoft.Extensions.Configuration;
-using Orleans.TestingHost;
+using Scynapse.TestingHost;
 using TestExtensions;
 using UnitTests.General;
 using UnitTests.GrainInterfaces;
 using UnitTests.TimerTests;
-using Orleans.Tests.SqlUtils;
-using Orleans.Internal;
+using Scynapse.Tests.SqlUtils;
+using Scynapse.Internal;
 using Xunit;
 using Microsoft.Extensions.Hosting;
 
@@ -17,12 +17,12 @@ using Microsoft.Extensions.Hosting;
 namespace Tester.AdoNet.Reminders
 {
     /// <summary>
-    /// Integration tests for Orleans reminders functionality using SQL Server as the reminder service backend.
+    /// Integration tests for Scynapse reminders functionality using SQL Server as the reminder service backend.
     /// </summary>
     [TestCategory("Reminders"), TestCategory("AdoNet"), TestCategory("SqlServer")]
     public class ReminderTests_AdoNet_SqlServer : ReminderTests_Base, IClassFixture<ReminderTests_AdoNet_SqlServer.Fixture>
     {
-        private const string TestDatabaseName = "OrleansTest_SqlServer_Reminders";
+        private const string TestDatabaseName = "ScynapseTest_SqlServer_Reminders";
         private static readonly string AdoInvariant = AdoNetInvariants.InvariantNameSqlServer;
         private const string ConnectionStringKey = "ReminderConnectionString";
 
@@ -49,7 +49,7 @@ namespace Tester.AdoNet.Reminders
         {
             public void Configure(IHostBuilder hostBuilder)
             {
-                hostBuilder.UseOrleans((ctx, siloBuilder) =>
+                hostBuilder.UseScynapse((ctx, siloBuilder) =>
                 {
                     siloBuilder.UseAdoNetReminderService(options =>
                     {
@@ -62,7 +62,7 @@ namespace Tester.AdoNet.Reminders
 
         public ReminderTests_AdoNet_SqlServer(Fixture fixture) : base(fixture)
         {
-            // ReminderTable.Clear() cannot be called from a non-Orleans thread,
+            // ReminderTable.Clear() cannot be called from a non-Scynapse thread,
             // so we must proxy the call through a grain.
             var controlProxy = fixture.GrainFactory.GetGrain<IReminderTestGrain2>(Guid.NewGuid());
             controlProxy.EraseReminderTable().WaitAsync(TestConstants.InitTimeout).Wait();

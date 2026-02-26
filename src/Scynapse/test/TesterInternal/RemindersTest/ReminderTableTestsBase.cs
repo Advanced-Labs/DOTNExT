@@ -1,11 +1,11 @@
-using Orleans.Runtime;
+using Scynapse.Runtime;
 using TestExtensions;
 using UnitTests.MembershipTests;
 using Xunit;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using Orleans.Configuration;
-using Orleans.TestingHost.Utils;
+using Scynapse.Configuration;
+using Scynapse.TestingHost.Utils;
 
 namespace UnitTests.RemindersTest
 {
@@ -21,7 +21,7 @@ namespace UnitTests.RemindersTest
 
         protected ConnectionStringFixture connectionStringFixture;
 
-        protected const string testDatabaseName = "OrleansReminderTest";//for relational storage
+        protected const string testDatabaseName = "ScynapseReminderTest";//for relational storage
 
         protected ReminderTableTestsBase(ConnectionStringFixture fixture, TestEnvironmentFixture clusterFixture, LoggerFilterOptions filters)
         {

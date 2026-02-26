@@ -1,6 +1,6 @@
-using Orleans.Runtime;
-using Orleans.Streams;
-using Orleans.Streams.Filtering;
+using Scynapse.Runtime;
+using Scynapse.Streams;
+using Scynapse.Streams.Filtering;
 using TestExtensions;
 using UnitTests.GrainInterfaces;
 using Xunit;
@@ -11,7 +11,7 @@ namespace Tester.StreamingTests
     /// <summary>
     /// Tests for stream caching behavior and cache miss scenarios.
     /// 
-    /// Orleans streaming providers use caching to improve performance by:
+    /// Scynapse streaming providers use caching to improve performance by:
     /// - Batching messages for delivery
     /// - Avoiding repeated deserialization
     /// - Enabling recovery from temporary failures

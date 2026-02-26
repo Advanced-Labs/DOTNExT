@@ -1,10 +1,10 @@
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using Orleans.Configuration;
-using Orleans.Messaging;
-using Orleans.Runtime.Membership;
-using Orleans.Runtime.MembershipService;
-using Orleans.Tests.SqlUtils;
+using Scynapse.Configuration;
+using Scynapse.Messaging;
+using Scynapse.Runtime.Membership;
+using Scynapse.Runtime.MembershipService;
+using Scynapse.Tests.SqlUtils;
 using TestExtensions;
 using UnitTests.General;
 using Xunit;
@@ -12,7 +12,7 @@ using Xunit;
 namespace UnitTests.MembershipTests
 {
     /// <summary>
-    /// Tests for operation of Orleans Membership Table using MySQL
+    /// Tests for operation of Scynapse Membership Table using MySQL
     /// </summary>
     [TestCategory("Membership"), TestCategory("MySql"), TestCategory("Functional")]
     public class MySqlMembershipTableTests : MembershipTableTestsBase

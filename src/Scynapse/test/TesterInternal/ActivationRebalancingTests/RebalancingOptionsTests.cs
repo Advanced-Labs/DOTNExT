@@ -1,5 +1,5 @@
 using Microsoft.Extensions.Options;
-using Orleans.Configuration;
+using Scynapse.Configuration;
 using Xunit;
 
 namespace UnitTests.ActivationRebalancingTests;
@@ -65,6 +65,6 @@ public class RebalancingOptionsTests
         };
 
         var validator = new ActivationRebalancerOptionsValidator(Options.Create(options), Options.Create(publisherOptions));
-        Assert.Throws<OrleansConfigurationException>(validator.ValidateConfiguration);
+        Assert.Throws<ScynapseConfigurationException>(validator.ValidateConfiguration);
     }
 }

@@ -6,7 +6,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <ConcurrentGarbageCollection>true</ConcurrentGarbageCollection>
-    <OrleansBuildTimeCodeGen>true</OrleansBuildTimeCodeGen>
+    <ScynapseBuildTimeCodeGen>true</ScynapseBuildTimeCodeGen>
   </PropertyGroup>
 
   <ItemGroup>
@@ -16,7 +16,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\AdoNet\Orleans.Streaming.AdoNet\Orleans.Streaming.AdoNet.csproj" />
+    <ProjectReference Include="..\..\src\AdoNet\Scynapse.Streaming.AdoNet\Scynapse.Streaming.AdoNet.csproj" />
     <ProjectReference Include="..\Extensions\TesterAdoNet\Tester.AdoNet.csproj" />
   </ItemGroup>
 

@@ -1,5 +1,5 @@
 using Microsoft.Extensions.DependencyInjection;
-using Orleans.Configuration;
+using Scynapse.Configuration;
 using System.Reflection;
 using TestExtensions;
 using Xunit;
@@ -7,13 +7,13 @@ using System.Text;
 using Microsoft.Extensions.Hosting;
 using Newtonsoft.Json;
 
-using Orleans.Serialization;
-using Orleans.Runtime;
-using Orleans.Serialization.Serializers;
-using Orleans.Streaming.EventHubs;
+using Scynapse.Serialization;
+using Scynapse.Runtime;
+using Scynapse.Serialization.Serializers;
+using Scynapse.Streaming.EventHubs;
 using Microsoft.Extensions.Options;
-using Orleans.Serialization.Configuration;
-using Orleans.Metadata;
+using Scynapse.Serialization.Configuration;
+using Scynapse.Metadata;
 
 namespace UnitTests.Serialization
 {
@@ -43,7 +43,7 @@ namespace UnitTests.Serialization
         public void NewtonsoftJsonCodec_ExternalSerializer_Silo()
         {
             var silo = new HostBuilder()
-                .UseOrleans((ctx, siloBuilder) =>
+                .UseScynapse((ctx, siloBuilder) =>
                 {
                     siloBuilder
                     .Configure<ClusterOptions>(o => o.ClusterId = o.ServiceId = "s")
@@ -63,15 +63,15 @@ namespace UnitTests.Serialization
         public void NewtonsoftJsonCodec_CanModifySerializerSettings()
         {
             var silo = new HostBuilder()
-                .UseOrleans((ctx, siloBuilder) =>
+                .UseScynapse((ctx, siloBuilder) =>
                 {
                     siloBuilder
                     .Configure<ClusterOptions>(o => o.ClusterId = o.ServiceId = "s")
-                    .Configure<OrleansJsonSerializerOptions>(options => options.JsonSerializerSettings.DefaultValueHandling = DefaultValueHandling.Include)
+                    .Configure<ScynapseJsonSerializerOptions>(options => options.JsonSerializerSettings.DefaultValueHandling = DefaultValueHandling.Include)
                     .UseLocalhostClustering();
                 })
                 .Build();
-            var serializer = silo.Services.GetRequiredService<OrleansJsonSerializer>();
+            var serializer = silo.Services.GetRequiredService<ScynapseJsonSerializer>();
             var data = new JsonPoco();
             var serialized = serializer.Serialize(data, typeof(JsonPoco));
             Assert.Contains("some_flag", serialized);
@@ -81,7 +81,7 @@ namespace UnitTests.Serialization
         public void NewtonsoftJsonCodec_DoesNotSerializeFrameworkTypes()
         {
             var silo = new HostBuilder()
-                .UseOrleans((ctx, siloBuilder) =>
+                .UseScynapse((ctx, siloBuilder) =>
                 {
                     siloBuilder.Services.AddSerializer(serializerBuilder => serializerBuilder.AddNewtonsoftJsonSerializer(type =>
                         {
@@ -110,7 +110,7 @@ namespace UnitTests.Serialization
         public void SystemTextJsonCodec_DoesNotSerializeFrameworkTypes()
         {
             var silo = new HostBuilder()
-                .UseOrleans((ctx, siloBuilder) =>
+                .UseScynapse((ctx, siloBuilder) =>
                 {
                     siloBuilder.Services.AddSerializer(serializerBuilder => serializerBuilder.AddJsonSerializer(type =>
                         {
@@ -139,7 +139,7 @@ namespace UnitTests.Serialization
         public void ProtocolBuffersCodec_DoesNotSerializeFrameworkTypes()
         {
             var silo = new HostBuilder()
-                .UseOrleans((ctx, siloBuilder) =>
+                .UseScynapse((ctx, siloBuilder) =>
                 {
                     siloBuilder.Services.AddSerializer(serializerBuilder => serializerBuilder.AddProtobufSerializer(type =>
                         {

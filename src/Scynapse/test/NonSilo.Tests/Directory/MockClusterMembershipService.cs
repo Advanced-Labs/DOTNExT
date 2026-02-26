@@ -1,6 +1,6 @@
 using System.Collections.Immutable;
-using Orleans.Runtime;
-using Orleans.Runtime.Utilities;
+using Scynapse.Runtime;
+using Scynapse.Runtime.Utilities;
 
 namespace UnitTests.Directory
 {

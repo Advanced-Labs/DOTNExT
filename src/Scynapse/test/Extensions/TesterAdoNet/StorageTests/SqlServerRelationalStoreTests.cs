@@ -1,4 +1,4 @@
-using Orleans.Tests.SqlUtils;
+using Scynapse.Tests.SqlUtils;
 using UnitTests.General;
 using Xunit;
 
@@ -10,7 +10,7 @@ namespace UnitTests.StorageTests.AdoNet
     [TestCategory("Persistence"), TestCategory("SqlServer")]
     public class SqlServerRelationalStoreTests : RelationalStoreTestsBase, IClassFixture<SqlServerRelationalStoreTests.Fixture>
     {
-        private const string TestDatabaseName = "OrleansStreamTest";
+        private const string TestDatabaseName = "ScynapseStreamTest";
         private const string AdoNetInvariantName = AdoNetInvariants.InvariantNameSqlServer;
         private readonly RelationalStorageForTesting _storage;
 

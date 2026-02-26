@@ -1,0 +1,31 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <ScynapseBuildTimeCodeGen>true</ScynapseBuildTimeCodeGen>
+    <TargetFrameworks>$(TestTargetFrameworks)</TargetFrameworks>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <NoWarn>$(NoWarn);SCYNAPSEEXP005</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="xunit" />
+    <PackageReference Include="xunit.runner.visualstudio" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" />
+    <PackageReference Include="Microsoft.Extensions.TimeProvider.Testing" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="$(SourceRoot)src\Scynapse.Journaling\Scynapse.Journaling.csproj" />
+    <ProjectReference Include="$(SourceRoot)src\Scynapse.Server\Scynapse.Server.csproj" />
+    <ProjectReference Include="$(SourceRoot)src\Scynapse.Sdk\Scynapse.Sdk.csproj" />
+    <ProjectReference Include="$(SourceRoot)src\Azure\Scynapse.Journaling.AzureStorage\Scynapse.Journaling.AzureStorage.csproj" />
+    <ProjectReference Include="$(SourceRoot)src\Scynapse.TestingHost\Scynapse.TestingHost.csproj" />
+    <ProjectReference Include="$(SourceRoot)test\Extensions\TesterAzureUtils\Tester.AzureUtils.csproj" />
+    <ProjectReference Include="$(SourceRoot)test\TestInfrastructure\TestExtensions\TestExtensions.csproj" />
+  </ItemGroup>
+
+</Project>

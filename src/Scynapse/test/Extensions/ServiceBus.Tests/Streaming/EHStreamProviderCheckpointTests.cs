@@ -1,17 +1,17 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
-using Orleans.Providers.Streams.Common;
-using Orleans.Providers.Streams.Generator;
-using Orleans.Runtime;
-using Orleans.Streams;
-using Orleans.TestingHost;
-using Orleans.TestingHost.Utils;
+using Scynapse.Providers.Streams.Common;
+using Scynapse.Providers.Streams.Generator;
+using Scynapse.Runtime;
+using Scynapse.Streams;
+using Scynapse.TestingHost;
+using Scynapse.TestingHost.Utils;
 using TestExtensions;
 using TestGrainInterfaces;
 using TestGrains;
 using UnitTests.Grains;
 using Xunit;
-using Orleans.Configuration;
+using Scynapse.Configuration;
 using Tester;
 using Tester.AzureUtils;
 
@@ -25,8 +25,8 @@ namespace ServiceBus.Tests.StreamingTests
     {
         private static readonly string StreamProviderTypeName = typeof(PersistentStreamProvider).FullName;
         private const string StreamProviderName = GeneratedStreamTestConstants.StreamProviderName;
-        private const string EHPath = "ehorleanstest6";
-        private const string EHConsumerGroup = "orleansnightly";
+        private const string EHPath = "ehscynapsetest6";
+        private const string EHConsumerGroup = "scynapsenightly";
 
         protected override void ConfigureTestCluster(TestClusterBuilder builder)
         {
@@ -82,14 +82,14 @@ namespace ServiceBus.Tests.StreamingTests
             }
         }
 
-        [SkippableFact(Skip = "https://github.com/dotnet/orleans/issues/5356")]
+        [SkippableFact(Skip = "https://github.com/dotnet/scynapse/issues/5356")]
         public async Task ReloadFromCheckpointTest()
         {
             logger.LogInformation("************************ EHReloadFromCheckpointTest *********************************");
             await this.ReloadFromCheckpointTestRunner(ImplicitSubscription_RecoverableStream_CollectorGrain.StreamNamespace, 1, 256);
         }
 
-        [SkippableFact(Skip = "https://github.com/dotnet/orleans/issues/5356")]
+        [SkippableFact(Skip = "https://github.com/dotnet/scynapse/issues/5356")]
         public async Task RestartSiloAfterCheckpointTest()
         {
             logger.LogInformation("************************ EHRestartSiloAfterCheckpointTest *********************************");

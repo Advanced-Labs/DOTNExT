@@ -1,15 +1,15 @@
-using Orleans.TestingHost;
+using Scynapse.TestingHost;
 using TestExtensions;
 using UnitTests.GrainInterfaces;
 using UnitTests.Grains;
 using UnitTests.StreamingTests;
 using Xunit;
 using Xunit.Abstractions;
-using Orleans.Runtime;
+using Scynapse.Runtime;
 using UnitTests.StorageTests;
-using Orleans.Storage;
-using Orleans.Providers;
-using Orleans.Internal;
+using Scynapse.Storage;
+using Scynapse.Providers;
+using Scynapse.Internal;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace UnitTests.Streaming
@@ -106,7 +106,7 @@ namespace UnitTests.Streaming
                         Assert.Equal(this.fixture.ServiceId, serviceId); // "ServiceId active in silo"
                     },
                     30,
-                    (ex, i) => ex is OrleansException,
+                    (ex, i) => ex is ScynapseException,
                     TimeSpan.FromSeconds(60),
                     new FixedBackoff(TimeSpan.FromSeconds(2)));
             }

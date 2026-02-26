@@ -1,4 +1,4 @@
-using Orleans.TestingHost;
+using Scynapse.TestingHost;
 using TestExtensions;
 using Xunit;
 
@@ -7,7 +7,7 @@ namespace DependencyInjection.Tests.DefaultServiceProvider
     /// <summary>
     /// Tests dependency injection functionality using the default Microsoft DI container.
     /// Inherits all test cases from DependencyInjectionGrainTestRunner to verify
-    /// that the default ServiceProvider implementation works correctly with Orleans.
+    /// that the default ServiceProvider implementation works correctly with Scynapse.
     /// </summary>
     [TestCategory("DI"), TestCategory("Functional")]
     public class DependencyInjectionGrainTestsUsingDefaultServiceProvider : DependencyInjectionGrainTestRunner, IClassFixture<DependencyInjectionGrainTestsUsingDefaultServiceProvider.Fixture>

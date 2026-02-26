@@ -1,6 +1,6 @@
 using System.Diagnostics;
 using Microsoft.Extensions.Logging;
-using Orleans.TestingHost;
+using Scynapse.TestingHost;
 using TestExtensions;
 using UnitTests.GrainInterfaces;
 using Xunit;
@@ -22,7 +22,7 @@ namespace UnitTests
     /// <summary>
     /// Tests for grain reentrancy, MayInterleave predicates, and fan-out scenarios.
     /// </summary>
-    public class ReentrancyTests : OrleansTestingBase, IClassFixture<ReentrancyTests.Fixture>
+    public class ReentrancyTests : ScynapseTestingBase, IClassFixture<ReentrancyTests.Fixture>
     {
         public class Fixture : BaseTestClusterFixture
         {
@@ -41,7 +41,7 @@ namespace UnitTests
             this.fixture = fixture;
         }
 
-        // See https://github.com/dotnet/orleans/pull/5086
+        // See https://github.com/dotnet/scynapse/pull/5086
         [Fact, TestCategory("Functional"), TestCategory("Tasks"), TestCategory("Reentrancy")]
         public async Task CorrelationId_Bug()
         {
@@ -113,7 +113,7 @@ namespace UnitTests
             {
                 Assert.IsType<ApplicationException>(ex);
                 Assert.True(ex.Message == "boom",
-                    "Should fail with Orleans runtime exception having all of necessary details");
+                    "Should fail with Scynapse runtime exception having all of necessary details");
             }
             this.fixture.Logger.LogInformation("Reentrancy NonReentrantGrain_WithMayInterleaveStaticPredicate_WhenPredicateThrows Test finished OK.");
         }
@@ -142,7 +142,7 @@ namespace UnitTests
             {
                 Assert.IsType<ApplicationException>(ex);
                 Assert.True(ex.Message == "boom",
-                    "Should fail with Orleans runtime exception having all of necessary details");
+                    "Should fail with Scynapse runtime exception having all of necessary details");
             }
             this.fixture.Logger.LogInformation("Reentrancy NonReentrantGrain_WithMayInterleaveInstancedPredicate_WhenPredicateThrows Test finished OK.");
         }

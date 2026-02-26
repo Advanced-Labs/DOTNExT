@@ -1,6 +1,6 @@
 using Microsoft.Extensions.Logging;
-using Orleans.Runtime.Placement;
-using Orleans.TestingHost;
+using Scynapse.Runtime.Placement;
+using Scynapse.TestingHost;
 using TestExtensions;
 using UnitTests.GrainInterfaces;
 using Xunit;
@@ -10,7 +10,7 @@ namespace UnitTests.CancellationTests
     /// <summary>
     /// Tests for GrainCancellationToken functionality including task cancellation and token callbacks.
     /// </summary>
-    public class GrainCancellationTokenTests : OrleansTestingBase, IClassFixture<GrainCancellationTokenTests.Fixture>
+    public class GrainCancellationTokenTests : ScynapseTestingBase, IClassFixture<GrainCancellationTokenTests.Fixture>
     {
         private readonly Fixture fixture;
 

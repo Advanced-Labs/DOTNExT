@@ -7,8 +7,8 @@ using Xunit;
 namespace DefaultCluster.Tests.General
 {
     /// <summary>
-    /// Tests for Orleans' interoperability with F# types and grains.
-    /// Validates that Orleans can correctly serialize/deserialize F# constructs like records, options, and discriminated unions,
+    /// Tests for Scynapse' interoperability with F# types and grains.
+    /// Validates that Scynapse can correctly serialize/deserialize F# constructs like records, options, and discriminated unions,
     /// ensuring proper cross-language support within the .NET ecosystem.
     /// </summary>
     public class FSharpGrainTests : HostedTestClusterEnsureDefaultStarted
@@ -37,7 +37,7 @@ namespace DefaultCluster.Tests.General
 
         /// <summary>
         /// Tests serialization of basic F# record types.
-        /// Validates that Orleans can properly serialize/deserialize F# records containing primitive values.
+        /// Validates that Scynapse can properly serialize/deserialize F# records containing primitive values.
         /// </summary>
         [Fact, TestCategory("BVT"), TestCategory("Generics"), TestCategory("FSharp"), TestCategory("Serialization")]
         public async Task FSharpGrains_Ping_Record_ofInt()
@@ -46,8 +46,8 @@ namespace DefaultCluster.Tests.General
         }
 
         /// <summary>
-        /// Tests F# record serialization without Orleans attributes.
-        /// This test demonstrates Orleans' ability to handle F# records even when they lack
+        /// Tests F# record serialization without Scynapse attributes.
+        /// This test demonstrates Scynapse' ability to handle F# records even when they lack
         /// explicit Serializable and Immutable attributes, validating attribute-free serialization.
         /// </summary>
         [Fact, TestCategory("BVT"), TestCategory("Generics"), TestCategory("FSharp"), TestCategory("Serialization")]
@@ -57,7 +57,7 @@ namespace DefaultCluster.Tests.General
         }
 
         /// <summary>
-        /// Tests F# record serialization with explicit Orleans attributes.
+        /// Tests F# record serialization with explicit Scynapse attributes.
         /// Validates that F# records containing option types (Some case) can be properly serialized
         /// when decorated with Serializable and Immutable attributes.
         /// </summary>
@@ -69,7 +69,7 @@ namespace DefaultCluster.Tests.General
 
         /// <summary>
         /// Tests F# record serialization with None option values.
-        /// Validates Orleans' handling of F# option types in the None case, ensuring proper null handling.
+        /// Validates Scynapse' handling of F# option types in the None case, ensuring proper null handling.
         /// </summary>
         [Fact, TestCategory("BVT"), TestCategory("Generics"), TestCategory("FSharp"), TestCategory("Serialization")]
         public async Task FSharpGrains_Ping_Record_ofIntOption_None()
@@ -79,8 +79,8 @@ namespace DefaultCluster.Tests.General
 
         /// <summary>
         /// Tests serialization of generic F# record types.
-        /// Validates that Orleans can handle F# records with type parameters, testing the combination
-        /// of F# generics and Orleans' serialization system.
+        /// Validates that Scynapse can handle F# records with type parameters, testing the combination
+        /// of F# generics and Scynapse' serialization system.
         /// </summary>
         [Fact, TestCategory("BVT"), TestCategory("Generics"), TestCategory("FSharp"), TestCategory("Serialization")]
         public async Task FSharpGrains_Ping_GenericRecord_ofInt()
@@ -91,7 +91,7 @@ namespace DefaultCluster.Tests.General
 
         /// <summary>
         /// Tests serialization of generic F# records containing option types (Some case).
-        /// This complex scenario validates Orleans' ability to handle nested F# type constructs:
+        /// This complex scenario validates Scynapse' ability to handle nested F# type constructs:
         /// generic records containing option types with values.
         /// </summary>
         [Fact, TestCategory("BVT"), TestCategory("Generics"), TestCategory("FSharp"), TestCategory("Serialization")]
@@ -114,7 +114,7 @@ namespace DefaultCluster.Tests.General
 
         /// <summary>
         /// Tests direct serialization of F# option types (Some case).
-        /// Validates that Orleans can handle F#'s built-in option type when it contains a value.
+        /// Validates that Scynapse can handle F#'s built-in option type when it contains a value.
         /// </summary>
         [Fact, TestCategory("BVT"), TestCategory("Generics"), TestCategory("FSharp"), TestCategory("Serialization")]
         public async Task FSharpGrains_Ping_IntOption_Some()
@@ -125,7 +125,7 @@ namespace DefaultCluster.Tests.General
 
         /// <summary>
         /// Tests direct serialization of F# option types (None case).
-        /// Validates that Orleans correctly handles F#'s None value, which represents the absence of a value.
+        /// Validates that Scynapse correctly handles F#'s None value, which represents the absence of a value.
         /// </summary>
         [Fact, TestCategory("BVT"), TestCategory("Generics"), TestCategory("FSharp"), TestCategory("Serialization")]
         public async Task FSharpGrains_Ping_IntOption_None()

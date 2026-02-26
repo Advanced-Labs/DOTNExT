@@ -1,9 +1,9 @@
 using System.Diagnostics;
 using Microsoft.Extensions.DependencyInjection;
-using Orleans.Providers;
-using Orleans.Runtime;
-using Orleans.Serialization;
-using Orleans.Storage;
+using Scynapse.Providers;
+using Scynapse.Runtime;
+using Scynapse.Serialization;
+using Scynapse.Storage;
 using Microsoft.Extensions.Logging;
 
 namespace UnitTests.StorageTests

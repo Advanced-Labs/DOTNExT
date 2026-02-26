@@ -1,0 +1,32 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageId>Genesa.Scynapse.Persistence.DynamoDB</PackageId>
+    <Title>Microsoft Scynapse AWS DynamoDB Persistence Provider</Title>
+    <Description>Microsoft Scynapse persistence providers backed by AWS DynamoDB</Description>
+    <PackageTags>$(PackageTags) AWS DynamoDB</PackageTags>
+    <TargetFrameworks>$(DefaultTargetFrameworks)</TargetFrameworks>
+    <ScynapseBuildTimeCodeGen>true</ScynapseBuildTimeCodeGen>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <AssemblyName>Scynapse.Persistence.DynamoDB</AssemblyName>
+    <RootNamespace>Scynapse.Persistence.DynamoDB</RootNamespace>
+    <DefineConstants>$(DefineConstants);PERSISTENCE_DYNAMODB</DefineConstants>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="..\Shared\AWSUtils.cs" Link="AWSUtils.cs" />
+    <Compile Include="..\Shared\Storage\DynamoDBStorage.cs" Link="Storage\DynamoDBStorage.cs" />
+    <Compile Include="..\Shared\Storage\DynamoDBClientOptions.cs" Link="Storage\DynamoDBClientOptions.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="$(SourceRoot)src\Scynapse.Runtime\Scynapse.Runtime.csproj" />
+    <PackageReference Include="AWSSDK.DynamoDBv2" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="README.md" Pack="true" PackagePath="\" />
+  </ItemGroup>
+</Project>

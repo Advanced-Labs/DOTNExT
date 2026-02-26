@@ -1,7 +1,7 @@
 using System.Diagnostics;
 using System.Text;
-using Orleans.Runtime;
-using Orleans.Storage;
+using Scynapse.Runtime;
+using Scynapse.Storage;
 using TestExtensions;
 using UnitTests.Persistence;
 using Xunit;

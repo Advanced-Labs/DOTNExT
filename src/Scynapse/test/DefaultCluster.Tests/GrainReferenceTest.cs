@@ -1,8 +1,8 @@
 using Newtonsoft.Json;
-using Orleans.Concurrency;
-using Orleans.Runtime;
-using Orleans.Serialization;
-using Orleans.Storage;
+using Scynapse.Concurrency;
+using Scynapse.Runtime;
+using Scynapse.Serialization;
+using Scynapse.Storage;
 using TestExtensions;
 using UnitTests.GrainInterfaces;
 using Xunit;
@@ -16,7 +16,7 @@ namespace DefaultCluster.Tests.General
     public class FooGrain : Grain, IFooGrain { }
 
     /// <summary>
-    /// Tests for Orleans grain reference functionality.
+    /// Tests for Scynapse grain reference functionality.
     /// Validates grain reference equality, comparison, serialization (including JSON),
     /// passing grain references between grains, handling null references,
     /// and proper hash code generation for distributed systems.
@@ -131,7 +131,7 @@ namespace DefaultCluster.Tests.General
         [Fact, TestCategory("Serialization"), TestCategory("JSON")]
         public async Task GrainReference_Json_Serialization_Nested()
         {
-            var settings = OrleansJsonSerializerSettings.GetDefaultSerializerSettings(this.HostedCluster.Client.ServiceProvider);
+            var settings = ScynapseJsonSerializerSettings.GetDefaultSerializerSettings(this.HostedCluster.Client.ServiceProvider);
 
             var grain = HostedCluster.GrainFactory.GetGrain<ISimpleGrain>(GetRandomGrainId());
             await grain.SetA(56820);
@@ -218,7 +218,7 @@ namespace DefaultCluster.Tests.General
 
         private T NewtonsoftJsonSerializeRoundtrip<T>(T obj)
         {
-            var settings = OrleansJsonSerializerSettings.GetDefaultSerializerSettings(this.HostedCluster.Client.ServiceProvider);
+            var settings = ScynapseJsonSerializerSettings.GetDefaultSerializerSettings(this.HostedCluster.Client.ServiceProvider);
             // http://james.newtonking.com/json/help/index.html?topic=html/T_Newtonsoft_Json_JsonConvert.htm
             string json = JsonConvert.SerializeObject(obj, settings);
             object other = JsonConvert.DeserializeObject(json, typeof(T), settings);

@@ -1,16 +1,16 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFrameworks>$(TestTargetFrameworks)</TargetFrameworks>
-    <OrleansBuildTimeCodeGen>true</OrleansBuildTimeCodeGen>
+    <ScynapseBuildTimeCodeGen>true</ScynapseBuildTimeCodeGen>
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="$(SourceRoot)src\Azure\Orleans.Streaming.EventHubs\Orleans.Streaming.EventHubs.csproj" />
+    <ProjectReference Include="$(SourceRoot)src\Azure\Scynapse.Streaming.EventHubs\Scynapse.Streaming.EventHubs.csproj" />
     <ProjectReference Include="$(SourceRoot)test\Tester\Tester.csproj" />
-    <ProjectReference Include="$(SourceRoot)src\Orleans.Serialization.NewtonsoftJson\Orleans.Serialization.NewtonsoftJson.csproj" />
-    <ProjectReference Include="$(SourceRoot)test\Misc\TestInternalDtosRefOrleans\TestInternalDtosRefOrleans.csproj" />
-    <ProjectReference Include="..\..\src\Orleans.Serialization.SystemTextJson\Orleans.Serialization.SystemTextJson.csproj" />
-    <ProjectReference Include="..\..\src\Serializers\Orleans.Serialization.Protobuf\Orleans.Serialization.Protobuf.csproj" />
+    <ProjectReference Include="$(SourceRoot)src\Scynapse.Serialization.NewtonsoftJson\Scynapse.Serialization.NewtonsoftJson.csproj" />
+    <ProjectReference Include="$(SourceRoot)test\Misc\TestInternalDtosRefScynapse\TestInternalDtosRefScynapse.csproj" />
+    <ProjectReference Include="..\..\src\Scynapse.Serialization.SystemTextJson\Scynapse.Serialization.SystemTextJson.csproj" />
+    <ProjectReference Include="..\..\src\Serializers\Scynapse.Serialization.Protobuf\Scynapse.Serialization.Protobuf.csproj" />
     <ProjectReference Include="$(SourceRoot)test\Grains\TestSplitGrainContracts\TestSplitGrainContracts.csproj" />
   </ItemGroup>
 

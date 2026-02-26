@@ -16,9 +16,9 @@ using Xunit;
 namespace Analyzers.Tests
 {
     /// <summary>
-    /// Base class for testing Roslyn diagnostic analyzers in the Orleans project.
+    /// Base class for testing Roslyn diagnostic analyzers in the Scynapse project.
     /// Provides common infrastructure for compiling test code and running analyzers to verify diagnostics.
-    /// This enables testing of Orleans-specific code analysis rules that help developers avoid common mistakes.
+    /// This enables testing of Scynapse-specific code analysis rules that help developers avoid common mistakes.
     /// </summary>
     /// <typeparam name="TDiagnosticAnalyzer">The type of diagnostic analyzer being tested.</typeparam>
     public abstract class DiagnosticAnalyzerTestBase<TDiagnosticAnalyzer>
@@ -27,22 +27,22 @@ namespace Analyzers.Tests
         private static readonly string[] Usings = new[] {
             "System",
             "System.Threading.Tasks",
-            "Orleans"
+            "Scynapse"
         };
 
         /// <summary>
-        /// Provides test data for all Orleans grain interface types.
+        /// Provides test data for all Scynapse grain interface types.
         /// Used by theory tests to ensure analyzers work correctly with all grain interface variations.
         /// </summary>
         public static IEnumerable<object[]> GrainInterfaces =>
             new List<object[]>
             {
-                new object[] { "Orleans.IGrain" },
-                new object[] { "Orleans.IGrainWithStringKey" },
-                new object[] { "Orleans.IGrainWithGuidKey" },
-                new object[] { "Orleans.IGrainWithGuidCompoundKey" },
-                new object[] { "Orleans.IGrainWithIntegerKey" },
-                new object[] { "Orleans.IGrainWithIntegerCompoundKey" }
+                new object[] { "Scynapse.IGrain" },
+                new object[] { "Scynapse.IGrainWithStringKey" },
+                new object[] { "Scynapse.IGrainWithGuidKey" },
+                new object[] { "Scynapse.IGrainWithGuidCompoundKey" },
+                new object[] { "Scynapse.IGrainWithIntegerKey" },
+                new object[] { "Scynapse.IGrainWithIntegerCompoundKey" }
             };
 
         /// <summary>
@@ -112,8 +112,8 @@ namespace Analyzers.Tests
             var assemblies = new[]
             {
                 typeof(Task).Assembly,
-                typeof(Orleans.IGrain).Assembly,
-                typeof(Orleans.Grain).Assembly,
+                typeof(Scynapse.IGrain).Assembly,
+                typeof(Scynapse.Grain).Assembly,
                 typeof(Attribute).Assembly,
                 typeof(int).Assembly,
                 typeof(object).Assembly,

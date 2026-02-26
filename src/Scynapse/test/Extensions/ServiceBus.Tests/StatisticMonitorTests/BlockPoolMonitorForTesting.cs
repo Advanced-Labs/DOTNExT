@@ -1,4 +1,4 @@
-﻿using Orleans.Providers.Streams.Common;
+﻿using Scynapse.Providers.Streams.Common;
 
 namespace ServiceBus.Tests.MonitorTests
 {
@@ -23,14 +23,14 @@ namespace ServiceBus.Tests.MonitorTests
     }
 
     [Serializable]
-    [Orleans.GenerateSerializer]
+    [Scynapse.GenerateSerializer]
     public class ObjectPoolMonitorCounters
     {
-        [Orleans.Id(0)]
+        [Scynapse.Id(0)]
         public int TrackObjectAllocatedByCacheCallCounter;
-        [Orleans.Id(1)]
+        [Scynapse.Id(1)]
         public int TrackObjectReleasedFromCacheCallCounter;
-        [Orleans.Id(2)]
+        [Scynapse.Id(2)]
         public int ReportCallCounter;
     }
 }

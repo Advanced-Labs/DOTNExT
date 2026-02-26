@@ -1,11 +1,11 @@
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using Orleans.Configuration;
-using Orleans.Runtime.MembershipService;
+using Scynapse.Configuration;
+using Scynapse.Runtime.MembershipService;
 using Xunit;
 using NSubstitute;
-using Orleans.Runtime;
-using Orleans;
+using Scynapse.Runtime;
+using Scynapse;
 using Xunit.Abstractions;
 using TestExtensions;
 using System.Collections.Concurrent;

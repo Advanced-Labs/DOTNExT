@@ -1,6 +1,6 @@
 using Microsoft.Extensions.Configuration;
-using Orleans.Providers;
-using Orleans.TestingHost;
+using Scynapse.Providers;
+using Scynapse.TestingHost;
 using Tester.StreamingTests;
 using TestExtensions;
 using Xunit;

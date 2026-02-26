@@ -4,13 +4,13 @@ using Benchmarks.Models;
 using Benchmarks.Serialization.Models;
 using Benchmarks.Utilities;
 using Microsoft.Extensions.DependencyInjection;
-using Orleans.Serialization;
-using Orleans.Serialization.Session;
+using Scynapse.Serialization;
+using Scynapse.Serialization.Session;
 
 namespace Benchmarks.Serialization.Comparison;
 
 /// <summary>
-/// Benchmarks Orleans deep copy performance for various object types including arrays and value types.
+/// Benchmarks Scynapse deep copy performance for various object types including arrays and value types.
 /// </summary>
 [Config(typeof(BenchmarkConfig))]
 public class CopierBenchmark

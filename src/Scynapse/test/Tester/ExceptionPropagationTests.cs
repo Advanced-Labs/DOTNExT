@@ -8,9 +8,9 @@ using Xunit.Abstractions;
 namespace UnitTests.General
 {
     /// <summary>
-    /// Comprehensive tests for exception propagation across Orleans' distributed system boundaries.
+    /// Comprehensive tests for exception propagation across Scynapse' distributed system boundaries.
     /// 
-    /// Orleans must correctly propagate exceptions from grains back to callers, preserving:
+    /// Scynapse must correctly propagate exceptions from grains back to callers, preserving:
     /// - Original exception types and messages
     /// - Stack traces from the remote grain (critical for debugging distributed systems)
     /// - AggregateException structure (not unwrapped)
@@ -24,7 +24,7 @@ namespace UnitTests.General
     /// 
     /// Proper exception handling is crucial for debugging and maintaining distributed applications.
     /// </summary>
-    public class ExceptionPropagationTests : OrleansTestingBase, IClassFixture<ExceptionPropagationTests.Fixture>
+    public class ExceptionPropagationTests : ScynapseTestingBase, IClassFixture<ExceptionPropagationTests.Fixture>
     {
         private const int TestIterations = 3;
         private readonly ITestOutputHelper output;
@@ -154,7 +154,7 @@ namespace UnitTests.General
 
         /// <summary>
         /// Tests that nested AggregateExceptions maintain their structure during propagation.
-        /// Orleans does not flatten the exception hierarchy, preserving the original nesting
+        /// Scynapse does not flatten the exception hierarchy, preserving the original nesting
         /// that may have semantic meaning in the application.
         /// </summary>
         [Fact, TestCategory("BVT")]
@@ -403,7 +403,7 @@ namespace UnitTests.General
 
         /// <summary>
         /// Tests the most common serialization failure scenario: client sends a request
-        /// that the grain cannot deserialize. This validates that Orleans properly detects
+        /// that the grain cannot deserialize. This validates that Scynapse properly detects
         /// the failure and sends an appropriate exception back to the client rather than
         /// silently failing or hanging.
         /// </summary>

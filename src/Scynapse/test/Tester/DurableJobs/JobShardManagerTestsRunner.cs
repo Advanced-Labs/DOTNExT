@@ -5,8 +5,8 @@ using System.Linq;
 using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
-using Orleans.Runtime;
-using Orleans.DurableJobs;
+using Scynapse.Runtime;
+using Scynapse.DurableJobs;
 using Xunit;
 
 namespace Tester.DurableJobs;

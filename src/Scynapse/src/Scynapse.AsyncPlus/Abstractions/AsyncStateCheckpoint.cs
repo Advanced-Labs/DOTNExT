@@ -37,7 +37,7 @@ public sealed record AsyncStateCheckpoint
 
 /// <summary>
 /// Grain state for async state persistence.
-/// Stored by Orleans persistence provider (e.g., RavenDB).
+/// Stored by Scynapse persistence provider (e.g., RavenDB).
 /// </summary>
 [GenerateSerializer]
 public sealed class AsyncStatePersistenceGrainState
@@ -46,7 +46,7 @@ public sealed class AsyncStatePersistenceGrainState
     /// Current state number (-1 if no checkpoint).
     /// </summary>
     /// <remarks>
-    /// JsonProperty with Include is needed because Orleans uses DefaultValueHandling.Ignore
+    /// JsonProperty with Include is needed because Scynapse uses DefaultValueHandling.Ignore
     /// which would skip StateNumber=0 (first await point) since 0 is the int default.
     /// </remarks>
     [Id(0)]

@@ -1,7 +1,7 @@
 using System.Diagnostics;
 using System.Net;
-using Orleans.Runtime;
-using Orleans.TestingHost.Utils;
+using Scynapse.Runtime;
+using Scynapse.TestingHost.Utils;
 using Xunit;
 using static TestExtensions.TestDefaultConfiguration;
 

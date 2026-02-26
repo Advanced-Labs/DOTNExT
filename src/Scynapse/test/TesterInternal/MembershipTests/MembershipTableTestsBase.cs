@@ -1,13 +1,13 @@
 using System.Net;
-using Orleans.Messaging;
-using Orleans.Runtime;
-using Orleans.TestingHost.Utils;
+using Scynapse.Messaging;
+using Scynapse.Runtime;
+using Scynapse.TestingHost.Utils;
 using TestExtensions;
 using Xunit;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using Orleans.Configuration;
-using Orleans.Internal;
+using Scynapse.Configuration;
+using Scynapse.Internal;
 
 namespace UnitTests.MembershipTests
 {
@@ -35,7 +35,7 @@ namespace UnitTests.MembershipTests
         protected ILoggerFactory loggerFactory;
         protected IOptions<SiloOptions> siloOptions;
         protected IOptions<ClusterOptions> _clusterOptions;
-        protected const string testDatabaseName = "OrleansMembershipTest";//for relational storage
+        protected const string testDatabaseName = "ScynapseMembershipTest";//for relational storage
         protected readonly IOptions<GatewayOptions> _gatewayOptions;
 
         private static int generation;

@@ -1,11 +1,11 @@
 using System.Buffers.Text;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Orleans.Concurrency;
-using Orleans.Providers;
-using Orleans.Runtime;
-using Orleans.Streams;
-using Orleans.Streams.Core;
+using Scynapse.Concurrency;
+using Scynapse.Providers;
+using Scynapse.Runtime;
+using Scynapse.Streams;
+using Scynapse.Streams.Core;
 using UnitTests.GrainInterfaces;
 using UnitTests.TestHelper;
 

@@ -2,10 +2,10 @@
 
 using System.Text;
 using Microsoft.Extensions.Logging;
-using Orleans.Internal;
-using Orleans.Runtime;
-using Orleans.TestingHost;
-using Orleans.TestingHost.Utils;
+using Scynapse.Internal;
+using Scynapse.Runtime;
+using Scynapse.TestingHost;
+using Scynapse.TestingHost.Utils;
 using TestExtensions;
 using UnitTests.GrainInterfaces;
 using Xunit;
@@ -18,7 +18,7 @@ namespace UnitTests.TimerTests
     /// <summary>
     /// Base class for reminder tests providing common test operations and utilities.
     /// </summary>
-    public class ReminderTests_Base : OrleansTestingBase, IDisposable
+    public class ReminderTests_Base : ScynapseTestingBase, IDisposable
     {
         protected TestCluster HostedCluster { get; private set; }
         internal static readonly TimeSpan LEEWAY = TimeSpan.FromMilliseconds(500); // the experiment shouldnt be that long that the sums of leeways exceeds a period
@@ -53,7 +53,7 @@ namespace UnitTests.TimerTests
 
         public void Dispose()
         {
-            // ReminderTable.Clear() cannot be called from a non-Orleans thread,
+            // ReminderTable.Clear() cannot be called from a non-Scynapse thread,
             // so we must proxy the call through a grain.
             var controlProxy = this.GrainFactory.GetGrain<IReminderTestGrain2>(Guid.NewGuid());
             controlProxy.EraseReminderTable().WaitAsync(TestConstants.InitTimeout).Wait();

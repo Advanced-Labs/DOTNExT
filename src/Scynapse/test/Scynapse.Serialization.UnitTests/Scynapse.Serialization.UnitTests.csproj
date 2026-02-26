@@ -1,0 +1,39 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <IsTestProject>true</IsTestProject>
+    <TargetFrameworks>$(TestTargetFrameworks);netcoreapp3.1</TargetFrameworks>
+    <GenerateBindingRedirectsOutputType>true</GenerateBindingRedirectsOutputType>
+    <ScynapseBuildTimeCodeGen>true</ScynapseBuildTimeCodeGen>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <SuppressTfmSupportBuildWarnings>true</SuppressTfmSupportBuildWarnings>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="CsCheck" />
+    <PackageReference Include="xunit" />
+    <PackageReference Include="xunit.extensibility.core" />
+    <PackageReference Include="xunit.runner.visualstudio" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" />
+    <PackageReference Include="Newtonsoft.Json" />
+    <PackageReference Include="FSharp.Core" />
+    <PackageReference Include="Google.Protobuf" />
+    <PackageReference Include="Grpc.Tools" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="$(SourceRoot)src\Scynapse.Serialization.TestKit\Scynapse.Serialization.TestKit.csproj" />
+    <ProjectReference Include="$(SourceRoot)src\Scynapse.Serialization.FSharp\Scynapse.Serialization.FSharp.csproj" />
+    <ProjectReference Include="$(SourceRoot)src\Scynapse.Serialization\Scynapse.Serialization.csproj" />
+    <ProjectReference Include="$(SourceRoot)src\Scynapse.Serialization.SystemTextJson\Scynapse.Serialization.SystemTextJson.csproj" />
+    <ProjectReference Include="$(SourceRoot)src\Scynapse.Serialization.NewtonsoftJson\Scynapse.Serialization.NewtonsoftJson.csproj" />
+    <ProjectReference Include="$(SourceRoot)src\Scynapse.Serialization.MessagePack\Scynapse.Serialization.MessagePack.csproj" />
+    <ProjectReference Include="$(SourceRoot)src\Serializers\Scynapse.Serialization.Protobuf\Scynapse.Serialization.Protobuf.csproj" />
+    <ProjectReference Include="..\Misc\TestSerializerExternalModels\TestSerializerExternalModels.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Protobuf Include="protobuf-model.proto" GrpcServices="None" />
+  </ItemGroup>
+
+</Project>

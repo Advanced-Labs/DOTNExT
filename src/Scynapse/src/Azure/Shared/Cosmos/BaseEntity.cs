@@ -1,15 +1,15 @@
 using Newtonsoft.Json;
 
-#if ORLEANS_CLUSTERING
-namespace Orleans.Clustering.Cosmos;
-#elif ORLEANS_PERSISTENCE
-namespace Orleans.Persistence.Cosmos;
-#elif ORLEANS_REMINDERS
-namespace Orleans.Reminders.Cosmos;
-#elif ORLEANS_STREAMING
-namespace Orleans.Streaming.Cosmos;
-#elif ORLEANS_DIRECTORY
-namespace Orleans.GrainDirectory.Cosmos;
+#if SCYNAPSE_CLUSTERING
+namespace Scynapse.Clustering.Cosmos;
+#elif SCYNAPSE_PERSISTENCE
+namespace Scynapse.Persistence.Cosmos;
+#elif SCYNAPSE_REMINDERS
+namespace Scynapse.Reminders.Cosmos;
+#elif SCYNAPSE_STREAMING
+namespace Scynapse.Streaming.Cosmos;
+#elif SCYNAPSE_DIRECTORY
+namespace Scynapse.GrainDirectory.Cosmos;
 #else
 // No default namespace intentionally to cause compile errors if something is not defined
 #endif
