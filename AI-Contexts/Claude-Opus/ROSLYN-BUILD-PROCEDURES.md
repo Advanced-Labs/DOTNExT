@@ -207,7 +207,7 @@ dotnet build src/Compilers/CSharp/Portable/Microsoft.CodeAnalysis.CSharp.csproj 
 
 Create this file in the test project:
 
-**File**: `/home/user/DOTNExT/src/NewOrleans/playground/AsyncPersistenceScenarios/Services/PersistableAsyncCompiler.cs`
+**File**: `/home/user/DOTNExT/src/Scynapse/playground/AsyncPersistenceScenarios/Services/PersistableAsyncCompiler.cs`
 
 ```csharp
 using System.Reflection;
@@ -272,7 +272,7 @@ public class PersistableAsyncCompiler
 
 ### Step 3: Update Project References
 
-**File**: `/home/user/DOTNExT/src/NewOrleans/playground/AsyncPersistenceScenarios/AsyncPersistenceScenarios.csproj`
+**File**: `/home/user/DOTNExT/src/Scynapse/playground/AsyncPersistenceScenarios/AsyncPersistenceScenarios.csproj`
 
 Add reference to modified Roslyn:
 
@@ -289,7 +289,7 @@ Add reference to modified Roslyn:
 
 ### Step 4: Create Test Source Code
 
-**File**: `/home/user/DOTNExT/src/NewOrleans/playground/AsyncPersistenceScenarios/TestWorkflows/PersistableWorkflowSource.cs`
+**File**: `/home/user/DOTNExT/src/Scynapse/playground/AsyncPersistenceScenarios/TestWorkflows/PersistableWorkflowSource.cs`
 
 ```csharp
 namespace AsyncPersistenceScenarios.TestWorkflows;
@@ -406,7 +406,7 @@ cd /home/user/DOTNExT/src/roslyn
 dotnet build src/Compilers/CSharp/Portable/Microsoft.CodeAnalysis.CSharp.csproj -c Release
 
 # Build test project
-cd /home/user/DOTNExT/src/NewOrleans/playground/AsyncPersistenceScenarios
+cd /home/user/DOTNExT/src/Scynapse/playground/AsyncPersistenceScenarios
 dotnet build
 
 # Run test project

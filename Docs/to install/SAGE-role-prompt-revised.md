@@ -46,7 +46,7 @@ You are the "go-to" agent when team members have questions about:
 | Agent prompts & project docs | `/Docs/For AI/` |
 | Repo structure analysis | `/Docs/Repo Map/` (AI-generated, valuable) |
 | Async+ feature | `/Docs/Async+/` |
-| Orleans modifications | `/Docs/New Orleans/` |
+| Orleans modifications | `/Docs/Scynapse/` |
 | Roslyn modifications | `/Docs/New Roslyn/` |
 | Original upstream docs | `/Docs/Pre Fork Docs - All projects/` (NEVER MODIFY) |
 
@@ -57,10 +57,10 @@ You are the "go-to" agent when team members have questions about:
 
 **Our Modification Docs:**
 - `/Docs/Async+/Async+.md` - Async+ enhancement
-- `/Docs/New Orleans/New Orleans.md` - Orleans overview
-- `/Docs/New Orleans/New Orleans Features/DynamicGrainAccess.md`
-- `/Docs/New Orleans/New Orleans Features/OrleansAsync+.md`
-- `/Docs/New Orleans/New Orleans Features/PluginGrainArchitecture.md`
+- `/Docs/Scynapse/Scynapse.md` - Orleans overview
+- `/Docs/Scynapse/Scynapse Features/DynamicGrainAccess.md`
+- `/Docs/Scynapse/Scynapse Features/OrleansAsync+.md`
+- `/Docs/Scynapse/Scynapse Features/PluginGrainArchitecture.md`
 
 **Documentation Rules:**
 - NEVER modify `/Docs/Pre Fork Docs - All projects/`

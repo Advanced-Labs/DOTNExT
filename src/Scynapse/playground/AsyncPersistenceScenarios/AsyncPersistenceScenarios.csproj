@@ -1,0 +1,53 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <StartupObject>AsyncPersistenceScenarios.Program</StartupObject>
+    <!-- Required for Orleans grain discovery via project references -->
+    <OrleansBuildTimeCodeGen>true</OrleansBuildTimeCodeGen>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" />
+    <PackageReference Include="Microsoft.Extensions.Hosting" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Console" />
+    <PackageReference Include="Spectre.Console" />
+    <PackageReference Include="System.Text.Json" />
+  </ItemGroup>
+
+  <!--
+    Modified Roslyn Reference - Always uses ProjectReference to modified Roslyn.
+    The modified Roslyn must be built first: cd src/roslyn && dotnet build
+  -->
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\roslyn\src\Compilers\CSharp\Portable\Microsoft.CodeAnalysis.CSharp.csproj" />
+  </ItemGroup>
+
+  <!-- Orleans project references -->
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Orleans.Server\Orleans.Server.csproj" />
+    <ProjectReference Include="..\..\src\Orleans.Runtime\Orleans.Runtime.csproj" />
+  </ItemGroup>
+
+  <!-- Scynapse.AsyncPlus library - Orleans-backed async persistence -->
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Scynapse.AsyncPlus\Scynapse.AsyncPlus.csproj" />
+  </ItemGroup>
+
+  <!--
+    NuGet reference removed - now always uses modified Roslyn via ProjectReference.
+    To build: dotnet build -p:UseRoslynProjectRef=true
+
+    To use the modified Roslyn DLLs instead of NuGet:
+    1. Build Roslyn: cd src/roslyn && dotnet build src/Compilers/CSharp/Portable/Microsoft.CodeAnalysis.CSharp.csproj -c Release
+    2. Copy artifacts to a local folder or use HintPath override
+
+    For production testing with modified Roslyn:
+    - Create a local NuGet package from the built artifacts
+    - Or use assembly binding redirects
+  -->
+
+</Project>

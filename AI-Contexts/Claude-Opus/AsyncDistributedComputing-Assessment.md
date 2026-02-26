@@ -125,7 +125,7 @@ Your C# async approach would need to **enforce** isolation that Erlang gets for 
 - Custom async builders
 - State machine reflection/manipulation
 - Orleans' infrastructure for distribution
-- Your dynamic grain loading (NewOrleans)
+- Your dynamic grain loading (Scynapse)
 
 ### Is This Novel?
 
@@ -159,11 +159,11 @@ Then expand from there.
 
 ---
 
-## How NewOrleans Positions You
+## How Scynapse Positions You
 
 Your existing work provides excellent foundations:
 
-| NewOrleans Feature | How It Helps |
+| Scynapse Feature | How It Helps |
 |--------------------|--------------|
 | **Dynamic grain loading** | Hot-deploy workflow grains |
 | **ALC isolation** | Different workflow versions coexist |
@@ -256,7 +256,7 @@ Unload v1.0 only after:
    - TIMEOUT: Force abort after deadline
 4. **Unload after drainage** - Only GC old types when no references remain
 
-This aligns with NewOrleans' ALC isolation - different versions coexist in separate load contexts
+This aligns with Scynapse' ALC isolation - different versions coexist in separate load contexts
 
 ### Awaiter State
 
@@ -274,7 +274,7 @@ What if the async method is mid-try-catch when checkpointed? The state machine t
 
 **This is a legitimate research direction with real potential value.** It's not vaporware or hand-waving—the technical foundations exist.
 
-The question is whether the engineering cost is worth the ergonomic benefit of "just write async C# and get distributed durability." For many use cases, explicit state machines (Durable Functions, Saga patterns) are good enough. But for a platform like NewOrleans aiming to be a next-generation distributed runtime, this could be a differentiating feature.
+The question is whether the engineering cost is worth the ergonomic benefit of "just write async C# and get distributed durability." For many use cases, explicit state machines (Durable Functions, Saga patterns) are good enough. But for a platform like Scynapse aiming to be a next-generation distributed runtime, this could be a differentiating feature.
 
 **My suggestion**: Build Experiments 1-3 over a few days. If they work cleanly, you have something real. If they expose fundamental blockers, you'll know early.
 
@@ -292,4 +292,4 @@ The question is whether the engineering cost is worth the ergonomic benefit of "
 
 ---
 
-*This document is my honest assessment. I find the idea compelling and technically grounded, but the implementation complexity is non-trivial. The existing NewOrleans work provides a strong foundation to build on.*
+*This document is my honest assessment. I find the idea compelling and technically grounded, but the implementation complexity is non-trivial. The existing Scynapse work provides a strong foundation to build on.*

@@ -1,4 +1,4 @@
-# NewOrleans Async+ Integration
+# Scynapse Async+ Integration
 
 **Author**: Claude Opus 4
 **Date**: 2025-11-30
@@ -8,7 +8,7 @@
 
 ## Executive Summary
 
-With the Roslyn modification for async persistence now working (Challenge 7 verified), the next phase is to integrate async persistence with NewOrleans (our Orleans fork). This document describes the architecture for the **NewOrleans Async+ Driver** - a component that bridges Async+ capabilities (starting with persistence) to the Orleans runtime.
+With the Roslyn modification for async persistence now working (Challenge 7 verified), the next phase is to integrate async persistence with Scynapse (our Orleans fork). This document describes the architecture for the **Scynapse Async+ Driver** - a component that bridges Async+ capabilities (starting with persistence) to the Orleans runtime.
 
 ---
 
@@ -67,9 +67,9 @@ Replace the in-memory persistence with Orleans-backed persistence that:
                                     │ Implementation
                                     ▼
 ┌─────────────────────────────────────────────────────────────────────────────┐
-│                      NewOrleans.AsyncPlus.Driver                             │
+│                      Scynapse.AsyncPlus.Driver                             │
 │                                                                             │
-│   NewOrleansAsyncPersistenceService : IAsyncPersistenceService                  │
+│   ScynapseAsyncPersistenceService : IAsyncPersistenceService                  │
 │   - Wraps IAsyncStatePersistenceGrain calls                                 │
 │   - DI-injectable into Orleans silo/client                                  │
 │   - Configurable storage provider name                                       │
@@ -117,10 +117,10 @@ This gives us real persistence testing - checkpoint → kill process → restart
 
 ## Component Design
 
-### 1. Grain Interfaces (in `NewOrleans.AsyncPlus.Abstractions`)
+### 1. Grain Interfaces (in `Scynapse.AsyncPlus.Abstractions`)
 
 ```csharp
-namespace NewOrleans.AsyncPlus;
+namespace Scynapse.AsyncPlus;
 
 /// <summary>
 /// Grain interface for persisting async state machine checkpoints.
@@ -168,10 +168,10 @@ public record AsyncStateCheckpoint(
 );
 ```
 
-### 2. Grain Implementation (in `NewOrleans.AsyncPlus.Grains`)
+### 2. Grain Implementation (in `Scynapse.AsyncPlus.Grains`)
 
 ```csharp
-namespace NewOrleans.AsyncPlus.Grains;
+namespace Scynapse.AsyncPlus.Grains;
 
 /// <summary>
 /// Grain state for async persistence.
@@ -241,23 +241,23 @@ public class AsyncStatePersistenceGrain : Grain<AsyncStatePersistenceGrainState>
 }
 ```
 
-### 3. Orleans Driver Service (in `NewOrleans.AsyncPlus.Driver`)
+### 3. Orleans Driver Service (in `Scynapse.AsyncPlus.Driver`)
 
 ```csharp
-namespace NewOrleans.AsyncPlus;
+namespace Scynapse.AsyncPlus;
 
 /// <summary>
 /// Orleans-backed implementation of IAsyncPersistenceService.
 /// Bridges the Async+ abstraction to Orleans grains.
 /// </summary>
-public class NewOrleansAsyncPersistenceService : IAsyncPersistenceService
+public class ScynapseAsyncPersistenceService : IAsyncPersistenceService
 {
     private readonly IGrainFactory _grainFactory;
-    private readonly ILogger<NewOrleansAsyncPersistenceService> _logger;
+    private readonly ILogger<ScynapseAsyncPersistenceService> _logger;
 
-    public NewOrleansAsyncPersistenceService(
+    public ScynapseAsyncPersistenceService(
         IGrainFactory grainFactory,
-        ILogger<NewOrleansAsyncPersistenceService> logger)
+        ILogger<ScynapseAsyncPersistenceService> logger)
     {
         _grainFactory = grainFactory;
         _logger = logger;
@@ -348,10 +348,10 @@ public class NewOrleansAsyncPersistenceService : IAsyncPersistenceService
 }
 ```
 
-### 4. DI Extension Methods (in `NewOrleans.AsyncPlus.Driver`)
+### 4. DI Extension Methods (in `Scynapse.AsyncPlus.Driver`)
 
 ```csharp
-namespace NewOrleans.AsyncPlus;
+namespace Scynapse.AsyncPlus;
 
 public static class AsyncPlusHostingExtensions
 {
@@ -365,7 +365,7 @@ public static class AsyncPlusHostingExtensions
         siloBuilder.ConfigureServices(services =>
         {
             // Register the Orleans-backed persistence service
-            services.AddSingleton<IAsyncPersistenceService, NewOrleansAsyncPersistenceService>();
+            services.AddSingleton<IAsyncPersistenceService, ScynapseAsyncPersistenceService>();
 
             // Optionally configure storage name
             services.Configure<AsyncPlusOptions>(options =>
@@ -384,7 +384,7 @@ public static class AsyncPlusHostingExtensions
     {
         clientBuilder.ConfigureServices(services =>
         {
-            services.AddSingleton<IAsyncPersistenceService, NewOrleansAsyncPersistenceService>();
+            services.AddSingleton<IAsyncPersistenceService, ScynapseAsyncPersistenceService>();
         });
 
         return clientBuilder;
@@ -413,7 +413,7 @@ AsyncPersistenceScenarios/
 ├── Services/
 │   ├── IAsyncPersistenceService.cs       # Existing
 │   ├── InMemoryAsyncPersistenceService.cs # Existing
-│   └── NewOrleansAsyncPersistenceService.cs  # NEW
+│   └── ScynapseAsyncPersistenceService.cs  # NEW
 ├── Orleans/
 │   ├── IAsyncStatePersistenceGrain.cs     # NEW
 │   ├── AsyncStatePersistenceGrain.cs      # NEW
@@ -442,9 +442,9 @@ Disadvantages:
 
 For production:
 ```
-NewOrleans.AsyncPlus.Abstractions/   # Interfaces, DTOs
-NewOrleans.AsyncPlus.Grains/         # Grain implementations
-NewOrleans.AsyncPlus.Driver/         # Service implementation
+Scynapse.AsyncPlus.Abstractions/   # Interfaces, DTOs
+Scynapse.AsyncPlus.Grains/         # Grain implementations
+Scynapse.AsyncPlus.Driver/         # Service implementation
 ```
 
 ---
@@ -460,7 +460,7 @@ For Orleans code generation to work with project references (not NuGet):
 </PropertyGroup>
 ```
 
-The root `Directory.Build.props` at `/src/NewOrleans/` includes:
+The root `Directory.Build.props` at `/src/Scynapse/` includes:
 ```xml
 <Import Condition=" '$(OrleansBuildTimeCodeGen)' == 'true' "
         Project="$(MSBuildThisFileDirectory)src/Orleans.CodeGenerator/build/Microsoft.Orleans.CodeGenerator.props" />
@@ -475,7 +475,7 @@ This triggers the Orleans source generator for serializers and grain references.
 ### Phase 1: Basic Orleans Integration
 1. Add Orleans references to AsyncPersistenceScenarios
 2. Implement `IAsyncStatePersistenceGrain` and grain
-3. Implement `NewOrleansAsyncPersistenceService`
+3. Implement `ScynapseAsyncPersistenceService`
 4. Add Challenge 8: Orleans-backed persistence test
 
 ### Phase 2: Configuration & Polish
@@ -528,7 +528,7 @@ public interface IAsyncPlusDriver
 - `CURRENT-WORK.md` - Working Roslyn modification details
 - `DOTNExT-Vision.md` - Long-term vision including persistence tiers
 - `AsyncPersistence-Research.md` - Research on async state machine internals
-- `/src/NewOrleans/playground/PluginGrainScenarios/` - Orleans project reference pattern
+- `/src/Scynapse/playground/PluginGrainScenarios/` - Orleans project reference pattern
 
 ---
 

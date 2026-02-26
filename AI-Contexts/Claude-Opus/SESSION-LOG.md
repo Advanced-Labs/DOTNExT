@@ -171,7 +171,7 @@ Continued from previous session. The Roslyn modification was failing Challenge 7
 
 5. **New Direction: Orleans Integration**
    - User wants to move from in-memory persistence to Orleans-backed
-   - Designed `NewOrleans Async+ Driver` architecture
+   - Designed `Scynapse Async+ Driver` architecture
    - Uses grains for state storage, configurable via DI
    - Driver pattern allows future Async+ augmentations
 
@@ -179,7 +179,7 @@ Continued from previous session. The Roslyn modification was failing Challenge 7
 
 | File | Purpose |
 |------|---------|
-| `NewOrleans-AsyncPlus-Integration.md` | **NEW** - Full design for Orleans integration |
+| `Scynapse-AsyncPlus-Integration.md` | **NEW** - Full design for Orleans integration |
 | `CURRENT-WORK.md` | Updated with Phase 2 complete, Phase 3 starting |
 | `SESSION-LOG.md` | This entry |
 | `AsyncMethodToStateMachineRewriter.cs` | Added `InitializePersistenceServiceLocal()`, fixed execution order |
@@ -312,7 +312,7 @@ Continuing from earlier session where C1 was working but struct boxing was ident
 2. **Option A Implementation** - Updated interface and implementation:
    - `IAsyncPersistenceService.TryRestore<TStateMachine>(ref TStateMachine, string)` added
    - Old non-generic method marked `[Obsolete]`
-   - `NewOrleansAsyncPersistenceService` updated with `DeserializeStateMachine<T>`
+   - `ScynapseAsyncPersistenceService` updated with `DeserializeStateMachine<T>`
 
 3. **Roslyn Codegen Updates** - Modified `AsyncMethodToStateMachineRewriter.cs`:
    - Added `GetGenericTryRestoreMethod()` to find new interface method
@@ -336,7 +336,7 @@ Continuing from earlier session where C1 was working but struct boxing was ident
 | File | Change |
 |------|--------|
 | `DOTNExTPersistence.cs` | Added generic `TryRestore<T>`, marked old obsolete |
-| `NewOrleansAsyncPersistenceService.cs` | Implemented generic method, added `DeserializeStateMachine<T>` |
+| `ScynapseAsyncPersistenceService.cs` | Implemented generic method, added `DeserializeStateMachine<T>` |
 | `AsyncMethodToStateMachineRewriter.cs` | Added generic method support, logging, **fixed `stateMachineType` → `F.CurrentType`** |
 | `RoslynPlusCrossSession.cs` | **NEW** - R1 scenario for Roslyn+ testing |
 | `Program.cs` | Added R1 to self-managing scenarios menu |
@@ -516,11 +516,11 @@ Continuing from previous session. C2 scenario was failing due to grain ID collis
    - Root cause: All workflows used same grain ID based on method name only
    - Fix: Added `WorkflowId` property to `AsyncPersistenceContext`
    - Added `SetCurrent(service, workflowId)` overload
-   - Updated `NewOrleansAsyncPersistenceService.ResolveGrainId()` to use WorkflowId when set
+   - Updated `ScynapseAsyncPersistenceService.ResolveGrainId()` to use WorkflowId when set
    - C2 now passes: All 5 workflows produce correct results (30, 50, 70, 90, 110)
 
 2. **Console Debug Output Reduction**:
-   - Changed log filter from LogLevel.Debug to LogLevel.Warning for NewOrleans.AsyncPlus
+   - Changed log filter from LogLevel.Debug to LogLevel.Warning for Scynapse.AsyncPlus
    - Console stays clean, detailed logs go to file
 
 3. **C8 Scenario Implementation**:
@@ -537,7 +537,7 @@ Continuing from previous session. C2 scenario was failing due to grain ID collis
 | File | Change |
 |------|--------|
 | `DOTNExTPersistence.cs` | Added `WorkflowId` property, `SetCurrent(service, workflowId)` overload |
-| `NewOrleansAsyncPersistenceService.cs` | Added `ResolveGrainId()` method to use WorkflowId when set |
+| `ScynapseAsyncPersistenceService.cs` | Added `ResolveGrainId()` method to use WorkflowId when set |
 | `SiloHelper.cs` | Changed log level to Warning for AsyncPlus |
 | `MultipleConcurrentWorkflows.cs` | Updated to launch workflows with unique context |
 | `MultiSiloCheckpointVisibility.cs` | **NEW** - C8 scenario implementation |

@@ -24,7 +24,7 @@
 ## Executive Summary
 
 DOTNExT is envisioned as a **next-generation runtime platform** that evolves from:
-- A fork of Orleans (NewOrleans) with dynamic grain loading
+- A fork of Orleans (Scynapse) with dynamic grain loading
 - Through increasingly deep modifications to Roslyn and the .NET runtime
 - Toward a **Meta-Operating System** comparable to Android in architectural scope
 
@@ -48,7 +48,7 @@ The vision spans multiple implementation depths:
 └─────────────────────────────────────────────────────────────────────────┘
                                     │
 ┌─────────────────────────────────────────────────────────────────────────┐
-│ Layer 4: NewOrleans Framework                                            │
+│ Layer 4: Scynapse Framework                                            │
 │ - Dynamic grain loading (GTD, GTC, Package System)                       │
 │ - Distributed async orchestration                                        │
 │ - Soft/Hard persistence abstractions                                     │
@@ -90,7 +90,7 @@ Async/await is purely a **local concurrency mechanism**:
 
 ### Evolution Path
 
-#### Stage 1: Framework-Level (NewOrleans Today)
+#### Stage 1: Framework-Level (Scynapse Today)
 - Custom `[AsyncMethodBuilder]` intercepts suspensions
 - Explicit checkpointing at await boundaries
 - Framework-managed persistence and migration
@@ -321,7 +321,7 @@ VM-A                                    VM-B
 │  ┌──────────────────────────────────────────────────────────────┐  │
 │  │                      VM Services Layer                        │  │
 │  │  ┌─────────────┐ ┌─────────────┐ ┌─────────────┐             │  │
-│  │  │ NewOrleans  │ │  Persistence │ │  Networking │             │  │
+│  │  │ Scynapse  │ │  Persistence │ │  Networking │             │  │
 │  │  │   Service   │ │   Service    │ │   Service   │             │  │
 │  │  └─────────────┘ └─────────────┘ └─────────────┘             │  │
 │  │  ┌─────────────┐ ┌─────────────┐ ┌─────────────┐             │  │
@@ -554,9 +554,9 @@ public interface ISoftPersistable
 
 ## References
 
-- `/docs/NewOrleans/` - NewOrleans framework documentation
-- `/docs/NewOrleans/References/PluginGrainArchitecture.md` - MDCP-based grain loading
-- `/docs/NewOrleans/References/DynamicGrainAccess.md` - Dynamic grain access design
+- `/docs/Scynapse/` - Scynapse framework documentation
+- `/docs/Scynapse/References/PluginGrainArchitecture.md` - MDCP-based grain loading
+- `/docs/Scynapse/References/DynamicGrainAccess.md` - Dynamic grain access design
 - `/AI-Contexts/Claude-Opus/AsyncDistributedComputing-Assessment.md` - Initial async/await analysis
 - dotnet/runtime issue #109632 - Runtime-async tracking
 - dotnet/runtime `docs/design/specs/runtime-async.md` - Runtime-async specification

@@ -428,15 +428,15 @@ Fixed by adding `InitializePersistenceServiceLocal()` called BEFORE `VisitBody()
 - "Run All with Report" feature for comprehensive testing
 
 ### ✅ Phase 3: Orleans Integration (COMPLETE)
-See: `NewOrleans-AsyncPlus-Integration.md` for full design
+See: `Scynapse-AsyncPlus-Integration.md` for full design
 
 **Goal**: Replace in-memory persistence with Orleans-backed persistence
 
 **Completed**:
-- ✅ `NewOrleans.AsyncPlus` library created at `src/NewOrleans/src/NewOrleans.AsyncPlus/`
+- ✅ `Scynapse.AsyncPlus` library created at `src/Scynapse/src/Scynapse.AsyncPlus/`
 - ✅ `IAsyncStatePersistenceGrain` grain interface with checkpoint/restore/complete/fault
 - ✅ `AsyncStatePersistenceGrain` implementation with `IPersistentState<T>`
-- ✅ `NewOrleansAsyncPersistenceService` with tracked tasks for sync-to-async bridge
+- ✅ `ScynapseAsyncPersistenceService` with tracked tasks for sync-to-async bridge
 - ✅ `DOTNExT.Persistence` namespace as canonical location for Roslyn-generated code
 - ✅ `UseAsyncPlusPersistence()` silo builder extension
 - ✅ `RavenDbGrainStorage` - Custom Orleans storage provider for RavenDB
@@ -460,8 +460,8 @@ cd /home/user/DOTNExT
 cd src/roslyn
 dotnet build src/Compilers/CSharp/Portable/Microsoft.CodeAnalysis.CSharp.csproj
 
-# 2. Build NewOrleans.AsyncPlus library
-cd ../NewOrleans/src/NewOrleans.AsyncPlus
+# 2. Build Scynapse.AsyncPlus library
+cd ../Scynapse/src/Scynapse.AsyncPlus
 dotnet build
 
 # 3. Build AsyncPersistenceScenarios
@@ -472,7 +472,7 @@ dotnet build
 ### Test Commands
 ```bash
 # Run the test scenarios
-cd /home/user/DOTNExT/src/NewOrleans/playground/AsyncPersistenceScenarios
+cd /home/user/DOTNExT/src/Scynapse/playground/AsyncPersistenceScenarios
 dotnet run
 ```
 
@@ -518,18 +518,18 @@ Note: Challenges 1-5 show 0 checkpoints because they're NOT using [Persistable]
 ### Roslyn (src/roslyn/)
 - `src/Compilers/CSharp/Portable/Lowering/AsyncRewriter/AsyncMethodToStateMachineRewriter.cs`
 
-### NewOrleans.AsyncPlus Library (src/NewOrleans/src/NewOrleans.AsyncPlus/)
-- `NewOrleans.AsyncPlus.csproj` - Library project with Orleans + RavenDB references
+### Scynapse.AsyncPlus Library (src/Scynapse/src/Scynapse.AsyncPlus/)
+- `Scynapse.AsyncPlus.csproj` - Library project with Orleans + RavenDB references
 - `Abstractions/IAsyncStatePersistenceGrain.cs` - Grain interface
 - `Abstractions/AsyncStateCheckpoint.cs` - DTOs with Orleans serialization
 - `Abstractions/DOTNExTPersistence.cs` - Canonical `DOTNExT.Persistence` types
 - `Grains/AsyncStatePersistenceGrain.cs` - Grain implementation
-- `Services/NewOrleansAsyncPersistenceService.cs` - Orleans-backed persistence service
+- `Services/ScynapseAsyncPersistenceService.cs` - Orleans-backed persistence service
 - `Extensions/AsyncPlusHostingExtensions.cs` - DI configuration + RavenDB extensions
 - `Storage/RavenDbGrainStorage.cs` - RavenDB Orleans storage provider
 - `Storage/RavenDbStorageOptions.cs` - RavenDB configuration options
 
-### AsyncPersistenceScenarios (src/NewOrleans/playground/AsyncPersistenceScenarios/)
+### AsyncPersistenceScenarios (src/Scynapse/playground/AsyncPersistenceScenarios/)
 - `Program.cs` - Menu-driven scenario runner with Challenge 8
 - `AsyncPersistenceScenarios.csproj` - Added Orleans and AsyncPlus references
 

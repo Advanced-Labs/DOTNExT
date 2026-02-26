@@ -30,11 +30,11 @@
 | `AsyncPlus-Scenarios.md` | Test scenarios (C1-C9, R1) with risk/value analysis |
 | `AsyncPlus-SiloPatterns.md` | Orleans silo orchestration patterns |
 
-### NewOrleans / Orleans Integration
+### Scynapse / Orleans Integration
 
 | File | Purpose |
 |------|---------|
-| `NewOrleans-AsyncPlus-Integration.md` | Async+ integration with Orleans |
+| `Scynapse-AsyncPlus-Integration.md` | Async+ integration with Orleans |
 | `PluginGrainArchitecture.md` | Dynamic grain loading architecture |
 | `DynamicGrainAccess.md` | Dynamic grain access patterns |
 

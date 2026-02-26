@@ -35,7 +35,7 @@ Shared language and conventions for the DOTNExT multi-agent development team.
 | WPF | WPF | `src/wpf` |
 | WFM | WinForms | `src/winforms` |
 | EFC | Entity Framework Core | `src/efcore` |
-| ORL | Orleans (NewOrleans fork) | `src/NewOrleans` |
+| ORL | Orleans (Scynapse fork) | `src/Scynapse` |
 | FSH | F# | `src/fsharp` |
 | RAZ | Razor | `src/razor` |
 

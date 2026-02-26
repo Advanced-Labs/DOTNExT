@@ -32,7 +32,7 @@ This document provides a detailed implementation plan for **Phase 1** of the VAY
 | **VUID generation and mapping** | Phase 2 | Depends on StorageDevice being functional |
 | **Voron integration** | Phase 2 | Storage engine integration requires Phase 1 foundation |
 | **Remote dispatch / CallDispatchDevice** | Phase 4 | Requires persistence (Phase 2) and relations (Phase 3) first |
-| **NewOrleans integration** | Phase 4 | Distribution builds on persistence layer |
+| **Scynapse integration** | Phase 4 | Distribution builds on persistence layer |
 | **JIT codegen modifications** | Phase 2+ | Use JIT helpers for Phase 1; optimize later |
 | **Alternate object layouts (Mode B)** | Phase 2+ | Start with stub+external body (Mode A) |
 | **Transaction coordination across drivers** | Phase 2+ | Requires StorageDevice to be functional |

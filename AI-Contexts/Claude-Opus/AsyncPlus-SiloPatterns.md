@@ -45,7 +45,7 @@ public static class SiloHelper
                 logging.ClearProviders();
                 logging.AddConsole();
                 logging.SetMinimumLevel(LogLevel.Warning);
-                logging.AddFilter("NewOrleans.AsyncPlus", LogLevel.Debug);
+                logging.AddFilter("Scynapse.AsyncPlus", LogLevel.Debug);
             })
             .Build();
     }

@@ -89,9 +89,9 @@ D:\Dev\DOTNExT\
     ├── Async+/                            ← OUR MODIFICATION: Async+
     │   └── Async+.md                      ← Async+ feature documentation
     │
-    ├── New Orleans/                       ← OUR MODIFICATION: Orleans
-    │   ├── New Orleans.md                 ← Overview of our changes
-    │   ├── New Orleans Features/          ← Our new features
+    ├── Scynapse/                       ← OUR MODIFICATION: Orleans
+    │   ├── Scynapse.md                 ← Overview of our changes
+    │   ├── Scynapse Features/          ← Our new features
     │   │   ├── DynamicGrainAccess.md      ← Dynamic grain access
     │   │   ├── OrleansAsync+.md           ← Async+ in Orleans
     │   │   └── PluginGrainArchitecture.md ← Plugin grain system
@@ -160,8 +160,8 @@ D:\Dev\DOTNExT\
 
 ### "I need to understand our modifications"
 1. `/Docs/Async+/Async+.md` - Async+ feature
-2. `/Docs/New Orleans/New Orleans.md` - Orleans overview
-3. `/Docs/New Orleans/New Orleans Features/` - Specific features
+2. `/Docs/Scynapse/Scynapse.md` - Orleans overview
+3. `/Docs/Scynapse/Scynapse Features/` - Specific features
 
 ### "I'm an AI agent and need role guidance"
 1. `/CLAUDE.md` - Foundation (READ FIRST)
@@ -216,8 +216,8 @@ AI-generated comprehensive analysis of the .NET runtime repository. **Highly val
 | Location | Contents |
 |----------|----------|
 | `/Docs/Async+/` | Async+ enhancement feature |
-| `/Docs/New Orleans/` | Orleans fork with custom features |
-| `/Docs/New Orleans/New Orleans Features/` | DynamicGrainAccess, OrleansAsync+, PluginGrainArchitecture |
+| `/Docs/Scynapse/` | Orleans fork with custom features |
+| `/Docs/Scynapse/Scynapse Features/` | DynamicGrainAccess, OrleansAsync+, PluginGrainArchitecture |
 | `/Docs/New Roslyn/` | Roslyn modifications (when added) |
 | `/Docs/New dotnet-runtime/` | Runtime modifications (when added) |
 

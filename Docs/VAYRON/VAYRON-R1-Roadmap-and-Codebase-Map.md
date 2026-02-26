@@ -52,7 +52,7 @@
 
 **Deliverables:**
 - CallDispatchDevice real implementation
-- Activation/placement driver family (NewOrleans-derived)
+- Activation/placement driver family (Scynapse-derived)
 - Single-writer rule enforced initially
 
 ### Phase 5+: Replication + Versioning + Semantic Hardening
@@ -75,13 +75,13 @@ The DOTNExT repository is a VMR (Virtual Monolithic Repository) containing:
 - **.NET Runtime** (`src/runtime/`) - CLR, JIT, GC, BCL
 - **Roslyn** (`src/roslyn/`) - C#/VB compilers
 - **SDK** (`src/sdk/`) - dotnet CLI, MSBuild tasks
-- **NewOrleans** (`src/NewOrleans/`) - Forked Orleans distributed actor framework
+- **Scynapse** (`src/Scynapse/`) - Forked Orleans distributed actor framework
 - **RavenDB/Voron** (`src/Raven/`) - Document database with Voron storage engine
 
 This combination provides the foundation for VAYRON's three key integration engines:
 1. **CLR** - The extensibility target
 2. **Voron** - Gen-0 StorageDevice driver
-3. **NewOrleans** - Gen-0 CallDispatch/Placement driver family
+3. **Scynapse** - Gen-0 CallDispatch/Placement driver family
 
 ---
 
@@ -356,11 +356,11 @@ public class WriteAheadJournal {
 
 ---
 
-### 6. NewOrleans (Orleans Fork) Analysis
+### 6. Scynapse (Orleans Fork) Analysis
 
 #### 6.1 Grain System Overview
 
-**Location:** `src/NewOrleans/src/Orleans.Core/`
+**Location:** `src/Scynapse/src/Orleans.Core/`
 
 Orleans provides:
 - **Grains** - Virtual actors with single-threaded execution
@@ -481,7 +481,7 @@ class VoronStorageOps : IStorageOps {
 }
 ```
 
-#### 7.2 NewOrleans as CallDispatchDevice Engine
+#### 7.2 Scynapse as CallDispatchDevice Engine
 
 **Approach:**
 1. VObject with `[Distributed]` gets a GrainReference internally
@@ -583,9 +583,9 @@ src/Raven/src/Voron/
 └── Data/BTrees/Tree.cs            # B-Tree
 ```
 
-#### NewOrleans
+#### Scynapse
 ```
-src/NewOrleans/src/Orleans.Core/
+src/Scynapse/src/Orleans.Core/
 ├── Core/
 │   ├── GrainReference.cs          # Remote reference
 │   ├── IGrainContext.cs           # Activation context

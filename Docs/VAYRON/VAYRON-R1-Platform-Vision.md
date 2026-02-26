@@ -121,7 +121,7 @@ Updated framing: **Virtues are Systemic capabilities implemented by Drivers**.
 |-------------------|---------------|----------------|
 | Virtual | Participates in DDS routing | Object routing + ops_root |
 | Persistent | State survives restarts | StorageDevice driver (Voron as gen-0 engine) |
-| Distributed | Object may be remote | CallDispatch/Placement driver family (NewOrleans-derived gen-0) |
+| Distributed | Object may be remote | CallDispatch/Placement driver family (Scynapse-derived gen-0) |
 | Replicated(N) | Multiple synchronized instances | Replication driver family + placement + storage cooperation |
 | Versioned | Time-travel / MVCC history | VersionDevice driver (initially layered on storage) |
 | Relational | Edges / reverse edges / traversal | RelationalDevice driver (may bootstrap on storage indexes) |
@@ -172,7 +172,7 @@ Updated framing: **Virtues are Systemic capabilities implemented by Drivers**.
 |                    Engines packaged as Drivers/Modules                  |
 |                                                                         |
 |  - Voron engine (gen-0 StorageDevice driver)                            |
-|  - NewOrleans-derived engine family (gen-0 dispatch/placement/etc.)     |
+|  - Scynapse-derived engine family (gen-0 dispatch/placement/etc.)     |
 |  - Graph engine (later RelationalDevice)                                |
 |  - Versioning engine (later VersionDevice)                              |
 |  - Semantic engine (later SemanticDevice)                               |
@@ -384,7 +384,7 @@ But early phases can keep transactions strictly local and still preserve the "en
 
 ---
 
-## 15. Orleans / NewOrleans Integration
+## 15. Orleans / Scynapse Integration
 
 Rather than "embed Orleans into the Memory System," treat Orleans-derived capability as a **driver family**:
 
@@ -454,12 +454,12 @@ In practice:
 
 ---
 
-## 19. Integration Engines: Voron and NewOrleans (Gen-0 Drivers)
+## 19. Integration Engines: Voron and Scynapse (Gen-0 Drivers)
 
 VAYRON can incorporate existing high-value projects as early engines, but **behind device-class contracts**:
 
 * **Voron** as an initial StorageDevice driver (durability + MVCC-ish semantics)
-* **NewOrleans** as an initial CallDispatch/Placement/Activation driver family
+* **Scynapse** as an initial CallDispatch/Placement/Activation driver family
 
 Crucially:
 

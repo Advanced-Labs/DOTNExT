@@ -131,7 +131,7 @@ D:\Dev\DOTNExT\
     ├── Async+/                            ← OUR MODIFICATIONS
     │   └── (already exists)
     │
-    ├── New Orleans/                       ← OUR MODIFICATIONS
+    ├── Scynapse/                       ← OUR MODIFICATIONS
     │   └── (already exists)
     │
     ├── New Roslyn/                        ← OUR MODIFICATIONS
@@ -183,7 +183,7 @@ Should show the active context and folder structure.
 1. Ask: "Where are the Repo Map docs?"
 2. Claude should respond with `/Docs/Repo Map/`
 3. Ask: "What files document our modifications?"
-4. Claude should mention Async+, New Orleans, New Roslyn
+4. Claude should mention Async+, Scynapse, New Roslyn
 
 ### Test 4: Verify Role Loading
 

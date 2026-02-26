@@ -476,7 +476,7 @@ SDK = sdk
 ASP = aspnetcore
 WPF = wpf
 WFM = winforms
-ORL = orleans (NewOrleans fork)
+ORL = orleans (Scynapse fork)
 MSB = msbuild
 ```
 

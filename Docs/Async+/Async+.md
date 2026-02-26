@@ -77,9 +77,9 @@ Async+ is **technology-agnostic** at its core. The Roslyn modifications emit cal
                     ║                               ║
     ┌───────────────▼────────────────┐  ┌──────────▼──────────────────────┐
     │   Orleans Driver               │  │   Future Drivers                │
-    │   (NewOrleans.AsyncPlus)       │  │                                 │
+    │   (Scynapse.AsyncPlus)       │  │                                 │
     ├────────────────────────────────┤  ├─────────────────────────────────┤
-    │ • NewOrleansAsyncPersistenceService│ • FileAsyncPersistenceService  │
+    │ • ScynapseAsyncPersistenceService│ • FileAsyncPersistenceService  │
     │ • AsyncStatePersistenceGrain   │  │ • RedisAsyncPersistenceService  │
     │ • RavenDbGrainStorage          │  │ • SqlAsyncPersistenceService    │
     └────────────────────────────────┘  └─────────────────────────────────┘
@@ -604,5 +604,5 @@ Each driver implements `IAsyncPersistenceService` with appropriate storage seman
 ## References
 
 - Source: `src/roslyn/src/Compilers/CSharp/Portable/Lowering/AsyncRewriter/`
-- Core types: `src/NewOrleans/src/NewOrleans.AsyncPlus/Abstractions/`
+- Core types: `src/Scynapse/src/Scynapse.AsyncPlus/Abstractions/`
 - Orleans driver: See `OrleansAsync+.md`

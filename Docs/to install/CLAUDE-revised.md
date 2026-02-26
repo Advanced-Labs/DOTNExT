@@ -92,9 +92,9 @@ D:\Dev\DOTNExT\Docs\
 ├── Async+/                          ← OUR MODIFICATIONS: Async+ enhancements
 │   └── Async+.md                    ← Async+ feature documentation
 │
-├── New Orleans/                     ← OUR MODIFICATIONS: Orleans fork
-│   ├── New Orleans.md               ← Overview of our Orleans changes
-│   ├── New Orleans Features/        ← Our new features
+├── Scynapse/                     ← OUR MODIFICATIONS: Orleans fork
+│   ├── Scynapse.md               ← Overview of our Orleans changes
+│   ├── Scynapse Features/        ← Our new features
 │   │   ├── DynamicGrainAccess.md    ← Dynamic grain access feature
 │   │   ├── OrleansAsync+.md         ← Async+ integration with Orleans
 │   │   └── PluginGrainArchitecture.md ← Plugin grain system
@@ -165,8 +165,8 @@ This document is based on the original [component] documentation with the follow
 
 **For understanding our modifications:**
 - `/Docs/Async+/Async+.md` - Async+ feature
-- `/Docs/New Orleans/New Orleans.md` - Orleans modifications overview
-- `/Docs/New Orleans/New Orleans Features/` - Individual feature docs
+- `/Docs/Scynapse/Scynapse.md` - Orleans modifications overview
+- `/Docs/Scynapse/Scynapse Features/` - Individual feature docs
 
 **For AI agent operations:**
 - `/Docs/For AI/DOTNExT-Master-Reference.md` - Technical reference
@@ -279,7 +279,7 @@ D:\Dev\DOTNExT\
 │   ├── winforms/       # Windows Forms
 │   ├── msbuild/        # MSBuild engine
 │   ├── efcore/         # Entity Framework Core
-│   ├── NewOrleans/     # Orleans fork (Louis's)
+│   ├── Scynapse/     # Orleans fork (Louis's)
 │   └── ...             # Many more components
 ├── eng/                # Build infrastructure (Arcade)
 ├── Contexts/           # Context continuity system
@@ -411,7 +411,7 @@ When you begin a session or recover from compaction:
 - **Repo structure questions:** `/Docs/Repo Map/` files
 - **Workflow questions:** SAGE role or `/Docs/For AI/DOTNExT-Workflows.md`
 - **Technical details:** `/Docs/For AI/DOTNExT-Master-Reference.md`
-- **Our modifications:** `/Docs/Async+/`, `/Docs/New Orleans/`, `/Docs/New Roslyn/`
+- **Our modifications:** `/Docs/Async+/`, `/Docs/Scynapse/`, `/Docs/New Roslyn/`
 - **Terminology:** `/Docs/For AI/DOTNExT-Terminology.md`
 - **Stuck or confused:** Escalate to Louis with clear description
 

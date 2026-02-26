@@ -13,7 +13,7 @@ VAYRON transforms the .NET CLR from a closed runtime into an extensible platform
 | **ObjectModelDevice** | What an object IS (layout, scanning, identity) | CLR Default |
 | **FieldAccessDevice** | Field read/write interception | CLR Default |
 | **StorageDevice** | Persistence (layer I/O, transactions) | Voron |
-| **CallDispatchDevice** | Method invocation/routing | NewOrleans |
+| **CallDispatchDevice** | Method invocation/routing | Scynapse |
 | **RelationalDevice** | Edges and graph traversal | (Phase 3+) |
 | **VersionDevice** | Time-travel / MVCC | (Phase 5+) |
 | **SecurityDevice** | Kernel-enforced security | (Early wiring) |
@@ -63,7 +63,7 @@ Original documentation versions are preserved in [Older/](./Older/).
 
 ### Phase 4: Distribution
 - CallDispatchDevice implementation
-- NewOrleans-backed activation/placement
+- Scynapse-backed activation/placement
 - Remote method invocation
 
 ### Phase 5+: Advanced Features
@@ -105,7 +105,7 @@ Page-based, MVCC, ACID storage engine providing:
 
 **Role:** Gen-0 StorageDevice driver
 
-### NewOrleans (Orleans fork)
+### Scynapse (Orleans fork)
 Distributed virtual actor framework providing:
 - Grain activation/placement
 - Single-threaded execution model
@@ -123,7 +123,7 @@ DOTNExT/
 ├── src/
 │   ├── runtime/           # CLR - extensibility target
 │   ├── roslyn/            # Compiler (future C= support)
-│   ├── NewOrleans/        # Orleans fork
+│   ├── Scynapse/        # Orleans fork
 │   └── Raven/             # RavenDB with Voron
 │       └── src/Voron/     # Storage engine
 ├── Docs/

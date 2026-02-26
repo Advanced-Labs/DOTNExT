@@ -80,8 +80,8 @@ If you sense the conversation is long or complex:
 │       └── *.md                       # Topic-specific analysis
 │
 ├── src/
-│   └── NewOrleans/            # The Orleans fork
-│       ├── NewOrleans.md      # Main documentation
+│   └── Scynapse/            # The Orleans fork
+│       ├── Scynapse.md      # Main documentation
 │       └── docs/References/   # Design documents
 │
 └── docs/                      # Additional documentation
@@ -93,7 +93,7 @@ If you sense the conversation is long or complex:
 
 **DOTNExT** evolves through stages:
 
-1. **NewOrleans** (now): Orleans fork with dynamic grain loading, GTD, dynamic clients
+1. **Scynapse** (now): Orleans fork with dynamic grain loading, GTD, dynamic clients
 2. **Augmented async/await**: Persistence-aware async, soft/hard persistence, version drainage
 3. **Roslyn modifications**: C* superset, codegen for distributed patterns
 4. **VM redesign**: Continuous bookkeeping, OID-based refs, snapshot-ready memory
@@ -112,8 +112,8 @@ Key concepts:
 **Last updated**: 2025-11-28
 
 **What exists**:
-- NewOrleans with dynamic grain loading (MDCP, GTD, GTC, dynamic clients)
-- Documentation in `/src/NewOrleans/` and `/docs/NewOrleans/`
+- Scynapse with dynamic grain loading (MDCP, GTD, GTC, dynamic clients)
+- Documentation in `/src/Scynapse/` and `/docs/Scynapse/`
 - Vision document capturing grand scope
 
 **What's next**:

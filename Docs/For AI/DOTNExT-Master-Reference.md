@@ -18,7 +18,7 @@ This is the authoritative reference for the DOTNExT project - a custom fork/modi
 | **AI Agent Docs** | `/Docs/For AI/` |
 | **Repo Structure Analysis** | `/Docs/Repo Map/` |
 | **Async+ Feature** | `/Docs/Async+/` |
-| **Orleans Modifications** | `/Docs/New Orleans/` |
+| **Orleans Modifications** | `/Docs/Scynapse/` |
 | **Roslyn Modifications** | `/Docs/New Roslyn/` |
 | **Runtime Modifications** | `/Docs/New dotnet-runtime/` |
 | **Original Upstream Docs** | `/Docs/Pre Fork Docs - All projects/` |
@@ -36,10 +36,10 @@ This is the authoritative reference for the DOTNExT project - a custom fork/modi
 
 ### For Our Modifications
 - `/Docs/Async+/Async+.md` - Async+ enhancement
-- `/Docs/New Orleans/New Orleans.md` - Orleans overview
-- `/Docs/New Orleans/New Orleans Features/DynamicGrainAccess.md`
-- `/Docs/New Orleans/New Orleans Features/OrleansAsync+.md`
-- `/Docs/New Orleans/New Orleans Features/PluginGrainArchitecture.md`
+- `/Docs/Scynapse/Scynapse.md` - Orleans overview
+- `/Docs/Scynapse/Scynapse Features/DynamicGrainAccess.md`
+- `/Docs/Scynapse/Scynapse Features/OrleansAsync+.md`
+- `/Docs/Scynapse/Scynapse Features/PluginGrainArchitecture.md`
 
 ## Documentation Rules
 
@@ -133,7 +133,7 @@ Have their own VS integration workflow:
 |------------|------|-------|
 | **aspire** | `src/aspire` | Cloud-native stack |
 | **vstest** | `src/vstest` | Test platform |
-| **NewOrleans** | `src/NewOrleans` | Orleans fork (Louis's) |
+| **Scynapse** | `src/Scynapse` | Orleans fork (Louis's) |
 | **deployment-tools** | `src/deployment-tools` | Deployment infrastructure |
 
 ---
