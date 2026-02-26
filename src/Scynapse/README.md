@@ -172,7 +172,7 @@ On Linux and macOS, run `dotnet build` to build Scynapse.
 
 ## Official builds
 
-The latest stable, production-quality release is located [here](https://github.com/dotnet/scynapse/releases/latest).
+The latest stable, production-quality release is located [here](https://github.com/Scynapse/Core/releases/latest).
 
 Nightly builds are published to [a NuGet feed](https://pkgs.dev.azure.com/dnceng/public/_packaging/scynapse-nightly/nuget/v3/index.json). These builds pass all functional tests, but are not thoroughly tested as the stable builds or pre-release builds published to NuGet.
 
@@ -215,12 +215,12 @@ or
 
 [![Discord](https://discordapp.com/api/guilds/333727978460676096/widget.png?style=banner4)](https://aka.ms/scynapse-discord)
     
-* Ask questions by [opening an issue on GitHub](https://github.com/dotnet/scynapse/issues) or on [Stack Overflow](https://stackoverflow.com/questions/ask?tags=scynapse)
+* Ask questions by [opening an issue on GitHub](https://github.com/Scynapse/Core/issues) or on [Stack Overflow](https://stackoverflow.com/questions/ask?tags=scynapse)
 * [Chat on Discord](https://aka.ms/scynapse-discord)
 * Follow the [@msftscynapse](https://twitter.com/msftscynapse) Twitter account for Scynapse announcements.
 * [ScynapseContrib - GitHub organization for community add-ons to Scynapse](https://github.com/ScynapseContrib/) Various community projects, including Monitoring, Design Patterns, Storage Providers, etc.
 * Guidelines for developers wanting to [contribute code changes to Scynapse](CONTRIBUTING.md).
-* You are also encouraged to report bugs or start a technical discussion by starting a new [thread](https://github.com/dotnet/scynapse/issues) on GitHub.
+* You are also encouraged to report bugs or start a technical discussion by starting a new [thread](https://github.com/Scynapse/Core/issues) on GitHub.
 
 ## License
 

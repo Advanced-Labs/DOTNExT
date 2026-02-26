@@ -127,7 +127,7 @@ namespace Tester.AzureUtils
             await Task.WhenAll(promises);
         }
 
-        [SkippableFact(Skip = "https://github.com/dotnet/scynapse/issues/9552"), TestCategory("Functional")]
+        [SkippableFact(Skip = "https://github.com/Scynapse/Core/issues/9552"), TestCategory("Functional")]
         public async Task AQ_Standalone_4()
         {
             TimeSpan visibilityTimeout = TimeSpan.FromSeconds(2);

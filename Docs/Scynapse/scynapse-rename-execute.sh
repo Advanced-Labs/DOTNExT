@@ -28,22 +28,26 @@ set -euo pipefail
 # Content replacement pairs (applied in this order via sed)
 # CRITICAL: Order matters! More specific patterns before general ones.
 CONTENT_REPLACEMENTS=(
-    # --- Phase A: Compound/prefixed patterns (most specific first) ---
+    # --- Phase A: URLs (most specific — must come before generic patterns) ---
+    "github\.com/dotnet/orleans|github.com/Scynapse/Core"   # GitHub repo URL
+    "github\.com/dotnet/Orleans|github.com/Scynapse/Core"   # GitHub repo URL (PascalCase)
+
+    # --- Phase B: Compound/prefixed patterns ---
     "Microsoft\.Orleans|Genesa.Scynapse"          # NuGet PackageIds: Microsoft.Orleans.Core -> Genesa.Scynapse.Core
     "microsoft\.orleans|genesa.scynapse"           # Lowercase variant if any
     "MICROSOFT\.ORLEANS|GENESA.SCYNAPSE"           # Uppercase variant if any
 
-    # --- Phase B: Previous project name remnants ---
+    # --- Phase C: Previous project name remnants ---
     "NewOrleans|Scynapse"                          # NewOrleans -> Scynapse
     "NEWORLEANS|SCYNAPSE"                          # NEWORLEANS -> SCYNAPSE
     "neworleans|scynapse"                          # neworleans -> scynapse
     "new-orleans|scynapse"                         # kebab-case
     "new_orleans|scynapse"                         # snake_case
 
-    # --- Phase C: Main Orleans rename (PascalCase) ---
+    # --- Phase D: Main Orleans rename (PascalCase) ---
     "Orleans|Scynapse"                             # The big one: Orleans -> Scynapse
 
-    # --- Phase D: Lowercase/uppercase variants ---
+    # --- Phase E: Lowercase/uppercase variants ---
     "orleans|scynapse"                             # lowercase (URLs, paths, vars)
     "ORLEANS|SCYNAPSE"                             # UPPERCASE (diagnostic IDs, env vars)
 )

@@ -41,7 +41,7 @@ namespace UnitTests
             this.fixture = fixture;
         }
 
-        // See https://github.com/dotnet/scynapse/pull/5086
+        // See https://github.com/Scynapse/Core/pull/5086
         [Fact, TestCategory("Functional"), TestCategory("Tasks"), TestCategory("Reentrancy")]
         public async Task CorrelationId_Bug()
         {

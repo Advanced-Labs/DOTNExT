@@ -22,7 +22,7 @@ namespace Scynapse.Storage
         /// </summary>
         public int Hash(ReadOnlySpan<byte> data)
         {
-            // implementation restored from Scynapse v3.7.2: https://github.com/dotnet/scynapse/blob/b24e446abfd883f0e4ed614f5267eaa3331548dc/src/AdoNet/Scynapse.Persistence.AdoNet/Storage/Provider/ScynapseDefaultHasher.cs
+            // implementation restored from Scynapse v3.7.2: https://github.com/Scynapse/Core/blob/b24e446abfd883f0e4ed614f5267eaa3331548dc/src/AdoNet/Scynapse.Persistence.AdoNet/Storage/Provider/ScynapseDefaultHasher.cs
             return unchecked((int)JenkinsHash.ComputeHash(data));
         }
     }

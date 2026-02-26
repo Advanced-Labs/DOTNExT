@@ -20,7 +20,7 @@ public class CassandraClusteringOptions
     /// configured <see cref="ClusterMembershipOptions.DefunctSiloExpiration"/> value.
     /// </summary>
     /// <remarks>
-    /// Initial implementation of https://github.com/dotnet/scynapse/issues/9164 in that it only affects silo entries
+    /// Initial implementation of https://github.com/Scynapse/Core/issues/9164 in that it only affects silo entries
     /// that are updated with IAmAlive and will not attempt to update, for instance, the entire membership table. It
     /// also will not affect membership tables that have already been created, since it uses the Cassandra table-level
     /// <c>default_time_to_live</c>.

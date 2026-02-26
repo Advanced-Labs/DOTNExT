@@ -131,7 +131,7 @@ namespace Scynapse.Serialization.UnitTests
         }
 
         /// <summary>
-        /// Regression test for https://github.com/dotnet/scynapse/issues/8503
+        /// Regression test for https://github.com/Scynapse/Core/issues/8503
         /// </summary>
         [Fact]
         public void PooledBuffer_WriteTwice()

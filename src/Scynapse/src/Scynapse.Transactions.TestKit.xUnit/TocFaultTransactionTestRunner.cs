@@ -9,7 +9,7 @@ namespace Scynapse.Transactions.TestKit.xUnit
         protected TocFaultTransactionTestRunnerxUnit(IGrainFactory grainFactory, ITestOutputHelper output)
         : base(grainFactory, output.WriteLine) { }
 
-        [SkippableTheory(Skip = "https://github.com/dotnet/scynapse/issues/9556")]
+        [SkippableTheory(Skip = "https://github.com/Scynapse/Core/issues/9556")]
         [InlineData(TransactionTestConstants.SingleStateTransactionalGrain, TransactionTestConstants.MaxCoordinatedTransactions)]
         [InlineData(TransactionTestConstants.DoubleStateTransactionalGrain, TransactionTestConstants.MaxCoordinatedTransactions / 2)]
         [InlineData(TransactionTestConstants.MaxStateTransactionalGrain, 1)]

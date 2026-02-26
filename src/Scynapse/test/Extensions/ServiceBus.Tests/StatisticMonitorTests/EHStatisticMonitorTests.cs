@@ -70,7 +70,7 @@ namespace ServiceBus.Tests.MonitorTests
             seed = new Random();
         }
 
-        [Fact(Skip = "https://github.com/dotnet/scynapse/issues/4594"), TestCategory("Functional")]
+        [Fact(Skip = "https://github.com/Scynapse/Core/issues/4594"), TestCategory("Functional")]
         public async Task EHStatistics_MonitorCalledAccordingly()
         {
             var streamId = new FullStreamIdentity(Guid.NewGuid(), StreamNamespace, StreamProviderName);

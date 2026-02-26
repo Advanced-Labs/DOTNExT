@@ -115,7 +115,7 @@ All directories under `src/Scynapse/` that contained "Orleans" were renamed to "
 | **Diagnostic IDs** | `ORLEANS0001`-`0013` | `ORLEANS0001` -> `SCYNAPSE0001` |
 | **Experimental flags** | `ORLEANSEXP001`-`004` | `ORLEANSEXP001` -> `SCYNAPSEEXP001` |
 | **Environment variables** | `ORLEANS_CLUSTER_ID`, `ORLEANS_SERVICE_ID` | `SCYNAPSE_CLUSTER_ID`, `SCYNAPSE_SERVICE_ID` |
-| **GitHub URLs** | All repo links | `github.com/dotnet/orleans` -> `github.com/dotnet/scynapse` |
+| **GitHub URLs** | All repo links | `github.com/dotnet/orleans` -> `github.com/Scynapse/Core` |
 | **SQL schemas** | 29 SQL files | Table/procedure references updated |
 | **Comments & XML docs** | Thousands | All "Orleans" references in comments updated |
 | **CI/CD configs** | 7 files | `.azure/`, `.github/` configs updated |

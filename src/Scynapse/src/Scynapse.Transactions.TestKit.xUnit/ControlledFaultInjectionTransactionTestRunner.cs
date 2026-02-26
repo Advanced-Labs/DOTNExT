@@ -22,7 +22,7 @@ namespace Scynapse.Transactions.TestKit.xUnit
             return base.SingleGrainWriteTransaction();
         }
 
-        [SkippableTheory(Skip = "https://github.com/dotnet/scynapse/issues/9551")]
+        [SkippableTheory(Skip = "https://github.com/Scynapse/Core/issues/9551")]
         [InlineData(TransactionFaultInjectPhase.AfterPrepare, FaultInjectionType.Deactivation)]
         [InlineData(TransactionFaultInjectPhase.AfterConfirm, FaultInjectionType.Deactivation)]
         [InlineData(TransactionFaultInjectPhase.AfterPrepared, FaultInjectionType.Deactivation)]

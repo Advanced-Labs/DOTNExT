@@ -276,7 +276,7 @@ namespace Scynapse.Tests.SqlUtils
             private static SiloAddress GetSiloAddress(IDataRecord record, string portName)
             {
                 //Use the GetInt32 method instead of the generic GetValue<TValue> version to retrieve the value from the data record
-                //GetValue<int> causes an InvalidCastException with orcale data provider. See https://github.com/dotnet/scynapse/issues/3561
+                //GetValue<int> causes an InvalidCastException with orcale data provider. See https://github.com/Scynapse/Core/issues/3561
                 int port = record.GetInt32(portName);
                 int generation = record.GetInt32(nameof(Columns.Generation));
                 string address = record.GetValue<string>(nameof(Columns.Address));

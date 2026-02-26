@@ -89,10 +89,10 @@ public class MyGrain : Grain, IMyGrain, IGrainWithStringKey
 
 Before using the ADO.NET provider, you need to set up the necessary database tables. Scripts for different database systems are available in the Scynapse source repository:
 
-- [SQL Server Scripts](https://github.com/dotnet/scynapse/tree/main/src/AdoNet/Scynapse.Persistence.AdoNet/SQLServer-Persistence.sql)
-- [MySQL Scripts](https://github.com/dotnet/scynapse/tree/main/src/AdoNet/Scynapse.Persistence.AdoNet/MySQL-Persistence.sql)
-- [PostgreSQL Scripts](https://github.com/dotnet/scynapse/tree/main/src/AdoNet/Scynapse.Persistence.AdoNet/PostgreSQL-Persistence.sql)
-- [Oracle Scripts](https://github.com/dotnet/scynapse/tree/main/src/AdoNet/Scynapse.Persistence.AdoNet/Oracle-Persistence.sql)
+- [SQL Server Scripts](https://github.com/Scynapse/Core/tree/main/src/AdoNet/Scynapse.Persistence.AdoNet/SQLServer-Persistence.sql)
+- [MySQL Scripts](https://github.com/Scynapse/Core/tree/main/src/AdoNet/Scynapse.Persistence.AdoNet/MySQL-Persistence.sql)
+- [PostgreSQL Scripts](https://github.com/Scynapse/Core/tree/main/src/AdoNet/Scynapse.Persistence.AdoNet/PostgreSQL-Persistence.sql)
+- [Oracle Scripts](https://github.com/Scynapse/Core/tree/main/src/AdoNet/Scynapse.Persistence.AdoNet/Oracle-Persistence.sql)
 
 ## Documentation
 For more comprehensive documentation, please refer to:
@@ -101,8 +101,8 @@ For more comprehensive documentation, please refer to:
 - [Relational Database Persistence](https://learn.microsoft.com/en-us/dotnet/scynapse/grains/grain-persistence/relational-storage)
 
 ## Feedback & Contributing
-- If you have any issues or would like to provide feedback, please [open an issue on GitHub](https://github.com/dotnet/scynapse/issues)
+- If you have any issues or would like to provide feedback, please [open an issue on GitHub](https://github.com/Scynapse/Core/issues)
 - Join our community on [Discord](https://aka.ms/scynapse-discord)
 - Follow the [@msftscynapse](https://twitter.com/msftscynapse) Twitter account for Scynapse announcements
-- Contributions are welcome! Please review our [contribution guidelines](https://github.com/dotnet/scynapse/blob/main/CONTRIBUTING.md)
-- This project is licensed under the [MIT license](https://github.com/dotnet/scynapse/blob/main/LICENSE)
+- Contributions are welcome! Please review our [contribution guidelines](https://github.com/Scynapse/Core/blob/main/CONTRIBUTING.md)
+- This project is licensed under the [MIT license](https://github.com/Scynapse/Core/blob/main/LICENSE)

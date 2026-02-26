@@ -7,7 +7,7 @@
 
     // This class forms a code generation test case.
     // If the code generator does generate any code for the async state machine in the Product
-    // method, it must generate valid C# syntax. See: https://github.com/dotnet/scynapse/pull/3639
+    // method, it must generate valid C# syntax. See: https://github.com/Scynapse/Core/pull/3639
     public class FeaturePopulatorCodeGenTestClass : CodeGenTestPoco, FeaturePopulatorCodeGenTestClass.IFactory<int, double>
     {
         public interface IFactory<TInput, TOutput>

@@ -23,7 +23,7 @@ Implementation notes:
 
 7) The implementation follows the Extended Scynapse membership protocol. For more information, see at:
         https://learn.microsoft.com/dotnet/scynapse/implementation/cluster-management
-        https://github.com/dotnet/scynapse/blob/main/src/Scynapse.Core/SystemTargetInterfaces/IMembershipTable.cs
+        https://github.com/Scynapse/Core/blob/main/src/Scynapse.Core/SystemTargetInterfaces/IMembershipTable.cs
 */
 
 

@@ -62,7 +62,7 @@ namespace Tester.Forwarding
             this.EnsurePreconditionsMet();
         }
 
-        [Fact(Skip = "https://github.com/dotnet/scynapse/issues/6423"), TestCategory("Forward"), TestCategory("Functional")]
+        [Fact(Skip = "https://github.com/Scynapse/Core/issues/6423"), TestCategory("Forward"), TestCategory("Functional")]
         public async Task SiloGracefulShutdown_ForwardPendingRequest()
         {
             var grain = await GetLongRunningTaskGrainOnSecondary<bool>();

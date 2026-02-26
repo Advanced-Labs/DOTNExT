@@ -26,7 +26,7 @@
 
   <PropertyGroup>
     <SourceLinkCreate>true</SourceLinkCreate>
-    <SourceLinkOriginUrl>https://github.com/dotnet/scynapse</SourceLinkOriginUrl>
+    <SourceLinkOriginUrl>https://github.com/Scynapse/Core</SourceLinkOriginUrl>
   </PropertyGroup>
 
   <ItemGroup>

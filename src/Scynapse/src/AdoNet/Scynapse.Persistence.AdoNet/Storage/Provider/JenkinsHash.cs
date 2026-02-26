@@ -5,7 +5,7 @@ namespace Scynapse.Storage
     // Based on the version in http://home.comcast.net/~bretm/hash/7.html, which is based on that
     // in http://burtleburtle.net/bob/hash/evahash.html.
     // Note that we only use the version that takes three ulongs, which was written by the Scynapse team.
-    // implementation restored from Scynapse v3.7.2: https://github.com/dotnet/scynapse/blob/b24e446abfd883f0e4ed614f5267eaa3331548dc/src/Scynapse.Core.Abstractions/IDs/JenkinsHash.cs,
+    // implementation restored from Scynapse v3.7.2: https://github.com/Scynapse/Core/blob/b24e446abfd883f0e4ed614f5267eaa3331548dc/src/Scynapse.Core.Abstractions/IDs/JenkinsHash.cs,
     // trimmed and slightly optimized
     internal static class JenkinsHash
     {

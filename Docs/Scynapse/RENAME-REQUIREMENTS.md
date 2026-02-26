@@ -61,19 +61,21 @@ Four scripts handle different aspects of the rename. All live in `Docs/Scynapse/
 
 | # | Old Pattern | New Pattern | Scope |
 |---|-------------|-------------|-------|
-| 1 | `Microsoft.Orleans` | `Genesa.Scynapse` | NuGet package IDs |
-| 2 | `microsoft.orleans` | `genesa.scynapse` | Lowercase variant |
-| 3 | `MICROSOFT.ORLEANS` | `GENESA.SCYNAPSE` | Uppercase variant |
-| 4 | `NewOrleans` | `Scynapse` | Previous name remnants |
-| 5 | `NEWORLEANS` | `SCYNAPSE` | Previous name uppercase |
-| 6 | `neworleans` | `scynapse` | Previous name lowercase |
-| 7 | `new-orleans` | `scynapse` | Kebab-case |
-| 8 | `new_orleans` | `scynapse` | Snake_case |
-| 9 | `Orleans` | `Scynapse` | Main rename (PascalCase) |
-| 10 | `orleans` | `scynapse` | Lowercase (URLs, paths, vars) |
-| 11 | `ORLEANS` | `SCYNAPSE` | Uppercase (diag IDs, env vars) |
+| 1 | `github.com/dotnet/orleans` | `github.com/Scynapse/Core` | GitHub repo URLs |
+| 2 | `github.com/dotnet/Orleans` | `github.com/Scynapse/Core` | GitHub repo URLs (PascalCase) |
+| 3 | `Microsoft.Orleans` | `Genesa.Scynapse` | NuGet package IDs |
+| 4 | `microsoft.orleans` | `genesa.scynapse` | Lowercase variant |
+| 5 | `MICROSOFT.ORLEANS` | `GENESA.SCYNAPSE` | Uppercase variant |
+| 6 | `NewOrleans` | `Scynapse` | Previous name remnants |
+| 7 | `NEWORLEANS` | `SCYNAPSE` | Previous name uppercase |
+| 8 | `neworleans` | `scynapse` | Previous name lowercase |
+| 9 | `new-orleans` | `scynapse` | Kebab-case |
+| 10 | `new_orleans` | `scynapse` | Snake_case |
+| 11 | `Orleans` | `Scynapse` | Main rename (PascalCase) |
+| 12 | `orleans` | `scynapse` | Lowercase (paths, vars) |
+| 13 | `ORLEANS` | `SCYNAPSE` | Uppercase (diag IDs, env vars) |
 
-**Critical: Order matters!** More-specific patterns (e.g., `Microsoft.Orleans`) must come before the general `Orleans` pattern, otherwise `Orleans` would be replaced first, creating `Microsoft.Scynapse` instead of the correct `Genesa.Scynapse`.
+**Critical: Order matters!** More-specific patterns must come before general ones. The GitHub URL rule (`github.com/dotnet/orleans` → `github.com/Scynapse/Core`) MUST precede the generic `orleans → scynapse` rule, otherwise URLs would become `github.com/dotnet/scynapse` (wrong org/repo). Similarly, `Microsoft.Orleans` must precede bare `Orleans` to produce `Genesa.Scynapse` instead of `Microsoft.Scynapse`.
 
 **What this script CANNOT handle (and why):**
 
@@ -194,7 +196,7 @@ git add -A && git commit -m "Rename Orleans -> Scynapse / Microsoft.Orleans -> G
 | Diagnostic IDs (`ORLEANS0xxx`) | All renamed to `SCYNAPSE0xxx` |
 | Experimental flags (`ORLEANSEXPxxx`) | All renamed to `SCYNAPSEEXPxxx` |
 | Environment variables (`ORLEANS_*`) | All renamed to `SCYNAPSE_*` |
-| GitHub URLs (`github.com/dotnet/orleans`) | All renamed to `github.com/dotnet/scynapse` |
+| GitHub URLs (`github.com/dotnet/orleans`) | All renamed to `github.com/Scynapse/Core` |
 | Comments and XML docs | All updated |
 | SQL file content | All updated |
 | Build configs (`.props`, `.targets`) | All updated |

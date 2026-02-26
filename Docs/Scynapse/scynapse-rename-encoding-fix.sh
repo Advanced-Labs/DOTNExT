@@ -38,6 +38,8 @@ PROJECT_ROOT="${PROJECT_ROOT:-$(cd "$(dirname "$0")/../.." && pwd)/src/Scynapse}
 
 # Same replacement mapping as scynapse-rename-execute.sh (order matters!)
 REPLACEMENTS=(
+    "github.com/dotnet/orleans|github.com/Scynapse/Core"
+    "github.com/dotnet/Orleans|github.com/Scynapse/Core"
     "Microsoft.Orleans|Genesa.Scynapse"
     "microsoft.orleans|genesa.scynapse"
     "MICROSOFT.ORLEANS|GENESA.SCYNAPSE"

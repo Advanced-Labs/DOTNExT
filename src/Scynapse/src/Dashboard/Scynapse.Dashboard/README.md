@@ -112,8 +112,8 @@ For more comprehensive documentation, please refer to:
 - [Server configuration](https://learn.microsoft.com/en-us/dotnet/scynapse/host/configuration-guide/server-configuration)
 
 ## Feedback & Contributing
-- If you have any issues or would like to provide feedback, please [open an issue on GitHub](https://github.com/dotnet/scynapse/issues)
+- If you have any issues or would like to provide feedback, please [open an issue on GitHub](https://github.com/Scynapse/Core/issues)
 - Join our community on [Discord](https://aka.ms/scynapse-discord)
 - Follow the [@msftscynapse](https://twitter.com/msftscynapse) Twitter account for Scynapse announcements
-- Contributions are welcome! Please review our [contribution guidelines](https://github.com/dotnet/scynapse/blob/main/CONTRIBUTING.md)
-- This project is licensed under the [MIT license](https://github.com/dotnet/scynapse/blob/main/LICENSE)
+- Contributions are welcome! Please review our [contribution guidelines](https://github.com/Scynapse/Core/blob/main/CONTRIBUTING.md)
+- This project is licensed under the [MIT license](https://github.com/Scynapse/Core/blob/main/LICENSE)

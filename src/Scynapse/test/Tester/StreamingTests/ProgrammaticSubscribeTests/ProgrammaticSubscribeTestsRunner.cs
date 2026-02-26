@@ -71,7 +71,7 @@ namespace Tester.StreamingTests
             await Task.WhenAll(tasks);
         }
 
-        [SkippableFact(Skip = "https://github.com/dotnet/scynapse/issues/5635")]
+        [SkippableFact(Skip = "https://github.com/Scynapse/Core/issues/5635")]
         public async Task StreamingTests_Consumer_Producer_UnSubscribe()
         {
             var subscriptionManager = new SubscriptionManager(this.fixture.HostedCluster);
@@ -165,7 +165,7 @@ namespace Tester.StreamingTests
         }
 
 
-        [SkippableFact(Skip = "https://github.com/dotnet/scynapse/issues/5650")]
+        [SkippableFact(Skip = "https://github.com/Scynapse/Core/issues/5650")]
         public async Task StreamingTests_Consumer_Producer_SubscribeToTwoStream_MessageWithPolymorphism()
         {
             var subscriptionManager = new SubscriptionManager(this.fixture.HostedCluster);

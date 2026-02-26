@@ -62,7 +62,7 @@ namespace Tester.StreamingTests.PlugableQueueBalancerTests
             this.fixture = fixture;
         }
 
-        [Fact(Skip = "https://github.com/dotnet/scynapse/issues/4317"), TestCategory("BVT")]
+        [Fact(Skip = "https://github.com/Scynapse/Core/issues/4317"), TestCategory("BVT")]
         public Task PluggableQueueBalancerTest_ShouldUseInjectedQueueBalancerAndBalanceCorrectly()
         {
             return base.ShouldUseInjectedQueueBalancerAndBalanceCorrectly(this.fixture, StreamProviderName, siloCount, totalQueueCount);

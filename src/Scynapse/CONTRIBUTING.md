@@ -6,9 +6,9 @@ Some notes and guidelines for developers who want to contribute to Scynapse.
 
 Here are some pointers for anyone looking for mini-features and work items that would make a positive contribution to Scynapse.
 
-These are just a few ideas, so if you think of something else that would be useful, then spin up a [discussion thread](https://github.com/dotnet/scynapse/issues) on GitHub to discuss the proposal, and go for it.
+These are just a few ideas, so if you think of something else that would be useful, then spin up a [discussion thread](https://github.com/Scynapse/Core/issues) on GitHub to discuss the proposal, and go for it.
 
-* **[Scynapse GitHub Repository](https://github.com/dotnet/scynapse)**
+* **[Scynapse GitHub Repository](https://github.com/Scynapse/Core)**
 
 Pull requests are always welcome.
 

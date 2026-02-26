@@ -49,7 +49,7 @@ namespace Tester.AzureUtils.TimerTests
             await Test_Reminders_Basic_StopByRef();
         }
 
-        [SkippableFact(Skip = "https://github.com/dotnet/scynapse/issues/9337"), TestCategory("Functional")]
+        [SkippableFact(Skip = "https://github.com/Scynapse/Core/issues/9337"), TestCategory("Functional")]
         public async Task Rem_Azure_Basic_ListOps()
         {
             await Test_Reminders_Basic_ListOps();
@@ -69,7 +69,7 @@ namespace Tester.AzureUtils.TimerTests
             await Test_Reminders_ReminderNotFound();
         }
 
-        [SkippableFact(Skip = "https://github.com/dotnet/scynapse/issues/9344"), TestCategory("Functional")]
+        [SkippableFact(Skip = "https://github.com/Scynapse/Core/issues/9344"), TestCategory("Functional")]
         public async Task Rem_Azure_Basic()
         {
             // start up a test grain and get the period that it's programmed to use.
@@ -90,7 +90,7 @@ namespace Tester.AzureUtils.TimerTests
             Assert.Equal(last, curr);
         }
 
-        [SkippableFact(Skip = "https://github.com/dotnet/scynapse/issues/9557"), TestCategory("Functional")]
+        [SkippableFact(Skip = "https://github.com/Scynapse/Core/issues/9557"), TestCategory("Functional")]
         public async Task Rem_Azure_Basic_Restart()
         {
             IReminderTestGrain2 grain = this.GrainFactory.GetGrain<IReminderTestGrain2>(Guid.NewGuid());
@@ -279,7 +279,7 @@ namespace Tester.AzureUtils.TimerTests
             // TODO: write tests where period of a reminder is changed
         }
 
-        [SkippableFact(Skip = "https://github.com/dotnet/scynapse/issues/9557"), TestCategory("Functional")]
+        [SkippableFact(Skip = "https://github.com/Scynapse/Core/issues/9557"), TestCategory("Functional")]
         public async Task Rem_Azure_GT_Basic()
         {
             IReminderTestGrain2 g1 = this.GrainFactory.GetGrain<IReminderTestGrain2>(Guid.NewGuid());
@@ -304,7 +304,7 @@ namespace Tester.AzureUtils.TimerTests
             Assert.Equal(4, curr2); // CopyGrain fault
         }
 
-        [SkippableFact(Skip = "https://github.com/dotnet/scynapse/issues/4319"), TestCategory("Functional")]
+        [SkippableFact(Skip = "https://github.com/Scynapse/Core/issues/4319"), TestCategory("Functional")]
         public async Task Rem_Azure_GT_1F1J_MultiGrain()
         {
             List<SiloHandle> silos = await this.HostedCluster.StartAdditionalSilosAsync(1);

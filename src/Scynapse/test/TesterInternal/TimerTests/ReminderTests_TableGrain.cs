@@ -57,7 +57,7 @@ namespace UnitTests.TimerTests
         /// <summary>
         /// Tests basic reminder list operations including creation and retrieval.
         /// </summary>
-        [Fact(Skip = "https://github.com/dotnet/scynapse/issues/9555")]
+        [Fact(Skip = "https://github.com/Scynapse/Core/issues/9555")]
         public async Task Rem_Grain_Basic_ListOps()
         {
             await Test_Reminders_Basic_ListOps();
@@ -78,7 +78,7 @@ namespace UnitTests.TimerTests
         /// <summary>
         /// Tests single join scenario with multiple grains and multiple reminders.
         /// </summary>
-        [SkippableFact(Skip = "https://github.com/dotnet/scynapse/issues/4318")]
+        [SkippableFact(Skip = "https://github.com/Scynapse/Core/issues/4318")]
         public async Task Rem_Grain_1J_MultiGrainMultiReminders()
         {
             await Test_Reminders_1J_MultiGrainMultiReminders();

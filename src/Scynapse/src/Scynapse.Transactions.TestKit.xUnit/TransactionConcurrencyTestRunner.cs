@@ -14,7 +14,7 @@ namespace Scynapse.Transactions.TestKit.xUnit
         /// </summary>
         /// <param name="grainStates"></param>
         /// <returns></returns>
-        [SkippableTheory(Skip = "https://github.com/dotnet/scynapse/issues/9554")]
+        [SkippableTheory(Skip = "https://github.com/Scynapse/Core/issues/9554")]
         [InlineData(TransactionTestConstants.SingleStateTransactionalGrain)]
         [InlineData(TransactionTestConstants.DoubleStateTransactionalGrain)]
         [InlineData(TransactionTestConstants.MaxStateTransactionalGrain)]
@@ -28,7 +28,7 @@ namespace Scynapse.Transactions.TestKit.xUnit
         /// </summary>
         /// <param name="grainStates"></param>
         /// <returns></returns>
-        [SkippableTheory(Skip = "https://github.com/dotnet/scynapse/issues/9554")]
+        [SkippableTheory(Skip = "https://github.com/Scynapse/Core/issues/9554")]
         [InlineData(TransactionTestConstants.SingleStateTransactionalGrain)]
         [InlineData(TransactionTestConstants.DoubleStateTransactionalGrain)]
         [InlineData(TransactionTestConstants.MaxStateTransactionalGrain)]
@@ -42,7 +42,7 @@ namespace Scynapse.Transactions.TestKit.xUnit
         /// </summary>
         /// <param name="grainStates"></param>
         /// <returns></returns>
-        [SkippableTheory(Skip = "https://github.com/dotnet/scynapse/issues/9554")]
+        [SkippableTheory(Skip = "https://github.com/Scynapse/Core/issues/9554")]
         [InlineData(TransactionTestConstants.SingleStateTransactionalGrain)]
         [InlineData(TransactionTestConstants.DoubleStateTransactionalGrain)]
         [InlineData(TransactionTestConstants.MaxStateTransactionalGrain)]

@@ -141,7 +141,7 @@ namespace Scynapse.Tests.SqlUtils
                     StartAt = record.GetDateTimeValue(nameof(DbStoredQueries.Columns.StartTime)),
 
                     //Use the GetInt64 method instead of the generic GetValue<TValue> version to retrieve the value from the data record
-                    //GetValue<int> causes an InvalidCastException with oracle data provider. See https://github.com/dotnet/scynapse/issues/3561
+                    //GetValue<int> causes an InvalidCastException with oracle data provider. See https://github.com/Scynapse/Core/issues/3561
                     Period = TimeSpan.FromMilliseconds(record.GetInt64(nameof(DbStoredQueries.Columns.Period))),
                     ETag = DbStoredQueries.Converters.GetVersion(record).ToString()
                 };

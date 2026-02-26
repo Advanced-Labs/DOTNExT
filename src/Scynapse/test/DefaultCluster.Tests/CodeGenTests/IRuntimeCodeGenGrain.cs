@@ -8,7 +8,7 @@ namespace Tester.CodeGenTests
     using Scynapse;
     using Scynapse.Providers;
 
-    // Regression test for explicit interface method implementations https://github.com/dotnet/scynapse/issues/8991
+    // Regression test for explicit interface method implementations https://github.com/Scynapse/Core/issues/8991
     public interface IExplicitInterfaceMethodImplementationTestGenericBase<in T>
     {
         Task M(T arg);
@@ -31,7 +31,7 @@ namespace Tester.CodeGenTests
         }
     }
 
-    // End regression test for https://github.com/dotnet/scynapse/issues/8991
+    // End regression test for https://github.com/Scynapse/Core/issues/8991
 
     public interface IGrainWithNonPublicMethods : IGrainWithGuidKey
     {

@@ -87,7 +87,7 @@ namespace Tester.AzureUtils.Streaming
             }
         }
 
-        [SkippableFact(Skip = "https://github.com/dotnet/scynapse/issues/5639"), TestCategory("Functional"), TestCategory("AzureStorage"), TestCategory("Storage"), TestCategory("Streaming")]
+        [SkippableFact(Skip = "https://github.com/Scynapse/Core/issues/5639"), TestCategory("Functional"), TestCategory("AzureStorage"), TestCategory("Storage"), TestCategory("Streaming")]
         public async Task AQStreamProducerOnDroppedClientTest()
         {
             logger.LogInformation("************************ AQStreamProducerOnDroppedClientTest *********************************");

@@ -10,11 +10,11 @@
     <Product>Microsoft Scynapse</Product>
     <Copyright>© Microsoft Corporation. All rights reserved.</Copyright>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <PackageProjectUrl>https://github.com/dotnet/scynapse</PackageProjectUrl>
+    <PackageProjectUrl>https://github.com/Scynapse/Core</PackageProjectUrl>
     <PackageIcon>logo_128.png</PackageIcon>
     <PackageTags>Scynapse Cloud-Computing Actor-Model Actors Distributed-Systems C# .NET</PackageTags>
     <PackageReleaseNotes></PackageReleaseNotes>
-    <PublicRepositoryUrl>https://github.com/dotnet/scynapse</PublicRepositoryUrl>
+    <PublicRepositoryUrl>https://github.com/Scynapse/Core</PublicRepositoryUrl>
     <PrivateRepositoryUrl>$(RepositoryUrl)</PrivateRepositoryUrl>
     <RepositoryUrl>$(RepositoryUrl)</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
