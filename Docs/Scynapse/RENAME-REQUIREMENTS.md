@@ -7,6 +7,43 @@
 **Date Assessed:** 2026-02-26
 **Scope:** `src/Scynapse/` directory (3,344 files, 772 directories)
 
+### Rename Decision
+
+**Full rename: Orleans -> Scynapse, Microsoft.Orleans -> Genesa.Scynapse**
+
+### Scripts
+
+Two scripts handle the rename. Run from `Docs/Scynapse/`:
+
+```bash
+# 1. AUDIT - run before AND after rename to verify
+./scynapse-rename-audit.sh              # Full report
+./scynapse-rename-audit.sh --summary    # Counts only
+
+# 2. EXECUTE - performs the actual rename
+./scynapse-rename-execute.sh --dry-run  # Preview changes (ALWAYS run first)
+./scynapse-rename-execute.sh --execute  # Apply changes
+./scynapse-rename-execute.sh --phase 1  # Dirs only
+./scynapse-rename-execute.sh --phase 2  # Files only
+./scynapse-rename-execute.sh --phase 3  # Content only
+```
+
+### Replacement Mapping (applied in order)
+
+| # | Old Pattern | New Pattern | Scope |
+|---|-------------|-------------|-------|
+| 1 | `Microsoft.Orleans` | `Genesa.Scynapse` | NuGet package IDs |
+| 2 | `NewOrleans` | `Scynapse` | Previous name remnants |
+| 3 | `NEWORLEANS` | `SCYNAPSE` | Previous name uppercase |
+| 4 | `Orleans` | `Scynapse` | Main rename (PascalCase) |
+| 5 | `orleans` | `scynapse` | Lowercase (URLs, paths, vars) |
+| 6 | `ORLEANS` | `SCYNAPSE` | Uppercase (diag IDs, env vars) |
+
+### Manual Items (not scriptable)
+- Binary files: `OrleansLogo.png`, `logo_128.png` -- need image replacement
+- `.verified.cs` snapshot files may need test regeneration
+- SQL migration scripts may need database-side updates
+
 ### Summary of Remaining "Orleans" References
 
 | Category | Count | Notes |
