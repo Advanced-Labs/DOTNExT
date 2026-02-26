@@ -1,427 +1,274 @@
 # Scynapse Project Rename Requirements
 
-## STATUS: Orleans References Still Pervasive
+## STATUS: Rename Complete (Text) / Binary Logos Pending
 
 **Previous Rename:** NewOrleans -> Scynapse (completed 2026-02-26)
-**Current Issue:** The original Orleans framework naming is still present throughout the entire codebase
+**Full Rename:** Orleans -> Scynapse / Microsoft.Orleans -> Genesa.Scynapse (completed 2026-02-26)
 **Date Assessed:** 2026-02-26
 **Scope:** `src/Scynapse/` directory (3,344 files, 772 directories)
 
-### Rename Decision
+### Current State
 
-**Full rename: Orleans -> Scynapse, Microsoft.Orleans -> Genesa.Scynapse**
+| Metric | Before Rename | After Rename |
+|--------|--------------|--------------|
+| Directories with "Orleans" in name | 139 | **0** |
+| Files with "Orleans" in filename | 230 | **0** |
+| Files with "Orleans" in content (text) | 2,891 | **0** |
+| Binary files with "Orleans" metadata | 3 | **3** (logos, manual replacement) |
+| Non-UTF-8 files with "Orleans" | 1 | **0** (fixed manually) |
 
-### Scripts
+---
 
-Two scripts handle the rename. Run from `Docs/Scynapse/`:
+## Script Inventory
+
+Four scripts handle different aspects of the rename. All live in `Docs/Scynapse/` and should be run from that directory.
+
+### 1. `scynapse-rename-audit.sh` — Discovery & Counting
+
+**Purpose:** Find all remaining Orleans references. Run BEFORE and AFTER rename to verify completeness.
 
 ```bash
-# 1. AUDIT - run before AND after rename to verify
 ./scynapse-rename-audit.sh              # Full report
 ./scynapse-rename-audit.sh --summary    # Counts only
-
-# 2. EXECUTE - performs the actual rename
-./scynapse-rename-execute.sh --dry-run  # Preview changes (ALWAYS run first)
-./scynapse-rename-execute.sh --execute  # Apply changes
-./scynapse-rename-execute.sh --phase 1  # Dirs only
-./scynapse-rename-execute.sh --phase 2  # Files only
-./scynapse-rename-execute.sh --phase 3  # Content only
+./scynapse-rename-audit.sh --output report  # Save to report files
 ```
 
-### Replacement Mapping (applied in order)
+**What it checks:** Directory names, file names, file content (by extension), binary files, GitHub URLs, NuGet package IDs, diagnostic IDs, environment variables, SQL schema references.
+
+**Limitations:** Only searches text files by extension whitelist. Cannot detect encoding issues — non-UTF-8 files show up in content grep but `grep` may silently fail to match inside them.
+
+---
+
+### 2. `scynapse-rename-execute.sh` — Bulk Text Rename (3 Phases)
+
+**Purpose:** Perform the actual find-and-replace across the entire codebase.
+
+```bash
+./scynapse-rename-execute.sh --dry-run      # Preview changes (ALWAYS run first)
+./scynapse-rename-execute.sh --execute       # Apply changes
+./scynapse-rename-execute.sh --phase 1       # Dirs only
+./scynapse-rename-execute.sh --phase 2       # Files only
+./scynapse-rename-execute.sh --phase 3       # Content only
+```
+
+**Phase 1 — Directory renames:** Finds directories with `Orleans` in the name, processes deepest-first (to avoid renaming parents before children), uses `git mv` where possible.
+
+**Phase 2 — File renames:** Finds files with `Orleans` in the name, renames via `git mv`.
+
+**Phase 3 — Content replacement:** Applies ordered `sed` substitutions across all text files matching the extension whitelist. All replacement patterns are applied in a single `sed` pass per file for efficiency.
+
+**Replacement Mapping (applied in this order):**
 
 | # | Old Pattern | New Pattern | Scope |
 |---|-------------|-------------|-------|
 | 1 | `Microsoft.Orleans` | `Genesa.Scynapse` | NuGet package IDs |
-| 2 | `NewOrleans` | `Scynapse` | Previous name remnants |
-| 3 | `NEWORLEANS` | `SCYNAPSE` | Previous name uppercase |
-| 4 | `Orleans` | `Scynapse` | Main rename (PascalCase) |
-| 5 | `orleans` | `scynapse` | Lowercase (URLs, paths, vars) |
-| 6 | `ORLEANS` | `SCYNAPSE` | Uppercase (diag IDs, env vars) |
+| 2 | `microsoft.orleans` | `genesa.scynapse` | Lowercase variant |
+| 3 | `MICROSOFT.ORLEANS` | `GENESA.SCYNAPSE` | Uppercase variant |
+| 4 | `NewOrleans` | `Scynapse` | Previous name remnants |
+| 5 | `NEWORLEANS` | `SCYNAPSE` | Previous name uppercase |
+| 6 | `neworleans` | `scynapse` | Previous name lowercase |
+| 7 | `new-orleans` | `scynapse` | Kebab-case |
+| 8 | `new_orleans` | `scynapse` | Snake_case |
+| 9 | `Orleans` | `Scynapse` | Main rename (PascalCase) |
+| 10 | `orleans` | `scynapse` | Lowercase (URLs, paths, vars) |
+| 11 | `ORLEANS` | `SCYNAPSE` | Uppercase (diag IDs, env vars) |
 
-### Manual Items (not scriptable)
-- Binary files: `OrleansLogo.png`, `logo_128.png` -- need image replacement
-- `.verified.cs` snapshot files may need test regeneration
-- SQL migration scripts may need database-side updates
+**Critical: Order matters!** More-specific patterns (e.g., `Microsoft.Orleans`) must come before the general `Orleans` pattern, otherwise `Orleans` would be replaced first, creating `Microsoft.Scynapse` instead of the correct `Genesa.Scynapse`.
 
-### Summary of Remaining "Orleans" References
+**What this script CANNOT handle (and why):**
 
-| Category | Count | Notes |
-|----------|-------|-------|
-| Directories with "Orleans" in name | 139 (direct match) | Core framework dirs like `Orleans.Core/`, `Orleans.Runtime/`, etc. |
-| Files with "Orleans" in filename | 230 | `.csproj`, `.cs`, `.targets`, `.props`, `.slnx`, `.sln`, `.png`, `.fsproj` |
-| Files containing "Orleans" in content | 2,891 | 86% of all files in the project |
-| Total line occurrences (PascalCase) | ~16,768 | `Orleans` in namespaces, classes, comments, configs |
-| Total line occurrences (UPPERCASE) | ~220 | `ORLEANS` in diagnostic IDs, env vars, constants |
-| Remaining "NewOrleans" references | 1 filename + 1 content line | Should be cleaned up |
-
----
-
-## 1. Case Variant Breakdown
-
-### `Orleans` (PascalCase) - ~16,768 occurrences across 2,874 files
-The dominant form. Appears in:
-- Namespace declarations (`namespace Orleans.*`)
-- Class/type names (`OrleansException`, `OrleansJsonSerializer`, etc.)
-- Project names and assembly names (`Orleans.Core`, `Orleans.Runtime`, etc.)
-- Package IDs (`Microsoft.Orleans.*`)
-- Solution file references
-- Using statements
-- Comments, URLs, and documentation
-
-### `ORLEANS` (Uppercase) - ~220 occurrences across 82 files
-Appears in:
-- Diagnostic analyzer IDs: `ORLEANS0001` through `ORLEANS0013`
-- Experimental feature attributes: `ORLEANSEXP001` through `ORLEANSEXP004`
-- Environment variables: `ORLEANS_CLUSTER_ID`, `ORLEANS_SERVICE_ID`
-- Compiler define constants: `ORLEANS_CLUSTERING`
-- Analyzer release documentation
-
-### `orleans` (lowercase) - 194 files
-Appears in:
-- GitHub URLs: `github.com/dotnet/orleans/issues/*`
-- Log file paths: `orleans-grain-storage-debug.log`
-- RavenDB document paths: `orleans/{serviceId}/grains/...`
-- Variable names: `_orleansSerializer`, `_orleansPayload`
-
-### `NewOrleans` / `NEWORLEANS` - 2 instances total
-- **Filename:** `src/Scynapse.AsyncPlus/Services/NewOrleansAsyncPersistenceService.cs`
-- **Content:** `playground/PluginGrainScenarios/Grains/EventTestGrain.cs` line 6: `// NEWORLEANS EVENTS TEST GRAINS`
-
-### Binary files containing "Orleans"
-- `src/Dashboard/Orleans.Dashboard.App/src/assets/img/OrleansLogo.png` (logo image)
-- `assets/logo_128.png` (binary content contains "orleans")
+| Gap | Why | Solution |
+|-----|-----|----------|
+| **Non-UTF-8 files** | `sed` reads byte streams. UTF-16 stores `Orleans` as `O\x00r\x00l\x00e\x00a\x00n\x00s\x00` — sed patterns won't match. | Use `scynapse-rename-encoding-fix.sh` after Phase 3. |
+| **Binary files** | Images (.png, .jpg) can't be text-processed. | Manual replacement with new logo assets. |
+| **SQL database objects** | Script renames the SQL *files*, but existing *databases* still have old table/procedure names. | Write SQL migration scripts for deployed databases. |
+| **`.verified.cs` snapshots** | Content gets renamed by sed, but the generated output from re-running tests may differ from what sed produced (different formatting, ordering). | Re-run tests with `--update-snapshots` or Verify's auto-accept after rename. |
 
 ---
 
-## 2. Directories with "Orleans" in Name (139 direct matches)
+### 3. `scynapse-rename-encoding-fix.sh` — Non-UTF-8 File Handler
 
-### Core Framework Directories (src/)
+**Purpose:** Catch files that `sed` silently skipped due to non-UTF-8 encoding.
 
-| Directory | Type |
-|-----------|------|
-| `src/Orleans.Analyzers/` | Roslyn analyzers |
-| `src/Orleans.BroadcastChannel/` | Broadcast channel |
-| `src/Orleans.Client/` | Client library |
-| `src/Orleans.Clustering.Consul/` | Consul clustering |
-| `src/Orleans.Clustering.ZooKeeper/` | ZooKeeper clustering |
-| `src/Orleans.CodeGenerator/` | Source generator |
-| `src/Orleans.Connections.Security/` | TLS/Security |
-| `src/Orleans.Core/` | Core library |
-| `src/Orleans.Core.Abstractions/` | Core abstractions |
-| `src/Orleans.DurableJobs/` | Durable jobs |
-| `src/Orleans.EventSourcing/` | Event sourcing |
-| `src/Orleans.Hosting.Kubernetes/` | Kubernetes hosting |
-| `src/Orleans.Identity/` | Identity (+ 4 subdirs: Client, Core, Server, Tests) |
-| `src/Orleans.Journaling/` | Journaling |
-| `src/Orleans.Persistence.Memory/` | In-memory persistence |
-| `src/Orleans.Reminders/` | Reminders |
-| `src/Orleans.Reminders.Abstractions/` | Reminders abstractions |
-| `src/Orleans.Runtime/` | Runtime |
-| `src/Orleans.Sdk/` | SDK metapackage |
-| `src/Orleans.Serialization/` | Serialization |
-| `src/Orleans.Serialization.Abstractions/` | Serialization abstractions |
-| `src/Orleans.Serialization.FSharp/` | F# serialization |
-| `src/Orleans.Serialization.MessagePack/` | MessagePack |
-| `src/Orleans.Serialization.NewtonsoftJson/` | Newtonsoft.Json |
-| `src/Orleans.Serialization.SystemTextJson/` | System.Text.Json |
-| `src/Orleans.Serialization.TestKit/` | Serialization test kit |
-| `src/Orleans.Server/` | Server library |
-| `src/Orleans.Streaming/` | Streaming |
-| `src/Orleans.Streaming.Abstractions/` | Streaming abstractions |
-| `src/Orleans.Streaming.NATS/` | NATS streaming |
-| `src/Orleans.TestingHost/` | Testing host |
-| `src/Orleans.Transactions/` | Transactions |
-| `src/Orleans.Transactions.TestKit.Base/` | Transactions test kit |
-| `src/Orleans.Transactions.TestKit.xUnit/` | xUnit test kit |
+```bash
+./scynapse-rename-encoding-fix.sh --scan-only   # List non-UTF-8 files
+./scynapse-rename-encoding-fix.sh --dry-run      # Preview what would change
+./scynapse-rename-encoding-fix.sh --execute       # Apply fixes
+```
 
-### Provider Directories (src/[Provider]/)
+**How it works:**
+1. Scans all text-like files with `file --mime-encoding` to detect non-UTF-8
+2. For each non-UTF-8 file, converts to UTF-8 via `iconv`
+3. Checks if the UTF-8 version contains `orleans` (case-insensitive)
+4. Applies the same replacement mapping as the execute script
+5. Converts back to the original encoding, preserving BOM if present
 
-| Directory | Provider |
-|-----------|----------|
-| `src/AWS/Orleans.Clustering.DynamoDB/` | AWS DynamoDB clustering |
-| `src/AWS/Orleans.Persistence.DynamoDB/` | AWS DynamoDB persistence |
-| `src/AWS/Orleans.Reminders.DynamoDB/` | AWS DynamoDB reminders |
-| `src/AWS/Orleans.Streaming.SQS/` | AWS SQS streaming |
-| `src/AdoNet/Orleans.Clustering.AdoNet/` | ADO.NET clustering |
-| `src/AdoNet/Orleans.GrainDirectory.AdoNet/` | ADO.NET grain directory |
-| `src/AdoNet/Orleans.Persistence.AdoNet/` | ADO.NET persistence |
-| `src/AdoNet/Orleans.Reminders.AdoNet/` | ADO.NET reminders |
-| `src/AdoNet/Orleans.Streaming.AdoNet/` | ADO.NET streaming |
-| `src/Azure/Orleans.Clustering.AzureStorage/` | Azure clustering |
-| `src/Azure/Orleans.Clustering.Cosmos/` | Cosmos DB clustering |
-| `src/Azure/Orleans.DurableJobs.AzureStorage/` | Azure durable jobs |
-| `src/Azure/Orleans.GrainDirectory.AzureStorage/` | Azure grain directory |
-| `src/Azure/Orleans.Hosting.AzureCloudServices/` | Azure cloud services |
-| `src/Azure/Orleans.Journaling.AzureStorage/` | Azure journaling |
-| `src/Azure/Orleans.Persistence.AzureStorage/` | Azure persistence |
-| `src/Azure/Orleans.Persistence.Cosmos/` | Cosmos DB persistence |
-| `src/Azure/Orleans.Reminders.AzureStorage/` | Azure reminders |
-| `src/Azure/Orleans.Reminders.Cosmos/` | Cosmos DB reminders |
-| `src/Azure/Orleans.Streaming.AzureStorage/` | Azure streaming |
-| `src/Azure/Orleans.Streaming.EventHubs/` | Event Hubs streaming |
-| `src/Azure/Orleans.Transactions.AzureStorage/` | Azure transactions |
-| `src/Cassandra/Orleans.Clustering.Cassandra/` | Cassandra clustering |
-| `src/Dashboard/Orleans.Dashboard/` | Dashboard |
-| `src/Dashboard/Orleans.Dashboard.Abstractions/` | Dashboard abstractions |
-| `src/Dashboard/Orleans.Dashboard.App/` | Dashboard frontend |
-| `src/Redis/Orleans.Clustering.Redis/` | Redis clustering |
-| `src/Redis/Orleans.GrainDirectory.Redis/` | Redis grain directory |
-| `src/Redis/Orleans.Persistence.Redis/` | Redis persistence |
-| `src/Redis/Orleans.Reminders.Redis/` | Redis reminders |
-| `src/Serializers/Orleans.Serialization.Protobuf/` | Protobuf serialization |
+**Why this is a separate script:**
+The main execute script uses `grep -ril "orleans"` to find candidates, then `sed` to replace. But `grep` on a UTF-16 file may find a match (since grep can be binary-aware) while `sed` fails to replace (since sed is strictly line-oriented ASCII/UTF-8). This creates a false sense of "processed" when the file was actually unchanged.
 
-### API Reference Directories (src/api/)
-Mirror of the above under `src/api/` -- 48 additional directories with same `Orleans.*` naming pattern.
+**When to run:** After `scynapse-rename-execute.sh --execute` Phase 3 completes. This is the "mop-up" pass.
 
-### Test Directories (test/)
-
-| Directory |
-|-----------|
-| `test/Misc/TestInternalDtosRefOrleans/` |
-| `test/NonSilo.Tests/OrleansRuntime/` |
-| `test/Orleans.CodeGenerator.Tests/` |
-| `test/Orleans.Connections.Security.Tests/` |
-| `test/Orleans.Dashboard.Tests/` |
-| `test/Orleans.Dashboard.Tests/Orleans.Dashboard.TestGrains/` |
-| `test/Orleans.Dashboard.Tests/Orleans.Dashboard.UnitTests/` |
-| `test/Orleans.Journaling.Tests/` |
-| `test/Orleans.Serialization.FSharp.Tests/` |
-| `test/Orleans.Serialization.UnitTests/` |
-| `test/TestInfrastructure/Orleans.TestingHost.Tests/` |
-| `test/TesterInternal/OrleansRuntime/` |
-| `test/Transactions/Orleans.Transactions.Azure.Test/` |
-| `test/Transactions/Orleans.Transactions.Tests/` |
+**Real example:** `Scynapse.Core/GlobalSuppressions.cs` was UTF-16 encoded (Visual Studio creates these in UTF-16). The execute script's sed pass ran on it but couldn't match `Orleans.Runtime.SafeTimer` in the `[SuppressMessage]` target string. This was caught and fixed manually before this script existed — the script prevents this class of miss in the future.
 
 ---
 
-## 3. Files with "Orleans" in Filename (230 files)
+### 4. `scynapse-rename-post-verify.sh` — Structural Integrity Check
 
-### By Extension
+**Purpose:** Verify that the rename didn't break structural references. This is NOT a grep for "Orleans" — it checks that the codebase still hangs together correctly after all the renaming.
 
-| Extension | Count | Examples |
-|-----------|-------|---------|
-| `.cs` | 138 | `OrleansException.cs`, `OrleansSourceGenerator.cs`, `OrleansSiloInstanceManager.cs` |
-| `.csproj` | 77 | `Orleans.Core.csproj`, `Orleans.Runtime.csproj`, etc. |
-| `.targets` | 4 | `Microsoft.Orleans.Sdk.targets`, `Orleans.Dashboard.Frontend.targets` |
-| `.json` | 4 | `Orleans.*.xunit.runner.json` |
-| `.props` | 3 | `Microsoft.Orleans.CodeGenerator.props` |
-| `.slnx` | 1 | `Orleans.slnx` (main solution file) |
-| `.sln` | 1 | `ManagedCode.Orleans.Identity.sln` |
-| `.png` | 1 | `OrleansLogo.png` |
-| `.fsproj` | 1 | `Orleans.Serialization.FSharp.Tests.fsproj` |
+```bash
+./scynapse-rename-post-verify.sh              # Full verification
+./scynapse-rename-post-verify.sh --quick       # Fast checks only
+./scynapse-rename-post-verify.sh --fix         # Auto-fix trivial issues
+```
 
-### By Location
+**What it checks:**
 
-| Location | Count |
-|----------|-------|
-| `src/` | 167 |
-| `test/` | 62 |
-| Root | 1 (`Orleans.slnx`) |
+| Check | What it validates |
+|-------|-------------------|
+| **ProjectReference integrity** | Every `<ProjectReference Include="...">` in every `.csproj` resolves to an actual file on disk. |
+| **Solution file references** | Every project path in `.sln` and `.slnx` files resolves to an actual file. |
+| **Non-UTF-8 Orleans check** | Re-scans non-UTF-8 files specifically (catches encoding-fix misses). |
+| **PackageId consistency** | No `.csproj` has `<PackageId>` or `<AssemblyName>` containing "Orleans". |
+| **Binary files** | Lists any image files whose binary content contains "orleans" metadata. |
+| **Text content** | Quick grep for any remaining text references (defers to audit script for details). |
+| **Directory/file names** | No directories or files still named with "Orleans". |
 
----
-
-## 4. Files Containing "Orleans" in Content (2,891 files)
-
-### By File Extension
-
-| Extension | Count |
-|-----------|-------|
-| `.cs` | 2,625 |
-| `.csproj` | 129 |
-| `.md` | 59 |
-| `.sql` | 29 |
-| `.props` | 7 |
-| `.tsx` | 5 |
-| `.targets` | 5 |
-| `.json` | 5 |
-| `.yaml` | 4 |
-| `.html` | 3 |
-| `.fs` | 3 |
-| `.css` | 3 |
-| `.png` | 2 (binary) |
-| `.gitignore` | 2 |
-| Other (`.yml`, `.ts`, `.slnx`, `.sln`, `.resx`, `.ps1`, `.proto`, `.fsproj`, `.cmd`) | 1 each |
-
-### By Top-Level Directory
-
-| Directory | Files with Orleans content |
-|-----------|---------------------------|
-| `src/` | 2,016 |
-| `test/` | 791 |
-| `playground/` | 63 |
-| `.azure/` | 4 |
-| Root-level files | 16 |
-
-### Root-Level Files with Orleans Content
-
-- `Orleans.slnx` -- Solution file
-- `README.md` -- Documentation
-- `CONTRIBUTING.md` -- Documentation
-- `SUPPORT.md` -- Documentation
-- `Directory.Build.props` -- Build config
-- `Directory.Build.targets` -- Build config
-- `Directory.Packages.props` -- Package versions
-- `Test.cmd` -- Build script
-- `build.ps1` -- Build script
-- `distributed-tests.yml` -- CI config
-- `.gitignore` -- Git config
-- `.config/tsaoptions.json` -- Tool config
-- `.devcontainer/devcontainer.json` -- Dev container
-- `.github/copilot-instructions.md` -- GitHub config
+**When to run:** After ALL other rename scripts have completed, before committing.
 
 ---
 
-## 5. Namespace Declarations with "Orleans"
+## Complete Rename Workflow (for future AI agents)
 
-Over **200 distinct namespace declarations** beginning with `Orleans`:
+If you need to re-run the rename (e.g., after merging upstream Orleans changes), follow this exact sequence:
 
-### Primary namespaces
-- `namespace Orleans` / `namespace Orleans;`
-- `namespace Orleans.Core` / `Orleans.Core.Internal`
-- `namespace Orleans.Runtime` / `Orleans.Runtime.*` (20+ sub-namespaces)
-- `namespace Orleans.Serialization` / `Orleans.Serialization.*` (15+ sub-namespaces)
-- `namespace Orleans.Hosting` / `Orleans.Hosting.*`
-- `namespace Orleans.Configuration` / `Orleans.Configuration.*`
-- `namespace Orleans.Streaming` / `Orleans.Streaming.*` (10+ sub-namespaces)
-- `namespace Orleans.Transactions` / `Orleans.Transactions.*`
-- `namespace Orleans.Placement` / `Orleans.Placement.*`
-- `namespace Orleans.Persistence` / `Orleans.Persistence.*`
-- `namespace Orleans.Clustering.*`
-- `namespace Orleans.GrainDirectory` / `Orleans.GrainDirectory.*`
-- `namespace Orleans.Reminders` / `Orleans.Reminders.*`
-- `namespace Orleans.EventSourcing` / `Orleans.EventSourcing.*`
-- `namespace Orleans.DurableJobs` / `Orleans.DurableJobs.*`
-- `namespace Orleans.Journaling` / `Orleans.Journaling.*`
-- `namespace Orleans.Dashboard` / `Orleans.Dashboard.*`
-- `namespace Orleans.BroadcastChannel`
-- `namespace Orleans.TestingHost` / `Orleans.TestingHost.*`
-- `namespace Orleans.Analyzers`
-- `namespace Orleans.CodeGenerator` / `Orleans.CodeGenerator.*`
-- `namespace Orleans.DynamicGrains`
-- `namespace Orleans.Identity.*`
+```bash
+cd Docs/Scynapse/
 
-### Generated code namespaces
-- `namespace OrleansCodeGen.Orleans.*` (40+ sub-namespaces)
-- `namespace OrleansAWSUtils.*`
+# ── STEP 1: Pre-rename audit ──
+./scynapse-rename-audit.sh --summary
+# Record the "before" numbers
 
----
+# ── STEP 2: Commit current state ──
+git add -A && git commit -m "Pre-rename checkpoint"
 
-## 6. C# Type Names Containing "Orleans" (50+)
+# ── STEP 3: Execute rename (3 phases) ──
+./scynapse-rename-execute.sh --dry-run     # Review first!
+./scynapse-rename-execute.sh --execute     # Phase 1 (dirs), 2 (files), 3 (content)
 
-### Exception Types
-- `OrleansException`, `OrleansConfigurationException`
-- `OrleansLifecycleCanceledException`, `OrleansMessageRejectionException`
-- `OrleansClusterConnectivityCheckFailedException`, `OrleansMissingMembershipEntryException`
-- `OrleansTransactionException` (+ 10 transaction-related exception types)
-- `OrleansBrokenTransactionLockException`, `OrleansCascadingAbortException`
-- `OrleansOrphanCallException`, `OrleansReadOnlyViolatedException`
+# ── STEP 4: Fix non-UTF-8 files ──
+./scynapse-rename-encoding-fix.sh --dry-run
+./scynapse-rename-encoding-fix.sh --execute
 
-### Generated Codec/Copier Types (40 types)
-- `Codec_Orleans*Exception` (20 types)
-- `Copier_Orleans*Exception` (20 types)
+# ── STEP 5: Verify structural integrity ──
+./scynapse-rename-post-verify.sh
 
-### Service/Utility Types
-- `OrleansJsonSerializer`, `OrleansJsonSerializerSettings`, `OrleansJsonSerializerOptions`
-- `OrleansJsonSerializationBinder`, `OrleansGrainStateSerializer`
-- `OrleansClientGenericHostExtensions`, `OrleansSiloGenericHostExtensions`
-- `OrleansSourceGenerator`, `OrleansGeneratorDiagnosticAnalysisException`
-- `OrleansApplicationProtocol`, `OrleansDebuggerHelper`
-- `OrleansTestingBase`, `OrleansTaskScheduler*` (3 test class variants)
-- `OrleansSiloInstanceManager`, `OrleansDefaultHasher`
-- `Orleans3CompatibleHasher`, `Orleans3CompatibleStorageHashPicker`, `Orleans3CompatibleStringKeyHasher`
-- `OrleansIdentityConstants`, `OrleansIdentityExtensions`, `OrleansAuthorizationActionFilter`
-- `OrleansBuilderMarker`, `OrleansCallBackDataEvent`
-- `OrleansGeneratedCodeHelper`, `OrleansRelationalDownloadStream`
-- `RelationalOrleansQueries`, `OrleansQueries`
-- `OrleansServiceBusErrorCode`
+# ── STEP 6: Post-rename audit ──
+./scynapse-rename-audit.sh --summary
+# Compare with "before" numbers — everything should be 0
 
-### NuGet Package IDs (Microsoft.Orleans.*)
-All use `Microsoft.Orleans.*` prefix:
-- `Microsoft.Orleans.Core`, `Microsoft.Orleans.Runtime`, `Microsoft.Orleans.Sdk`
-- `Microsoft.Orleans.Client`, `Microsoft.Orleans.Server`
-- `Microsoft.Orleans.Serialization.*` (6 variants)
-- `Microsoft.Orleans.Clustering.*` (6 variants)
-- `Microsoft.Orleans.Persistence.*` (5 variants)
-- `Microsoft.Orleans.Streaming.*` (5 variants)
-- `Microsoft.Orleans.Reminders.*` (5 variants)
-- `Microsoft.Orleans.Transactions.*` (3 variants)
-- `Microsoft.Orleans.CodeGenerator`, `Microsoft.Orleans.Analyzers`
-- `Microsoft.Orleans.Dashboard`, `Microsoft.Orleans.Dashboard.Abstractions`
-- And many more
+# ── STEP 7: Handle manual items ──
+# - Replace binary logo files with Scynapse versions
+# - Re-run tests to regenerate .verified.cs snapshots
+# - Write SQL migration scripts if databases are affected
+
+# ── STEP 8: Commit ──
+git add -A && git commit -m "Rename Orleans -> Scynapse / Microsoft.Orleans -> Genesa.Scynapse"
+```
 
 ---
 
-## 7. Diagnostic/Constant Identifiers
+## What Remains (as of 2026-02-26)
 
-| Identifier | Usage |
-|------------|-------|
-| `ORLEANS0001` - `ORLEANS0013` | Roslyn analyzer diagnostic IDs |
-| `ORLEANSEXP001` - `ORLEANSEXP004` | Experimental feature flags |
-| `ORLEANS_CLUSTER_ID` | Kubernetes environment variable |
-| `ORLEANS_SERVICE_ID` | Kubernetes environment variable |
-| `ORLEANS_CLUSTERING` | Compiler define constant |
+### Complete — No Action Needed
 
----
+| Category | Status |
+|----------|--------|
+| Directory names | 0 remaining |
+| File names | 0 remaining |
+| Namespaces (`namespace Orleans.*`) | All renamed to `Scynapse.*` |
+| Type names (`OrleansException`, etc.) | All renamed to `Scynapse*` |
+| NuGet PackageIds (`Microsoft.Orleans.*`) | All renamed to `Genesa.Scynapse.*` |
+| Assembly names | All renamed |
+| InternalsVisibleTo attributes | All updated |
+| Diagnostic IDs (`ORLEANS0xxx`) | All renamed to `SCYNAPSE0xxx` |
+| Experimental flags (`ORLEANSEXPxxx`) | All renamed to `SCYNAPSEEXPxxx` |
+| Environment variables (`ORLEANS_*`) | All renamed to `SCYNAPSE_*` |
+| GitHub URLs (`github.com/dotnet/orleans`) | All renamed to `github.com/dotnet/scynapse` |
+| Comments and XML docs | All updated |
+| SQL file content | All updated |
+| Build configs (`.props`, `.targets`) | All updated |
+| CI/CD configs (`.azure/`, `.github/`) | All updated |
+| Non-UTF-8 encoded files | All fixed (1 was found and fixed) |
 
-## 8. SQL Database References
+### Pending — Manual Action Required
 
-29 SQL files in `src/AdoNet/` contain Orleans references in:
-- Table names and stored procedure names
-- Comments referencing Orleans
-- Schema definitions
-- Files: PostgreSQL, MySQL, SQLServer, Oracle persistence/reminders/clustering/streaming SQL
+| Item | Files | Action |
+|------|-------|--------|
+| **Logo/image files** | `assets/logo_128.png`, `Dashboard/.../ScynapseLogo.png`, `Scynapse.Identity/logo.png` | Replace with Scynapse-branded images. These are binary PNG files — the "orleans" reference is in embedded metadata (EXIF, PNG text chunks) that can't be text-edited. |
+| **Deployed databases** | N/A (no deployed instances yet) | When SQL schemas are deployed, run migration scripts to rename stored procedures and tables. The SQL *files* are already renamed. |
 
----
+### Future Considerations — When Publishing NuGet Packages
 
-## 9. CI/CD and Infrastructure
+When Scynapse is published as NuGet packages:
 
-| File | Content |
-|------|---------|
-| `.azure/pipelines/templates/vars.yaml` | Build variables with Orleans names |
-| `.azure/pipelines/templates/build.yaml` | Build steps referencing Orleans |
-| `.azure/pipelines/github-mirror.yaml` | Mirror config |
-| `.azure/pipelines/nightly-main.yaml` | Nightly build config |
-| `.github/copilot-instructions.md` | References Orleans |
-| `.config/tsaoptions.json` | References Orleans |
-| `.devcontainer/devcontainer.json` | References Orleans |
-
----
-
-## 10. Scale Assessment
-
-This is NOT a simple find-and-replace rename. The "Orleans" naming is deeply embedded as the **core identity** of the framework:
-
-- **2,891 out of 3,344 files** (86%) contain "Orleans" in their content
-- **139 directories** are named with "Orleans"
-- **230 files** have "Orleans" in their filename
-- **~16,768+ line occurrences** of the PascalCase form alone
-- **200+ distinct namespaces** starting with `Orleans`
-- **50+ type names** containing "Orleans"
-- **77 .csproj files** named `Orleans.*.csproj`
-- SQL schemas, binary assets, CI/CD configs all affected
-
-### Rename Strategy Considerations
-
-1. **Full Rename**: Would touch 2,891+ files, rename 139+ directories, rename 230 files. Extremely high risk of breakage.
-2. **Namespace-Only Rename**: Keep directory/file names, change `namespace Orleans` -> new namespace. Still massive.
-3. **Wrapper/Alias Approach**: Keep internal Orleans naming, add Scynapse as a public-facing alias layer.
-4. **Accept Orleans Naming Internally**: The project directory is already `Scynapse/`. Keep internal framework code using `Orleans.*` namespaces (as this is a fork), rename only our custom additions.
+1. **Package IDs are already set:** All `.csproj` files have `<PackageId>Genesa.Scynapse.*</PackageId>`.
+2. **Package versions:** The `Directory.Packages.props` at the repo root controls package versions for internal consumption. When publishing externally, ensure version numbers don't conflict with the upstream `Microsoft.Orleans.*` packages.
+3. **Package signing:** If publishing to nuget.org, packages will need a Genesa signing certificate. The upstream `Microsoft.Orleans.*` packages are Microsoft-signed — our packages must have a different identity chain.
+4. **Metapackage:** `Genesa.Scynapse.Sdk` is the SDK metapackage (replaces `Microsoft.Orleans.Sdk`). Consumers will reference this.
+5. **Code generators:** The `Genesa.Scynapse.CodeGenerator` package contains MSBuild `.props`/`.targets` files that were renamed from `Microsoft.Orleans.CodeGenerator.props` to `Genesa.Scynapse.CodeGenerator.props`. These are loaded by MSBuild via the NuGet package layout convention, so the filenames must match the package ID.
 
 ---
 
-## 11. Immediate Cleanup Items (2 remaining NewOrleans references)
+## Understanding the Rename Scripts' Design Decisions
 
-These should be cleaned up regardless of any broader rename decision:
+### Why sed and not a smarter tool?
 
-1. **File rename needed:** `src/Scynapse.AsyncPlus/Services/NewOrleansAsyncPersistenceService.cs`
-2. **Content update needed:** `playground/PluginGrainScenarios/Grains/EventTestGrain.cs` line 6: `// NEWORLEANS EVENTS TEST GRAINS`
+`sed` was chosen because:
+- It's universally available on Linux/macOS/WSL
+- It handles the vast majority of files (99.97% of text files are UTF-8/ASCII)
+- It's fast — can process thousands of files in seconds
+- The replacement patterns are simple string substitutions, not context-aware refactoring
+
+The tradeoff is that `sed` can't handle non-UTF-8 encodings, which is why the encoding-fix script exists as a complement.
+
+### Why is pattern order so critical?
+
+Consider the string `Microsoft.Orleans.Core`:
+- If `Orleans -> Scynapse` runs first: `Microsoft.Scynapse.Core` (WRONG — `Microsoft.` prefix kept)
+- If `Microsoft.Orleans -> Genesa.Scynapse` runs first: `Genesa.Scynapse.Core` (CORRECT)
+
+Similarly, `OrleansCodeGen.Orleans.Runtime`:
+- The execute script handles this correctly because `Orleans -> Scynapse` is a global replacement, so both instances get replaced to `ScynapseCodeGen.Scynapse.Runtime`.
+
+### Why are binary files excluded?
+
+Binary files (PNG, JPG, DLL) store data in non-text formats. Even if they contain the ASCII string "orleans" (e.g., in PNG metadata chunks), running `sed` on a binary file would corrupt the file structure. Logo images specifically need to be re-created by a designer or re-exported from a graphics tool.
+
+### Why is encoding detection a separate pass?
+
+Detecting encoding is expensive (requires reading file headers via `file` command for every file) and rarely needed (only ~0.03% of files are non-UTF-8 in this codebase). Making it a separate script keeps the main rename fast while providing a thorough safety net.
+
+---
+
+## Handling Future Upstream Merges
+
+When merging new Orleans upstream changes into Scynapse:
+
+1. **New files from upstream will use `Orleans` naming.** After merging, re-run the full rename workflow (all 4 scripts).
+2. **Conflict resolution:** If upstream renamed a file we also renamed, git will show a rename conflict. Resolve by keeping our `Scynapse` name.
+3. **New namespaces:** If upstream adds new `Orleans.*` namespaces, the `Orleans -> Scynapse` sed pattern will catch them automatically.
+4. **New NuGet packages:** If upstream adds new `Microsoft.Orleans.*` packages, the `Microsoft.Orleans -> Genesa.Scynapse` pattern will catch them.
+5. **New diagnostic IDs:** If upstream adds `ORLEANS0014`, the `ORLEANS -> SCYNAPSE` pattern will rename it to `SCYNAPSE0014`.
+
+The scripts are idempotent — running them on an already-renamed codebase produces no changes (the audit confirms 0 hits). This makes it safe to run them after every merge.
 
 ---
 
 ## Notes
 
-- The previous NewOrleans -> Scynapse rename only touched the **project's own custom code** (Scynapse.AsyncPlus and related docs)
-- The original Orleans framework naming (`Orleans.*`) was intentionally left intact as it represents the upstream fork identity
-- This document serves as a comprehensive reference for any future deeper rename effort
-- Generated by exhaustive `find` and `grep` search on 2026-02-26
+- This document serves as the primary reference for the Scynapse rename process
+- The full file-by-file inventory is in `RENAME-FILE-INVENTORY.md`
+- All scripts are in `Docs/Scynapse/` and should be run from that directory
+- The scripts use `PROJECT_ROOT` environment variable (auto-detected from script location)
+- Log files are written to `/tmp/scynapse-*` by default

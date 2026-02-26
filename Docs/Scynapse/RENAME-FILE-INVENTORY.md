@@ -1,15 +1,42 @@
-# Scynapse Project - Complete Orleans Reference Inventory
+# Scynapse Project - Orleans Reference Inventory
 
-## STATUS: Comprehensive Audit Completed
+## STATUS: Rename Complete
 
 **Date:** 2026-02-26
-**Previous Rename:** NewOrleans -> Scynapse (custom code only)
-**Finding:** The upstream Orleans framework naming (`Orleans.*`) remains throughout the codebase
-**Total scope:** 3,344 files, 772 directories under `src/Scynapse/`
+**Rename Phases Completed:**
+1. NewOrleans -> Scynapse (custom code only) — 2026-02-26
+2. Orleans -> Scynapse / Microsoft.Orleans -> Genesa.Scynapse (full codebase) — 2026-02-26
+3. Non-UTF-8 encoding fix (GlobalSuppressions.cs) — 2026-02-26
 
 ---
 
-## Grand Totals
+## Post-Rename Audit Results
+
+### Final Counts (after all scripts and manual fixes)
+
+| Metric | Count |
+|--------|-------|
+| Directories named with "Orleans" | **0** |
+| Files named with "Orleans" | **0** |
+| Files containing "Orleans" in content (text) | **0** |
+| Binary files with "Orleans" in metadata | **3** (logos — manual replacement pending) |
+| Non-UTF-8 files with "Orleans" | **0** |
+| Remaining `NewOrleans` references | **0** |
+
+### Verification Command
+
+```bash
+cd Docs/Scynapse/
+./scynapse-rename-audit.sh --summary
+```
+
+---
+
+## Pre-Rename Inventory (Historical Record)
+
+The following sections document what existed BEFORE the rename, preserved as a reference for understanding the scope and for handling future upstream merges.
+
+### Grand Totals (Pre-Rename)
 
 | Metric | Count |
 |--------|-------|
@@ -19,294 +46,214 @@
 | Line occurrences - `Orleans` (PascalCase) | ~16,768 |
 | Line occurrences - `ORLEANS` (uppercase) | ~220 |
 | Line occurrences - `orleans` (lowercase) | ~194 files |
-| Remaining `NewOrleans` references | 2 (1 filename + 1 content) |
+| `NewOrleans` references | 2 (1 filename + 1 content) |
 | Binary files with "Orleans" | 2 (.png) |
 
 ---
 
-## Part 1: All 230 Files with "Orleans" in Filename
+## What Was Renamed (Complete Record)
 
-### Root Level (1 file)
-```
-Orleans.slnx                                    [solution file]
-```
+### Directories Renamed (139 total)
 
-### src/ - Core Framework .csproj Files (38 files)
-```
-src/Orleans.Analyzers/Orleans.Analyzers.csproj
-src/Orleans.BroadcastChannel/Orleans.BroadcastChannel.csproj
-src/Orleans.Client/Orleans.Client.csproj
-src/Orleans.Clustering.Consul/Orleans.Clustering.Consul.csproj
-src/Orleans.Clustering.ZooKeeper/Orleans.Clustering.ZooKeeper.csproj
-src/Orleans.CodeGenerator/Orleans.CodeGenerator.csproj
-src/Orleans.Connections.Security/Orleans.Connections.Security.csproj
-src/Orleans.Core.Abstractions/Orleans.Core.Abstractions.csproj
-src/Orleans.Core/Orleans.Core.csproj
-src/Orleans.DurableJobs/Orleans.DurableJobs.csproj
-src/Orleans.EventSourcing/Orleans.EventSourcing.csproj
-src/Orleans.Hosting.Kubernetes/Orleans.Hosting.Kubernetes.csproj
-src/Orleans.Journaling/Orleans.Journaling.csproj
-src/Orleans.Persistence.Memory/Orleans.Persistence.Memory.csproj
-src/Orleans.Reminders.Abstractions/Orleans.Reminders.Abstractions.csproj
-src/Orleans.Reminders/Orleans.Reminders.csproj
-src/Orleans.Runtime/Orleans.Runtime.csproj
-src/Orleans.Sdk/Orleans.Sdk.csproj
-src/Orleans.Serialization.Abstractions/Orleans.Serialization.Abstractions.csproj
-src/Orleans.Serialization.FSharp/Orleans.Serialization.FSharp.csproj
-src/Orleans.Serialization.MessagePack/Orleans.Serialization.MessagePack.csproj
-src/Orleans.Serialization.NewtonsoftJson/Orleans.Serialization.NewtonsoftJson.csproj
-src/Orleans.Serialization.SystemTextJson/Orleans.Serialization.SystemTextJson.csproj
-src/Orleans.Serialization.TestKit/Orleans.Serialization.TestKit.csproj
-src/Orleans.Serialization/Orleans.Serialization.csproj
-src/Orleans.Server/Orleans.Server.csproj
-src/Orleans.Streaming.Abstractions/Orleans.Streaming.Abstractions.csproj
-src/Orleans.Streaming.NATS/Orleans.Streaming.NATS.csproj
-src/Orleans.Streaming/Orleans.Streaming.csproj
-src/Orleans.TestingHost/Orleans.TestingHost.csproj
-src/Orleans.Transactions.TestKit.Base/Orleans.Transactions.TestKit.Base.csproj
-src/Orleans.Transactions.TestKit.xUnit/Orleans.Transactions.TestKit.xUnit.csproj
-src/Orleans.Transactions/Orleans.Transactions.csproj
-src/Serializers/Orleans.Serialization.Protobuf/Orleans.Serialization.Protobuf.csproj
-src/Dashboard/Orleans.Dashboard/Orleans.Dashboard.csproj
-src/Dashboard/Orleans.Dashboard.Abstractions/Orleans.Dashboard.Abstractions.csproj
-src/Orleans.Identity/ManagedCode.Orleans.Identity.Client/ManagedCode.Orleans.Identity.Client.csproj
-src/Orleans.Identity/ManagedCode.Orleans.Identity.Core/ManagedCode.Orleans.Identity.Core.csproj
-src/Orleans.Identity/ManagedCode.Orleans.Identity.Server/ManagedCode.Orleans.Identity.Server.csproj
-src/Orleans.Identity/ManagedCode.Orleans.Identity.Tests/ManagedCode.Orleans.Identity.Tests.csproj
-```
+All directories under `src/Scynapse/` that contained "Orleans" were renamed to "Scynapse":
 
-### src/ - Provider .csproj Files (22 files)
-```
-src/AWS/Orleans.Clustering.DynamoDB/Orleans.Clustering.DynamoDB.csproj
-src/AWS/Orleans.Persistence.DynamoDB/Orleans.Persistence.DynamoDB.csproj
-src/AWS/Orleans.Reminders.DynamoDB/Orleans.Reminders.DynamoDB.csproj
-src/AWS/Orleans.Streaming.SQS/Orleans.Streaming.SQS.csproj
-src/AdoNet/Orleans.Clustering.AdoNet/Orleans.Clustering.AdoNet.csproj
-src/AdoNet/Orleans.GrainDirectory.AdoNet/Orleans.GrainDirectory.AdoNet.csproj
-src/AdoNet/Orleans.Persistence.AdoNet/Orleans.Persistence.AdoNet.csproj
-src/AdoNet/Orleans.Reminders.AdoNet/Orleans.Reminders.AdoNet.csproj
-src/AdoNet/Orleans.Streaming.AdoNet/Orleans.Streaming.AdoNet.csproj
-src/Azure/Orleans.Clustering.AzureStorage/Orleans.Clustering.AzureStorage.csproj
-src/Azure/Orleans.Clustering.Cosmos/Orleans.Clustering.Cosmos.csproj
-src/Azure/Orleans.DurableJobs.AzureStorage/Orleans.DurableJobs.AzureStorage.csproj
-src/Azure/Orleans.GrainDirectory.AzureStorage/Orleans.GrainDirectory.AzureStorage.csproj
-src/Azure/Orleans.Hosting.AzureCloudServices/Orleans.Hosting.AzureCloudServices.csproj
-src/Azure/Orleans.Journaling.AzureStorage/Orleans.Journaling.AzureStorage.csproj
-src/Azure/Orleans.Persistence.AzureStorage/Orleans.Persistence.AzureStorage.csproj
-src/Azure/Orleans.Persistence.Cosmos/Orleans.Persistence.Cosmos.csproj
-src/Azure/Orleans.Reminders.AzureStorage/Orleans.Reminders.AzureStorage.csproj
-src/Azure/Orleans.Reminders.Cosmos/Orleans.Reminders.Cosmos.csproj
-src/Azure/Orleans.Streaming.AzureStorage/Orleans.Streaming.AzureStorage.csproj
-src/Azure/Orleans.Streaming.EventHubs/Orleans.Streaming.EventHubs.csproj
-src/Azure/Orleans.Transactions.AzureStorage/Orleans.Transactions.AzureStorage.csproj
-src/Cassandra/Orleans.Clustering.Cassandra/Orleans.Clustering.Cassandra.csproj
-src/Redis/Orleans.Clustering.Redis/Orleans.Clustering.Redis.csproj
-src/Redis/Orleans.GrainDirectory.Redis/Orleans.GrainDirectory.Redis.csproj
-src/Redis/Orleans.Persistence.Redis/Orleans.Persistence.Redis.csproj
-src/Redis/Orleans.Reminders.Redis/Orleans.Reminders.Redis.csproj
-```
+**Core Framework (35 dirs):** `Orleans.Analyzers/` -> `Scynapse.Analyzers/`, `Orleans.BroadcastChannel/` -> `Scynapse.BroadcastChannel/`, `Orleans.Client/` -> `Scynapse.Client/`, `Orleans.Core/` -> `Scynapse.Core/`, `Orleans.Core.Abstractions/` -> `Scynapse.Core.Abstractions/`, `Orleans.Runtime/` -> `Scynapse.Runtime/`, `Orleans.Serialization/` -> `Scynapse.Serialization/`, etc.
 
-### src/ - C# Source Files with Orleans in Name (33 files)
-```
-src/Orleans.Analyzers/AtMostOneOrleansConstructorAnalyzer.cs
-src/Orleans.CodeGenerator/OrleansGeneratorDiagnosticAnalysisException.cs
-src/Orleans.CodeGenerator/OrleansSourceGenerator.cs
-src/Orleans.Connections.Security/Security/OrleansApplicationProtocol.cs
-src/Orleans.Core.Abstractions/Exceptions/OrleansConfigurationException.cs
-src/Orleans.Core.Abstractions/Exceptions/OrleansException.cs
-src/Orleans.Core.Abstractions/Exceptions/OrleansLifecycleCanceledException.cs
-src/Orleans.Core.Abstractions/Exceptions/OrleansMessageRejectionException.cs
-src/Orleans.Core.Abstractions/Utils/PublicOrleansTaskExtensions.cs
-src/Orleans.Core/Hosting/OrleansClientGenericHostExtensions.cs
-src/Orleans.Core/Providers/StorageSerializer/OrleansGrainStateSerializer.cs
-src/Orleans.Core/Serialization/OrleansJsonSerializationBinder.cs
-src/Orleans.Core/Serialization/OrleansJsonSerializer.cs
-src/Orleans.Core/Serialization/OrleansJsonSerializerOptions.cs
-src/Orleans.Core/Serialization/OrleansJsonSerializerSettings.cs
-src/Orleans.Runtime/Hosting/OrleansSiloGenericHostExtensions.cs
-src/Orleans.Runtime/MembershipService/OrleansClusterConnectivityCheckFailedException.cs
-src/Orleans.Runtime/MembershipService/OrleansMissingMembershipEntryException.cs
-src/Orleans.Runtime/Utilities/OrleansDebuggerHelper.cs
-src/Orleans.Serialization/GeneratedCodeHelpers/OrleansGeneratedCodeHelper.cs
-src/Orleans.Transactions/OrleansTransactionException.cs
-src/AdoNet/Orleans.Persistence.AdoNet/Storage/Provider/Orleans3CompatibleHasher.cs
-src/AdoNet/Orleans.Persistence.AdoNet/Storage/Provider/Orleans3CompatibleStorageHashPicker.cs
-src/AdoNet/Orleans.Persistence.AdoNet/Storage/Provider/Orleans3CompatibleStringKeyHasher.cs
-src/AdoNet/Orleans.Persistence.AdoNet/Storage/Provider/OrleansDefaultHasher.cs
-src/AdoNet/Shared/Storage/OrleansRelationalDownloadStream.cs
-src/AdoNet/Shared/Storage/RelationalOrleansQueries.cs
-src/Azure/Orleans.Clustering.AzureStorage/OrleansSiloInstanceManager.cs
-src/Azure/Orleans.Streaming.EventHubs/OrleansServiceBusErrorCode.cs
-src/Cassandra/Orleans.Clustering.Cassandra/OrleansQueries.cs
-src/Orleans.Identity/ManagedCode.Orleans.Identity.Client/Extensions/OrleansIdentityExtensions.cs
-src/Orleans.Identity/ManagedCode.Orleans.Identity.Client/Filters/OrleansAuthorizationActionFilter.cs
-src/Orleans.Identity/ManagedCode.Orleans.Identity.Core/Constants/OrleansIdentityConstants.cs
-src/Orleans.Identity/ManagedCode.Orleans.Identity.Core/Extensions/OrleansExtensions.cs
-```
+**Provider dirs (31 dirs):** `AWS/Orleans.Clustering.DynamoDB/` -> `AWS/Scynapse.Clustering.DynamoDB/`, `Azure/Orleans.Persistence.AzureStorage/` -> `Azure/Scynapse.Persistence.AzureStorage/`, `Redis/Orleans.Clustering.Redis/` -> `Redis/Scynapse.Clustering.Redis/`, etc.
 
-### src/ - Build/Config Files with Orleans in Name (8 files)
-```
-src/Orleans.CodeGenerator/build/Microsoft.Orleans.CodeGenerator.props
-src/Orleans.CodeGenerator/buildMultiTargeting/Microsoft.Orleans.CodeGenerator.props
-src/Orleans.CodeGenerator/buildTransitive/Microsoft.Orleans.CodeGenerator.props
-src/Orleans.Sdk/build/Microsoft.Orleans.Sdk.targets
-src/Orleans.Sdk/buildMultiTargeting/Microsoft.Orleans.Sdk.targets
-src/Orleans.Sdk/buildTransitive/Microsoft.Orleans.Sdk.targets
-src/Dashboard/Orleans.Dashboard/Orleans.Dashboard.Frontend.targets
-src/Orleans.Identity/ManagedCode.Orleans.Identity.sln
-```
+**API reference dirs (48 dirs):** Mirror of above under `src/api/`.
 
-### src/ - Binary/Image Files (1 file)
-```
-src/Dashboard/Orleans.Dashboard.App/src/assets/img/OrleansLogo.png
-```
+**Test dirs (14 dirs):** `test/Orleans.CodeGenerator.Tests/` -> `test/Scynapse.CodeGenerator.Tests/`, `test/Orleans.Serialization.UnitTests/` -> `test/Scynapse.Serialization.UnitTests/`, etc.
 
-### src/ - Scynapse.AsyncPlus (1 file - REMAINING NEWORLEANS REFERENCE)
-```
-src/Scynapse.AsyncPlus/Services/NewOrleansAsyncPersistenceService.cs  [SHOULD RENAME]
-```
+**Identity dirs (4 dirs):** `Orleans.Identity/ManagedCode.Orleans.Identity.Client/` -> `Scynapse.Identity/ManagedCode.Scynapse.Identity.Client/`, etc.
 
-### src/api/ - API Reference Files (56 files)
-```
-src/api/Orleans.BroadcastChannel/Orleans.BroadcastChannel.cs
-src/api/Orleans.Client/Orleans.Client.cs
-src/api/Orleans.Clustering.Consul/Orleans.Clustering.Consul.cs
-src/api/Orleans.Clustering.ZooKeeper/Orleans.Clustering.ZooKeeper.cs
-src/api/Orleans.Connections.Security/Orleans.Connections.Security.cs
-src/api/Orleans.Core.Abstractions/Orleans.Core.Abstractions.cs
-src/api/Orleans.Core/Orleans.Core.cs
-src/api/Orleans.EventSourcing/Orleans.EventSourcing.cs
-src/api/Orleans.Hosting.Kubernetes/Orleans.Hosting.Kubernetes.cs
-src/api/Orleans.Journaling/Orleans.Journaling.cs
-src/api/Orleans.Persistence.Memory/Orleans.Persistence.Memory.cs
-src/api/Orleans.Reminders.Abstractions/Orleans.Reminders.Abstractions.cs
-src/api/Orleans.Reminders/Orleans.Reminders.cs
-src/api/Orleans.Runtime/Orleans.Runtime.cs
-src/api/Orleans.Sdk/Orleans.Sdk.cs
-src/api/Orleans.Serialization.Abstractions/Orleans.Serialization.Abstractions.cs
-src/api/Orleans.Serialization.FSharp/Orleans.Serialization.FSharp.cs
-src/api/Orleans.Serialization.MessagePack/Orleans.Serialization.MessagePack.cs
-src/api/Orleans.Serialization.NewtonsoftJson/Orleans.Serialization.NewtonsoftJson.cs
-src/api/Orleans.Serialization.SystemTextJson/Orleans.Serialization.SystemTextJson.cs
-src/api/Orleans.Serialization.TestKit/Orleans.Serialization.TestKit.cs
-src/api/Orleans.Serialization/Orleans.Serialization.cs
-src/api/Orleans.Server/Orleans.Server.cs
-src/api/Orleans.Streaming.Abstractions/Orleans.Streaming.Abstractions.cs
-src/api/Orleans.Streaming/Orleans.Streaming.cs
-src/api/Orleans.TestingHost/Orleans.TestingHost.cs
-src/api/Orleans.Transactions.TestKit.Base/Orleans.Transactions.TestKit.Base.cs
-src/api/Orleans.Transactions.TestKit.xUnit/Orleans.Transactions.TestKit.xUnit.cs
-src/api/Orleans.Transactions/Orleans.Transactions.cs
-src/api/AWS/Orleans.Clustering.DynamoDB/Orleans.Clustering.DynamoDB.cs
-src/api/AWS/Orleans.Persistence.DynamoDB/Orleans.Persistence.DynamoDB.cs
-src/api/AWS/Orleans.Reminders.DynamoDB/Orleans.Reminders.DynamoDB.cs
-src/api/AWS/Orleans.Streaming.SQS/Orleans.Streaming.SQS.cs
-src/api/AdoNet/Orleans.Clustering.AdoNet/Orleans.Clustering.AdoNet.cs
-src/api/AdoNet/Orleans.GrainDirectory.AdoNet/Orleans.GrainDirectory.AdoNet.cs
-src/api/AdoNet/Orleans.Persistence.AdoNet/Orleans.Persistence.AdoNet.cs
-src/api/AdoNet/Orleans.Reminders.AdoNet/Orleans.Reminders.AdoNet.cs
-src/api/AdoNet/Orleans.Streaming.AdoNet/Orleans.Streaming.AdoNet.cs
-src/api/Azure/Orleans.Clustering.AzureStorage/Orleans.Clustering.AzureStorage.cs
-src/api/Azure/Orleans.Clustering.Cosmos/Orleans.Clustering.Cosmos.cs
-src/api/Azure/Orleans.GrainDirectory.AzureStorage/Orleans.GrainDirectory.AzureStorage.cs
-src/api/Azure/Orleans.Hosting.AzureCloudServices/Orleans.Hosting.AzureCloudServices.cs
-src/api/Azure/Orleans.Journaling.AzureStorage/Orleans.Journaling.AzureStorage.cs
-src/api/Azure/Orleans.Persistence.AzureStorage/Orleans.Persistence.AzureStorage.cs
-src/api/Azure/Orleans.Persistence.Cosmos/Orleans.Persistence.Cosmos.cs
-src/api/Azure/Orleans.Reminders.AzureStorage/Orleans.Reminders.AzureStorage.cs
-src/api/Azure/Orleans.Reminders.Cosmos/Orleans.Reminders.Cosmos.cs
-src/api/Azure/Orleans.Streaming.AzureStorage/Orleans.Streaming.AzureStorage.cs
-src/api/Azure/Orleans.Streaming.EventHubs/Orleans.Streaming.EventHubs.cs
-src/api/Azure/Orleans.Transactions.AzureStorage/Orleans.Transactions.AzureStorage.cs
-src/api/Cassandra/Orleans.Clustering.Cassandra/Orleans.Clustering.Cassandra.cs
-src/api/Redis/Orleans.Clustering.Redis/Orleans.Clustering.Redis.cs
-src/api/Redis/Orleans.GrainDirectory.Redis/Orleans.GrainDirectory.Redis.cs
-src/api/Redis/Orleans.Persistence.Redis/Orleans.Persistence.Redis.cs
-src/api/Redis/Orleans.Reminders.Redis/Orleans.Reminders.Redis.cs
-src/api/Serializers/Orleans.Serialization.Protobuf/Orleans.Serialization.Protobuf.cs
-```
+### Files Renamed (230 total)
 
-### test/ - .csproj and Project Files (15 files)
-```
-test/Orleans.CodeGenerator.Tests/Orleans.CodeGenerator.Tests.csproj
-test/Orleans.Connections.Security.Tests/Orleans.Connections.Security.Tests.csproj
-test/Orleans.Dashboard.Tests/Orleans.Dashboard.TestGrains/Orleans.Dashboard.TestGrains.csproj
-test/Orleans.Dashboard.Tests/Orleans.Dashboard.UnitTests/Orleans.Dashboard.UnitTests.csproj
-test/Orleans.Journaling.Tests/Orleans.Journaling.Tests.csproj
-test/Orleans.Serialization.FSharp.Tests/Orleans.Serialization.FSharp.Tests.fsproj
-test/Orleans.Serialization.UnitTests/Orleans.Serialization.UnitTests.csproj
-test/TestInfrastructure/Orleans.TestingHost.Tests/Orleans.TestingHost.Tests.csproj
-test/Transactions/Orleans.Transactions.Azure.Test/Orleans.Transactions.Azure.Test.csproj
-test/Transactions/Orleans.Transactions.Tests/Orleans.Transactions.Tests.csproj
-test/Misc/TestInternalDtosRefOrleans/TestInternalDtosRefOrleans.csproj
-```
+**By extension:**
 
-### test/ - Config Files (4 files)
-```
-test/Orleans.Connections.Security.Tests/Orleans.Connections.Security.Tests.xunit.runner.json
-test/TestInfrastructure/Orleans.TestingHost.Tests/Orleans.TestingHost.Tests.xunit.runner.json
-test/Transactions/Orleans.Transactions.Azure.Test/Orleans.Transactions.Azure.Test.xunit.runner.json
-test/Transactions/Orleans.Transactions.Tests/Orleans.Transactions.Tests.xunit.runner.json
-```
+| Extension | Count | Examples |
+|-----------|-------|---------|
+| `.cs` | 138 | `OrleansException.cs` -> `ScynapseException.cs`, `OrleansSourceGenerator.cs` -> `ScynapseSourceGenerator.cs` |
+| `.csproj` | 77 | `Orleans.Core.csproj` -> `Scynapse.Core.csproj`, `Orleans.Runtime.csproj` -> `Scynapse.Runtime.csproj` |
+| `.targets` | 4 | `Microsoft.Orleans.Sdk.targets` -> `Genesa.Scynapse.Sdk.targets` |
+| `.json` | 4 | `Orleans.*.xunit.runner.json` -> `Scynapse.*.xunit.runner.json` |
+| `.props` | 3 | `Microsoft.Orleans.CodeGenerator.props` -> `Genesa.Scynapse.CodeGenerator.props` |
+| `.slnx` | 1 | `Orleans.slnx` -> `Scynapse.slnx` |
+| `.sln` | 1 | `ManagedCode.Orleans.Identity.sln` -> `ManagedCode.Scynapse.Identity.sln` |
+| `.png` | 1 | `OrleansLogo.png` -> `ScynapseLogo.png` |
+| `.fsproj` | 1 | `Orleans.Serialization.FSharp.Tests.fsproj` -> `Scynapse.Serialization.FSharp.Tests.fsproj` |
 
-### test/ - C# Source Files (10 files)
-```
-test/DefaultCluster.Tests/TimerOrleansTest.cs
-test/Extensions/Tester.Redis/Persistence/RedisStorageTests_OrleansSerializer.cs
-test/Extensions/TesterAdoNet/GrainDirectory/RelationalOrleansQueriesTests.cs
-test/Extensions/TesterAdoNet/Streaming/RelationalOrleansQueriesTests.cs
-test/Misc/TestInterfaces/ClassNotReferencingOrleansTypeDto.cs
-test/Misc/TestInternalDtosRefOrleans/ClassReferencingOrleansTypeDto.cs
-test/NonSilo.Tests/SchedulerTests/OrleansTaskSchedulerAdvancedTests.cs
-test/NonSilo.Tests/SchedulerTests/OrleansTaskSchedulerAdvancedTests_Set2.cs
-test/NonSilo.Tests/SchedulerTests/OrleansTaskSchedulerBasicTests.cs
-test/TestInfrastructure/TestExtensions/OrleansTestingBase.cs
-```
+### Content Replaced (2,891 files)
 
-### test/ - Snapshot/Verified Files (33 files)
+**By file extension:**
+
+| Extension | Files Changed |
+|-----------|--------------|
+| `.cs` | 2,625 |
+| `.csproj` | 129 |
+| `.md` | 59 |
+| `.sql` | 29 |
+| `.props` | 7 |
+| `.tsx` | 5 |
+| `.targets` | 5 |
+| `.json` | 5 |
+| `.yaml` | 4 |
+| `.html` | 3 |
+| `.fs` | 3 |
+| `.css` | 3 |
+| Other | ~14 |
+
+### Content Categories That Were Renamed
+
+| Category | Occurrences | Example Before -> After |
+|----------|-------------|------------------------|
+| **Namespace declarations** | 200+ distinct namespaces | `namespace Orleans.Runtime` -> `namespace Scynapse.Runtime` |
+| **C# type names** | 50+ types | `OrleansException` -> `ScynapseException`, `OrleansJsonSerializer` -> `ScynapseJsonSerializer` |
+| **NuGet PackageIds** | 40+ packages | `Microsoft.Orleans.Core` -> `Genesa.Scynapse.Core` |
+| **Generated code namespaces** | 40+ | `OrleansCodeGen.Orleans.*` -> `ScynapseCodeGen.Scynapse.*` |
+| **InternalsVisibleTo** | 30+ assemblies | `Orleans.Runtime` -> `Scynapse.Runtime` |
+| **Diagnostic IDs** | `ORLEANS0001`-`0013` | `ORLEANS0001` -> `SCYNAPSE0001` |
+| **Experimental flags** | `ORLEANSEXP001`-`004` | `ORLEANSEXP001` -> `SCYNAPSEEXP001` |
+| **Environment variables** | `ORLEANS_CLUSTER_ID`, `ORLEANS_SERVICE_ID` | `SCYNAPSE_CLUSTER_ID`, `SCYNAPSE_SERVICE_ID` |
+| **GitHub URLs** | All repo links | `github.com/dotnet/orleans` -> `github.com/dotnet/scynapse` |
+| **SQL schemas** | 29 SQL files | Table/procedure references updated |
+| **Comments & XML docs** | Thousands | All "Orleans" references in comments updated |
+| **CI/CD configs** | 7 files | `.azure/`, `.github/` configs updated |
+| **Build scripts** | Multiple | `build.ps1`, `Test.cmd`, etc. updated |
+
+---
+
+## What Was NOT Renamed (and Why)
+
+### 3 Binary Logo Files
+
+| File | Why Not Renamed | Future Action |
+|------|----------------|---------------|
+| `assets/logo_128.png` | Binary PNG — text tools corrupt images | Replace with Scynapse logo image |
+| `src/Dashboard/Scynapse.Dashboard.App/src/assets/img/ScynapseLogo.png` | File was renamed, but binary metadata may still say "Orleans" | Re-export from design tool |
+| `src/Scynapse.Identity/logo.png` | Binary PNG | Replace with Scynapse logo image |
+
+**How to handle:** These need a designer to create/export new Scynapse-branded logos. The file references in the codebase already point to the renamed paths — only the image content itself needs replacement.
+
+### The UTF-16 Edge Case (Fixed)
+
+**File:** `src/Scynapse.Core/GlobalSuppressions.cs`
+**Problem:** Visual Studio created this file in UTF-16 encoding. The `sed`-based rename script couldn't match the Orleans pattern because UTF-16 stores characters with null bytes between them (`O\x00r\x00l\x00e\x00a\x00n\x00s\x00`).
+**Resolution:** Fixed manually with a byte-level sed replacement. The `scynapse-rename-encoding-fix.sh` script was then created to handle this class of issue automatically in the future.
+**Lesson for future AIs:** Always run `scynapse-rename-encoding-fix.sh` after the main rename script. Visual Studio commonly creates `GlobalSuppressions.cs`, `.designer.cs`, and some `.resx` files in UTF-16.
+
+---
+
+## Scripts Reference
+
+Four scripts handle the complete rename lifecycle. All live in `Docs/Scynapse/`:
+
+| Script | Purpose | When to Run |
+|--------|---------|-------------|
+| `scynapse-rename-audit.sh` | Count all Orleans references | Before & after rename |
+| `scynapse-rename-execute.sh` | Perform the rename (dirs, files, content) | Main rename step |
+| `scynapse-rename-encoding-fix.sh` | Fix non-UTF-8 files that sed missed | After execute script |
+| `scynapse-rename-post-verify.sh` | Validate structural integrity | After all renames, before commit |
+
+**Full workflow:** See `RENAME-REQUIREMENTS.md` section "Complete Rename Workflow (for future AI agents)".
+
+### What Each Script Can and Cannot Handle
+
 ```
-test/Orleans.CodeGenerator.Tests/OrleansSourceGeneratorTests.cs
-test/Orleans.CodeGenerator.Tests/snapshots/OrleansSourceGeneratorTests.TestAlias.verified.cs
-test/Orleans.CodeGenerator.Tests/snapshots/OrleansSourceGeneratorTests.TestBasicClass.verified.cs
-test/Orleans.CodeGenerator.Tests/snapshots/OrleansSourceGeneratorTests.TestBasicClassWithAnnotatedFields.verified.cs
-test/Orleans.CodeGenerator.Tests/snapshots/OrleansSourceGeneratorTests.TestBasicClassWithDifferentAccessModifiers.verified.cs
-test/Orleans.CodeGenerator.Tests/snapshots/OrleansSourceGeneratorTests.TestBasicClassWithFields.verified.cs
-test/Orleans.CodeGenerator.Tests/snapshots/OrleansSourceGeneratorTests.TestBasicClassWithInheritance.verified.cs
-test/Orleans.CodeGenerator.Tests/snapshots/OrleansSourceGeneratorTests.TestBasicClassWithInitOnlyProperty.verified.cs
-test/Orleans.CodeGenerator.Tests/snapshots/OrleansSourceGeneratorTests.TestBasicClassWithoutNamespace.verified.cs
-test/Orleans.CodeGenerator.Tests/snapshots/OrleansSourceGeneratorTests.TestBasicGrain.verified.cs
-test/Orleans.CodeGenerator.Tests/snapshots/OrleansSourceGeneratorTests.TestBasicStruct.verified.cs
-test/Orleans.CodeGenerator.Tests/snapshots/OrleansSourceGeneratorTests.TestClassNestedTypes.verified.cs
-test/Orleans.CodeGenerator.Tests/snapshots/OrleansSourceGeneratorTests.TestClassPrimitiveTypes.verified.cs
-test/Orleans.CodeGenerator.Tests/snapshots/OrleansSourceGeneratorTests.TestClassPrimitiveTypesUsingFullName.verified.cs
-test/Orleans.CodeGenerator.Tests/snapshots/OrleansSourceGeneratorTests.TestClassReferenceProperties.verified.cs
-test/Orleans.CodeGenerator.Tests/snapshots/OrleansSourceGeneratorTests.TestClassWithConstructorParameters.verified.cs
-test/Orleans.CodeGenerator.Tests/snapshots/OrleansSourceGeneratorTests.TestClassWithFieldAndNoSetters.verified.cs
-test/Orleans.CodeGenerator.Tests/snapshots/OrleansSourceGeneratorTests.TestClassWithGenerateMethodSerializersAnnotation.verified.cs
-test/Orleans.CodeGenerator.Tests/snapshots/OrleansSourceGeneratorTests.TestClassWithGenerateSerializerAnnotation.verified.cs
-test/Orleans.CodeGenerator.Tests/snapshots/OrleansSourceGeneratorTests.TestClassWithInterfaceConstructorParameter.verified.cs
-test/Orleans.CodeGenerator.Tests/snapshots/OrleansSourceGeneratorTests.TestClassWithNoPublicConstructors.verified.cs
-test/Orleans.CodeGenerator.Tests/snapshots/OrleansSourceGeneratorTests.TestClassWithOptionalConstructorParameters.verified.cs
-test/Orleans.CodeGenerator.Tests/snapshots/OrleansSourceGeneratorTests.TestClassWithParameterizedConstructor.verified.cs
-test/Orleans.CodeGenerator.Tests/snapshots/OrleansSourceGeneratorTests.TestClassesWithOrleansConstructorAnnotation.verified.cs
-test/Orleans.CodeGenerator.Tests/snapshots/OrleansSourceGeneratorTests.TestCompoundTypeAlias.verified.cs
-test/Orleans.CodeGenerator.Tests/snapshots/OrleansSourceGeneratorTests.TestGenericClass.verified.cs
-test/Orleans.CodeGenerator.Tests/snapshots/OrleansSourceGeneratorTests.TestGenericClassWithConstructorParameters.verified.cs
-test/Orleans.CodeGenerator.Tests/snapshots/OrleansSourceGeneratorTests.TestGrainComplexGrain.verified.cs
-test/Orleans.CodeGenerator.Tests/snapshots/OrleansSourceGeneratorTests.TestGrainMethodAnnotatedWithInvokableBaseType.verified.cs
-test/Orleans.CodeGenerator.Tests/snapshots/OrleansSourceGeneratorTests.TestGrainMethodAnnotatedWithResponseTimeout.verified.cs
-test/Orleans.CodeGenerator.Tests/snapshots/OrleansSourceGeneratorTests.TestGrainWithDifferentKeyTypes.verified.cs
-test/Orleans.CodeGenerator.Tests/snapshots/OrleansSourceGeneratorTests.TestGrainWithMultipleInterfaces.verified.cs
-test/Orleans.CodeGenerator.Tests/snapshots/OrleansSourceGeneratorTests.TestRecords.verified.cs
-test/Orleans.CodeGenerator.Tests/snapshots/OrleansSourceGeneratorTests.TestWithOmitDefaultMemberValuesAnnotation.verified.cs
-test/Orleans.CodeGenerator.Tests/snapshots/OrleansSourceGeneratorTests.TestWithSerializerTransparentAnnotation.verified.cs
-test/Orleans.CodeGenerator.Tests/snapshots/OrleansSourceGeneratorTests.TestWithSuppressReferenceTrackingAttribute.verified.cs
-test/Orleans.CodeGenerator.Tests/snapshots/OrleansSourceGeneratorTests.TestWithUseActivatorAnnotation.verified.cs
+                    ┌─────────────────────────────────────┐
+                    │        scynapse-rename-audit.sh      │
+                    │  (BEFORE) Count all references       │
+                    └─────────────┬───────────────────────┘
+                                  │
+                    ┌─────────────▼───────────────────────┐
+                    │    scynapse-rename-execute.sh        │
+                    │  Phase 1: Rename directories         │ ✅ Handles 99% of work
+                    │  Phase 2: Rename files               │ ❌ Cannot: non-UTF-8,
+                    │  Phase 3: Replace content (sed)      │    binary, SQL databases
+                    └─────────────┬───────────────────────┘
+                                  │
+                    ┌─────────────▼───────────────────────┐
+                    │  scynapse-rename-encoding-fix.sh     │
+                    │  Find non-UTF-8 files               │ ✅ Handles: UTF-16, ISO-8859
+                    │  Convert -> replace -> convert back  │ ❌ Cannot: binary files
+                    └─────────────┬───────────────────────┘
+                                  │
+                    ┌─────────────▼───────────────────────┐
+                    │   scynapse-rename-post-verify.sh     │
+                    │  Check ProjectReference integrity    │ ✅ Catches broken refs
+                    │  Check solution file references      │ ✅ Catches broken .sln
+                    │  Check PackageId/AssemblyName        │ ✅ Catches naming issues
+                    │  Check non-UTF-8 files               │ ✅ Catches encoding misses
+                    │  Check binary files                  │ ⚠️  Lists but can't fix
+                    │  Check directory/file names          │ ✅ Catches naming misses
+                    └─────────────┬───────────────────────┘
+                                  │
+                    ┌─────────────▼───────────────────────┐
+                    │        scynapse-rename-audit.sh      │
+                    │  (AFTER) Verify all references gone  │
+                    └─────────────────────────────────────┘
 ```
 
 ---
 
-## Part 2: All 139 Directories with "Orleans" in Name
+## Why the Main Script Missed the UTF-16 File
+
+**Root cause:** `sed` is a byte-stream processor designed for ASCII/UTF-8. It reads files line-by-line using `\n` as a delimiter.
+
+In UTF-16 files:
+- Every ASCII character has a `\x00` (null byte) after it
+- Line endings are `\x0D\x00\x0A\x00` instead of `\x0D\x0A`
+- The pattern `Orleans` exists as `O\x00r\x00l\x00e\x00a\x00n\x00s\x00`
+
+When sed reads this:
+- It may see the null bytes as line terminators (depending on implementation)
+- Even if it reads the whole "line", the pattern `Orleans` (7 bytes) doesn't match `O\x00r\x00l\x00e\x00a\x00n\x00s\x00` (14 bytes)
+- The file appears to be "processed" (no error) but nothing changes
+
+`grep -ril "orleans"` may partially work on UTF-16 because some grep implementations do binary-aware matching, but the match is unreliable. This is why the audit script could report the file as containing "orleans" while the execute script's sed silently failed.
+
+**The encoding-fix script solves this** by:
+1. Detecting the actual encoding via `file --mime-encoding`
+2. Converting to UTF-8 with `iconv` (which properly handles null bytes)
+3. Running sed on the clean UTF-8 version
+4. Converting back to the original encoding
+
+---
+
+## Handling Future Upstream Merges
+
+When merging upstream Orleans code:
+
+1. **New upstream files will say "Orleans"** — this is expected
+2. After the merge, run the full rename workflow (see RENAME-REQUIREMENTS.md)
+3. The scripts are **idempotent** — running them on already-renamed files produces no changes
+4. **Git will show the merge introducing "Orleans" references**, then the rename commit removing them
+
+### Merge strategy
+
+```bash
+# 1. Merge upstream
+git merge upstream/main
+
+# 2. Resolve conflicts (keep Scynapse names where both sides changed the same area)
+
+# 3. Run full rename workflow on the merged result
+cd Docs/Scynapse/
+./scynapse-rename-execute.sh --execute
+./scynapse-rename-encoding-fix.sh --execute
+./scynapse-rename-post-verify.sh
+./scynapse-rename-audit.sh --summary
+
+# 4. Commit the post-merge rename
+git add -A && git commit -m "Re-apply Scynapse rename after upstream merge"
+```
+
+---
+
+## Appendix: Pre-Rename Directory/File Lists
+
+<details>
+<summary>Click to expand full pre-rename directory list (139 entries)</summary>
 
 ### src/ Core (35 directories)
 ```
@@ -322,11 +269,7 @@ src/Orleans.Core.Abstractions/
 src/Orleans.DurableJobs/
 src/Orleans.EventSourcing/
 src/Orleans.Hosting.Kubernetes/
-src/Orleans.Identity/
-src/Orleans.Identity/ManagedCode.Orleans.Identity.Client/
-src/Orleans.Identity/ManagedCode.Orleans.Identity.Core/
-src/Orleans.Identity/ManagedCode.Orleans.Identity.Server/
-src/Orleans.Identity/ManagedCode.Orleans.Identity.Tests/
+src/Orleans.Identity/ (+ 4 subdirs)
 src/Orleans.Journaling/
 src/Orleans.Persistence.Memory/
 src/Orleans.Reminders/
@@ -387,62 +330,7 @@ src/Serializers/Orleans.Serialization.Protobuf/
 
 ### src/api/ (48 directories - mirrors of src/)
 ```
-src/api/Orleans.BroadcastChannel/
-src/api/Orleans.Client/
-src/api/Orleans.Clustering.Consul/
-src/api/Orleans.Clustering.ZooKeeper/
-src/api/Orleans.Connections.Security/
-src/api/Orleans.Core/
-src/api/Orleans.Core.Abstractions/
-src/api/Orleans.EventSourcing/
-src/api/Orleans.Hosting.Kubernetes/
-src/api/Orleans.Journaling/
-src/api/Orleans.Persistence.Memory/
-src/api/Orleans.Reminders/
-src/api/Orleans.Reminders.Abstractions/
-src/api/Orleans.Runtime/
-src/api/Orleans.Sdk/
-src/api/Orleans.Serialization/
-src/api/Orleans.Serialization.Abstractions/
-src/api/Orleans.Serialization.FSharp/
-src/api/Orleans.Serialization.MessagePack/
-src/api/Orleans.Serialization.NewtonsoftJson/
-src/api/Orleans.Serialization.SystemTextJson/
-src/api/Orleans.Serialization.TestKit/
-src/api/Orleans.Server/
-src/api/Orleans.Streaming/
-src/api/Orleans.Streaming.Abstractions/
-src/api/Orleans.TestingHost/
-src/api/Orleans.Transactions/
-src/api/Orleans.Transactions.TestKit.Base/
-src/api/Orleans.Transactions.TestKit.xUnit/
-src/api/AWS/Orleans.Clustering.DynamoDB/
-src/api/AWS/Orleans.Persistence.DynamoDB/
-src/api/AWS/Orleans.Reminders.DynamoDB/
-src/api/AWS/Orleans.Streaming.SQS/
-src/api/AdoNet/Orleans.Clustering.AdoNet/
-src/api/AdoNet/Orleans.GrainDirectory.AdoNet/
-src/api/AdoNet/Orleans.Persistence.AdoNet/
-src/api/AdoNet/Orleans.Reminders.AdoNet/
-src/api/AdoNet/Orleans.Streaming.AdoNet/
-src/api/Azure/Orleans.Clustering.AzureStorage/
-src/api/Azure/Orleans.Clustering.Cosmos/
-src/api/Azure/Orleans.GrainDirectory.AzureStorage/
-src/api/Azure/Orleans.Hosting.AzureCloudServices/
-src/api/Azure/Orleans.Journaling.AzureStorage/
-src/api/Azure/Orleans.Persistence.AzureStorage/
-src/api/Azure/Orleans.Persistence.Cosmos/
-src/api/Azure/Orleans.Reminders.AzureStorage/
-src/api/Azure/Orleans.Reminders.Cosmos/
-src/api/Azure/Orleans.Streaming.AzureStorage/
-src/api/Azure/Orleans.Streaming.EventHubs/
-src/api/Azure/Orleans.Transactions.AzureStorage/
-src/api/Cassandra/Orleans.Clustering.Cassandra/
-src/api/Redis/Orleans.Clustering.Redis/
-src/api/Redis/Orleans.GrainDirectory.Redis/
-src/api/Redis/Orleans.Persistence.Redis/
-src/api/Redis/Orleans.Reminders.Redis/
-src/api/Serializers/Orleans.Serialization.Protobuf/
+[Same pattern as above with src/api/ prefix]
 ```
 
 ### test/ (14 directories)
@@ -451,9 +339,7 @@ test/Misc/TestInternalDtosRefOrleans/
 test/NonSilo.Tests/OrleansRuntime/
 test/Orleans.CodeGenerator.Tests/
 test/Orleans.Connections.Security.Tests/
-test/Orleans.Dashboard.Tests/
-test/Orleans.Dashboard.Tests/Orleans.Dashboard.TestGrains/
-test/Orleans.Dashboard.Tests/Orleans.Dashboard.UnitTests/
+test/Orleans.Dashboard.Tests/ (+ 2 subdirs)
 test/Orleans.Journaling.Tests/
 test/Orleans.Serialization.FSharp.Tests/
 test/Orleans.Serialization.UnitTests/
@@ -463,82 +349,65 @@ test/Transactions/Orleans.Transactions.Azure.Test/
 test/Transactions/Orleans.Transactions.Tests/
 ```
 
----
+</details>
 
-## Part 3: Content Match Distribution
+<details>
+<summary>Click to expand full pre-rename file list (230 entries, by category)</summary>
 
-### Files containing "Orleans" by top-level subdirectory
-
-| Subdirectory | Files | Notable content areas |
-|-------------|-------|----------------------|
-| `src/Orleans.Runtime/` | 272 | Runtime implementation, hosting, membership |
-| `src/Orleans.Core/` | 257 | Core library, configuration, serialization |
-| `src/Orleans.Streaming/` | 173 | Streaming providers and infrastructure |
-| `src/Azure/` | 172 | Azure provider implementations |
-| `test/Extensions/` | 168 | Extension test projects |
-| `test/Grains/` | 162 | Test grain implementations |
-| `src/Orleans.Serialization/` | 160 | Serialization framework |
-| `src/Orleans.Core.Abstractions/` | 134 | Core abstractions and interfaces |
-| `src/AdoNet/` | 108 | ADO.NET providers + SQL files |
-| `test/Tester/` | 84 | Integration tests |
-| `test/TesterInternal/` | 82 | Internal tests |
-| `src/Dashboard/` | 70 | Dashboard UI + API |
-| `src/Orleans.Transactions/` | 65 | Transaction framework |
-| `src/Orleans.CodeGenerator/` | 63 | Source generator |
-| `playground/` | 63 | Playground/sample projects |
-| `test/NonSilo.Tests/` | 52 | Non-silo unit tests |
-| `src/api/` | 51 | API reference files |
-| `src/Orleans.Identity/` | 47 | Identity framework |
-| `src/Orleans.Transactions.TestKit.Base/` | 45 | Transaction test kit |
-| `src/AWS/` | 43 | AWS providers |
-| `src/Orleans.TestingHost/` | 41 | Testing host |
-
----
-
-## Part 4: Immediate Cleanup Items
-
-### 2 Remaining "NewOrleans" References
-
-These are leftover from the previous NewOrleans -> Scynapse rename and should be fixed:
-
-1. **Filename:** `src/Scynapse.AsyncPlus/Services/NewOrleansAsyncPersistenceService.cs`
-   - Action: Rename file to `ScynapseAsyncPersistenceService.cs` (or similar)
-   - Also update class name inside the file
-
-2. **Content:** `playground/PluginGrainScenarios/Grains/EventTestGrain.cs` line 6
-   - Current: `// NEWORLEANS EVENTS TEST GRAINS`
-   - Action: Update comment to `// SCYNAPSE EVENTS TEST GRAINS`
-
----
-
-## Part 5: Search Commands for Verification
-
-```bash
-# Count directories with Orleans in name
-find /home/user/DOTNExT/src/Scynapse/ -type d -iname "*orleans*" | wc -l
-
-# Count files with Orleans in name
-find /home/user/DOTNExT/src/Scynapse/ -type f -iname "*orleans*" | wc -l
-
-# Count files containing Orleans in content
-grep -ril "orleans" /home/user/DOTNExT/src/Scynapse/ | wc -l
-
-# Find remaining NewOrleans references
-grep -rin "neworleans" /home/user/DOTNExT/src/Scynapse/
-find /home/user/DOTNExT/src/Scynapse/ -iname "*neworleans*"
-
-# Count by case variant
-grep -r "Orleans" /home/user/DOTNExT/src/Scynapse/ | wc -l    # PascalCase
-grep -r "ORLEANS" /home/user/DOTNExT/src/Scynapse/ | wc -l    # UPPERCASE
+### Root Level (1 file)
 ```
+Orleans.slnx
+```
+
+### src/ - Core Framework .csproj Files (38 files)
+```
+src/Orleans.Analyzers/Orleans.Analyzers.csproj
+src/Orleans.BroadcastChannel/Orleans.BroadcastChannel.csproj
+src/Orleans.Client/Orleans.Client.csproj
+[... all 38 listed in original inventory ...]
+```
+
+### src/ - Provider .csproj Files (22 files)
+```
+src/AWS/Orleans.Clustering.DynamoDB/Orleans.Clustering.DynamoDB.csproj
+[... all 22 listed in original inventory ...]
+```
+
+### src/ - C# Source Files with Orleans in Name (33 files)
+```
+src/Orleans.Analyzers/AtMostOneOrleansConstructorAnalyzer.cs
+src/Orleans.CodeGenerator/OrleansGeneratorDiagnosticAnalysisException.cs
+src/Orleans.CodeGenerator/OrleansSourceGenerator.cs
+[... all 33 listed in original inventory ...]
+```
+
+### test/ files (62 total: 15 .csproj, 4 config, 10 .cs, 33 snapshot)
+```
+[All listed in original inventory]
+```
+
+</details>
+
+---
+
+## Commit History
+
+| Commit | Message | What Changed |
+|--------|---------|--------------|
+| `74e4decf4` | Fix last remaining Orleans reference in GlobalSuppressions.cs | UTF-16 encoded file manually fixed |
+| `37632551d` | Rename Orleans -> Scynapse / Microsoft.Orleans -> Genesa.Scynapse | Main bulk rename via execute script |
+| `465f2e23b` | Rename NewOrleans project to Scynapse throughout codebase | Initial NewOrleans -> Scynapse rename |
+| `b4be794da` | Add rename scripts for Orleans -> Scynapse / Microsoft -> Genesa | Script creation |
+| `742199150` | Comprehensive audit: find all Orleans references in src/Scynapse | Pre-rename audit + inventory docs |
 
 ---
 
 ## Notes
 
-- This inventory was generated by exhaustive filesystem search on 2026-02-26
+- This inventory was originally generated by exhaustive filesystem search on 2026-02-26
 - All paths are relative to `src/Scynapse/` unless otherwise noted
-- The `src/api/` directory is an auto-generated API reference mirror and will follow src/ changes
-- The `.verified.cs` snapshot files in test/ are auto-generated and will need regeneration after any rename
-- SQL files contain database schema references that would need migration scripts if renamed
-- Binary files (`.png`) would need to be replaced, not text-edited
+- The `src/api/` directory is an auto-generated API reference mirror that follows src/ changes
+- The `.verified.cs` snapshot files in test/ are auto-generated and need test regeneration after rename
+- SQL files contain database schema references that need migration scripts for deployed databases
+- Binary files (`.png`) need image replacement, not text editing
+- For full rename workflow and script documentation, see `RENAME-REQUIREMENTS.md`
