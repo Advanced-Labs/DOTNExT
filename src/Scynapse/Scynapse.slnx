@@ -6,20 +6,6 @@
     <Project Path="playground/DynamicGrainLoading.TestGrains/DynamicGrainLoading.TestGrains.csproj" />
     <Project Path="playground/PluginGrainScenarios/PluginGrainScenarios.csproj" />
   </Folder>
-  <Folder Name="/playground/ActivationRebalancing/">
-    <Project Path="playground/ActivationRebalancing/ActivationRebalancing.AppHost/ActivationRebalancing.AppHost.csproj" />
-    <Project Path="playground/ActivationRebalancing/ActivationRebalancing.Cluster/ActivationRebalancing.Cluster.csproj" />
-    <Project Path="playground/ActivationRebalancing/ActivationRebalancing.Frontend/ActivationRebalancing.Frontend.csproj" />
-  </Folder>
-  <Folder Name="/playground/ChaoticCluster/">
-    <Project Path="playground/ChaoticCluster/ChaoticCluster.AppHost/ChaoticCluster.AppHost.csproj" />
-    <Project Path="playground/ChaoticCluster/ChaoticCluster.ServiceDefaults/ChaoticCluster.ServiceDefaults.csproj" />
-    <Project Path="playground/ChaoticCluster/ChaoticCluster.Silo/ChaoticCluster.Silo.csproj" />
-  </Folder>
-  <Folder Name="/playground/DashboardToy/">
-    <Project Path="playground/DashboardToy/DashboardToy.AppHost/DashboardToy.AppHost.csproj" />
-    <Project Path="playground/DashboardToy/DashboardToy.Frontend/DashboardToy.Frontend.csproj" />
-  </Folder>
   <Folder Name="/playground/Dashboard/">
     <Project Path="playground/DashboardCohosted/DashboardCohosted.csproj" />
     <Project Path="playground/DashboardSeparateHost/DashboardSeparateHost.csproj" />

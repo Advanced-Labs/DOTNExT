@@ -7,10 +7,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Using Remove="Scynapse.Hosting" />
-  </ItemGroup>
-
-  <ItemGroup>
     <ProjectReference Include="$(SourceRoot)src\Scynapse.Core.Abstractions\Scynapse.Core.Abstractions.csproj" />
+    <!-- Scynapse.Runtime provides the Scynapse.Hosting and Scynapse.Runtime namespaces
+         required by implicit usings injected via Genesa.Scynapse.Sdk.targets -->
+    <ProjectReference Include="$(SourceRoot)src\Scynapse.Runtime\Scynapse.Runtime.csproj" />
   </ItemGroup>
 </Project>

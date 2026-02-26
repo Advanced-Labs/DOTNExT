@@ -198,16 +198,16 @@ public class SplitAssemblyDynamicGrainTests : IClassFixture<SplitAssemblyDynamic
 
             // Search for the TestSplitGrains assembly
             var testGrainsDir = Path.Combine(currentDir.FullName, "test", "Grains", "TestSplitGrains");
-            if (!Directory.Exists(testGrainsDir))
+            if (!System.IO.Directory.Exists(testGrainsDir))
             {
                 return null;
             }
 
             // Look in bin/Debug or bin/Release directories
             var binDir = Path.Combine(testGrainsDir, "bin");
-            if (Directory.Exists(binDir))
+            if (System.IO.Directory.Exists(binDir))
             {
-                foreach (var netDir in Directory.GetDirectories(binDir, "net*", SearchOption.AllDirectories))
+                foreach (var netDir in System.IO.Directory.GetDirectories(binDir, "net*", SearchOption.AllDirectories))
                 {
                     var assemblyPath = Path.Combine(netDir, "TestSplitGrains.dll");
                     if (File.Exists(assemblyPath))
