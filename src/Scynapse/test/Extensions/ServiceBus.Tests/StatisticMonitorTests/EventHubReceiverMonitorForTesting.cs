@@ -1,4 +1,4 @@
-using Orleans.Providers.Streams.Common;
+using Scynapse.Providers.Streams.Common;
 
 namespace ServiceBus.Tests.MonitorTests
 {
@@ -28,16 +28,16 @@ namespace ServiceBus.Tests.MonitorTests
     }
 
     [Serializable]
-    [Orleans.GenerateSerializer]
+    [Scynapse.GenerateSerializer]
     public class EventHubReceiverMonitorCounters 
     {
-        [Orleans.Id(0)]
+        [Scynapse.Id(0)]
         public int TrackInitializationCallCounter;
-        [Orleans.Id(1)]
+        [Scynapse.Id(1)]
         public int TrackReadCallCounter;
-        [Orleans.Id(2)]
+        [Scynapse.Id(2)]
         public int TrackMessagesReceivedCallCounter;
-        [Orleans.Id(3)]
+        [Scynapse.Id(3)]
         public int TrackShutdownCallCounter;
     }
 }

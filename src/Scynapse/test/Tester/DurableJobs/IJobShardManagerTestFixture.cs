@@ -1,8 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Orleans.Runtime;
-using Orleans.DurableJobs;
+using Scynapse.Runtime;
+using Scynapse.DurableJobs;
 
 namespace Tester.DurableJobs;
 

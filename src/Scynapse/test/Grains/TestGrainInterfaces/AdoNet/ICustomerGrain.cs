@@ -1,4 +1,4 @@
-﻿namespace Orleans.SqlUtils.StorageProvider.GrainInterfaces
+﻿namespace Scynapse.SqlUtils.StorageProvider.GrainInterfaces
 {
     public interface ICustomerGrain : IGrainWithIntegerKey
     {

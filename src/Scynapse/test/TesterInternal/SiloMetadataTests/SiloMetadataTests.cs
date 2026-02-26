@@ -1,7 +1,7 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Orleans.Runtime.MembershipService.SiloMetadata;
-using Orleans.TestingHost;
+using Scynapse.Runtime.MembershipService.SiloMetadata;
+using Scynapse.TestingHost;
 using Xunit;
 
 namespace UnitTests.SiloMetadataTests;
@@ -14,9 +14,9 @@ public class SiloMetadataTests(SiloMetadataTests.Fixture fixture) : IClassFixtur
 {
     private static readonly List<KeyValuePair<string, string>> Metadata =
         [
-            new("Orleans:Metadata:first", "1"),
-            new("Orleans:Metadata:second", "2"),
-            new("Orleans:Metadata:third", "3")
+            new("Scynapse:Metadata:first", "1"),
+            new("Scynapse:Metadata:second", "2"),
+            new("Scynapse:Metadata:third", "3")
         ];
 
     public class Fixture : IAsyncLifetime

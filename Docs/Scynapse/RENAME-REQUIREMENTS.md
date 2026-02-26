@@ -1,528 +1,276 @@
 # Scynapse Project Rename Requirements
 
-## ✅ RENAME COMPLETED
+## STATUS: Rename Complete (Text) / Binary Logos Pending
 
-**Status:** COMPLETE - NewOrleans → Scynapse rename finished
-**Date Completed:** 2026-02-26
-**Commit:** 465f2e23b - "Rename NewOrleans project to Scynapse throughout codebase"
-**Files Modified:** 3,397
-**Lines Changed:** +935 insertions, -1,529 deletions
+**Previous Rename:** NewOrleans -> Scynapse (completed 2026-02-26)
+**Full Rename:** Orleans -> Scynapse / Microsoft.Orleans -> Genesa.Scynapse (completed 2026-02-26)
+**Date Assessed:** 2026-02-26
+**Scope:** `src/Scynapse/` directory (3,344 files, 772 directories)
 
-### What Was Renamed:
-- ✅ 3 primary directories
-- ✅ 54+ files with content updates
-- ✅ All namespace declarations
-- ✅ All using statements
-- ✅ All project files (.csproj)
-- ✅ All documentation files
-- ✅ CLAUDE.md updated
-- ✅ All research documents
+### Current State
 
----
-
-## Document Purpose
-
-This document comprehensively catalogs everything that would need to be renamed if the Scynapse project were given a different name. It covers directories, files, code identifiers, configuration files, documentation, and all references throughout the codebase.
-
-**Current Name Forms:**
-- Directory: `src/Scynapse/`
-- Docs folder: `Docs/Scynapse/`
-- Code: `Scynapse`, `ScynapseAsyncPlus`, etc.
-
-**Current Name Forms:**
-- Directory: `src/Scynapse/`
-- Docs folder: `Docs/Scynapse/` (with space)
-- Code: `Scynapse`, `ScynapseAsyncPlus`, etc. (camelCase in code)
+| Metric | Before Rename | After Rename |
+|--------|--------------|--------------|
+| Directories with "Orleans" in name | 139 | **0** |
+| Files with "Orleans" in filename | 230 | **0** |
+| Files with "Orleans" in content (text) | 2,891 | **0** |
+| Binary files with "Orleans" metadata | 3 | **3** (logos, manual replacement) |
+| Non-UTF-8 files with "Orleans" | 1 | **0** (fixed manually) |
 
 ---
 
-## 1. Directory Structure Changes
+## Script Inventory
 
-### Primary Directories
+Four scripts handle different aspects of the rename. All live in `Docs/Scynapse/` and should be run from that directory.
 
-| Current Path | Type | Impact | Notes |
-|---|---|---|---|
-| `/src/Scynapse/` | Root directory | **HIGH** | Main project directory - ALL subdirectories affected |
-| `/Docs/Scynapse/` | Documentation | **HIGH** | Project documentation folder |
-| `/Docs/Scynapse/Scynapse Features/` | Documentation | **HIGH** | Feature documentation subfolder |
-| `/Research/Scynapse/` | Research documents | **MEDIUM** | Research and design docs |
-| `/AI-Contexts/Claude-Opus/` | Contains references | **MEDIUM** | Context files reference Scynapse |
+### 1. `scynapse-rename-audit.sh` — Discovery & Counting
 
-### Sub-Directories in src/Scynapse/
-
-```
-src/Scynapse/
-├── src/
-│   ├── Orleans.Core.Abstractions/
-│   ├── Orleans.Core/
-│   ├── Orleans.Runtime/
-│   ├── Orleans.Server/
-│   ├── Orleans.Client/
-│   ├── Orleans.CodeGenerator/
-│   ├── Orleans.Serialization/
-│   ├── Orleans.Persistence.Memory/
-│   ├── Orleans.Persistence.RavenDB/
-│   ├── Scynapse.AsyncPlus/              ← MUST RENAME (contains "Scynapse")
-│   │   ├── Scynapse.AsyncPlus.csproj
-│   │   ├── Storage/
-│   │   ├── Services/
-│   │   ├── Grains/
-│   │   └── Abstractions/
-│   └── ...
-├── playground/
-│   ├── DynamicGrainLoading.*/             ← Check for naming
-│   ├── PluginGrainScenarios/
-│   ├── AsyncPersistenceScenarios/
-│   └── ...
-└── ...
-```
-
----
-
-## 2. Project Files (.csproj, .slnx)
-
-### Solution Files
-- `src/Scynapse/Orleans.slnx` - Main solution file
-  - **Change needed**: May contain references to `Scynapse.*` project names
-
-### Project Files Containing "Scynapse"
-
-| Project File | Current Name | Location |
-|---|---|---|
-| `Scynapse.AsyncPlus.csproj` | Assembly: `Scynapse.AsyncPlus` | `src/Scynapse/src/Scynapse.AsyncPlus/` |
-| Project package names | Various `Scynapse.*` | Throughout `src/Scynapse/src/` |
-| Playground project files | Check for references | `src/Scynapse/playground/` |
-
-**In each .csproj file, check for:**
-- `<AssemblyName>` - May be `Scynapse.AsyncPlus` or similar
-- `<RootNamespace>` - Package namespace
-- `<PackageId>` - NuGet package name
-- `<ProjectReference>` - References to other `Scynapse.*` projects
-- `<Version>` metadata
-
----
-
-## 3. C# Code Identifiers
-
-### Namespace Declarations
-
-**Pattern**: `namespace Scynapse.*;`
-
-Files containing `Scynapse` namespace:
-- `src/Scynapse/src/Scynapse.AsyncPlus/Services/ScynapseAsyncPersistenceService.cs`
-- `src/Scynapse/src/Scynapse.AsyncPlus/Storage/RavenDbGrainStorage.cs`
-- `src/Scynapse/src/Scynapse.AsyncPlus/Storage/RavenDbStorageOptions.cs`
-- `src/Scynapse/src/Scynapse.AsyncPlus/Grains/AsyncStatePersistenceGrain.cs`
-- `src/Scynapse/src/Scynapse.AsyncPlus/Abstractions/IAsyncStatePersistenceGrain.cs`
-- `src/Scynapse/src/Scynapse.AsyncPlus/Abstractions/AsyncStateCheckpoint.cs`
-- `src/Scynapse/src/Scynapse.AsyncPlus/Extensions/AsyncPlusHostingExtensions.cs`
-
-### Class and Type Names
-
-- `ScynapseAsyncPersistenceService` - Service class
-- `AsyncStatePersistenceGrain` - Grain implementation
-- `IAsyncStatePersistenceGrain` - Interface
-- Other types within the `Scynapse.AsyncPlus` namespace
-
-### Using Statements
-
-Files importing from `Scynapse` namespace:
-- `src/Scynapse/playground/AsyncPersistenceScenarios/Services/IAsyncPersistenceService.cs`
-- `src/Scynapse/playground/AsyncPersistenceScenarios/Program.cs`
-- `src/Scynapse/playground/AsyncPersistenceScenarios/Scenarios/*.cs` (multiple files)
-- `src/Scynapse/playground/PluginGrainScenarios/Scenarios/EventScenario.cs`
-- `src/Scynapse/playground/PluginGrainScenarios/Program.cs`
-- `src/Scynapse/playground/PluginGrainScenarios/Grains/EventTestGrain.cs`
-
----
-
-## 4. Configuration Files
-
-### JSON Files
-
-| File | Location | Contains |
-|---|---|---|
-| `global.json` | `src/Scynapse/` | May reference SDK or build config |
-| `NuGet.Config` | `src/Scynapse/` | Package sources, potentially with Scynapse references |
-| `.devcontainer/devcontainer.json` | `src/Scynapse/.devcontainer/` | Container config, may have paths |
-| `Directory.Packages.props` | `src/Scynapse/` | Package versions, may have `Scynapse.*` references |
-| `appsettings*.json` | Playground projects | Application settings |
-
-### YAML/Properties Files
-
-| File | Location | Contains |
-|---|---|---|
-| `.azure/pipelines/templates/vars.yaml` | CI/CD variables | Build environment, package names |
-| `Directory.Build.props` | `src/Scynapse/` | Shared build properties |
-| `Directory.Build.targets` | `src/Scynapse/` | Shared build targets |
-| `.github/copilot-instructions.md` | GitHub config | References to the project |
-
-### Configuration Details
-
-Check for:
-- NuGet package names with `Scynapse` prefix
-- Assembly names
-- Package ID declarations
-- Build artifact naming
-- CI/CD pipeline variable names
-
----
-
-## 5. Documentation Files
-
-### Markdown Documents
-
-| File | Current Name | Path |
-|---|---|---|
-| `Scynapse.md` | Main project doc | `Docs/Scynapse/` |
-| `DynamicGrainAccess.md` | Feature doc | `Docs/Scynapse/Scynapse Features/` |
-| `OrleansAsync+.md` | Feature doc | `Docs/Scynapse/Scynapse Features/` |
-| `PluginGrainArchitecture.md` | Feature doc | `Docs/Scynapse/Scynapse Features/` |
-| `StatePropertyAccess.md` | Feature doc | `Docs/Scynapse/Scynapse Features/` |
-| References in CLAUDE.md | Project reference | `.claude/CLAUDE.md` |
-| References in VAYRON docs | Project reference | `Docs/VAYRON/` |
-| References in AI context files | Project reference | `AI-Contexts/Claude-Opus/` |
-
-### Documentation Content to Update
-
-Within the documents, search for and update:
-- Title/heading: "# Scynapse:" → update
-- References: "Scynapse project", "Scynapse system", etc.
-- Links to `/src/Scynapse/` paths
-- Links to `/Docs/Scynapse/` paths
-- Mentions in context files: "Scynapse-AsyncPlus-Integration.md"
-
----
-
-## 6. Script Files
-
-### Build Scripts
-
-| File | Location | Check for |
-|---|---|---|
-| `Build.cmd` | `src/Scynapse/` | Hardcoded paths, project names |
-| `build.ps1` | `src/Scynapse/` | PowerShell script with paths/names |
-| `Test.cmd` | `src/Scynapse/` | Test runner paths |
-| `TestAll.cmd` | `src/Scynapse/` | Test suite config |
-| `Parallel-Tests.ps1` | `src/Scynapse/` | PowerShell test runner |
-| `common.ps1` | `src/Scynapse/` | Common script utilities |
-
-### CI/CD Scripts
-
-- `.azure/pipelines/*.yaml` - Azure Pipelines configuration
-- Check for hardcoded project names, paths, artifact names
-
----
-
-## 7. Searchable String References
-
-### Code References (grep patterns)
-
-```
-# High priority - core naming
-- "Scynapse" (exact match)
-- "ScynapseAsyncPlus"
-- "neworleans" (lowercase)
-- "NEWORLEANS" (uppercase)
-
-# Documentation patterns
-- "Scynapse" (with space)
-- "new-orleans" (kebab-case)
-- "neworleans" (no space)
-
-# Context/metadata
-- "Scynapse-AsyncPlus"
-- "Orleans fork (Louis's)"
-- References to `/src/Scynapse/`
-```
-
----
-
-## 8. File Type Inventory
-
-### By File Type
-
-| Type | Extensions | Locations | Examples |
-|---|---|---|---|
-| Solution Files | `.slnx`, `.sln` | `src/Scynapse/` | `Orleans.slnx` |
-| Project Files | `.csproj` | `src/Scynapse/src/*/`, `src/Scynapse/playground/*/` | `Scynapse.AsyncPlus.csproj` |
-| C# Source | `.cs` | Throughout `src/Scynapse/src/`, `playground/` | Namespace decls, class names |
-| Configuration | `.json`, `.props`, `.targets`, `.config` | `src/Scynapse/` and subdirs | Global.json, NuGet.Config |
-| Build Scripts | `.cmd`, `.ps1`, `.sh` | `src/Scynapse/`, `src/Scynapse/.azure/` | Build.cmd, build.ps1 |
-| Documentation | `.md` | `Docs/Scynapse/`, `Docs/VAYRON/`, `AI-Contexts/` | *.md files |
-| CI/CD | `.yaml`, `.yml` | `src/Scynapse/.azure/pipelines/` | Pipeline definitions |
-| GitHub Config | `.json`, `.yml`, `.md` | `src/Scynapse/.github/` | Actions, dependabot config |
-| VS Code Config | `.json` | `src/Scynapse/.vscode/` | launch.json, tasks.json |
-| Dev Container | `.json` | `src/Scynapse/.devcontainer/` | devcontainer.json |
-| Misc | `.gitignore`, `.gitattributes`, `.editorconfig`, etc. | `src/Scynapse/` | Configuration files |
-
----
-
-## 9. Affected Project Types
-
-### NuGet Packages
-
-If the `Scynapse.AsyncPlus` assembly is published as a NuGet package:
-- Package ID: `Scynapse.AsyncPlus` → needs rename
-- All historical versions in feeds would retain old name
-- Documentation and package description would reference old name
-
-### CI/CD Artifacts
-
-- Build output names
-- Test result files
-- Package artifact names in Azure Pipelines
-- Release asset naming
-
-### GitHub Metadata
-
-- Repository description
-- README references
-- Issues and discussions mentioning the project
-- GitHub Actions workflow names/descriptions
-
----
-
-## 10. Cross-Repository References
-
-### Outside src/Scynapse/
-
-Files in the main DOTNExT repository referencing Scynapse:
-
-| File | Location | References |
-|---|---|---|
-| `CLAUDE.md` | `/.claude/` | "Orleans fork (Louis's)", directory reference |
-| `Manage-Contexts.ps1` | Root (if exists) | Potential path references |
-| Build coordination files | `/eng/` | May reference Scynapse for multi-repo builds |
-| Documentation | `/Docs/For AI/`, `/Docs/VAYRON/` | References to the project |
-| Context files | `/AI-Contexts/Claude-Opus/` | `Scynapse-AsyncPlus-Integration.md` |
-
-### Research Documents
-
-- `/Research/Scynapse/` directory
-  - `orleans-state-properties-design.md`
-  - `neworleans-events-v1.md`
-  - `neworleans-client-principals.md`
-
----
-
-## 11. String Replacement Strategy
-
-### Phase 1: Preparation
-- [ ] List all files containing "Scynapse" or "Scynapse"
-- [ ] Back up entire codebase
-- [ ] Create feature branch: `claude/rename-neworleans-to-[NEWNAME]`
-
-### Phase 2: Directory Renames
-- [ ] Rename `src/Scynapse/` → `src/[NEWNAME]/`
-- [ ] Rename `Docs/Scynapse/` → `Docs/[NEWNAME]/` (or `Docs/[NewName]/` in camelCase)
-- [ ] Rename `Research/Scynapse/` → `Research/[NEWNAME]/`
-- [ ] Update git index with new paths
-
-### Phase 3: File Renames
-- [ ] Rename project files: `Scynapse.AsyncPlus.csproj` → `[NewName].AsyncPlus.csproj`
-- [ ] Rename any source files starting with `Scynapse`
-- [ ] Update solution file references
-
-### Phase 4: Code Changes
-- [ ] Update namespace declarations: `namespace Scynapse.*` → `namespace [NEWNAME].*`
-- [ ] Update class names containing "Scynapse"
-- [ ] Update assembly names in .csproj files
-- [ ] Update package IDs in .csproj files
-
-### Phase 5: Configuration Updates
-- [ ] Update project references in .csproj files
-- [ ] Update .slnx solution file with new project paths
-- [ ] Update NuGet.Config if needed
-- [ ] Update Directory.Packages.props assembly references
-
-### Phase 6: Documentation Updates
-- [ ] Rename markdown files in `/Docs/Scynapse/`
-- [ ] Update content within markdown files
-- [ ] Update references in `CLAUDE.md`
-- [ ] Update references in `/Docs/VAYRON/` docs
-- [ ] Update research document references
-
-### Phase 7: Script/CI-CD Updates
-- [ ] Update `Build.cmd`, `build.ps1` with new paths/project names
-- [ ] Update `.azure/pipelines/` YAML files
-- [ ] Update any hardcoded paths in scripts
-- [ ] Update GitHub workflow references
-
-### Phase 8: Verification
-- [ ] Build solution (should find all unresolved references)
-- [ ] Search codebase for any remaining old names
-- [ ] Test all playground projects
-- [ ] Verify CI/CD pipelines reference correct paths
-
----
-
-## 12. Detailed File List
-
-### Core Source Files Containing "Scynapse"
-
-```
-src/Scynapse/src/Scynapse.AsyncPlus/
-├── Scynapse.AsyncPlus.csproj ← MUST RENAME FILE
-├── Services/ScynapseAsyncPersistenceService.cs
-├── Storage/RavenDbGrainStorage.cs
-├── Storage/RavenDbStorageOptions.cs
-├── Grains/AsyncStatePersistenceGrain.cs
-├── Abstractions/IAsyncStatePersistenceGrain.cs
-├── Abstractions/AsyncStateCheckpoint.cs
-└── Extensions/AsyncPlusHostingExtensions.cs
-```
-
-All files in the above directory need namespace updates.
-
-### Playground Files with References
-
-```
-src/Scynapse/playground/
-├── AsyncPersistenceScenarios/
-│   ├── Program.cs
-│   ├── AsyncPersistenceScenarios.csproj
-│   ├── Services/IAsyncPersistenceService.cs
-│   └── Scenarios/
-│       ├── CrossSessionPersistence.cs
-│       ├── ExceptionRecovery.cs
-│       ├── GrainMobility.cs
-│       ├── MultiSiloCheckpointVisibility.cs
-│       ├── MultipleConcurrentWorkflows.cs
-│       ├── NestedAsyncCalls.cs
-│       └── RoslynPlusCrossSession.cs
-├── PluginGrainScenarios/
-│   ├── Program.cs
-│   ├── Scenarios/EventScenario.cs
-│   └── Grains/EventTestGrain.cs
-└── [other projects with potential references]
-```
-
-### Documentation Files to Rename
-
-```
-Docs/Scynapse/ ← DIRECTORY RENAME
-├── Scynapse.md ← FILE RENAME
-├── Scynapse Features/ ← SUBDIRECTORY RENAME
-│   ├── DynamicGrainAccess.md
-│   ├── OrleansAsync+.md
-│   ├── PluginGrainArchitecture.md
-│   └── StatePropertyAccess.md
-└── [Original Orleans Internals/] ← Reference docs
-```
-
-### Research Documents
-
-```
-Research/Scynapse/ ← DIRECTORY RENAME
-├── orleans-state-properties-design.md
-├── neworleans-events-v1.md
-└── neworleans-client-principals.md
-```
-
----
-
-## 13. Potential Naming Inconsistencies to Resolve
-
-### Current Naming Inconsistency
-
-The project currently uses **two different naming conventions**:
-- **Directory**: `Scynapse` (camelCase, no space)
-- **Documentation**: `Scynapse` (with space)
-
-**Recommendation**: Decide on a single convention for the new name:
-- Option A: `MyProjectName` (camelCase) - Use consistently everywhere
-- Option B: `My Project Name` (with spaces) - Use only in docs/display names
-- Option C: `my-project-name` (kebab-case) - Use for URLs/identifiers only
-
-### Files with Mixed Conventions
-
-- `neworleans-*.md` files in Research folder (lowercase, hyphenated)
-- Documentation refers to it as "Scynapse" (with space)
-- Code uses "Scynapse" (camelCase)
-
----
-
-## 14. Git Considerations
-
-### Tracking the Rename
-
-When renaming directories and files:
-```bash
-# Git will track as delete + add unless using:
-git mv src/Scynapse src/[NEWNAME]
-git mv Docs/"Scynapse" Docs/"[NewName]"
-
-# This preserves file history
-```
-
-### Commit Strategy
-
-Suggest separate commits:
-1. Directory/file renames (structural changes)
-2. Namespace changes in code
-3. Configuration updates
-4. Documentation updates
-
-This makes the diff cleaner and easier to review.
-
----
-
-## 15. Testing Checklist
-
-After renaming, verify:
-
-- [ ] Solution loads in Visual Studio
-- [ ] All project references resolve
-- [ ] Build completes successfully (`Build.cmd`)
-- [ ] Unit tests pass (`Test.cmd`)
-- [ ] Playground projects run
-- [ ] No broken documentation links
-- [ ] NuGet package builds (if applicable)
-- [ ] CI/CD pipelines pass
-- [ ] Git history is preserved
-- [ ] No remaining hardcoded old names in code/configs
-
----
-
-## 16. Search Commands for Verification
-
-After renaming, use these to verify completion:
+**Purpose:** Find all remaining Orleans references. Run BEFORE and AFTER rename to verify completeness.
 
 ```bash
-# Search for remaining "Scynapse" references
-grep -r "Scynapse" src/ Docs/ --include="*.cs" --include="*.md" --include="*.csproj" --include="*.json"
+./scynapse-rename-audit.sh              # Full report
+./scynapse-rename-audit.sh --summary    # Counts only
+./scynapse-rename-audit.sh --output report  # Save to report files
+```
 
-# Search for old doc folder name
-grep -r "Scynapse" Docs/ --include="*.md" | grep -v "Scynapse Features"
+**What it checks:** Directory names, file names, file content (by extension), binary files, GitHub URLs, NuGet package IDs, diagnostic IDs, environment variables, SQL schema references.
 
-# Search for old directory path references
-grep -r "src/Scynapse" . --include="*.md" --include="*.ps1" --include="*.cmd"
+**Limitations:** Only searches text files by extension whitelist. Cannot detect encoding issues — non-UTF-8 files show up in content grep but `grep` may silently fail to match inside them.
 
-# In code - check for namespace declarations
-grep -r "namespace Scynapse" src/
+---
+
+### 2. `scynapse-rename-execute.sh` — Bulk Text Rename (3 Phases)
+
+**Purpose:** Perform the actual find-and-replace across the entire codebase.
+
+```bash
+./scynapse-rename-execute.sh --dry-run      # Preview changes (ALWAYS run first)
+./scynapse-rename-execute.sh --execute       # Apply changes
+./scynapse-rename-execute.sh --phase 1       # Dirs only
+./scynapse-rename-execute.sh --phase 2       # Files only
+./scynapse-rename-execute.sh --phase 3       # Content only
+```
+
+**Phase 1 — Directory renames:** Finds directories with `Orleans` in the name, processes deepest-first (to avoid renaming parents before children), uses `git mv` where possible.
+
+**Phase 2 — File renames:** Finds files with `Orleans` in the name, renames via `git mv`.
+
+**Phase 3 — Content replacement:** Applies ordered `sed` substitutions across all text files matching the extension whitelist. All replacement patterns are applied in a single `sed` pass per file for efficiency.
+
+**Replacement Mapping (applied in this order):**
+
+| # | Old Pattern | New Pattern | Scope |
+|---|-------------|-------------|-------|
+| 1 | `github.com/dotnet/orleans` | `github.com/Scynapse/Core` | GitHub repo URLs |
+| 2 | `github.com/dotnet/Orleans` | `github.com/Scynapse/Core` | GitHub repo URLs (PascalCase) |
+| 3 | `Microsoft.Orleans` | `Genesa.Scynapse` | NuGet package IDs |
+| 4 | `microsoft.orleans` | `genesa.scynapse` | Lowercase variant |
+| 5 | `MICROSOFT.ORLEANS` | `GENESA.SCYNAPSE` | Uppercase variant |
+| 6 | `NewOrleans` | `Scynapse` | Previous name remnants |
+| 7 | `NEWORLEANS` | `SCYNAPSE` | Previous name uppercase |
+| 8 | `neworleans` | `scynapse` | Previous name lowercase |
+| 9 | `new-orleans` | `scynapse` | Kebab-case |
+| 10 | `new_orleans` | `scynapse` | Snake_case |
+| 11 | `Orleans` | `Scynapse` | Main rename (PascalCase) |
+| 12 | `orleans` | `scynapse` | Lowercase (paths, vars) |
+| 13 | `ORLEANS` | `SCYNAPSE` | Uppercase (diag IDs, env vars) |
+
+**Critical: Order matters!** More-specific patterns must come before general ones. The GitHub URL rule (`github.com/dotnet/orleans` → `github.com/Scynapse/Core`) MUST precede the generic `orleans → scynapse` rule, otherwise URLs would become `github.com/dotnet/scynapse` (wrong org/repo). Similarly, `Microsoft.Orleans` must precede bare `Orleans` to produce `Genesa.Scynapse` instead of `Microsoft.Scynapse`.
+
+**What this script CANNOT handle (and why):**
+
+| Gap | Why | Solution |
+|-----|-----|----------|
+| **Non-UTF-8 files** | `sed` reads byte streams. UTF-16 stores `Orleans` as `O\x00r\x00l\x00e\x00a\x00n\x00s\x00` — sed patterns won't match. | Use `scynapse-rename-encoding-fix.sh` after Phase 3. |
+| **Binary files** | Images (.png, .jpg) can't be text-processed. | Manual replacement with new logo assets. |
+| **SQL database objects** | Script renames the SQL *files*, but existing *databases* still have old table/procedure names. | Write SQL migration scripts for deployed databases. |
+| **`.verified.cs` snapshots** | Content gets renamed by sed, but the generated output from re-running tests may differ from what sed produced (different formatting, ordering). | Re-run tests with `--update-snapshots` or Verify's auto-accept after rename. |
+
+---
+
+### 3. `scynapse-rename-encoding-fix.sh` — Non-UTF-8 File Handler
+
+**Purpose:** Catch files that `sed` silently skipped due to non-UTF-8 encoding.
+
+```bash
+./scynapse-rename-encoding-fix.sh --scan-only   # List non-UTF-8 files
+./scynapse-rename-encoding-fix.sh --dry-run      # Preview what would change
+./scynapse-rename-encoding-fix.sh --execute       # Apply fixes
+```
+
+**How it works:**
+1. Scans all text-like files with `file --mime-encoding` to detect non-UTF-8
+2. For each non-UTF-8 file, converts to UTF-8 via `iconv`
+3. Checks if the UTF-8 version contains `orleans` (case-insensitive)
+4. Applies the same replacement mapping as the execute script
+5. Converts back to the original encoding, preserving BOM if present
+
+**Why this is a separate script:**
+The main execute script uses `grep -ril "orleans"` to find candidates, then `sed` to replace. But `grep` on a UTF-16 file may find a match (since grep can be binary-aware) while `sed` fails to replace (since sed is strictly line-oriented ASCII/UTF-8). This creates a false sense of "processed" when the file was actually unchanged.
+
+**When to run:** After `scynapse-rename-execute.sh --execute` Phase 3 completes. This is the "mop-up" pass.
+
+**Real example:** `Scynapse.Core/GlobalSuppressions.cs` was UTF-16 encoded (Visual Studio creates these in UTF-16). The execute script's sed pass ran on it but couldn't match `Orleans.Runtime.SafeTimer` in the `[SuppressMessage]` target string. This was caught and fixed manually before this script existed — the script prevents this class of miss in the future.
+
+---
+
+### 4. `scynapse-rename-post-verify.sh` — Structural Integrity Check
+
+**Purpose:** Verify that the rename didn't break structural references. This is NOT a grep for "Orleans" — it checks that the codebase still hangs together correctly after all the renaming.
+
+```bash
+./scynapse-rename-post-verify.sh              # Full verification
+./scynapse-rename-post-verify.sh --quick       # Fast checks only
+./scynapse-rename-post-verify.sh --fix         # Auto-fix trivial issues
+```
+
+**What it checks:**
+
+| Check | What it validates |
+|-------|-------------------|
+| **ProjectReference integrity** | Every `<ProjectReference Include="...">` in every `.csproj` resolves to an actual file on disk. |
+| **Solution file references** | Every project path in `.sln` and `.slnx` files resolves to an actual file. |
+| **Non-UTF-8 Orleans check** | Re-scans non-UTF-8 files specifically (catches encoding-fix misses). |
+| **PackageId consistency** | No `.csproj` has `<PackageId>` or `<AssemblyName>` containing "Orleans". |
+| **Binary files** | Lists any image files whose binary content contains "orleans" metadata. |
+| **Text content** | Quick grep for any remaining text references (defers to audit script for details). |
+| **Directory/file names** | No directories or files still named with "Orleans". |
+
+**When to run:** After ALL other rename scripts have completed, before committing.
+
+---
+
+## Complete Rename Workflow (for future AI agents)
+
+If you need to re-run the rename (e.g., after merging upstream Orleans changes), follow this exact sequence:
+
+```bash
+cd Docs/Scynapse/
+
+# ── STEP 1: Pre-rename audit ──
+./scynapse-rename-audit.sh --summary
+# Record the "before" numbers
+
+# ── STEP 2: Commit current state ──
+git add -A && git commit -m "Pre-rename checkpoint"
+
+# ── STEP 3: Execute rename (3 phases) ──
+./scynapse-rename-execute.sh --dry-run     # Review first!
+./scynapse-rename-execute.sh --execute     # Phase 1 (dirs), 2 (files), 3 (content)
+
+# ── STEP 4: Fix non-UTF-8 files ──
+./scynapse-rename-encoding-fix.sh --dry-run
+./scynapse-rename-encoding-fix.sh --execute
+
+# ── STEP 5: Verify structural integrity ──
+./scynapse-rename-post-verify.sh
+
+# ── STEP 6: Post-rename audit ──
+./scynapse-rename-audit.sh --summary
+# Compare with "before" numbers — everything should be 0
+
+# ── STEP 7: Handle manual items ──
+# - Replace binary logo files with Scynapse versions
+# - Re-run tests to regenerate .verified.cs snapshots
+# - Write SQL migration scripts if databases are affected
+
+# ── STEP 8: Commit ──
+git add -A && git commit -m "Rename Orleans -> Scynapse / Microsoft.Orleans -> Genesa.Scynapse"
 ```
 
 ---
 
-## Appendix: Summary Statistics
+## What Remains (as of 2026-02-26)
 
-- **Directories to rename**: 3 (src/Scynapse, Docs/Scynapse, Research/Scynapse)
-- **Project files to update**: 20+ (.csproj files)
-- **Source files with "Scynapse" namespace**: 8+ files
-- **Files importing from "Scynapse"**: 10+ files
-- **Documentation files**: 5+ markdown files
-- **Configuration files to check**: 15+ (JSON, YAML, Props, Targets)
-- **External references in CLAUDE.md**: Multiple
-- **Total files affected**: 80+ files across directories
+### Complete — No Action Needed
+
+| Category | Status |
+|----------|--------|
+| Directory names | 0 remaining |
+| File names | 0 remaining |
+| Namespaces (`namespace Orleans.*`) | All renamed to `Scynapse.*` |
+| Type names (`OrleansException`, etc.) | All renamed to `Scynapse*` |
+| NuGet PackageIds (`Microsoft.Orleans.*`) | All renamed to `Genesa.Scynapse.*` |
+| Assembly names | All renamed |
+| InternalsVisibleTo attributes | All updated |
+| Diagnostic IDs (`ORLEANS0xxx`) | All renamed to `SCYNAPSE0xxx` |
+| Experimental flags (`ORLEANSEXPxxx`) | All renamed to `SCYNAPSEEXPxxx` |
+| Environment variables (`ORLEANS_*`) | All renamed to `SCYNAPSE_*` |
+| GitHub URLs (`github.com/dotnet/orleans`) | All renamed to `github.com/Scynapse/Core` |
+| Comments and XML docs | All updated |
+| SQL file content | All updated |
+| Build configs (`.props`, `.targets`) | All updated |
+| CI/CD configs (`.azure/`, `.github/`) | All updated |
+| Non-UTF-8 encoded files | All fixed (1 was found and fixed) |
+
+### Pending — Manual Action Required
+
+| Item | Files | Action |
+|------|-------|--------|
+| **Logo/image files** | `assets/logo_128.png`, `Dashboard/.../ScynapseLogo.png`, `Scynapse.Identity/logo.png` | Replace with Scynapse-branded images. These are binary PNG files — the "orleans" reference is in embedded metadata (EXIF, PNG text chunks) that can't be text-edited. |
+| **Deployed databases** | N/A (no deployed instances yet) | When SQL schemas are deployed, run migration scripts to rename stored procedures and tables. The SQL *files* are already renamed. |
+
+### Future Considerations — When Publishing NuGet Packages
+
+When Scynapse is published as NuGet packages:
+
+1. **Package IDs are already set:** All `.csproj` files have `<PackageId>Genesa.Scynapse.*</PackageId>`.
+2. **Package versions:** The `Directory.Packages.props` at the repo root controls package versions for internal consumption. When publishing externally, ensure version numbers don't conflict with the upstream `Microsoft.Orleans.*` packages.
+3. **Package signing:** If publishing to nuget.org, packages will need a Genesa signing certificate. The upstream `Microsoft.Orleans.*` packages are Microsoft-signed — our packages must have a different identity chain.
+4. **Metapackage:** `Genesa.Scynapse.Sdk` is the SDK metapackage (replaces `Microsoft.Orleans.Sdk`). Consumers will reference this.
+5. **Code generators:** The `Genesa.Scynapse.CodeGenerator` package contains MSBuild `.props`/`.targets` files that were renamed from `Microsoft.Orleans.CodeGenerator.props` to `Genesa.Scynapse.CodeGenerator.props`. These are loaded by MSBuild via the NuGet package layout convention, so the filenames must match the package ID.
+
+---
+
+## Understanding the Rename Scripts' Design Decisions
+
+### Why sed and not a smarter tool?
+
+`sed` was chosen because:
+- It's universally available on Linux/macOS/WSL
+- It handles the vast majority of files (99.97% of text files are UTF-8/ASCII)
+- It's fast — can process thousands of files in seconds
+- The replacement patterns are simple string substitutions, not context-aware refactoring
+
+The tradeoff is that `sed` can't handle non-UTF-8 encodings, which is why the encoding-fix script exists as a complement.
+
+### Why is pattern order so critical?
+
+Consider the string `Microsoft.Orleans.Core`:
+- If `Orleans -> Scynapse` runs first: `Microsoft.Scynapse.Core` (WRONG — `Microsoft.` prefix kept)
+- If `Microsoft.Orleans -> Genesa.Scynapse` runs first: `Genesa.Scynapse.Core` (CORRECT)
+
+Similarly, `OrleansCodeGen.Orleans.Runtime`:
+- The execute script handles this correctly because `Orleans -> Scynapse` is a global replacement, so both instances get replaced to `ScynapseCodeGen.Scynapse.Runtime`.
+
+### Why are binary files excluded?
+
+Binary files (PNG, JPG, DLL) store data in non-text formats. Even if they contain the ASCII string "orleans" (e.g., in PNG metadata chunks), running `sed` on a binary file would corrupt the file structure. Logo images specifically need to be re-created by a designer or re-exported from a graphics tool.
+
+### Why is encoding detection a separate pass?
+
+Detecting encoding is expensive (requires reading file headers via `file` command for every file) and rarely needed (only ~0.03% of files are non-UTF-8 in this codebase). Making it a separate script keeps the main rename fast while providing a thorough safety net.
+
+---
+
+## Handling Future Upstream Merges
+
+When merging new Orleans upstream changes into Scynapse:
+
+1. **New files from upstream will use `Orleans` naming.** After merging, re-run the full rename workflow (all 4 scripts).
+2. **Conflict resolution:** If upstream renamed a file we also renamed, git will show a rename conflict. Resolve by keeping our `Scynapse` name.
+3. **New namespaces:** If upstream adds new `Orleans.*` namespaces, the `Orleans -> Scynapse` sed pattern will catch them automatically.
+4. **New NuGet packages:** If upstream adds new `Microsoft.Orleans.*` packages, the `Microsoft.Orleans -> Genesa.Scynapse` pattern will catch them.
+5. **New diagnostic IDs:** If upstream adds `ORLEANS0014`, the `ORLEANS -> SCYNAPSE` pattern will rename it to `SCYNAPSE0014`.
+
+The scripts are idempotent — running them on an already-renamed codebase produces no changes (the audit confirms 0 hits). This makes it safe to run them after every merge.
 
 ---
 
 ## Notes
 
-- This document was generated by comprehensive analysis
-- The actual list may grow as the codebase evolves
-- Always verify with grep/search in your specific version
-- Test thoroughly before committing rename changes
-- Consider the impact on downstream users of any published packages
-
+- This document serves as the primary reference for the Scynapse rename process
+- The full file-by-file inventory is in `RENAME-FILE-INVENTORY.md`
+- All scripts are in `Docs/Scynapse/` and should be run from that directory
+- The scripts use `PROJECT_ROOT` environment variable (auto-detected from script location)
+- Log files are written to `/tmp/scynapse-*` by default

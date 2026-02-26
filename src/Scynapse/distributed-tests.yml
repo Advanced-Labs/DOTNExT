@@ -8,7 +8,7 @@ jobs:
     source:
       localFolder: Artifacts/DistributedTests/DistributedTests.Server/{{framework}}
     executable: DistributedTests.Server.exe
-    readyStateText: Orleans Silo started.
+    readyStateText: Scynapse Silo started.
     framework: net8.0
     arguments: "{{configurator}} --clusterId {{clusterId}} --serviceId {{serviceId}} --azureQueueUri {{azureQueueUri}} --azureTableUri {{azureTableUri}} {{configuratorOptions}}"
     onConfigure:
@@ -141,32 +141,32 @@ scenarios:
         commandOptions: "--numWorkers {{numWorkers}} --blocksPerWorker {{blocksPerWorker}} --requestsPerBlock {{requestsPerBlock}} --duration {{duration}}"
 
 counters:
-- provider: Microsoft.Orleans
+- provider: Genesa.Scynapse
   values:
   - name: app-requests
-    measurement: orleans-counter/requests-per-second
+    measurement: scynapse-counter/requests-per-second
     description: Request rate
 
   - name: activation-count
-    measurement: orleans-counter/grain-activation-count
+    measurement: scynapse-counter/grain-activation-count
     description: Total number of grains
 
 results:
-# Microsoft.Orleans counters
-- name: orleans-counter/requests-per-second
-  measurement: orleans-counter/requests-per-second
+# Genesa.Scynapse counters
+- name: scynapse-counter/requests-per-second
+  measurement: scynapse-counter/requests-per-second
   description: Request rate
   format: "n0"
   aggregate: max
   reduce: max
-- name: orleans-counter/requests-per-second/95
-  measurement: orleans-counter/requests-per-second
+- name: scynapse-counter/requests-per-second/95
+  measurement: scynapse-counter/requests-per-second
   description: Request rate
   format: "n0"
   aggregate: percentile95
   reduce: max
 - name: activation-count
-  measurement: orleans-counter/grain-activation-count
+  measurement: scynapse-counter/grain-activation-count
   description: Active grains
 
 profiles:

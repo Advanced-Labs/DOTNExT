@@ -1,10 +1,10 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging;
-using Orleans.Configuration;
-using Orleans.Streaming.EventHubs;
-using Orleans.Streams;
-using Orleans.TestingHost;
+using Scynapse.Configuration;
+using Scynapse.Streaming.EventHubs;
+using Scynapse.Streams;
+using Scynapse.TestingHost;
 using ServiceBus.Tests.TestStreamProviders.EventHub;
 using Tester;
 using Tester.StreamingTests;
@@ -22,8 +22,8 @@ namespace ServiceBus.Tests.StreamingTests
     {
         private const string StreamProviderName = "EventHubStreamProvider";
         private const string StreamNamespace = "StreamNamespace";
-        private const string EHPath = "ehorleanstest";
-        private const string EHConsumerGroup = "orleansnightly";
+        private const string EHPath = "ehscynapsetest";
+        private const string EHConsumerGroup = "scynapsenightly";
 
         private readonly ITestOutputHelper output;
         private ClientStreamTestRunner runner;
@@ -84,14 +84,14 @@ namespace ServiceBus.Tests.StreamingTests
             }
         }
 
-        [SkippableFact(Skip = "https://github.com/dotnet/orleans/issues/5657")]
+        [SkippableFact(Skip = "https://github.com/Scynapse/Core/issues/5657")]
         public async Task EHStreamProducerOnDroppedClientTest()
         {
             logger.LogInformation("************************ EHStreamProducerOnDroppedClientTest *********************************");
             await runner.StreamProducerOnDroppedClientTest(StreamProviderName, StreamNamespace);
         }
 
-        [SkippableFact(Skip = "https://github.com/dotnet/orleans/issues/5634")]
+        [SkippableFact(Skip = "https://github.com/Scynapse/Core/issues/5634")]
         public async Task EHStreamConsumerOnDroppedClientTest()
         {
             logger.LogInformation("************************ EHStreamConsumerOnDroppedClientTest *********************************");

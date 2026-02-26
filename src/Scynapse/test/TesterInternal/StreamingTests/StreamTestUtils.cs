@@ -1,6 +1,6 @@
-using Orleans.Runtime;
-using Orleans.Streams;
-using Orleans.TestingHost;
+using Scynapse.Runtime;
+using Scynapse.Streams;
+using Scynapse.TestingHost;
 using Xunit;
 using Xunit.Abstractions;
 using Microsoft.Extensions.Logging;

@@ -1,6 +1,6 @@
-using Orleans.Placement.Repartitioning;
-using Orleans.Runtime;
-using Orleans.TestingHost;
+using Scynapse.Placement.Repartitioning;
+using Scynapse.Runtime;
+using Scynapse.TestingHost;
 using TestExtensions;
 using Xunit;
 

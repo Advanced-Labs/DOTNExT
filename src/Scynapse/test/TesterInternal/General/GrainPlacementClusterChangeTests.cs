@@ -1,5 +1,5 @@
 ﻿using System.Net;
-using Orleans.TestingHost;
+using Scynapse.TestingHost;
 using TestExtensions;
 using UnitTests.GrainInterfaces;
 using Xunit;

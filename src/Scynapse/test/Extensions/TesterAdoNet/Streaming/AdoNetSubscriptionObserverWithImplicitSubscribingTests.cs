@@ -1,10 +1,10 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
 using MySql.Data.MySqlClient;
-using Orleans.Configuration;
-using Orleans.Streams;
-using Orleans.TestingHost;
-using Orleans.Tests.SqlUtils;
+using Scynapse.Configuration;
+using Scynapse.Streams;
+using Scynapse.TestingHost;
+using Scynapse.Tests.SqlUtils;
 using Tester.StreamingTests.ProgrammaticSubscribeTests;
 using TestExtensions;
 using UnitTests.General;
@@ -43,7 +43,7 @@ public class PostgreSqlAdoNetSubscriptionObserverWithImplicitSubscribingTests() 
 [TestCategory("AdoNet"), TestCategory("Streaming"), TestCategory("Functional")]
 public abstract class AdoNetSubscriptionObserverWithImplicitSubscribingTests(AdoNetSubscriptionObserverWithImplicitSubscribingTests.Fixture fixture) : SubscriptionObserverWithImplicitSubscribingTestRunner(fixture), IAsyncLifetime
 {
-    private const string TestDatabaseName = "OrleansStreamTest";
+    private const string TestDatabaseName = "ScynapseStreamTest";
     private static RelationalStorageForTesting _testing;
     private readonly Fixture _fixture = fixture;
 

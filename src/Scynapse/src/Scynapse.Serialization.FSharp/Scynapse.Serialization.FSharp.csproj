@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageId>Genesa.Scynapse.Serialization.FSharp</PackageId>
+    <TargetFrameworks>$(DefaultTargetFrameworks);netstandard2.1</TargetFrameworks>
+    <PackageDescription>F# core type support for Scynapse.Serialization</PackageDescription>
+    <ScynapseBuildTimeCodeGen>true</ScynapseBuildTimeCodeGen>
+    <IsScynapseFrameworkPart>false</IsScynapseFrameworkPart>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="FSharp.Core" />
+    <ProjectReference Include="..\Scynapse.Serialization\Scynapse.Serialization.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="README.md" Pack="true" PackagePath="\" />
+  </ItemGroup>
+</Project>

@@ -3,9 +3,9 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
-using Orleans.Configuration;
-using Orleans.Providers.Streams.AzureQueue;
-using Orleans.TestingHost;
+using Scynapse.Configuration;
+using Scynapse.Providers.Streams.AzureQueue;
+using Scynapse.TestingHost;
 using Tester.StreamingTests;
 using TestExtensions;
 using Xunit;
@@ -87,7 +87,7 @@ namespace Tester.AzureUtils.Streaming
             }
         }
 
-        [SkippableFact(Skip = "https://github.com/dotnet/orleans/issues/5639"), TestCategory("Functional"), TestCategory("AzureStorage"), TestCategory("Storage"), TestCategory("Streaming")]
+        [SkippableFact(Skip = "https://github.com/Scynapse/Core/issues/5639"), TestCategory("Functional"), TestCategory("AzureStorage"), TestCategory("Storage"), TestCategory("Streaming")]
         public async Task AQStreamProducerOnDroppedClientTest()
         {
             logger.LogInformation("************************ AQStreamProducerOnDroppedClientTest *********************************");

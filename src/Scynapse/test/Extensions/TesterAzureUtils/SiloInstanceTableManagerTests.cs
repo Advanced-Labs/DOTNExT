@@ -1,20 +1,20 @@
 using System.Globalization;
 using System.Net;
 using Microsoft.Extensions.Logging;
-using Orleans.AzureUtils;
-using Orleans.Runtime;
-using Orleans.TestingHost.Utils;
+using Scynapse.AzureUtils;
+using Scynapse.Runtime;
+using Scynapse.TestingHost.Utils;
 using TestExtensions;
 using UnitTests.MembershipTests;
 using Xunit;
 using Xunit.Abstractions;
-using Orleans.Internal;
-using Orleans.Clustering.AzureStorage;
+using Scynapse.Internal;
+using Scynapse.Clustering.AzureStorage;
 
 namespace Tester.AzureUtils
 {
     /// <summary>
-    /// Tests for operation of Orleans SiloInstanceManager using AzureStore - Requires access to external Azure storage
+    /// Tests for operation of Scynapse SiloInstanceManager using AzureStore - Requires access to external Azure storage
     /// </summary>
     [TestCategory("AzureStorage"), TestCategory("Storage")]
     public class SiloInstanceTableManagerTests : IClassFixture<SiloInstanceTableManagerTests.Fixture>, IDisposable
@@ -34,7 +34,7 @@ namespace Tester.AzureUtils
         private int generation;
         private SiloAddress siloAddress;
         private SiloInstanceTableEntry myEntry;
-        private OrleansSiloInstanceManager manager;
+        private ScynapseSiloInstanceManager manager;
         private readonly ITestOutputHelper output;
 
         public SiloInstanceTableManagerTests(ITestOutputHelper output, Fixture fixture)
@@ -48,7 +48,7 @@ namespace Tester.AzureUtils
             output.WriteLine("ClusterId={0} Generation={1}", this.clusterId, generation);
 
             output.WriteLine("Initializing SiloInstanceManager");
-            manager = OrleansSiloInstanceManager.GetManager(
+            manager = ScynapseSiloInstanceManager.GetManager(
                 this.clusterId,
                 fixture.LoggerFactory,
                 new AzureStorageClusteringOptions { TableName = new AzureStorageClusteringOptions().TableName }.ConfigureTestDefaults())

@@ -1,4 +1,4 @@
-using Orleans.Concurrency;
+using Scynapse.Concurrency;
 
 namespace BenchmarkGrainInterfaces.Ping
 {

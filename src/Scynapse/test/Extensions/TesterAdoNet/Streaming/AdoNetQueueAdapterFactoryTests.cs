@@ -1,10 +1,10 @@
 using Microsoft.Extensions.Logging.Abstractions;
 using MySql.Data.MySqlClient;
-using Orleans.Configuration;
-using Orleans.Providers.Streams.Common;
-using Orleans.Streaming.AdoNet;
-using Orleans.Streams;
-using Orleans.Tests.SqlUtils;
+using Scynapse.Configuration;
+using Scynapse.Providers.Streams.Common;
+using Scynapse.Streaming.AdoNet;
+using Scynapse.Streams;
+using Scynapse.Tests.SqlUtils;
 using Tester.AdoNet.Fakes;
 using TestExtensions;
 using UnitTests.General;
@@ -48,7 +48,7 @@ public abstract class AdoNetQueueAdapterFactoryTests(string invariant, TestEnvir
     private RelationalStorageForTesting _testing;
     private IRelationalStorage _storage;
 
-    private const string TestDatabaseName = "OrleansStreamTest";
+    private const string TestDatabaseName = "ScynapseStreamTest";
 
     public async Task InitializeAsync()
     {

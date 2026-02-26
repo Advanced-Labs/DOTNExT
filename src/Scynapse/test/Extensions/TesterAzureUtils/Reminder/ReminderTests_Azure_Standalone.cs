@@ -1,14 +1,14 @@
-using Orleans.Runtime;
-using Orleans.Runtime.ReminderService;
+using Scynapse.Runtime;
+using Scynapse.Runtime.ReminderService;
 using TestExtensions;
 using Xunit;
 using Xunit.Abstractions;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using Orleans.Configuration;
-using Orleans.TestingHost.Utils;
-using Orleans.Internal;
-using Orleans.Reminders.AzureStorage;
+using Scynapse.Configuration;
+using Scynapse.TestingHost.Utils;
+using Scynapse.Internal;
+using Scynapse.Reminders.AzureStorage;
 
 // ReSharper disable InconsistentNaming
 // ReSharper disable UnusedVariable

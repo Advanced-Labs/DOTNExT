@@ -1,11 +1,11 @@
 using System.Runtime.ExceptionServices;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Orleans.TestingHost;
+using Scynapse.TestingHost;
 
 namespace TestExtensions
 {
-    public abstract class TestClusterPerTest : OrleansTestingBase, Xunit.IAsyncLifetime
+    public abstract class TestClusterPerTest : ScynapseTestingBase, Xunit.IAsyncLifetime
     {
         private readonly ExceptionDispatchInfo preconditionsException;
         static TestClusterPerTest()

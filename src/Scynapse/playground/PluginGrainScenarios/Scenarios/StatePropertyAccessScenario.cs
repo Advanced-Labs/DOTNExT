@@ -1,6 +1,6 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Orleans;
+using Scynapse;
 using PluginGrainScenarios.Grains;
 using Spectre.Console;
 
@@ -54,7 +54,7 @@ public static class StatePropertyAccessScenario
         AnsiConsole.MarkupLine("[blue]Phase 2: Method-style grain access[/]");
         AnsiConsole.MarkupLine("[blue]───────────────────────────────────────────────────────[/]");
 
-        AnsiConsole.MarkupLine("[yellow]Starting Orleans silo...[/]");
+        AnsiConsole.MarkupLine("[yellow]Starting Scynapse silo...[/]");
         using var host = SiloHelper.BuildSingleSilo(logLevel: LogLevel.Warning);
         await host.StartAsync();
         AnsiConsole.MarkupLine("[green]Silo started[/]");
@@ -133,8 +133,8 @@ public static class StatePropertyAccessScenario
         table.AddColumn("Syntax");
         table.AddColumn("Description");
 
-        table.AddRow("Method", "[grey]await grain.SetName(\"Louis\")[/]", "Standard Orleans RPC call");
-        table.AddRow("Method", "[grey]var name = await grain.GetName()[/]", "Standard Orleans RPC call");
+        table.AddRow("Method", "[grey]await grain.SetName(\"Louis\")[/]", "Standard Scynapse RPC call");
+        table.AddRow("Method", "[grey]var name = await grain.GetName()[/]", "Standard Scynapse RPC call");
         table.AddRow("Property", "[grey]await (grain.Name << \"Louis\")[/]", "StateTask<T> set via << operator");
         table.AddRow("Property", "[grey]var name = await grain.Name[/]", "StateTask<T> awaitable get");
 
@@ -248,7 +248,7 @@ public static class StatePropertyAccessScenario
 
     private static async Task TestMethodStyleAccess(IGrainFactory grainFactory)
     {
-        AnsiConsole.MarkupLine("[grey]Testing method-style access via Orleans...[/]");
+        AnsiConsole.MarkupLine("[grey]Testing method-style access via Scynapse...[/]");
 
         var grain = grainFactory.GetGrain<IStatePropertyTestGrain>("method-test");
 
@@ -259,7 +259,7 @@ public static class StatePropertyAccessScenario
             var name = await grain.GetName();
 
             if (name == "MethodStyleName")
-                Pass("SetName/GetName works via Orleans RPC");
+                Pass("SetName/GetName works via Scynapse RPC");
             else
                 Fail($"Expected 'MethodStyleName', got '{name}'");
         }
@@ -275,7 +275,7 @@ public static class StatePropertyAccessScenario
             var score = await grain.GetScore();
 
             if (score == 100)
-                Pass("SetScore/GetScore works via Orleans RPC");
+                Pass("SetScore/GetScore works via Scynapse RPC");
             else
                 Fail($"Expected 100, got {score}");
         }

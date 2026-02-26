@@ -1,0 +1,25 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageId>Genesa.Scynapse.Persistence.Redis</PackageId>
+    <Title>Microsoft Scynapse Persistence Redis Provider</Title>
+    <Description>Microsoft Scynapse Persistence implementation that uses Redis</Description>
+    <PackageTags>$(PackageTags) Redis Persistence</PackageTags>
+    <TargetFrameworks>$(DefaultTargetFrameworks)</TargetFrameworks>
+    <ScynapseBuildTimeCodeGen>true</ScynapseBuildTimeCodeGen>
+  </PropertyGroup>
+
+	<ItemGroup>
+		<PackageReference Include="StackExchange.Redis" />
+	</ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="$(SourceRoot)src\Scynapse.Runtime\Scynapse.Runtime.csproj" />
+  </ItemGroup>
+
+
+  <ItemGroup>
+    <None Include="README.md" Pack="true" PackagePath="\" />
+  </ItemGroup>
+</Project>

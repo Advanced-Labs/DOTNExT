@@ -1,5 +1,5 @@
 using Microsoft.Extensions.Logging;
-using Orleans.TestingHost;
+using Scynapse.TestingHost;
 using TestExtensions;
 using UnitTests.StreamingTests;
 using Xunit;
@@ -9,12 +9,12 @@ namespace ServiceBus.Tests.StreamingTests
     /// <summary>
     /// Tests for EventHub subscription multiplicity scenarios with batched message processing.
     /// </summary>
-    public class EHBatchedSubscriptionMultiplicityTests : OrleansTestingBase, IClassFixture<EHBatchedSubscriptionMultiplicityTests.Fixture>
+    public class EHBatchedSubscriptionMultiplicityTests : ScynapseTestingBase, IClassFixture<EHBatchedSubscriptionMultiplicityTests.Fixture>
     {
         private const string StreamProviderName = "EHStreamPerPartition";
         private const string StreamNamespace = "EHPullingAgentBatchingTests";
-        private const string EHPath = "ehorleanstest";
-        private const string EHConsumerGroup = "orleansnightly";
+        private const string EHPath = "ehscynapsetest";
+        private const string EHConsumerGroup = "scynapsenightly";
 
         private readonly SubscriptionMultiplicityTestRunner runner;
         private readonly Fixture fixture;

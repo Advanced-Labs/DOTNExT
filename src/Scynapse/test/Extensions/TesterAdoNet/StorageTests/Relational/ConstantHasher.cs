@@ -1,4 +1,4 @@
-﻿using Orleans.Storage;
+﻿using Scynapse.Storage;
 
 
 namespace UnitTests.StorageTests.Relational

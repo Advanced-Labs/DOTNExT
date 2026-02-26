@@ -1,9 +1,9 @@
 using System.Collections.Immutable;
 using System.Net;
 using Microsoft.Extensions.Logging.Abstractions;
-using Orleans.Configuration;
-using Orleans.Runtime.ConsistentRing;
-using Orleans.Streams;
+using Scynapse.Configuration;
+using Scynapse.Runtime.ConsistentRing;
+using Scynapse.Streams;
 using TestExtensions;
 using Xunit;
 using Xunit.Abstractions;

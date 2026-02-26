@@ -1,5 +1,5 @@
 using System.Data.Common;
-using Orleans.Tests.SqlUtils;
+using Scynapse.Tests.SqlUtils;
 using Tester.RelationalUtilities;
 using TestExtensions;
 
@@ -52,7 +52,7 @@ namespace UnitTests.General
         { get { return "INSERT INTO StreamingTest(Id, StreamData) VALUES(@id, @streamData);"; } }
 
         /// <summary>
-        /// The script that creates Orleans schema in the database, usually CreateOrleansTables_xxxx.sql
+        /// The script that creates Scynapse schema in the database, usually CreateScynapseTables_xxxx.sql
         /// </summary>
         protected string[] SetupSqlScriptFileNames => new[] {
                                 $"{this.ProviderMoniker}-Main.sql",
@@ -87,7 +87,7 @@ namespace UnitTests.General
         /// <summary>
         /// Converts the given script into batches to execute sequentially
         /// </summary>
-        /// <param name="setupScript">the script. usually CreateOrleansTables_xxxx.sql</param>
+        /// <param name="setupScript">the script. usually CreateScynapseTables_xxxx.sql</param>
         /// <param name="databaseName">the name of the database</param>
         protected abstract IEnumerable<string> ConvertToExecutableBatches(string setupScript, string databaseName);
 
@@ -182,7 +182,7 @@ namespace UnitTests.General
         /// <summary>
         /// Executes the given script in a test context.
         /// </summary>
-        /// <param name="setupScript">the script. usually CreateOrleansTables_xxxx.sql</param>
+        /// <param name="setupScript">the script. usually CreateScynapseTables_xxxx.sql</param>
         /// <param name="dataBaseName">the target database to be populated</param>
         /// <returns></returns>
         private async Task ExecuteSetupScript(string setupScript, string dataBaseName)

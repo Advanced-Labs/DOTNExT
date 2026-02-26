@@ -1,5 +1,5 @@
-using Orleans.Placement.Repartitioning;
-using Orleans.Runtime.Placement.Repartitioning;
+using Scynapse.Placement.Repartitioning;
+using Scynapse.Runtime.Placement.Repartitioning;
 using Xunit;
 
 namespace UnitTests.ActivationRepartitioningTests;

@@ -1,6 +1,6 @@
-# Orleans Dashboard - Separate Host Example
+# Scynapse Dashboard - Separate Host Example
 
-This example demonstrates how to host the Orleans Dashboard in a separate web application that connects to an Orleans cluster as a client.
+This example demonstrates how to host the Scynapse Dashboard in a separate web application that connects to an Scynapse cluster as a client.
 
 ## Overview
 
@@ -8,8 +8,8 @@ This approach separates the dashboard web service from your silos.
 
 ## Key Features
 
-- **Separate Process**: Dashboard web service runs independently from Orleans silos
-- **Client Connection**: Connects to the Orleans cluster as an Orleans client
+- **Separate Process**: Dashboard web service runs independently from Scynapse silos
+- **Client Connection**: Connects to the Scynapse cluster as an Scynapse client
 - **Standalone Silo**: Includes a separate silo host for demonstration
 - **Test Grains**: Includes test grains to generate activity for the dashboard
 
@@ -17,8 +17,8 @@ This approach separates the dashboard web service from your silos.
 
 The example consists of two components:
 
-1. **Silo Host**: A standalone Orleans silo that runs independently
-2. **Dashboard Web App**: A web application that connects as an Orleans client and hosts the dashboard
+1. **Silo Host**: A standalone Scynapse silo that runs independently
+2. **Dashboard Web App**: A web application that connects as an Scynapse client and hosts the dashboard
 
 ## Running the Example
 
@@ -27,7 +27,7 @@ dotnet run
 ```
 
 The application will:
-1. Start an Orleans silo on ports 11111 (silo) and 30000 (gateway)
+1. Start an Scynapse silo on ports 11111 (silo) and 30000 (gateway)
 2. Start the dashboard web application
 3. Generate test grain activity automatically
 
@@ -39,7 +39,7 @@ Once running, open your browser to the default ports (typically https://localhos
 
 ```csharp
 var siloHost = Host.CreateDefaultBuilder(args)
-    .UseOrleans((_, builder) =>
+    .UseScynapse((_, builder) =>
     {
         builder.UseDevelopmentClustering(options =>
             options.PrimarySiloEndpoint = new IPEndPoint(IPAddress.Loopback, 11111));
@@ -55,20 +55,20 @@ var siloHost = Host.CreateDefaultBuilder(args)
 ```csharp
 var dashboardBuilder = WebApplication.CreateBuilder(args);
 
-// Configure Orleans client
-dashboardBuilder.UseOrleansClient(clientBuilder =>
+// Configure Scynapse client
+dashboardBuilder.UseScynapseClient(clientBuilder =>
 {
     clientBuilder.UseStaticClustering(options =>
         options.Gateways.Add(new IPEndPoint(IPAddress.Loopback, 30000).ToGatewayUri()));
 
     // Add dashboard services
-    clientBuilder.AddOrleansDashboard();
+    clientBuilder.AddScynapseDashboard();
 });
 
 var app = dashboardBuilder.Build();
 
 // Map dashboard endpoints
-app.MapOrleansDashboard();
+app.MapScynapseDashboard();
 
 await app.RunAsync();
 ```
@@ -83,7 +83,7 @@ await app.RunAsync();
 │  Gateway: 30000 │
 └────────▲────────┘
          │
-         │ Orleans Client Connection
+         │ Scynapse Client Connection
          │
 ┌────────┴────────┐
 │  Dashboard      │
@@ -97,7 +97,7 @@ await app.RunAsync();
 ### Connect to Remote Cluster
 
 ```csharp
-dashboardBuilder.UseOrleansClient(clientBuilder =>
+dashboardBuilder.UseScynapseClient(clientBuilder =>
 {
     clientBuilder.UseStaticClustering(options =>
     {
@@ -105,26 +105,26 @@ dashboardBuilder.UseOrleansClient(clientBuilder =>
         options.Gateways.Add(new IPEndPoint(IPAddress.Parse("10.0.0.2"), 30000).ToGatewayUri());
     });
 
-    clientBuilder.AddOrleansDashboard();
+    clientBuilder.AddScynapseDashboard();
 });
 ```
 
 ### Custom Route Prefix
 
 ```csharp
-app.MapOrleansDashboard(routePrefix: "/dashboard");
+app.MapScynapseDashboard(routePrefix: "/dashboard");
 ```
 
 ### Add Authentication
 
 ```csharp
-app.MapOrleansDashboard().RequireAuthorization();
+app.MapScynapseDashboard().RequireAuthorization();
 ```
 
 ## Important Notes
 
 > [!WARNING]
-> The Orleans Dashboard is designed for **development and testing scenarios only**. It is not recommended for production deployments as it can have a significant performance impact on your cluster.
+> The Scynapse Dashboard is designed for **development and testing scenarios only**. It is not recommended for production deployments as it can have a significant performance impact on your cluster.
 
 ## Related Examples
 
@@ -133,6 +133,6 @@ app.MapOrleansDashboard().RequireAuthorization();
 
 ## Learn More
 
-- [Orleans Dashboard Documentation](../../../src/Dashboard/Orleans.Dashboard/README.md)
-- [Orleans Client Configuration](https://learn.microsoft.com/dotnet/orleans/host/configuration-guide/client-configuration)
-- [Microsoft Orleans Documentation](https://learn.microsoft.com/dotnet/orleans/)
+- [Scynapse Dashboard Documentation](../../../src/Dashboard/Scynapse.Dashboard/README.md)
+- [Scynapse Client Configuration](https://learn.microsoft.com/dotnet/scynapse/host/configuration-guide/client-configuration)
+- [Microsoft Scynapse Documentation](https://learn.microsoft.com/dotnet/scynapse/)

@@ -1,7 +1,7 @@
 using Xunit.Abstractions;
-using Orleans.LeaseProviders;
+using Scynapse.LeaseProviders;
 using TestExtensions.Runners;
-using Orleans.Configuration;
+using Scynapse.Configuration;
 using Microsoft.Extensions.Options;
 
 namespace Tester.AzureUtils.Lease

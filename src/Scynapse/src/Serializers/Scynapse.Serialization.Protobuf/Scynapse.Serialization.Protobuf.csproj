@@ -1,0 +1,24 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageId>Genesa.Scynapse.Serialization.Protobuf</PackageId>
+    <TargetFrameworks>$(DefaultTargetFrameworks);netstandard2.1</TargetFrameworks>
+    <PackageDescription>Google.Protobuf integration for Scynapse.Serialization</PackageDescription>
+    <ScynapseBuildTimeCodeGen>true</ScynapseBuildTimeCodeGen>
+    <IsScynapseFrameworkPart>false</IsScynapseFrameworkPart>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Google.Protobuf" Version="$(GoogleProtobufVersion)" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\Scynapse.Serialization\Scynapse.Serialization.csproj" />
+  </ItemGroup>
+
+
+  <ItemGroup>
+    <None Include="README.md" Pack="true" PackagePath="\" />
+  </ItemGroup>
+</Project>

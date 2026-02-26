@@ -1,8 +1,8 @@
 using AWSUtils.Tests.StorageTests;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using Orleans.Configuration;
-using Orleans.Reminders.DynamoDB;
+using Scynapse.Configuration;
+using Scynapse.Reminders.DynamoDB;
 using TestExtensions;
 using UnitTests;
 using UnitTests.RemindersTest;
@@ -11,7 +11,7 @@ using Xunit;
 namespace AWSUtils.Tests.RemindersTest
 {
     /// <summary>
-    /// Tests DynamoDB implementation of the Orleans reminders table for storing and retrieving grain reminders.
+    /// Tests DynamoDB implementation of the Scynapse reminders table for storing and retrieving grain reminders.
     /// </summary>
     [TestCategory("Reminders"), TestCategory("AWS"), TestCategory("DynamoDb")]
     [Collection(TestEnvironmentFixture.DefaultCollection)]

@@ -7,21 +7,21 @@ namespace TestGrainInterfaces
     }
 
     [Serializable]
-    [Orleans.GenerateSerializer]
+    [Scynapse.GenerateSerializer]
     public class PersonAttributes
     {
-        [Orleans.Id(0)]
+        [Scynapse.Id(0)]
         public string FirstName { get; set; }
-        [Orleans.Id(1)]
+        [Scynapse.Id(1)]
         public string LastName { get; set; }
-        [Orleans.Id(2)]
+        [Scynapse.Id(2)]
         public GenderType Gender { get; set; }
     }
 
     /// <summary>
-    /// Orleans grain communication interface IPerson
+    /// Scynapse grain communication interface IPerson
     /// </summary>
-    public interface IPersonGrain : Orleans.IGrainWithGuidKey
+    public interface IPersonGrain : Scynapse.IGrainWithGuidKey
     {
         Task RegisterBirth(PersonAttributes person);
         Task Marry(IPersonGrain spouse);

@@ -1,5 +1,5 @@
 using Azure.Identity;
-using Orleans.Configuration;
+using Scynapse.Configuration;
 using Tester.AzureUtils;
 using TestExtensions;
 

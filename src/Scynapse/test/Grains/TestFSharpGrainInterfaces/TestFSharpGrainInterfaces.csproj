@@ -2,15 +2,15 @@
   <PropertyGroup>
     <RootNamespace>UnitTests.GrainInterfaces</RootNamespace>
     <TargetFramework>$(MinTestTargetFramework)</TargetFramework>
-    <OrleansBuildTimeCodeGen>true</OrleansBuildTimeCodeGen>
+    <ScynapseBuildTimeCodeGen>true</ScynapseBuildTimeCodeGen>
   </PropertyGroup>
 
   <ItemGroup>
     <ProjectReference Include="$(SourceRoot)test\Misc\TestInterfaces\TestInterfaces.csproj" />
     <ProjectReference Include="$(SourceRoot)test\Grains\TestFSharp\TestFSharp.fsproj" />
     <ProjectReference Include="$(SourceRoot)test\Misc\TestFSharpInterfaces\TestFSharpInterfaces.fsproj" />
-    <ProjectReference Include="..\..\..\src\Orleans.Serialization.FSharp\Orleans.Serialization.FSharp.csproj" />
-    <ProjectReference Include="..\..\..\src\Orleans.Streaming\Orleans.Streaming.csproj" />
+    <ProjectReference Include="..\..\..\src\Scynapse.Serialization.FSharp\Scynapse.Serialization.FSharp.csproj" />
+    <ProjectReference Include="..\..\..\src\Scynapse.Streaming\Scynapse.Streaming.csproj" />
   </ItemGroup>
 
   <ItemGroup>

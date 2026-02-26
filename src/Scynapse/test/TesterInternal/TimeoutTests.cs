@@ -1,7 +1,7 @@
 using System.Diagnostics;
 using Microsoft.Extensions.DependencyInjection;
-using Orleans.Metadata;
-using Orleans.Runtime;
+using Scynapse.Metadata;
+using Scynapse.Runtime;
 using TestExtensions;
 using UnitTests.GrainInterfaces;
 using UnitTests.Grains;
@@ -11,9 +11,9 @@ using Xunit.Abstractions;
 namespace UnitTests
 {
     /// <summary>
-    /// Tests for Orleans timeout mechanisms and request cancellation.
+    /// Tests for Scynapse timeout mechanisms and request cancellation.
     /// 
-    /// Orleans implements timeouts to prevent indefinite waiting on grain calls:
+    /// Scynapse implements timeouts to prevent indefinite waiting on grain calls:
     /// - Each grain call has a configurable response timeout
     /// - If a grain method doesn't complete within the timeout, a TimeoutException is thrown
     /// - The original request continues executing on the silo (not cancelled)
@@ -132,7 +132,7 @@ namespace UnitTests
         /// 
         /// Currently skipped due to issue #3995.
         /// </summary>
-        [SkippableFact(Skip = "https://github.com/dotnet/orleans/issues/3995"), TestCategory("SlowBVT")]
+        [SkippableFact(Skip = "https://github.com/Scynapse/Core/issues/3995"), TestCategory("SlowBVT")]
         public async Task CallThatShouldHaveBeenDroppedNotExecutedTest()
         {
             var responseTimeout = TimeSpan.FromSeconds(2);

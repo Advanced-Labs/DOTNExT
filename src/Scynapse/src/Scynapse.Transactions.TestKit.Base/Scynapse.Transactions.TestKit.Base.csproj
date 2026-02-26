@@ -1,0 +1,28 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <PackageId>Genesa.Scynapse.Transactions.TestKit.Base</PackageId>
+    <Title>Microsoft Scynapse Transactions test kit base</Title>
+    <Description>Testkit base library for transactions</Description>
+    <PackageTags>$(PackageTags) TransactionTestkKit</PackageTags>
+    <ScynapseBuildTimeCodeGen>true</ScynapseBuildTimeCodeGen>
+    <IsScynapseFrameworkPart>false</IsScynapseFrameworkPart>
+    <TargetFrameworks>$(DefaultTargetFrameworks)</TargetFrameworks>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <AssemblyName>Scynapse.Transactions.TestKit.Base</AssemblyName>
+    <RootNamespace>Scynapse.Transactions.TestKit.Base</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="AwesomeAssertions" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="$(SourceRoot)src\Azure\Scynapse.Transactions.AzureStorage\Scynapse.Transactions.AzureStorage.csproj" />
+    <ProjectReference Include="$(SourceRoot)src\Scynapse.TestingHost\Scynapse.TestingHost.csproj" />
+    <ProjectReference Include="$(SourceRoot)src\Scynapse.Transactions\Scynapse.Transactions.csproj" />
+  </ItemGroup>
+
+</Project>

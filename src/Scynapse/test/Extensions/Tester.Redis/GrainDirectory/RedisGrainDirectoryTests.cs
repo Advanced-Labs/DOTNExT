@@ -1,7 +1,7 @@
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using Orleans.Configuration;
-using Orleans.GrainDirectory.Redis;
+using Scynapse.Configuration;
+using Scynapse.GrainDirectory.Redis;
 using StackExchange.Redis;
 using Tester.Directories;
 using TestExtensions;
@@ -11,7 +11,7 @@ using Xunit.Abstractions;
 namespace Tester.Redis.GrainDirectory
 {
     /// <summary>
-    /// Tests for Orleans grain directory functionality using Redis as the directory storage backend.
+    /// Tests for Scynapse grain directory functionality using Redis as the directory storage backend.
     /// </summary>
     [TestCategory("Redis"), TestCategory("Directory"), TestCategory("Functional")]
     [Collection(TestEnvironmentFixture.DefaultCollection)]

@@ -1,9 +1,9 @@
 using System.Text.RegularExpressions;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
-using Orleans.Runtime;
-using Orleans.Storage;
-using Orleans.TestingHost;
+using Scynapse.Runtime;
+using Scynapse.Storage;
+using Scynapse.TestingHost;
 using StackExchange.Redis;
 using TestExtensions;
 using TestExtensions.Runners;
@@ -43,7 +43,7 @@ namespace Tester.Redis.Persistence
                 public void Configure(IHostBuilder hostBuilder)
                 {
                     var connectionString = hostBuilder.GetConfiguration()[ConnectionStringKey];
-                    hostBuilder.UseOrleans((ctx, siloBuilder) =>
+                    hostBuilder.UseScynapse((ctx, siloBuilder) =>
                     {
                         siloBuilder
                             .AddRedisGrainStorage("GrainStorageForTest", options =>
@@ -67,7 +67,7 @@ namespace Tester.Redis.Persistence
             {
                 this.fixture = fixture;
             }
-            catch(OrleansConfigurationException) { }
+            catch(ScynapseConfigurationException) { }
 
             this.fixture.EnsurePreconditionsMet();
 

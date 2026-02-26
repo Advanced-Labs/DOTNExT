@@ -1,4 +1,4 @@
-namespace Orleans.UnitTest.GrainInterfaces
+namespace Scynapse.UnitTest.GrainInterfaces
 {
     [Serializable]
     [GenerateSerializer]

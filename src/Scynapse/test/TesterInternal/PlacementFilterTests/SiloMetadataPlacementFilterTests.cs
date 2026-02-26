@@ -1,8 +1,8 @@
 using Microsoft.Extensions.DependencyInjection;
-using Orleans.Placement;
-using Orleans.Runtime.MembershipService.SiloMetadata;
-using Orleans.Runtime.Placement.Filtering;
-using Orleans.TestingHost;
+using Scynapse.Placement;
+using Scynapse.Runtime.MembershipService.SiloMetadata;
+using Scynapse.Runtime.Placement.Filtering;
+using Scynapse.TestingHost;
 using Xunit;
 
 namespace UnitTests.PlacementFilterTests;
@@ -232,9 +232,9 @@ public interface IUniqueRequiredMatchFilteredGrain : IGrainWithIntegerKey
     Task<SiloAddress> GetHostingSilo();
 }
 
-#pragma warning disable ORLEANSEXP004
+#pragma warning disable SCYNAPSEEXP004
 [RequiredMatchSiloMetadataPlacementFilter(["unique"]), RandomPlacement]
-#pragma warning restore ORLEANSEXP004
+#pragma warning restore SCYNAPSEEXP004
 public class UniqueRequiredMatchFilteredGrain(ILocalSiloDetails localSiloDetails) : Grain, IUniqueRequiredMatchFilteredGrain
 {
     public Task<SiloAddress> GetHostingSilo() => Task.FromResult(localSiloDetails.SiloAddress);
@@ -244,9 +244,9 @@ public interface IPreferredMatchFilteredGrain : IGrainWithIntegerKey
     Task<SiloAddress> GetHostingSilo();
 }
 
-#pragma warning disable ORLEANSEXP004
+#pragma warning disable SCYNAPSEEXP004
 [PreferredMatchSiloMetadataPlacementFilter(["unique"], 1), RandomPlacement]
-#pragma warning restore ORLEANSEXP004
+#pragma warning restore SCYNAPSEEXP004
 public class PreferredMatchFilteredGrain(ILocalSiloDetails localSiloDetails) : Grain, IPreferredMatchFilteredGrain
 {
     public Task<SiloAddress> GetHostingSilo() => Task.FromResult(localSiloDetails.SiloAddress);
@@ -258,9 +258,9 @@ public interface IPreferredMatchMin2FilteredGrain : IGrainWithIntegerKey
     Task<SiloAddress> GetHostingSilo();
 }
 
-#pragma warning disable ORLEANSEXP004
+#pragma warning disable SCYNAPSEEXP004
 [PreferredMatchSiloMetadataPlacementFilter(["unique"]), RandomPlacement]
-#pragma warning restore ORLEANSEXP004
+#pragma warning restore SCYNAPSEEXP004
 public class PreferredMatchMinTwoFilteredGrain(ILocalSiloDetails localSiloDetails) : Grain, IPreferredMatchMin2FilteredGrain
 {
     public Task<SiloAddress> GetHostingSilo() => Task.FromResult(localSiloDetails.SiloAddress);
@@ -271,17 +271,17 @@ public interface IPreferredMatchMultipleFilteredGrain : IGrainWithIntegerKey
     Task<SiloAddress> GetHostingSilo();
 }
 
-#pragma warning disable ORLEANSEXP004
+#pragma warning disable SCYNAPSEEXP004
 [PreferredMatchSiloMetadataPlacementFilter(["unique", "other"], 2), RandomPlacement]
-#pragma warning restore ORLEANSEXP004
+#pragma warning restore SCYNAPSEEXP004
 public class PreferredMatchMultipleFilteredGrain(ILocalSiloDetails localSiloDetails) : Grain, IPreferredMatchMultipleFilteredGrain
 {
     public Task<SiloAddress> GetHostingSilo() => Task.FromResult(localSiloDetails.SiloAddress);
 }
 
-#pragma warning disable ORLEANSEXP004
+#pragma warning disable SCYNAPSEEXP004
 [PreferredMatchSiloMetadataPlacementFilter(["not.there"]), RandomPlacement]
-#pragma warning restore ORLEANSEXP004
+#pragma warning restore SCYNAPSEEXP004
 public class PreferredMatchNoMetadataFilteredGrain(ILocalSiloDetails localSiloDetails) : Grain, IPreferredMatchNoMetadataFilteredGrain
 {
     public Task<SiloAddress> GetHostingSilo() => Task.FromResult(localSiloDetails.SiloAddress);

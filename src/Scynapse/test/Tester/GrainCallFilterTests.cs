@@ -1,13 +1,13 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using Microsoft.Extensions.Configuration;
-using Orleans.Streams;
-using Orleans.TestingHost;
+using Scynapse.Streams;
+using Scynapse.TestingHost;
 using TestExtensions;
 using UnitTests.GrainInterfaces;
 using UnitTests.Grains;
 using Xunit;
-using Orleans.Providers;
+using Scynapse.Providers;
 using System.Diagnostics;
 
 namespace UnitTests.General
@@ -50,7 +50,7 @@ namespace UnitTests.General
     }
 
     /// <summary>
-    /// Comprehensive tests for Orleans grain call filters (interceptors).
+    /// Comprehensive tests for Scynapse grain call filters (interceptors).
     /// 
     /// Grain call filters provide AOP-style interception of grain method calls, enabling:
     /// - Cross-cutting concerns (logging, monitoring, security)
@@ -58,16 +58,16 @@ namespace UnitTests.General
     /// - Retry logic and error handling
     /// - Method call metrics and tracing
     /// 
-    /// Orleans supports both incoming filters (executed on the target grain/silo) and
+    /// Scynapse supports both incoming filters (executed on the target grain/silo) and
     /// outgoing filters (executed on the calling grain/client). Filters can be registered:
     /// - System-wide (all grains)
     /// - Per-grain-type
     /// 
     /// These tests verify filter execution order, context propagation, exception handling,
-    /// and integration with various Orleans features like streaming and observers.
+    /// and integration with various Scynapse features like streaming and observers.
     /// </summary>
     [TestCategory("BVT"), TestCategory("GrainCallFilter")]
-    public class GrainCallFilterTests : OrleansTestingBase, IClassFixture<GrainCallFilterTests.Fixture>
+    public class GrainCallFilterTests : ScynapseTestingBase, IClassFixture<GrainCallFilterTests.Fixture>
     {
         public class Fixture : PluginLoadingTestClusterFixture
         {
@@ -478,7 +478,7 @@ namespace UnitTests.General
         }
 
         /// <summary>
-        /// Tests that if a grain call filter sets an incorrect result type for <see cref="Orleans.IGrainCallContext.Result"/>,
+        /// Tests that if a grain call filter sets an incorrect result type for <see cref="Scynapse.IGrainCallContext.Result"/>,
         /// an exception is thrown on the caller.
         /// </summary>
         [Fact]
@@ -749,7 +749,7 @@ namespace UnitTests.General
         }
 
         /// <summary>
-        /// Tests that if a grain call filter sets an incorrect result type for <see cref="Orleans.IGrainCallContext.Result"/>,
+        /// Tests that if a grain call filter sets an incorrect result type for <see cref="Scynapse.IGrainCallContext.Result"/>,
         /// an exception is thrown on the caller.
         /// </summary>
         [Fact]

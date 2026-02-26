@@ -2,7 +2,7 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
-using Orleans.DurableJobs;
+using Scynapse.DurableJobs;
 using UnitTests.GrainInterfaces;
 
 namespace UnitTests.Grains;

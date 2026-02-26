@@ -5,13 +5,13 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
-using Orleans.Configuration;
-using Orleans.Providers;
-using Orleans.Runtime;
-using Orleans.Serialization;
-using Orleans.Serialization.Serializers;
-using Orleans.Serialization.TypeSystem;
-using Orleans.Storage;
+using Scynapse.Configuration;
+using Scynapse.Providers;
+using Scynapse.Runtime;
+using Scynapse.Serialization;
+using Scynapse.Serialization.Serializers;
+using Scynapse.Serialization.TypeSystem;
+using Scynapse.Storage;
 using Samples.StorageProviders;
 using TestExtensions;
 using UnitTests.Persistence;
@@ -59,7 +59,7 @@ namespace Tester.AzureUtils.Persistence
         {
             const string testName = nameof(PersistenceProvider_FileStore_WriteRead);
 
-            var store = new OrleansFileStorage("Data");
+            var store = new ScynapseFileStorage("Data");
             await Test_PersistenceProvider_WriteRead(testName, store);
         }
 
@@ -178,8 +178,8 @@ namespace Tester.AzureUtils.Persistence
         [InlineData(15 * 32 * 1024 - 256, false, true)]
         public async Task PersistenceProvider_Azure_ChangeStorageDataFormat_WhenJsonSerializerIsUsed(int? stringLength, bool useStringFormatForFirstWrite, bool useStringFormatForSecondWrite)
         {
-            // always use JsonSerializer over OrleansSerializer since specifying 'useStringFormat = true'
-            // writes to 'StringData', the OrleansSerializer can not read from the 'StringData' column as its not a format which it expects.
+            // always use JsonSerializer over ScynapseSerializer since specifying 'useStringFormat = true'
+            // writes to 'StringData', the ScynapseSerializer can not read from the 'StringData' column as its not a format which it expects.
             const bool useJson = true;
 
             var testName = string.Format("{0}({1}={2},{3}={4},{5}={6})",
@@ -299,11 +299,11 @@ namespace Tester.AzureUtils.Persistence
         {
             if (useStringFormat && !useJson)
             {
-                throw new InvalidOperationException($"Using {nameof(OrleansGrainStorageSerializer)} in conjuction with string data format makes no sense, there for stopping attempt.");
+                throw new InvalidOperationException($"Using {nameof(ScynapseGrainStorageSerializer)} in conjuction with string data format makes no sense, there for stopping attempt.");
             }
 
             var options = new AzureTableStorageOptions();
-            var jsonOptions = this.providerRuntime.ServiceProvider.GetService<IOptions<OrleansJsonSerializerOptions>>();
+            var jsonOptions = this.providerRuntime.ServiceProvider.GetService<IOptions<ScynapseJsonSerializerOptions>>();
             if (typeNameHandling != null)
             {
                 jsonOptions.Value.JsonSerializerSettings.TypeNameHandling = typeNameHandling.Value;
@@ -313,8 +313,8 @@ namespace Tester.AzureUtils.Persistence
             options.UseStringFormat = useStringFormat;
 
             // TODO change test to include more serializer?
-            var binarySerializer = new OrleansGrainStorageSerializer(this.providerRuntime.ServiceProvider.GetRequiredService<Serializer>());
-            var jsonSerializer = new JsonGrainStorageSerializer(new OrleansJsonSerializer(jsonOptions));
+            var binarySerializer = new ScynapseGrainStorageSerializer(this.providerRuntime.ServiceProvider.GetRequiredService<Serializer>());
+            var jsonSerializer = new JsonGrainStorageSerializer(new ScynapseJsonSerializer(jsonOptions));
             if (useFallback)
                 options.GrainStorageSerializer = useJson
                     ? new GrainStorageSerializer(jsonSerializer, binarySerializer)

@@ -1,0 +1,24 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <PackageId>Genesa.Scynapse.Clustering.Cassandra</PackageId>
+    <Title>Microsoft Scynapse Cassandra Clustering Provider</Title>
+    <Description>Microsoft Scynapse clustering provider backed by Cassandra</Description>
+    <PackageTags>$(PackageTags) Cassandra</PackageTags>
+    <TargetFrameworks>$(DefaultTargetFrameworks)</TargetFrameworks>
+    <AssemblyName>Scynapse.Clustering.Cassandra</AssemblyName>
+    <RootNamespace>Scynapse.Clustering.Cassandra</RootNamespace>
+    <ScynapseBuildTimeCodeGen>true</ScynapseBuildTimeCodeGen>
+    <DefineConstants>$(DefineConstants);SCYNAPSE_CLUSTERING</DefineConstants>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="$(SourceRoot)src\Scynapse.Runtime\Scynapse.Runtime.csproj" />
+    <PackageReference Include="CassandraCSharpDriver" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="Tester.Cassandra"/>
+  </ItemGroup>
+
+</Project>

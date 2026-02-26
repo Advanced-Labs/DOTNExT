@@ -1,6 +1,6 @@
 {
-  "areaPath": "DevDiv\\ASP.NET Core\\Orleans",
-  "codebaseName": "Orleans",
+  "areaPath": "DevDiv\\ASP.NET Core\\Scynapse",
+  "codebaseName": "Scynapse",
   "instanceUrl": "https://devdiv.visualstudio.com/",
   "iterationPath": "DevDiv",
   "notificationAliases": [
@@ -8,6 +8,6 @@
     "reuben.bond@microsoft.com"
   ],
   "projectName": "DEVDIV",
-  "repositoryName": "Orleans",
+  "repositoryName": "Scynapse",
   "template": "TFSDEVDIV"
 }

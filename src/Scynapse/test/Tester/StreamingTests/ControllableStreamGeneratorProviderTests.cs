@@ -1,11 +1,11 @@
 using Microsoft.Extensions.Logging;
-using Orleans.Configuration;
-using Orleans.Providers.Streams.Common;
-using Orleans.Providers.Streams.Generator;
-using Orleans.Runtime;
-using Orleans.Streams;
-using Orleans.TestingHost;
-using Orleans.TestingHost.Utils;
+using Scynapse.Configuration;
+using Scynapse.Providers.Streams.Common;
+using Scynapse.Providers.Streams.Generator;
+using Scynapse.Runtime;
+using Scynapse.Streams;
+using Scynapse.TestingHost;
+using Scynapse.TestingHost.Utils;
 using TestExtensions;
 using TestGrainInterfaces;
 using TestGrains;
@@ -17,7 +17,7 @@ namespace UnitTests.StreamingTests
     /// <summary>
     /// Tests for the controllable stream generator provider functionality, validating stream generation behavior and control commands.
     /// </summary>
-    public class ControllableStreamGeneratorProviderTests : OrleansTestingBase, IClassFixture<ControllableStreamGeneratorProviderTests.Fixture>
+    public class ControllableStreamGeneratorProviderTests : ScynapseTestingBase, IClassFixture<ControllableStreamGeneratorProviderTests.Fixture>
     {
         private const int TotalQueueCount = 4;
         private readonly Fixture fixture;

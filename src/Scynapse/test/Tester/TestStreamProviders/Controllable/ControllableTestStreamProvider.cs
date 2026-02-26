@@ -1,9 +1,9 @@
 using Microsoft.Extensions.DependencyInjection;
-using Orleans.Configuration;
-using Orleans.Providers;
-using Orleans.Providers.Streams.Common;
-using Orleans.Runtime;
-using Orleans.Streams;
+using Scynapse.Configuration;
+using Scynapse.Providers;
+using Scynapse.Providers.Streams.Common;
+using Scynapse.Runtime;
+using Scynapse.Streams;
 
 namespace Tester.TestStreamProviders.Controllable
 {

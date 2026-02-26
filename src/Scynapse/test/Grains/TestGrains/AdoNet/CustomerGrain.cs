@@ -1,7 +1,7 @@
-using Orleans.Providers;
-using Orleans.SqlUtils.StorageProvider.GrainInterfaces;
+using Scynapse.Providers;
+using Scynapse.SqlUtils.StorageProvider.GrainInterfaces;
 
-namespace Orleans.SqlUtils.StorageProvider.GrainClasses
+namespace Scynapse.SqlUtils.StorageProvider.GrainClasses
 {
     [StorageProvider(ProviderName = "SqlStore")]
     public class CustomerGrain : Grain<CustomerState>, ICustomerGrain

@@ -2,10 +2,10 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
-using Orleans.Configuration;
-using Orleans.Runtime;
-using Orleans.Serialization.TypeSystem;
-using Orleans.TestingHost;
+using Scynapse.Configuration;
+using Scynapse.Runtime;
+using Scynapse.Serialization.TypeSystem;
+using Scynapse.TestingHost;
 using TestExtensions;
 using UnitTests.GrainInterfaces;
 using UnitTests.Grains;
@@ -17,7 +17,7 @@ namespace Tester.HeterogeneousSilosTests
     /// Tests for heterogeneous silo configurations including grain type exclusion and type resolution merging.
     /// </summary>
     [TestCategory("Functional")]
-    public class HeterogeneousTests : OrleansTestingBase, IDisposable, IAsyncLifetime
+    public class HeterogeneousTests : ScynapseTestingBase, IDisposable, IAsyncLifetime
     {
         private static readonly TimeSpan ClientRefreshDelay = TimeSpan.FromSeconds(1);
         private static readonly TimeSpan RefreshInterval = TimeSpan.FromMilliseconds(200);
@@ -118,7 +118,7 @@ namespace Tester.HeterogeneousSilosTests
             await MergeGrainResolverTestsImpl<IStatelessWorkerGrain>(typeof(PreferLocalPlacement), true, this.CallIStatelessWorkerGrainMethod, typeof(StatelessWorkerGrain));
         }
 
-        [Fact(Skip = "https://github.com/dotnet/orleans/issues/9560")]
+        [Fact(Skip = "https://github.com/Scynapse/Core/issues/9560")]
         public async Task StatelessWorkerPlacementWithClientRefreshTests()
         {
             await MergeGrainResolverTestsImpl<IStatelessWorkerGrain>(typeof(RandomPlacement), false, this.CallIStatelessWorkerGrainMethod, typeof(StatelessWorkerGrain));

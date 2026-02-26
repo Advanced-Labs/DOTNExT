@@ -1,0 +1,25 @@
+<Project>
+
+  <ItemGroup>
+    <CompilerVisibleProperty Include="Scynapse_DesignTimeBuild" />
+    <CompilerVisibleProperty Include="Scynapse_AttachDebugger" />
+    <CompilerVisibleProperty Include="Scynapse_GenerateFieldIds" />
+    <CompilerVisibleProperty Include="Scynapse_ImmutableAttributes" />
+    <CompilerVisibleProperty Include="Scynapse_IdAttributes" />
+    <CompilerVisibleProperty Include="Scynapse_AliasAttributes" />
+    <CompilerVisibleProperty Include="Scynapse_GenerateSerializerAttributes" />
+    <CompilerVisibleProperty Include="Scynapse_ConstructorAttributes" />
+    <CompilerVisibleProperty Include="ScynapseGenerateCompatibilityInvokers" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <Scynapse_DesignTimeBuild>$(DesignTimeBuild)</Scynapse_DesignTimeBuild>
+    <Scynapse_GenerateFieldIds>$(ScynapseGenerateFieldIds)</Scynapse_GenerateFieldIds>
+    <Scynapse_ImmutableAttributes>$(ScynapseImmutableAttributes)</Scynapse_ImmutableAttributes>
+    <Scynapse_IdAttributes>$(ScynapseIdAttributes)</Scynapse_IdAttributes>
+    <Scynapse_AliasAttributes>$(ScynapseAliasAttributes)</Scynapse_AliasAttributes>
+    <Scynapse_GenerateSerializerAttributes>$(ScynapseGenerateSerializerAttributes)</Scynapse_GenerateSerializerAttributes>
+    <Scynapse_ConstructorAttributes>$(ScynapseConstructorAttributes)</Scynapse_ConstructorAttributes>
+  </PropertyGroup>
+
+</Project>

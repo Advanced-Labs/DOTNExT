@@ -1,15 +1,15 @@
-using Orleans.Concurrency;
-using Orleans.Runtime;
+using Scynapse.Concurrency;
+using Scynapse.Runtime;
 using TestExtensions;
 using Xunit;
 
-namespace UnitTests.OrleansRuntime
+namespace UnitTests.ScynapseRuntime
 {
     /// <summary>
-    /// Tests for the Orleans Management Grain functionality.
+    /// Tests for the Scynapse Management Grain functionality.
     /// The Management Grain is a system grain that provides cluster management operations
     /// such as querying grain activation information, collecting statistics, and
-    /// performing administrative tasks across the Orleans cluster.
+    /// performing administrative tasks across the Scynapse cluster.
     /// </summary>
     public class ManagementGrainTests : HostedTestClusterEnsureDefaultStarted
     {

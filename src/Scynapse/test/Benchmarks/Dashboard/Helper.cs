@@ -1,4 +1,4 @@
-using Orleans.Dashboard.Model;
+using Scynapse.Dashboard.Model;
 using System;
 using System.Collections.Generic;
 

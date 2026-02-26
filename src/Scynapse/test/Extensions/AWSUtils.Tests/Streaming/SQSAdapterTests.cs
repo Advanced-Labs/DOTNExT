@@ -2,21 +2,21 @@ using System.Collections.Concurrent;
 using System.Globalization;
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
-using Orleans.Providers.Streams.Common;
-using Orleans.Runtime;
-using Orleans.Streams;
-using OrleansAWSUtils.Streams;
+using Scynapse.Providers.Streams.Common;
+using Scynapse.Runtime;
+using Scynapse.Streams;
+using ScynapseAWSUtils.Streams;
 using AWSUtils.Tests.StorageTests;
 using TestExtensions;
 using Xunit;
 using Xunit.Abstractions;
-using OrleansAWSUtils.Storage;
-using Orleans.Configuration;
+using ScynapseAWSUtils.Storage;
+using Scynapse.Configuration;
 
 namespace AWSUtils.Tests.Streaming
 {
     /// <summary>
-    /// Tests SQS queue adapter functionality for sending and receiving messages through Orleans streaming.
+    /// Tests SQS queue adapter functionality for sending and receiving messages through Scynapse streaming.
     /// </summary>
     [TestCategory("AWS"), TestCategory("SQS")]
     [Collection(TestEnvironmentFixture.DefaultCollection)]

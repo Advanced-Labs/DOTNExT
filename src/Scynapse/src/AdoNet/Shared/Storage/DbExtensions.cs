@@ -9,17 +9,17 @@ using System.Threading.Tasks;
 #nullable disable
 
 #if CLUSTERING_ADONET
-namespace Orleans.Clustering.AdoNet.Storage
+namespace Scynapse.Clustering.AdoNet.Storage
 #elif PERSISTENCE_ADONET
-namespace Orleans.Persistence.AdoNet.Storage
+namespace Scynapse.Persistence.AdoNet.Storage
 #elif REMINDERS_ADONET
-namespace Orleans.Reminders.AdoNet.Storage
+namespace Scynapse.Reminders.AdoNet.Storage
 #elif STREAMING_ADONET
-namespace Orleans.Streaming.AdoNet.Storage
+namespace Scynapse.Streaming.AdoNet.Storage
 #elif GRAINDIRECTORY_ADONET
-namespace Orleans.GrainDirectory.AdoNet.Storage
+namespace Scynapse.GrainDirectory.AdoNet.Storage
 #elif TESTER_SQLUTILS
-namespace Orleans.Tests.SqlUtils
+namespace Scynapse.Tests.SqlUtils
 #else
 // No default namespace intentionally to cause compile errors if something is not defined
 #endif
@@ -145,7 +145,7 @@ namespace Orleans.Tests.SqlUtils
         /// <returns>Either the given value or the default for <see cref="System.DateTime"/>?.</returns>
         /// <exception cref="DataException"/>
         /// <remarks>An explicit function like this is needed in cases where to connector infers a type that is undesirable.
-        /// An example here is Npgsql.NodaTime, which makes Npgsql return Noda type and consequently Orleans is not able to
+        /// An example here is Npgsql.NodaTime, which makes Npgsql return Noda type and consequently Scynapse is not able to
         /// use it since it expects .NET <see cref="System.DateTime"/>. This function throws if the given <see paramref="fieldName"/> does not exist.</remarks>
         public static DateTime? GetDateTimeValueOrDefault(this IDataRecord record, string fieldName, DateTime? @default = default)
         {
@@ -246,7 +246,7 @@ namespace Orleans.Tests.SqlUtils
         /// <returns>DateTime Value in the given field.</returns>
         /// <exception cref="DataException"/>
         /// <remarks>An explicit function like this is needed in cases where to connector infers a type that is undesirable.
-        /// An example here is Npgsql.NodaTime, which makes Npgsql return Noda type and consequently Orleans is not able to
+        /// An example here is Npgsql.NodaTime, which makes Npgsql return Noda type and consequently Scynapse is not able to
         /// use it since it expects .NET <see cref="System.DateTime"/>. This function throws if the given <see paramref="fieldName"/> does not exist.</remarks>
         public static DateTime GetDateTimeValue(this IDataRecord record, string fieldName)
         {

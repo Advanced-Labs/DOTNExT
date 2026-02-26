@@ -4,31 +4,31 @@ using System.Data;
 using System.Linq;
 using System.Net;
 using System.Reflection;
-using Orleans.Runtime;
+using Scynapse.Runtime;
 
 #nullable disable
 
 #if CLUSTERING_ADONET
-namespace Orleans.Clustering.AdoNet.Storage
-#elif ORLEANS_REMINDERS_PROVIDER
-using Orleans.Reminders.AdoNet.Converters;
-namespace Orleans.Reminders.AdoNet.Storage
+namespace Scynapse.Clustering.AdoNet.Storage
+#elif SCYNAPSE_REMINDERS_PROVIDER
+using Scynapse.Reminders.AdoNet.Converters;
+namespace Scynapse.Reminders.AdoNet.Storage
 #elif PERSISTENCE_ADONET
-namespace Orleans.Persistence.AdoNet.Storage
+namespace Scynapse.Persistence.AdoNet.Storage
 #elif REMINDERS_ADONET
-namespace Orleans.Reminders.AdoNet.Storage
+namespace Scynapse.Reminders.AdoNet.Storage
 #elif STREAMING_ADONET
-namespace Orleans.Streaming.AdoNet.Storage
+namespace Scynapse.Streaming.AdoNet.Storage
 #elif GRAINDIRECTORY_ADONET
-namespace Orleans.GrainDirectory.AdoNet.Storage
+namespace Scynapse.GrainDirectory.AdoNet.Storage
 #elif TESTER_SQLUTILS
-namespace Orleans.Tests.SqlUtils
+namespace Scynapse.Tests.SqlUtils
 #else
 // No default namespace intentionally to cause compile errors if something is not defined
 #endif
 {
     /// <summary>
-    /// This class implements the expected contract between Orleans and the underlying relational storage.
+    /// This class implements the expected contract between Scynapse and the underlying relational storage.
     /// It makes sure all the stored queries are present and 
     /// </summary>
     internal class DbStoredQueries
@@ -52,7 +52,7 @@ namespace Orleans.Tests.SqlUtils
         /// The query that's used to get all the stored queries.
         /// this will probably be the same for all relational dbs.
         /// </summary>
-        internal const string GetQueriesKey = "SELECT QueryKey, QueryText FROM OrleansQuery";
+        internal const string GetQueriesKey = "SELECT QueryKey, QueryText FROM ScynapseQuery";
 
 #if CLUSTERING_ADONET || TESTER_SQLUTILS
 
@@ -103,7 +103,7 @@ namespace Orleans.Tests.SqlUtils
 
 #endif
 
-#if REMINDERS_ADONET || TESTER_SQLUTILS || ORLEANS_REMINDERS_PROVIDER
+#if REMINDERS_ADONET || TESTER_SQLUTILS || SCYNAPSE_REMINDERS_PROVIDER
 
         /// <summary>
         /// A query template to read reminder entries.
@@ -276,7 +276,7 @@ namespace Orleans.Tests.SqlUtils
             private static SiloAddress GetSiloAddress(IDataRecord record, string portName)
             {
                 //Use the GetInt32 method instead of the generic GetValue<TValue> version to retrieve the value from the data record
-                //GetValue<int> causes an InvalidCastException with orcale data provider. See https://github.com/dotnet/orleans/issues/3561
+                //GetValue<int> causes an InvalidCastException with orcale data provider. See https://github.com/Scynapse/Core/issues/3561
                 int port = record.GetInt32(portName);
                 int generation = record.GetInt32(nameof(Columns.Generation));
                 string address = record.GetValue<string>(nameof(Columns.Address));

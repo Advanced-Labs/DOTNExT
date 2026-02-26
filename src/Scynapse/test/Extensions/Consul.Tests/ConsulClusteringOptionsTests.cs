@@ -1,4 +1,4 @@
-using Orleans.Configuration;
+using Scynapse.Configuration;
 using Xunit;
 
 namespace Consul.Tests

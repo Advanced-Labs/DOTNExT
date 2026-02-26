@@ -1,7 +1,7 @@
 using Microsoft.Extensions.DependencyInjection;
-using Orleans;
-using Orleans.Runtime;
-using Orleans.Runtime.DynamicGrains;
+using Scynapse;
+using Scynapse.Runtime;
+using Scynapse.Runtime.DynamicGrains;
 using Spectre.Console;
 
 namespace PluginGrainScenarios.Scenarios;
@@ -69,9 +69,9 @@ public static class SplitGrainAssemblies
     {
         if (baseDir == null) return null;
 
-        // Search from AppContext.BaseDirectory upward to find Orleans root
+        // Search from AppContext.BaseDirectory upward to find Scynapse root
         var currentDir = new DirectoryInfo(AppContext.BaseDirectory);
-        while (currentDir != null && !File.Exists(Path.Combine(currentDir.FullName, "Orleans.slnx")))
+        while (currentDir != null && !File.Exists(Path.Combine(currentDir.FullName, "Scynapse.slnx")))
         {
             currentDir = currentDir.Parent;
         }
@@ -248,7 +248,7 @@ public static class SplitGrainAssemblies
         // Phase 1: Load contracts (interfaces) first
         AnsiConsole.MarkupLine("[blue]Phase 1: Loading Contracts Assembly (interfaces only)[/]");
         AnsiConsole.MarkupLine("[grey]  Contracts contain grain interfaces and shared data types.[/]");
-        AnsiConsole.MarkupLine("[grey]  Orleans generates proxy/stub classes from interfaces.[/]");
+        AnsiConsole.MarkupLine("[grey]  Scynapse generates proxy/stub classes from interfaces.[/]");
         var contractsResult = await grainLoader.LoadGrainAssemblyAsync(contractsPath);
 
         if (!contractsResult.Success)
@@ -282,7 +282,7 @@ public static class SplitGrainAssemblies
         // Phase 2: Load implementation
         AnsiConsole.MarkupLine("[blue]Phase 2: Loading Implementation Assembly (grain classes)[/]");
         AnsiConsole.MarkupLine("[grey]  Implementation contains grain classes that implement the interfaces.[/]");
-        AnsiConsole.MarkupLine("[grey]  Orleans generates activators and method invokers.[/]");
+        AnsiConsole.MarkupLine("[grey]  Scynapse generates activators and method invokers.[/]");
         var implResult = await grainLoader.LoadGrainAssemblyAsync(implementationPath);
 
         if (!implResult.Success)

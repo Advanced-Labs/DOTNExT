@@ -9,7 +9,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Scynapse.AsyncPlus;
 using Scynapse.AsyncPlus.Services;
-using Orleans;
+using Scynapse;
 using Spectre.Console;
 
 namespace AsyncPersistenceScenarios.Scenarios;
@@ -299,7 +299,7 @@ namespace ConcurrentWorkflows
         try
         {
             silo1 = await AnsiConsole.Status()
-                .StartAsync("Starting Orleans silo with RavenDB...", async ctx =>
+                .StartAsync("Starting Scynapse silo with RavenDB...", async ctx =>
                 {
                     var host = SiloHelper.BuildSingleSiloWithRavenDb(
                         siloPort: 11117,
@@ -532,7 +532,7 @@ namespace ConcurrentWorkflows
         try
         {
             silo2 = await AnsiConsole.Status()
-                .StartAsync("Starting Orleans silo (restart)...", async ctx =>
+                .StartAsync("Starting Scynapse silo (restart)...", async ctx =>
                 {
                     var host = SiloHelper.BuildSingleSiloWithRavenDb(
                         siloPort: 11117,

@@ -1,5 +1,5 @@
-using Orleans.EventSourcing;
-using Orleans.Providers;
+using Scynapse.EventSourcing;
+using Scynapse.Providers;
 using TestGrainInterfaces;
 
 namespace TestGrains
@@ -22,10 +22,10 @@ namespace TestGrains
         /// The state of this grain is just the current balance.
         /// </summary>
         [Serializable]
-        [Orleans.GenerateSerializer]
+        [Scynapse.GenerateSerializer]
         public class GrainState
         {
-            [Orleans.Id(0)]
+            [Scynapse.Id(0)]
             public uint Balance { get; set; }
 
             public void Apply(DepositTransaction d)

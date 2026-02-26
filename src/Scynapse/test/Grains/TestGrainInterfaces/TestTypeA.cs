@@ -1,10 +1,10 @@
 ﻿namespace UnitTests.GrainInterfaces
 {
     [Serializable]
-    [Orleans.GenerateSerializer]
+    [Scynapse.GenerateSerializer]
     public class TestTypeA
     {
-        [Orleans.Id(0)]
+        [Scynapse.Id(0)]
         public ICollection<TestTypeA> Collection { get; set; }
     }
 }

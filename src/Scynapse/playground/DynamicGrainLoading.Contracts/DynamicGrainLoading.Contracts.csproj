@@ -5,13 +5,13 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <OutputType>Library</OutputType>
-    <!-- Required for Orleans to generate proxy/stub classes for grain interfaces -->
-    <OrleansBuildTimeCodeGen>true</OrleansBuildTimeCodeGen>
+    <!-- Required for Scynapse to generate proxy/stub classes for grain interfaces -->
+    <ScynapseBuildTimeCodeGen>true</ScynapseBuildTimeCodeGen>
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\Orleans.Sdk\Orleans.Sdk.csproj" />
-    <ProjectReference Include="..\..\src\Orleans.Core.Abstractions\Orleans.Core.Abstractions.csproj" />
+    <ProjectReference Include="..\..\src\Scynapse.Sdk\Scynapse.Sdk.csproj" />
+    <ProjectReference Include="..\..\src\Scynapse.Core.Abstractions\Scynapse.Core.Abstractions.csproj" />
   </ItemGroup>
 
 </Project>

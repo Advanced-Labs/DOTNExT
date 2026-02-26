@@ -6,7 +6,7 @@ using Microsoft.Crank.EventSources;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using Orleans.Configuration;
+using Scynapse.Configuration;
 
 namespace DistributedTests.Client.Commands
 {
@@ -42,7 +42,7 @@ namespace DistributedTests.Client.Commands
         {
             _logger.LogInformation("Connecting to cluster...");
             var hostBuilder = new HostBuilder()
-                .UseOrleansClient((ctx, builder) => {
+                .UseScynapseClient((ctx, builder) => {
                     builder
                         .Configure<ClusterOptions>(options => { options.ClusterId = parameters.ClusterId; options.ServiceId = parameters.ServiceId; })
                         .UseAzureStorageClustering(options => options.TableServiceClient = parameters.AzureTableUri.CreateTableServiceClient());

@@ -1,8 +1,8 @@
 using Microsoft.Extensions.Logging;
-using Orleans.Providers.Streams.Common;
-using Orleans.Runtime;
-using Orleans.Streams;
-using Orleans.TestingHost;
+using Scynapse.Providers.Streams.Common;
+using Scynapse.Runtime;
+using Scynapse.Streams;
+using Scynapse.TestingHost;
 using Tester.TestStreamProviders.Controllable;
 using TestExtensions;
 using Xunit;
@@ -12,7 +12,7 @@ namespace UnitTests.StreamingTests
     /// <summary>
     /// Tests for the controllable stream provider adapter, validating echo commands through adapter and factory interfaces.
     /// </summary>
-    public class ControllableStreamProviderTests : OrleansTestingBase, IClassFixture<ControllableStreamProviderTests.Fixture>
+    public class ControllableStreamProviderTests : ScynapseTestingBase, IClassFixture<ControllableStreamProviderTests.Fixture>
     {
         public class Fixture : PluginLoadingTestClusterFixture
         {

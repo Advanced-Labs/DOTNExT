@@ -1,4 +1,4 @@
-using Orleans;
+using Scynapse;
 
 namespace UnitTests.SplitGrain.Contracts;
 

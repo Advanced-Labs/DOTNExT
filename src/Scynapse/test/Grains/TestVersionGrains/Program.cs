@@ -1,4 +1,4 @@
-using Orleans.TestingHost;
+using Scynapse.TestingHost;
 
 namespace TestVersionGrains
 {

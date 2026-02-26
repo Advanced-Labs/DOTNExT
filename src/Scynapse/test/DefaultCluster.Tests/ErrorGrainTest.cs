@@ -1,7 +1,7 @@
 using System.Diagnostics;
 using Microsoft.Extensions.Logging;
-using Orleans.Runtime;
-using Orleans.Internal;
+using Scynapse.Runtime;
+using Scynapse.Internal;
 using TestExtensions;
 using UnitTests.GrainInterfaces;
 using UnitTests.Grains;
@@ -11,14 +11,14 @@ using Xunit.Abstractions;
 namespace DefaultCluster.Tests
 {
     /// <summary>
-    /// Tests error handling and exception propagation in Orleans.
-    /// These tests verify Orleans' robust error handling capabilities including:
+    /// Tests error handling and exception propagation in Scynapse.
+    /// These tests verify Scynapse' robust error handling capabilities including:
     /// - Exception serialization and propagation across process boundaries
     /// - Handling of synchronous and asynchronous errors
     /// - Timeout behavior and recovery
     /// - Stress testing with multiple concurrent failing operations
     /// - Various grain communication patterns under error conditions
-    /// Orleans ensures that errors in grains don't crash the system and are properly communicated to callers.
+    /// Scynapse ensures that errors in grains don't crash the system and are properly communicated to callers.
     /// </summary>
     public class ErrorGrainTest : HostedTestClusterEnsureDefaultStarted
     {
@@ -44,9 +44,9 @@ namespace DefaultCluster.Tests
         }
 
         /// <summary>
-        /// Tests error handling for locally thrown exceptions (not in Orleans grains).
+        /// Tests error handling for locally thrown exceptions (not in Scynapse grains).
         /// Verifies that standard .NET exception handling works as expected for comparison
-        /// with distributed error handling in Orleans.
+        /// with distributed error handling in Scynapse.
         /// </summary>
         [Fact, TestCategory("BVT"), TestCategory("ErrorHandling")]
         public async Task ErrorHandlingLocalError()
@@ -114,7 +114,7 @@ namespace DefaultCluster.Tests
         /// - Timing assertions ensure proper async behavior
         /// This establishes baseline behavior for comparison with timeout scenarios.
         /// </summary>
-        [Fact(Skip = "https://github.com/dotnet/orleans/issues/9558"), TestCategory("BVT"), TestCategory("ErrorHandling")]
+        [Fact(Skip = "https://github.com/Scynapse/Core/issues/9558"), TestCategory("BVT"), TestCategory("ErrorHandling")]
         public async Task ErrorHandlingTimedMethod()
         {
             var grainFullName = typeof(ErrorGrain).FullName;
@@ -128,7 +128,7 @@ namespace DefaultCluster.Tests
             await Task.Delay(1000);
             Assert.False(promise.IsCompleted, "The task shouldn't have completed yet.");
 
-            // these asserts depend on timing issues and will be wrong for the sync version of OrleansTask
+            // these asserts depend on timing issues and will be wrong for the sync version of ScynapseTask
             Assert.True(stopwatch.ElapsedMilliseconds >= 900, $"Waited less than 900ms: ({stopwatch.ElapsedMilliseconds}ms)"); // check that we waited at least 0.9 second
             Assert.True(stopwatch.ElapsedMilliseconds <= 1300, $"Waited longer than 1300ms: ({stopwatch.ElapsedMilliseconds}ms)");
 
@@ -143,7 +143,7 @@ namespace DefaultCluster.Tests
         /// - Tasks don't complete until the actual error occurs
         /// - The exception is properly propagated when the method completes
         /// - Timing ensures the error happens after the expected delay
-        /// This tests Orleans' handling of delayed failures.
+        /// This tests Scynapse' handling of delayed failures.
         /// </summary>
         [Fact, TestCategory("BVT"), TestCategory("ErrorHandling")]
         public async Task ErrorHandlingTimedMethodWithError()
@@ -158,12 +158,12 @@ namespace DefaultCluster.Tests
         }
 
         /// <summary>
-        /// Stress tests Orleans with many concurrent delayed grain calls.
+        /// Stress tests Scynapse with many concurrent delayed grain calls.
         /// Verifies that:
         /// - The system can handle hundreds of concurrent grain calls
         /// - All calls complete successfully without deadlocks
-        /// - Orleans properly manages resources under load
-        /// This tests the scalability of Orleans' message handling and scheduling.
+        /// - Scynapse properly manages resources under load
+        /// This tests the scalability of Scynapse' message handling and scheduling.
         /// </summary>
         [Fact, TestCategory("Functional"), TestCategory("ErrorHandling"), TestCategory("Stress")]
         public async Task StressHandlingMultipleDelayedRequests()
@@ -187,7 +187,7 @@ namespace DefaultCluster.Tests
 
         /// <summary>
         /// Tests passing collections of grain references as method arguments.
-        /// Verifies that Orleans correctly serializes and deserializes complex types
+        /// Verifies that Scynapse correctly serializes and deserializes complex types
         /// containing grain references. This is important for scenarios where grains
         /// need to coordinate with multiple other grains.
         /// </summary>
@@ -203,10 +203,10 @@ namespace DefaultCluster.Tests
         }
 
         /// <summary>
-        /// Tests Orleans' delayed execution capabilities.
+        /// Tests Scynapse' delayed execution capabilities.
         /// Verifies that grains can schedule delayed operations and that these
         /// operations execute correctly after the specified delay.
-        /// This tests Orleans' internal timer and scheduling mechanisms.
+        /// This tests Scynapse' internal timer and scheduling mechanisms.
         /// </summary>
         [Fact, TestCategory("BVT"), TestCategory("AsynchronyPrimitives"), TestCategory("ErrorHandling")]
         public async Task AC_DelayedExecutor_2()
@@ -221,7 +221,7 @@ namespace DefaultCluster.Tests
         /// <summary>
         /// Tests async method patterns in simple grains.
         /// Verifies that grains correctly handle async methods for setting and getting state.
-        /// This demonstrates Orleans' support for modern async/await patterns in grain implementations.
+        /// This demonstrates Scynapse' support for modern async/await patterns in grain implementations.
         /// </summary>
         [Fact, TestCategory("BVT"), TestCategory("SimpleGrain")]
         public async Task SimpleGrain_AsyncMethods()
@@ -239,7 +239,7 @@ namespace DefaultCluster.Tests
 
         /// <summary>
         /// Tests promise forwarding where one grain forwards a call to another grain.
-        /// Verifies that Orleans correctly handles chained grain calls where the result
+        /// Verifies that Scynapse correctly handles chained grain calls where the result
         /// of one grain call is directly returned by another grain.
         /// This pattern is common in grain orchestration scenarios.
         /// </summary>
@@ -301,7 +301,7 @@ namespace DefaultCluster.Tests
         /// <summary>
         /// Tests observer disconnection scenarios.
         /// Verifies behavior when client observers are disconnected from grains.
-        /// This tests Orleans' observer pattern implementation for event notifications.
+        /// This tests Scynapse' observer pattern implementation for event notifications.
         /// </summary>
         [Fact, TestCategory("Revisit"), TestCategory("Observers")]
         public void ObserverTest_Disconnect()

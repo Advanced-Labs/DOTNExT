@@ -1,13 +1,13 @@
 using Microsoft.Extensions.Logging.Abstractions;
 using MySql.Data.MySqlClient;
-using Orleans.Configuration;
-using Orleans.Streaming.AdoNet;
-using Orleans.Streams;
-using Orleans.Tests.SqlUtils;
+using Scynapse.Configuration;
+using Scynapse.Streaming.AdoNet;
+using Scynapse.Streams;
+using Scynapse.Tests.SqlUtils;
 using TestExtensions;
 using UnitTests.General;
 using static System.String;
-using RelationalOrleansQueries = Orleans.Streaming.AdoNet.Storage.RelationalOrleansQueries;
+using RelationalScynapseQueries = Scynapse.Streaming.AdoNet.Storage.RelationalScynapseQueries;
 
 namespace Tester.AdoNet.Streaming;
 
@@ -46,9 +46,9 @@ public abstract class AdoNetQueueAdapterTests(string invariant, TestEnvironmentF
     private readonly TestEnvironmentFixture _fixture = fixture;
     private RelationalStorageForTesting _testing;
     private IRelationalStorage _storage;
-    private RelationalOrleansQueries _queries;
+    private RelationalScynapseQueries _queries;
 
-    private const string TestDatabaseName = "OrleansStreamTest";
+    private const string TestDatabaseName = "ScynapseStreamTest";
 
     public async Task InitializeAsync()
     {
@@ -57,7 +57,7 @@ public abstract class AdoNetQueueAdapterTests(string invariant, TestEnvironmentF
         Skip.If(IsNullOrEmpty(_testing.CurrentConnectionString), $"Database '{TestDatabaseName}' not initialized");
 
         _storage = _testing.Storage;
-        _queries = await RelationalOrleansQueries.CreateInstance(invariant, _testing.CurrentConnectionString);
+        _queries = await RelationalScynapseQueries.CreateInstance(invariant, _testing.CurrentConnectionString);
     }
 
     /// <summary>
@@ -130,7 +130,7 @@ public abstract class AdoNetQueueAdapterTests(string invariant, TestEnvironmentF
         var afterEnqueued = DateTime.UtcNow;
 
         // assert - stored messages are as expected
-        var stored = (await _storage.ReadAsync<AdoNetStreamMessage>("SELECT * FROM OrleansStreamMessage")).ToList();
+        var stored = (await _storage.ReadAsync<AdoNetStreamMessage>("SELECT * FROM ScynapseStreamMessage")).ToList();
         for (var i = 0; i < stored.Count; i++)
         {
             var item = stored[i];
@@ -213,7 +213,7 @@ public abstract class AdoNetQueueAdapterTests(string invariant, TestEnvironmentF
         }
 
         // assert - stored messages are as expected
-        var stored = (await _storage.ReadAsync<AdoNetStreamMessage>("SELECT * FROM OrleansStreamMessage")).ToList();
+        var stored = (await _storage.ReadAsync<AdoNetStreamMessage>("SELECT * FROM ScynapseStreamMessage")).ToList();
         for (var i = 0; i < stored.Count; i++)
         {
             var item = stored[i];

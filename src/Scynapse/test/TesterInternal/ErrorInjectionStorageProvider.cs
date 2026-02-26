@@ -1,8 +1,8 @@
 using System.Runtime.Serialization;
-using Orleans.Providers;
-using Orleans.Runtime;
+using Scynapse.Providers;
+using Scynapse.Runtime;
 using Microsoft.Extensions.Logging;
-using Orleans.Serialization;
+using Scynapse.Serialization;
 
 namespace UnitTests.StorageTests
 {
@@ -31,7 +31,7 @@ namespace UnitTests.StorageTests
 
     [Serializable]
     [GenerateSerializer]
-    public class StorageProviderInjectedError : OrleansException
+    public class StorageProviderInjectedError : ScynapseException
     {
         [Id(0)]
         private readonly ErrorInjectionPoint errorInjectionPoint;

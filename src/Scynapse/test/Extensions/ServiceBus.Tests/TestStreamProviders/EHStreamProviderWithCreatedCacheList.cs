@@ -1,12 +1,12 @@
 using System.Collections.Concurrent;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Orleans.Providers.Streams.Common;
-using Orleans.Streaming.EventHubs;
-using Orleans.Streams;
-using Orleans.Streaming.EventHubs.Testing;
-using Orleans.Configuration;
-using Orleans.Statistics;
+using Scynapse.Providers.Streams.Common;
+using Scynapse.Streaming.EventHubs;
+using Scynapse.Streams;
+using Scynapse.Streaming.EventHubs.Testing;
+using Scynapse.Configuration;
+using Scynapse.Statistics;
 
 namespace ServiceBus.Tests.TestStreamProviders
 {

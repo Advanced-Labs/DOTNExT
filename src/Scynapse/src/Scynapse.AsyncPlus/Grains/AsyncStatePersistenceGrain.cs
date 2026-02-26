@@ -1,11 +1,11 @@
 using Microsoft.Extensions.Logging;
-using Orleans.Runtime;
+using Scynapse.Runtime;
 
 namespace Scynapse.AsyncPlus.Grains;
 
 /// <summary>
 /// Grain implementation for persisting async state machine checkpoints.
-/// Uses Orleans grain storage (configured via silo builder) for durability.
+/// Uses Scynapse grain storage (configured via silo builder) for durability.
 /// </summary>
 public class AsyncStatePersistenceGrain : Grain, IAsyncStatePersistenceGrain
 {

@@ -1,8 +1,8 @@
 using System.Net;
 using Microsoft.Extensions.Hosting;
 using Xunit;
-using Orleans.Configuration;
-using Orleans.Runtime;
+using Scynapse.Configuration;
+using Scynapse.Runtime;
 using StackExchange.Redis;
 using TestExtensions;
 
@@ -27,7 +27,7 @@ namespace Tester.Redis.Persistence
             var siloAddress = IPAddress.Loopback;
 
             var host = Host.CreateDefaultBuilder()
-                .UseOrleans((ctx, builder) => {
+                .UseScynapse((ctx, builder) => {
                     builder.Configure<ClusterOptions>(options => options.ClusterId = "TESTCLUSTER")
                         .UseDevelopmentClustering(options => options.PrimarySiloEndpoint = new IPEndPoint(siloAddress, siloPort))
                         .ConfigureEndpoints(siloAddress, siloPort, gatewayPort)
@@ -42,7 +42,7 @@ namespace Tester.Redis.Persistence
 
             if (string.IsNullOrWhiteSpace(connectionString))
             {
-                Assert.Throws<OrleansConfigurationException>(() => host.Start());
+                Assert.Throws<ScynapseConfigurationException>(() => host.Start());
             }
         }
     }

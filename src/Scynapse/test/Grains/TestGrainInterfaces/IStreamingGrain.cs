@@ -1,5 +1,5 @@
 ﻿using Microsoft.Extensions.Logging;
-using Orleans.Streams;
+using Scynapse.Streams;
 
 namespace UnitTests.GrainInterfaces
 {

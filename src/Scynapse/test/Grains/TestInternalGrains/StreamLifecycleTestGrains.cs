@@ -2,8 +2,8 @@
 
 using System.Text;
 using Microsoft.Extensions.Logging;
-using Orleans.Runtime;
-using Orleans.Streams;
+using Scynapse.Runtime;
+using Scynapse.Streams;
 using UnitTests.GrainInterfaces;
 
 namespace UnitTests.Grains
@@ -147,7 +147,7 @@ namespace UnitTests.Grains
         }
     }
 
-    [Orleans.Providers.StorageProvider(ProviderName = "MemoryStore")]
+    [Scynapse.Providers.StorageProvider(ProviderName = "MemoryStore")]
     internal class StreamLifecycleConsumerGrain : StreamLifecycleTestGrainBase, IStreamLifecycleConsumerGrain
     {
         protected readonly InsideRuntimeClient runtimeClient;
@@ -271,7 +271,7 @@ namespace UnitTests.Grains
         }
     }
 
-    [Orleans.Providers.StorageProvider(ProviderName = "MemoryStore")]
+    [Scynapse.Providers.StorageProvider(ProviderName = "MemoryStore")]
     public class StreamLifecycleProducerGrain : StreamLifecycleTestGrainBase, IStreamLifecycleProducerGrain
     {
         public StreamLifecycleProducerGrain(ILoggerFactory loggerFactory) : base(loggerFactory)

@@ -8,22 +8,22 @@ using Benchmarks.Serialization.Models;
 using Benchmarks.Utilities;
 using MessagePack;
 using Microsoft.Extensions.DependencyInjection;
-using Orleans.Serialization;
-using Orleans.Serialization.Buffers;
-using Orleans.Serialization.Session;
+using Scynapse.Serialization;
+using Scynapse.Serialization.Buffers;
+using Scynapse.Serialization.Session;
 using Xunit;
 
 namespace Benchmarks.Serialization.Comparison;
 
 /// <summary>
-/// Compares Orleans serialization performance against other popular serializers for array types.
+/// Compares Scynapse serialization performance against other popular serializers for array types.
 /// </summary>
 [GroupBenchmarksBy(BenchmarkLogicalGroupRule.ByCategory)]
 [Config(typeof(BenchmarkConfig))]
 public class ArraySerializeBenchmark
 {
     private static readonly MyVector3[] _value;
-    private static readonly Serializer<MyVector3[]> _orleansSerializer;
+    private static readonly Serializer<MyVector3[]> _scynapseSerializer;
     private static readonly SerializerSession _session;
     private static readonly ArrayBufferWriter<byte> _arrayBufferWriter;
     private static readonly Utf8JsonWriter _jsonWriter;
@@ -36,13 +36,13 @@ public class ArraySerializeBenchmark
         var serviceProvider = new ServiceCollection()
             .AddSerializer(builder => builder.AddAssembly(typeof(ArraySerializeBenchmark).Assembly))
             .BuildServiceProvider();
-        _orleansSerializer = serviceProvider.GetRequiredService<Serializer<MyVector3[]>>();
+        _scynapseSerializer = serviceProvider.GetRequiredService<Serializer<MyVector3[]>>();
         _session = serviceProvider.GetRequiredService<SerializerSessionPool>().GetSession();
 
         // create buffers
         _stream = new MemoryStream();
 
-        var serialize1 = _orleansSerializer.SerializeToArray(_value);
+        var serialize1 = _scynapseSerializer.SerializeToArray(_value);
         var serialize2 = MessagePackSerializer.Serialize(_value);
         ProtoBuf.Serializer.Serialize(_stream, _value);
         var serialize3 = _stream.ToArray();
@@ -82,9 +82,9 @@ public class ArraySerializeBenchmark
     }
 
     [Benchmark, BenchmarkCategory(" byte[]")]
-    public byte[] OrleansSerialize()
+    public byte[] ScynapseSerialize()
     {
-        return _orleansSerializer.SerializeToArray(_value);
+        return _scynapseSerializer.SerializeToArray(_value);
     }
 
     // use BufferWriter
@@ -117,12 +117,12 @@ public class ArraySerializeBenchmark
 
     [Fact]
     [Benchmark, BenchmarkCategory("BufferWriter")]
-    public void OrleansBufferWriter()
+    public void ScynapseBufferWriter()
     {
         var writer = Writer.CreatePooled(_session);
         try
         {
-            _orleansSerializer.Serialize(_value, ref writer);
+            _scynapseSerializer.Serialize(_value, ref writer);
         }
         finally
         {
@@ -133,13 +133,13 @@ public class ArraySerializeBenchmark
 
     [Fact]
     [Benchmark, BenchmarkCategory("BufferWriter")]
-    public void OrleansBufferWriter2()
+    public void ScynapseBufferWriter2()
     {
         // wrap ArrayBufferWriter<byte>
         var writer = _arrayBufferWriter.CreateWriter(_session);
         try
         {
-            _orleansSerializer.Serialize(_value, ref writer);
+            _scynapseSerializer.Serialize(_value, ref writer);
         }
         finally
         {
@@ -152,10 +152,10 @@ public class ArraySerializeBenchmark
 
     [Fact]
     [Benchmark]
-    public void OrleansPipeWriter()
+    public void ScynapsePipeWriter()
     {
         var writer = _pipe.Writer.CreateWriter(_session);
-        _orleansSerializer.Serialize(_value, ref writer);
+        _scynapseSerializer.Serialize(_value, ref writer);
         _session.Reset();
 
         _pipe.Writer.Complete();

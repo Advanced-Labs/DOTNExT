@@ -2,8 +2,8 @@
 
 using Xunit;
 using Xunit.Abstractions;
-using Orleans.TestingHost;
-using Orleans.Configuration;
+using Scynapse.TestingHost;
+using Scynapse.Configuration;
 
 namespace Tester.AzureUtils.Persistence;
 

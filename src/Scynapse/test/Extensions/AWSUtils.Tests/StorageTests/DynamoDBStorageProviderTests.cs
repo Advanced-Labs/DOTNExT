@@ -2,16 +2,16 @@ using System.Diagnostics;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
-using Orleans.Configuration;
-using Orleans.Providers;
-using Orleans.Runtime;
-using Orleans.Serialization;
-using Orleans.Storage;
+using Scynapse.Configuration;
+using Scynapse.Providers;
+using Scynapse.Runtime;
+using Scynapse.Serialization;
+using Scynapse.Storage;
 using TestExtensions;
 using UnitTests.Persistence;
 using Xunit;
 using Xunit.Abstractions;
-using static Orleans.Storage.DynamoDBGrainStorage;
+using static Scynapse.Storage.DynamoDBGrainStorage;
 
 namespace AWSUtils.Tests.StorageTests
 {
@@ -181,9 +181,9 @@ namespace AWSUtils.Tests.StorageTests
                 Service = AWSTestConstants.DynamoDbService,
             };
 
-            var jsonOptions = this.providerRuntime.ServiceProvider.GetService<IOptions<OrleansJsonSerializerOptions>>();
-            var binarySerializer = new OrleansGrainStorageSerializer(this.providerRuntime.ServiceProvider.GetRequiredService<Serializer>());
-            var jsonSerializer = new JsonGrainStorageSerializer(new OrleansJsonSerializer(jsonOptions));
+            var jsonOptions = this.providerRuntime.ServiceProvider.GetService<IOptions<ScynapseJsonSerializerOptions>>();
+            var binarySerializer = new ScynapseGrainStorageSerializer(this.providerRuntime.ServiceProvider.GetRequiredService<Serializer>());
+            var jsonSerializer = new JsonGrainStorageSerializer(new ScynapseJsonSerializer(jsonOptions));
 
             if (useFallback)
                 options.GrainStorageSerializer = useJson

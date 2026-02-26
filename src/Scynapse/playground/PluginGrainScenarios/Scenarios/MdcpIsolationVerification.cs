@@ -1,9 +1,9 @@
 using System.Reflection;
 using System.Runtime.Loader;
 using Microsoft.Extensions.DependencyInjection;
-using Orleans;
-using Orleans.Runtime;
-using Orleans.Runtime.DynamicGrains;
+using Scynapse;
+using Scynapse.Runtime;
+using Scynapse.Runtime.DynamicGrains;
 using Spectre.Console;
 
 namespace PluginGrainScenarios.Scenarios;
@@ -13,7 +13,7 @@ namespace PluginGrainScenarios.Scenarios;
 /// Tests:
 /// - Assembly loaded in separate AssemblyLoadContext
 /// - IsCollectible = true for unloading support
-/// - Shared types (Orleans runtime) not duplicated
+/// - Shared types (Scynapse runtime) not duplicated
 /// - Plugin types properly isolated
 /// </summary>
 public static class MdcpIsolationVerification
@@ -36,7 +36,7 @@ public static class MdcpIsolationVerification
         AnsiConsole.WriteLine();
 
         // Start silo
-        AnsiConsole.MarkupLine("[yellow]Starting Orleans silo...[/]");
+        AnsiConsole.MarkupLine("[yellow]Starting Scynapse silo...[/]");
         using var host = SiloHelper.BuildSingleSilo();
         await host.StartAsync();
         AnsiConsole.MarkupLine("[green]Silo started successfully[/]");
@@ -85,7 +85,7 @@ public static class MdcpIsolationVerification
         }
 
         // Check 2: Shared Types
-        AnsiConsole.MarkupLine("[blue]Check 2: Shared Types (Orleans runtime should NOT be duplicated)[/]");
+        AnsiConsole.MarkupLine("[blue]Check 2: Shared Types (Scynapse runtime should NOT be duplicated)[/]");
         if (loadedAssembly != null)
         {
             var table = new Table();
@@ -93,19 +93,19 @@ public static class MdcpIsolationVerification
             table.AddColumn("Host Assembly Location");
             table.AddColumn("Plugin Sees Same?");
 
-            // Check if Orleans types are shared
-            var orleansTypes = new[]
+            // Check if Scynapse types are shared
+            var scynapseTypes = new[]
             {
                 typeof(IGrain),
                 typeof(GrainId),
                 typeof(SiloAddress)
             };
 
-            foreach (var hostType in orleansTypes)
+            foreach (var hostType in scynapseTypes)
             {
                 try
                 {
-                    // See if the plugin assembly references the same Orleans type
+                    // See if the plugin assembly references the same Scynapse type
                     var pluginRef = loadedAssembly.GetReferencedAssemblies()
                         .FirstOrDefault(a => a.Name == hostType.Assembly.GetName().Name);
 

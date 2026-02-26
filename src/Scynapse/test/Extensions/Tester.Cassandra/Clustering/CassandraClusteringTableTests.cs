@@ -1,10 +1,10 @@
 using System.Net;
 using Cassandra;
 using Microsoft.Extensions.DependencyInjection;
-using Orleans.Clustering.Cassandra;
-using Orleans.Clustering.Cassandra.Hosting;
-using Orleans.Configuration;
-using Orleans.Messaging;
+using Scynapse.Clustering.Cassandra;
+using Scynapse.Clustering.Cassandra.Hosting;
+using Scynapse.Configuration;
+using Scynapse.Messaging;
 using Tester.Cassandra.Utility;
 using Xunit;
 using Xunit.Abstractions;
@@ -12,7 +12,7 @@ using Xunit.Abstractions;
 namespace Tester.Cassandra.Clustering;
 
 /// <summary>
-/// Tests for Orleans membership table operations using Apache Cassandra as the backing store.
+/// Tests for Scynapse membership table operations using Apache Cassandra as the backing store.
 /// </summary>
 [TestCategory("Cassandra"), TestCategory("Clustering")]
 [Collection("Cassandra")]

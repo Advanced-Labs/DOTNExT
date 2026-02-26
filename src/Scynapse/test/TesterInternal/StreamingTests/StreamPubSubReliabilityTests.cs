@@ -1,10 +1,10 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Orleans.Providers;
-using Orleans.Runtime;
-using Orleans.Runtime.Hosting;
-using Orleans.Storage;
-using Orleans.TestingHost;
+using Scynapse.Providers;
+using Scynapse.Runtime;
+using Scynapse.Runtime.Hosting;
+using Scynapse.Storage;
+using Scynapse.TestingHost;
 using TestExtensions;
 using UnitTests.GrainInterfaces;
 using UnitTests.StorageTests;
@@ -15,7 +15,7 @@ namespace UnitTests.StreamingTests
     /// <summary>
     /// Tests for stream pub/sub reliability with error injection in storage providers.
     /// </summary>
-    public class StreamPubSubReliabilityTests : OrleansTestingBase, IClassFixture<StreamPubSubReliabilityTests.Fixture>, IAsyncLifetime
+    public class StreamPubSubReliabilityTests : ScynapseTestingBase, IClassFixture<StreamPubSubReliabilityTests.Fixture>, IAsyncLifetime
     {
         public class Fixture : BaseTestClusterFixture
         {
@@ -86,13 +86,13 @@ namespace UnitTests.StreamingTests
         {
             // Expected behaviour: Underlying error StorageProviderInjectedError returned to caller
             //
-            // Actual behaviour: Rather cryptic error OrleansException returned, mentioning 
+            // Actual behaviour: Rather cryptic error ScynapseException returned, mentioning 
             //                   root cause problem "Failed SetupActivationState" in message text, 
             //                   but no more details or stack trace.
 
             await SetErrorInjection(PubSubStoreProviderName, ErrorInjectionPoint.BeforeRead);
 
-            // TODO: expect StorageProviderInjectedError directly instead of OrleansException
+            // TODO: expect StorageProviderInjectedError directly instead of ScynapseException
             await Assert.ThrowsAsync<StorageProviderInjectedError>(() =>
                 Test_PubSub_Stream(StreamProviderName, StreamId));
         }

@@ -1,5 +1,5 @@
 using Xunit;
-using Orleans.TestingHost;
+using Scynapse.TestingHost;
 using TestExtensions;
 using UnitTests.GrainInterfaces;
 
@@ -8,7 +8,7 @@ namespace Tester
     /// <summary>
     /// Tests for grain service functionality including service invocation, lifecycle, and extensions.
     /// </summary>
-    public class GrainServiceTests : OrleansTestingBase, IClassFixture<GrainServiceTests.Fixture>
+    public class GrainServiceTests : ScynapseTestingBase, IClassFixture<GrainServiceTests.Fixture>
     {
         public class Fixture : PluginLoadingTestClusterFixture
         {

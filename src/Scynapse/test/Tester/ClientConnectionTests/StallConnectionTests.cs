@@ -1,9 +1,9 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Orleans.Configuration;
-using Orleans.Runtime;
-using Orleans.TestingHost;
+using Scynapse.Configuration;
+using Scynapse.Runtime;
+using Scynapse.TestingHost;
 using System.Diagnostics;
 using System.Net.Sockets;
 using TestExtensions;
@@ -92,7 +92,7 @@ namespace Tester.ClientConnectionTests
         private async Task<bool> WaitForClusterSize(int expectedSize)
         {
             var mgmtGrain = this.Client.GetGrain<IManagementGrain>(0);
-            var timeout = TestCluster.GetLivenessStabilizationTime(new Orleans.Configuration.ClusterMembershipOptions());
+            var timeout = TestCluster.GetLivenessStabilizationTime(new Scynapse.Configuration.ClusterMembershipOptions());
             var stopWatch = Stopwatch.StartNew();
             do
             {

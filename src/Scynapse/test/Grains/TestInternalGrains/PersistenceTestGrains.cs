@@ -5,12 +5,12 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
-using Orleans.Concurrency;
-using Orleans.Configuration;
-using Orleans.Core;
-using Orleans.Runtime;
-using Orleans.Serialization;
-using Orleans.Storage;
+using Scynapse.Concurrency;
+using Scynapse.Configuration;
+using Scynapse.Core;
+using Scynapse.Runtime;
+using Scynapse.Serialization;
+using Scynapse.Storage;
 using UnitTests.GrainInterfaces;
 using Xunit;
 
@@ -44,7 +44,7 @@ namespace UnitTests.Grains
         public SortedDictionary<T, T> SortedDict { get; set; }
     }
 
-    [Orleans.Providers.StorageProvider(ProviderName = "test1")]
+    [Scynapse.Providers.StorageProvider(ProviderName = "test1")]
     public class PersistenceTestGrain : Grain<PersistenceTestGrainState>, IPersistenceTestGrain
     {
         public override Task OnActivateAsync(CancellationToken cancellationToken)
@@ -99,13 +99,13 @@ namespace UnitTests.Grains
         }
     }
 
-    [Orleans.Providers.StorageProvider(ProviderName = "test1")]
+    [Scynapse.Providers.StorageProvider(ProviderName = "test1")]
     public class PersistenceTestGenericGrain<T> : PersistenceTestGrain, IPersistenceTestGenericGrain<T>
     {
         //...
     }
 
-    [Orleans.Providers.StorageProvider(ProviderName = "ErrorInjector")]
+    [Scynapse.Providers.StorageProvider(ProviderName = "ErrorInjector")]
     public class PersistenceProviderErrorGrain : Grain<PersistenceTestGrainState>, IPersistenceProviderErrorGrain
     {
         private readonly string _id = Guid.NewGuid().ToString();
@@ -135,7 +135,7 @@ namespace UnitTests.Grains
         public Task<string> GetActivationId() => Task.FromResult(_id);
     }
 
-    [Orleans.Providers.StorageProvider(ProviderName = "ErrorInjector")]
+    [Scynapse.Providers.StorageProvider(ProviderName = "ErrorInjector")]
     public class PersistenceUserHandledErrorGrain : Grain<PersistenceTestGrainState>, IPersistenceUserHandledErrorGrain
     {
         private readonly ILogger logger;
@@ -200,7 +200,7 @@ namespace UnitTests.Grains
         public Task<string> GetActivationId() => Task.FromResult(_id);
     }
 
-    [Orleans.Providers.StorageProvider(ProviderName = "test1")]
+    [Scynapse.Providers.StorageProvider(ProviderName = "test1")]
     public class PersistenceErrorGrain : Grain<PersistenceTestGrainState>, IPersistenceErrorGrain
     {
         public override Task OnActivateAsync(CancellationToken cancellationToken)
@@ -241,7 +241,7 @@ namespace UnitTests.Grains
         }
     }
 
-    [Orleans.Providers.StorageProvider(ProviderName = "MissingProvider")]
+    [Scynapse.Providers.StorageProvider(ProviderName = "MissingProvider")]
     public class BadProviderTestGrain : Grain<PersistenceTestGrainState>, IBadProviderTestGrain
     {
         private readonly ILogger logger;
@@ -265,7 +265,7 @@ namespace UnitTests.Grains
         }
     }
 
-    [Orleans.Providers.StorageProvider(ProviderName = "test1")]
+    [Scynapse.Providers.StorageProvider(ProviderName = "test1")]
     public class PersistenceNoStateTestGrain : Grain, IPersistenceNoStateTestGrain
     {
         private readonly ILogger logger;
@@ -303,7 +303,7 @@ namespace UnitTests.Grains
         }
     }
 
-    [Orleans.Providers.StorageProvider(ProviderName = "GrainStorageForTest")]
+    [Scynapse.Providers.StorageProvider(ProviderName = "GrainStorageForTest")]
     public class GrainStorageTestGrain : Grain<PersistenceTestGrainState>,
         IGrainStorageTestGrain, IGrainStorageTestGrain_LongKey
     {
@@ -347,7 +347,7 @@ namespace UnitTests.Grains
         }
     }
 
-    [Orleans.Providers.StorageProvider(ProviderName = "GrainStorageForTest")]
+    [Scynapse.Providers.StorageProvider(ProviderName = "GrainStorageForTest")]
     public class GrainStorageGenericGrain<T> : Grain<PersistenceGenericGrainState<T>>,
         IGrainStorageGenericGrain<T>
     {
@@ -379,7 +379,7 @@ namespace UnitTests.Grains
         }
     }
 
-    [Orleans.Providers.StorageProvider(ProviderName = "GrainStorageForTest")]
+    [Scynapse.Providers.StorageProvider(ProviderName = "GrainStorageForTest")]
     public class GrainStorageTestGrainExtendedKey : Grain<PersistenceTestGrainState>,
         IGrainStorageTestGrain_GuidExtendedKey, IGrainStorageTestGrain_LongExtendedKey
     {
@@ -418,8 +418,8 @@ namespace UnitTests.Grains
         }
     }
 
-    [Orleans.Providers.StorageProvider(ProviderName = "MemoryStore")]
-    //[Orleans.Providers.StorageProvider(ProviderName = "AzureStorageEmulator")]
+    [Scynapse.Providers.StorageProvider(ProviderName = "MemoryStore")]
+    //[Scynapse.Providers.StorageProvider(ProviderName = "AzureStorageEmulator")]
     public class MemoryStorageTestGrain : Grain<MemoryStorageTestGrain.NestedPersistenceTestGrainState>,
         IMemoryStorageTestGrain
     {
@@ -491,11 +491,11 @@ namespace UnitTests.Grains
     }
 
     /// <summary>
-    /// Orleans grain implementation class.
+    /// Scynapse grain implementation class.
     /// </summary>
-    [Orleans.Providers.StorageProvider(ProviderName = "MemoryStore")]
-    //[Orleans.Providers.StorageProvider(ProviderName = "AzureStore")]
-    //[Orleans.Providers.StorageProvider(ProviderName = "AzureStorageEmulator")]
+    [Scynapse.Providers.StorageProvider(ProviderName = "MemoryStore")]
+    //[Scynapse.Providers.StorageProvider(ProviderName = "AzureStore")]
+    //[Scynapse.Providers.StorageProvider(ProviderName = "AzureStorageEmulator")]
     public class UserGrain : Grain<DerivedUserState>, IUser
     {
         public Task SetName(string name)
@@ -574,7 +574,7 @@ namespace UnitTests.Grains
         public Dictionary<string, int> DictTwo { get; set; }
     }
 
-    [Orleans.Providers.StorageProvider(ProviderName = "MemoryStore")]
+    [Scynapse.Providers.StorageProvider(ProviderName = "MemoryStore")]
     [Reentrant]
     public class ReentrentGrainWithState : Grain<StateForIReentrentGrain>, IReentrentGrainWithState
     {
@@ -954,7 +954,7 @@ namespace UnitTests.Grains
         public int One { get; set; }
     }
 
-    [Orleans.Providers.StorageProvider(ProviderName = "MemoryStore")]
+    [Scynapse.Providers.StorageProvider(ProviderName = "MemoryStore")]
     internal class InternalGrainWithState : Grain<InternalGrainStateData>, IInternalGrainWithState
     {
         private readonly ILogger logger;
@@ -988,7 +988,7 @@ namespace UnitTests.Grains
         public int Field1 { get; set; }
     }
 
-    [Orleans.Providers.StorageProvider(ProviderName = "MemoryStore")]
+    [Scynapse.Providers.StorageProvider(ProviderName = "MemoryStore")]
     public class StateInheritanceTestGrain : Grain<StateInheritanceTestGrainData>, IStateInheritanceTestGrain
     {
         private readonly ILogger logger;
@@ -1027,7 +1027,7 @@ namespace UnitTests.Grains
 
         public SurrogateStateForTypeWithoutPublicConstructorGrain(
             IGrainContext grainContext,
-            [PersistentState("test_state", "OrleansSerializerMemoryStore")] IPersistentState<ExternalTypeWithoutPublicConstructor> persistence)
+            [PersistentState("test_state", "ScynapseSerializerMemoryStore")] IPersistentState<ExternalTypeWithoutPublicConstructor> persistence)
         {
             GrainContext = grainContext;
             _persistence = persistence;
@@ -1091,7 +1091,7 @@ namespace UnitTests.Grains
 
         public RecordTypeWithoutPublicParameterlessConstructorGrain(
             IGrainContext grainContext,
-            [PersistentState("test_state", "OrleansSerializerMemoryStore")] IPersistentState<RecordTypeWithoutPublicParameterlessConstructor> persistence)
+            [PersistentState("test_state", "ScynapseSerializerMemoryStore")] IPersistentState<RecordTypeWithoutPublicParameterlessConstructor> persistence)
         {
             GrainContext = grainContext;
             _persistence = persistence;

@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <TargetFrameworks>$(TestTargetFrameworks)</TargetFrameworks>
-    <OrleansBuildTimeCodeGen>true</OrleansBuildTimeCodeGen>
+    <ScynapseBuildTimeCodeGen>true</ScynapseBuildTimeCodeGen>
   </PropertyGroup>
 
   <ItemGroup>
@@ -12,9 +12,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\..\src\Azure\Orleans.Reminders.Cosmos\Orleans.Reminders.Cosmos.csproj" />
-    <ProjectReference Include="..\..\..\src\Azure\Orleans.Clustering.Cosmos\Orleans.Clustering.Cosmos.csproj" />
-    <ProjectReference Include="..\..\..\src\Azure\Orleans.Persistence.Cosmos\Orleans.Persistence.Cosmos.csproj" />
+    <ProjectReference Include="..\..\..\src\Azure\Scynapse.Reminders.Cosmos\Scynapse.Reminders.Cosmos.csproj" />
+    <ProjectReference Include="..\..\..\src\Azure\Scynapse.Clustering.Cosmos\Scynapse.Clustering.Cosmos.csproj" />
+    <ProjectReference Include="..\..\..\src\Azure\Scynapse.Persistence.Cosmos\Scynapse.Persistence.Cosmos.csproj" />
     <ProjectReference Include="$(SourceRoot)test\Tester\Tester.csproj" />
     <ProjectReference Include="$(SourceRoot)test\TesterInternal\TesterInternal.csproj" />
   </ItemGroup>

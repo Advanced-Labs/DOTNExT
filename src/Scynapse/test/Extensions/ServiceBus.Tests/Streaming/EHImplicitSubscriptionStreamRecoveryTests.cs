@@ -1,10 +1,10 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Orleans.Providers.Streams.Generator;
-using Orleans.Runtime;
-using Orleans.Streams;
-using Orleans.TestingHost;
+using Scynapse.Providers.Streams.Generator;
+using Scynapse.Runtime;
+using Scynapse.Streams;
+using Scynapse.TestingHost;
 using Tester.StreamingTests;
 using TestExtensions;
 using TestGrains;
@@ -17,12 +17,12 @@ namespace ServiceBus.Tests.StreamingTests
     /// Tests for EventHub stream recovery with implicit subscriptions handling transient and non-transient errors.
     /// </summary>
     [TestCategory("EventHub"), TestCategory("Streaming"), TestCategory("Functional")]
-    public class EHImplicitSubscriptionStreamRecoveryTests : OrleansTestingBase, IClassFixture<EHImplicitSubscriptionStreamRecoveryTests.Fixture>
+    public class EHImplicitSubscriptionStreamRecoveryTests : ScynapseTestingBase, IClassFixture<EHImplicitSubscriptionStreamRecoveryTests.Fixture>
     {
         private readonly Fixture fixture;
         private const string StreamProviderName = GeneratedStreamTestConstants.StreamProviderName;
-        private const string EHPath = "ehorleanstest2";
-        private const string EHConsumerGroup = "orleansnightly";
+        private const string EHPath = "ehscynapsetest2";
+        private const string EHConsumerGroup = "scynapsenightly";
 
         private readonly ImplicitSubscritionRecoverableStreamTestRunner runner;
 
@@ -83,14 +83,14 @@ namespace ServiceBus.Tests.StreamingTests
             this.runner = new ImplicitSubscritionRecoverableStreamTestRunner(this.fixture.GrainFactory, StreamProviderName);
         }
 
-        [SkippableFact(Skip = "https://github.com/dotnet/orleans/issues/5633")]
+        [SkippableFact(Skip = "https://github.com/Scynapse/Core/issues/5633")]
         public async Task Recoverable100EventStreamsWithTransientErrorsTest()
         {
             this.fixture.Logger.LogInformation("************************ EHRecoverable100EventStreamsWithTransientErrorsTest *********************************");
             await runner.Recoverable100EventStreamsWithTransientErrors(GenerateEvents, ImplicitSubscription_TransientError_RecoverableStream_CollectorGrain.StreamNamespace, 4, 100);
         }
 
-        [SkippableFact(Skip = "https://github.com/dotnet/orleans/issues/5638")]
+        [SkippableFact(Skip = "https://github.com/Scynapse/Core/issues/5638")]
         public async Task Recoverable100EventStreamsWith1NonTransientErrorTest()
         {
             this.fixture.Logger.LogInformation("************************ EHRecoverable100EventStreamsWith1NonTransientErrorTest *********************************");

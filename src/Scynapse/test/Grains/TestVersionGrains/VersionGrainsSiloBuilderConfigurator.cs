@@ -1,9 +1,9 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Orleans.Configuration;
-using Orleans.Runtime;
-using Orleans.Runtime.Placement;
-using Orleans.TestingHost;
+using Scynapse.Configuration;
+using Scynapse.Runtime;
+using Scynapse.Runtime.Placement;
+using Scynapse.TestingHost;
 using UnitTests.GrainInterfaces;
 using UnitTests.Grains;
 
@@ -15,7 +15,7 @@ namespace TestVersionGrains
         {
             var cfg = hostBuilder.GetConfiguration();
             var siloCount = int.Parse(cfg["SiloCount"]);
-            hostBuilder.UseOrleans((ctx, siloBuilder) =>
+            hostBuilder.UseScynapse((ctx, siloBuilder) =>
             {
                 siloBuilder.Configure<SiloMessagingOptions>(options => options.AssumeHomogenousSilosForTesting = false);
                 siloBuilder.Configure<GrainVersioningOptions>(options =>

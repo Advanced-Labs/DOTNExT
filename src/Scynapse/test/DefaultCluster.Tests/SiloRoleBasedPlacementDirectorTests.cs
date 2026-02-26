@@ -1,4 +1,4 @@
-using Orleans.Runtime;
+using Scynapse.Runtime;
 using TestExtensions;
 using UnitTests.GrainInterfaces;
 using Xunit;
@@ -6,7 +6,7 @@ using Xunit;
 namespace DefaultCluster.Tests.General
 {
     /// <summary>
-    /// Tests for silo role-based placement strategy in Orleans.
+    /// Tests for silo role-based placement strategy in Scynapse.
     /// This placement strategy allows grains to be placed on specific silos
     /// based on silo roles/names. This is useful for scenarios requiring
     /// grain affinity to specific infrastructure (e.g., grains that need
@@ -28,7 +28,7 @@ namespace DefaultCluster.Tests.General
         public async Task SiloRoleBasedPlacementDirector_CantFindSilo()
         {
             var grain = this.GrainFactory.GetGrain<ISiloRoleBasedPlacementGrain>("Sibyl.Silo");
-            await Assert.ThrowsAsync<OrleansException>(() => grain.Ping());
+            await Assert.ThrowsAsync<ScynapseException>(() => grain.Ping());
         }
 
         /// <summary>

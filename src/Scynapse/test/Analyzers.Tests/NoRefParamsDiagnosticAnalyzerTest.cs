@@ -1,14 +1,14 @@
 using Microsoft.CodeAnalysis;
-using Orleans.Analyzers;
+using Scynapse.Analyzers;
 using Xunit;
 
 namespace Analyzers.Tests
 {
     /// <summary>
     /// Tests for the analyzer that prevents ref, out, and in parameters in grain interface methods.
-    /// Orleans grain calls are distributed RPC calls that serialize parameters, so ref/out/in
+    /// Scynapse grain calls are distributed RPC calls that serialize parameters, so ref/out/in
     /// parameters cannot work as they would in local method calls. This analyzer helps developers
-    /// avoid this common mistake and ensures grain interfaces follow the Orleans programming model.
+    /// avoid this common mistake and ensures grain interfaces follow the Scynapse programming model.
     /// </summary>
     [TestCategory("BVT"), TestCategory("Analyzer")]
     public class NoRefParamsDiagnosticAnalyzerTest : DiagnosticAnalyzerTestBase<NoRefParamsDiagnosticAnalyzer>
@@ -99,7 +99,7 @@ namespace Analyzers.Tests
         /// <summary>
         /// Verifies that the analyzer allows regular parameters in grain interface methods
         /// and doesn't interfere with ref/out/in parameters in non-grain methods,
-        /// which are outside the scope of Orleans restrictions.
+        /// which are outside the scope of Scynapse restrictions.
         /// </summary>
         [Fact]
         public async Task NoRefParamsDiagnosticAnalyzerNoError()

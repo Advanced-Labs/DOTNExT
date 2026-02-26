@@ -12,7 +12,7 @@ namespace UnitTests.Grains
         public IMultifacetWriter Writer { get; set; }
     }
 
-    [Orleans.Providers.StorageProvider(ProviderName = "MemoryStore")]
+    [Scynapse.Providers.StorageProvider(ProviderName = "MemoryStore")]
     public class MultifacetFactoryTestGrain : Grain<MultifacetFactoryTestGrainState>, IMultifacetFactoryTestGrain
     {
         public Task<IMultifacetReader> GetReader(IMultifacetTestGrain grain)

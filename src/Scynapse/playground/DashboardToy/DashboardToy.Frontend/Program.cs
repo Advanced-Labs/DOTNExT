@@ -1,22 +1,22 @@
 using DashboardToy.Frontend.Data;
 using Microsoft.AspNetCore.Mvc;
-using Orleans.Configuration;
-using Orleans.Placement.Repartitioning;
+using Scynapse.Configuration;
+using Scynapse.Placement.Repartitioning;
 
 var builder = WebApplication.CreateBuilder(args);
-builder.AddKeyedRedisClient("orleans-redis");
-#pragma warning disable ORLEANSEXP001 // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
-builder.UseOrleans(orleans =>
+builder.AddKeyedRedisClient("scynapse-redis");
+#pragma warning disable SCYNAPSEEXP001 // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
+builder.UseScynapse(scynapse =>
 {
-    orleans.AddActivationRepartitioner<HardLimitRule>();
-    orleans.Configure<ActivationRepartitionerOptions>(o =>
+    scynapse.AddActivationRepartitioner<HardLimitRule>();
+    scynapse.Configure<ActivationRepartitionerOptions>(o =>
     {
         o.MinRoundPeriod = TimeSpan.FromSeconds(5);
         o.MaxRoundPeriod = TimeSpan.FromSeconds(15);
         o.RecoveryPeriod = TimeSpan.FromSeconds(2);
     });
 });
-#pragma warning restore ORLEANSEXP001 // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
+#pragma warning restore SCYNAPSEEXP001 // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
 
 // Add services to the container.
 builder.Services.AddSingleton<ClusterDiagnosticsService>();

@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <PackageId>Genesa.Scynapse.Persistence.Memory</PackageId>
+    <Title>Microsoft Scynapse grain persistence provider which holds state only in memory.</Title>
+    <Description>In-memory storage for Microsoft Scynapse</Description>
+    <TargetFrameworks>$(DefaultTargetFrameworks)</TargetFrameworks>
+    <AssemblyName>Scynapse.Persistence.Memory</AssemblyName>
+    <RootNamespace>Scynapse.Persistence.Memory</RootNamespace>
+    <ScynapseBuildTimeCodeGen>true</ScynapseBuildTimeCodeGen>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Scynapse.Runtime\Scynapse.Runtime.csproj" />
+  </ItemGroup>
+</Project>

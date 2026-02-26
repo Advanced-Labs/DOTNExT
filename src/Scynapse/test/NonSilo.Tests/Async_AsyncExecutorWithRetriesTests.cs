@@ -1,6 +1,6 @@
 using System.Globalization;
-using Orleans.Internal;
-using Orleans.Runtime;
+using Scynapse.Internal;
+using Scynapse.Runtime;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -10,8 +10,8 @@ namespace NonSilo.Tests
 {
     /// <summary>
     /// Tests for the AsyncExecutorWithRetries utility class, which provides resilient asynchronous execution with retry logic.
-    /// This class tests Orleans' internal retry mechanism for handling transient failures in asynchronous operations.
-    /// The AsyncExecutorWithRetries is used throughout Orleans for reliable execution of operations that may fail temporarily.
+    /// This class tests Scynapse' internal retry mechanism for handling transient failures in asynchronous operations.
+    /// The AsyncExecutorWithRetries is used throughout Scynapse for reliable execution of operations that may fail temporarily.
     /// </summary>
     public class Async_AsyncExecutorWithRetriesTests
     {

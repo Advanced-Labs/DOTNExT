@@ -8,17 +8,17 @@ using System.Reflection;
 #nullable disable
 
 #if CLUSTERING_ADONET
-namespace Orleans.Clustering.AdoNet.Storage
+namespace Scynapse.Clustering.AdoNet.Storage
 #elif PERSISTENCE_ADONET
-namespace Orleans.Persistence.AdoNet.Storage
+namespace Scynapse.Persistence.AdoNet.Storage
 #elif REMINDERS_ADONET
-namespace Orleans.Reminders.AdoNet.Storage
+namespace Scynapse.Reminders.AdoNet.Storage
 #elif STREAMING_ADONET
-namespace Orleans.Streaming.AdoNet.Storage
+namespace Scynapse.Streaming.AdoNet.Storage
 #elif GRAINDIRECTORY_ADONET
-namespace Orleans.GrainDirectory.AdoNet.Storage
+namespace Scynapse.GrainDirectory.AdoNet.Storage
 #elif TESTER_SQLUTILS
-namespace Orleans.Tests.SqlUtils
+namespace Scynapse.Tests.SqlUtils
 #else
 // No default namespace intentionally to cause compile errors if something is not defined
 #endif
@@ -141,7 +141,7 @@ namespace Orleans.Tests.SqlUtils
             /// The factory to provide vendor specific functionality.
             /// </summary>
             /// <remarks>For more about <see href="http://florianreischl.blogspot.fi/2011/08/adonet-connection-pooling-internals-and.html">ConnectionPool</see>
-            /// and issues with using this factory. Take these notes into account when considering robustness of Orleans!</remarks>
+            /// and issues with using this factory. Take these notes into account when considering robustness of Scynapse!</remarks>
             public readonly DbProviderFactory Factory;
 
             /// <summary>

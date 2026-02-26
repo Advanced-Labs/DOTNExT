@@ -2,10 +2,10 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
-using Orleans.Configuration;
-using Orleans.Providers.Streams.AzureQueue;
-using Orleans.TestingHost;
-using Orleans.TestingHost.Utils;
+using Scynapse.Configuration;
+using Scynapse.Providers.Streams.AzureQueue;
+using Scynapse.TestingHost;
+using Scynapse.TestingHost.Utils;
 using Tester;
 using Tester.AzureUtils;
 using Tester.AzureUtils.Streaming;
@@ -17,7 +17,7 @@ using Xunit;
 namespace UnitTests.HaloTests.Streaming
 {
     [TestCategory("Streaming"), TestCategory("Halo")]
-    public class HaloStreamSubscribeTests : OrleansTestingBase, IClassFixture<HaloStreamSubscribeTests.Fixture>
+    public class HaloStreamSubscribeTests : ScynapseTestingBase, IClassFixture<HaloStreamSubscribeTests.Fixture>
     {
         private readonly Fixture fixture;
         private const int queueCount = 8;

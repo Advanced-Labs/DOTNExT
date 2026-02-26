@@ -1,6 +1,6 @@
 #nullable enable
 using Microsoft.Extensions.Logging;
-using Orleans.GrainDirectory;
+using Scynapse.GrainDirectory;
 using TestExtensions;
 using Xunit;
 using Xunit.Abstractions;

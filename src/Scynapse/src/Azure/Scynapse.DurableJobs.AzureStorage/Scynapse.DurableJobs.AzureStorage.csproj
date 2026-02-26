@@ -1,0 +1,30 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageId>Genesa.Scynapse.DurableJobs.AzureStorage</PackageId>
+    <Title>Microsoft Scynapse Azure Storage Durable Jobs Provider</Title>
+    <Description>Microsoft Scynapse durable jobs provider backed by Azure Blob Storage</Description>
+    <PackageTags>$(PackageTags) Azure Storage</PackageTags>
+    <TargetFrameworks>$(DefaultTargetFrameworks)</TargetFrameworks>
+    <AssemblyName>Scynapse.DurableJobs.AzureStorage</AssemblyName>
+    <RootNamespace>Scynapse.DurableJobs.AzureStorage</RootNamespace>
+    <ScynapseBuildTimeCodeGen>true</ScynapseBuildTimeCodeGen>
+    <DefineConstants>$(DefineConstants)</DefineConstants>
+    <Nullable>enable</Nullable>
+    <VersionSuffix Condition="$(VersionSuffix) != ''">$(VersionSuffix).alpha.1</VersionSuffix>
+    <VersionSuffix Condition="$(VersionSuffix) == ''">alpha.1</VersionSuffix>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="$(SourceRoot)src\Scynapse.Runtime\Scynapse.Runtime.csproj" />
+    <ProjectReference Include="$(SourceRoot)src\Scynapse.DurableJobs\Scynapse.DurableJobs.csproj" />
+    <PackageReference Include="Azure.Core" />
+    <PackageReference Include="Azure.Storage.Blobs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="README.md" Pack="true" PackagePath="\" />
+  </ItemGroup>
+
+</Project>

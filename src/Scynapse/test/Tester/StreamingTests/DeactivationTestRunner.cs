@@ -1,9 +1,9 @@
-using Orleans.Streams;
-using Orleans.Internal;
+using Scynapse.Streams;
+using Scynapse.Internal;
 using UnitTests.GrainInterfaces;
 using Xunit;
-using Orleans.Runtime;
-using Orleans.Core.Internal;
+using Scynapse.Runtime;
+using Scynapse.Core.Internal;
 
 namespace UnitTests.StreamingTests
 {

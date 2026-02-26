@@ -2,7 +2,7 @@
   <PropertyGroup>
     <RootNamespace>TestVersionGrains</RootNamespace>
     <AssemblyName>TestVersionGrains</AssemblyName>
-    <OrleansBuildTimeCodeGen>true</OrleansBuildTimeCodeGen>
+    <ScynapseBuildTimeCodeGen>true</ScynapseBuildTimeCodeGen>
     <OutputType>Exe</OutputType>
     <TargetFrameworks>$(TestTargetFrameworks)</TargetFrameworks>
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
@@ -18,9 +18,9 @@
   </PropertyGroup>
   
   <ItemGroup>
-    <ProjectReference Update="$(SourceRoot)src\Orleans.Core.Abstractions\Orleans.Core.Abstractions.csproj" />
-    <ProjectReference Update="$(SourceRoot)src\Orleans.Core\Orleans.Core.csproj" />
-    <ProjectReference Include="$(SourceRoot)src\Orleans.TestingHost\Orleans.TestingHost.csproj" />
+    <ProjectReference Update="$(SourceRoot)src\Scynapse.Core.Abstractions\Scynapse.Core.Abstractions.csproj" />
+    <ProjectReference Update="$(SourceRoot)src\Scynapse.Core\Scynapse.Core.csproj" />
+    <ProjectReference Include="$(SourceRoot)src\Scynapse.TestingHost\Scynapse.TestingHost.csproj" />
     <ProjectReference Include="$(SourceRoot)test\Grains\TestGrainInterfaces\TestGrainInterfaces.csproj" />
     <ProjectReference Include="$(SourceRoot)test\Grains\TestGrains\TestGrains.csproj" />
   </ItemGroup>

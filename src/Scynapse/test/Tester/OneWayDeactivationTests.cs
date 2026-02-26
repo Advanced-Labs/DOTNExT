@@ -1,10 +1,10 @@
 using Microsoft.Extensions.DependencyInjection;
-using Orleans.Configuration;
-using Orleans.Configuration.Internal;
-using Orleans.Runtime;
-using Orleans.Runtime.GrainDirectory;
-using Orleans.Runtime.Placement;
-using Orleans.TestingHost;
+using Scynapse.Configuration;
+using Scynapse.Configuration.Internal;
+using Scynapse.Runtime;
+using Scynapse.Runtime.GrainDirectory;
+using Scynapse.Runtime.Placement;
+using Scynapse.TestingHost;
 using TestExtensions;
 using UnitTests.GrainInterfaces;
 using Xunit;
@@ -12,7 +12,7 @@ using Xunit;
 namespace UnitTests.General
 {
     [TestCategory("BVT"), TestCategory("OneWay")]
-    public class OneWayDeactivationTests : OrleansTestingBase, IClassFixture<OneWayDeactivationTests.Fixture>
+    public class OneWayDeactivationTests : ScynapseTestingBase, IClassFixture<OneWayDeactivationTests.Fixture>
     {
         private readonly Fixture _fixture;
 

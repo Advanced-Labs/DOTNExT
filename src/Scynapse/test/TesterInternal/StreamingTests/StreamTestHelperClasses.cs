@@ -1,7 +1,7 @@
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
-using Orleans.Runtime;
-using Orleans.Streams;
+using Scynapse.Runtime;
+using Scynapse.Streams;
 using UnitTests.GrainInterfaces;
 using UnitTests.Grains;
 using UnitTests.TestHelper;

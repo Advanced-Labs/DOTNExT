@@ -6,8 +6,8 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Scynapse.AsyncPlus;
 using Scynapse.AsyncPlus.Services;
-using Orleans;
-using Orleans.Runtime;
+using Scynapse;
+using Scynapse.Runtime;
 using Spectre.Console;
 
 namespace AsyncPersistenceScenarios.Scenarios;
@@ -340,7 +340,7 @@ namespace GrainMobilityWorkflow
             AnsiConsole.WriteLine();
             AnsiConsole.MarkupLine("[blue]Phase 3: Deactivating persistence grain...[/]");
 
-            // Deactivate the grain - this forces Orleans to unload it
+            // Deactivate the grain - this forces Scynapse to unload it
             // When accessed again, it will reactivate (possibly on a different silo)
             await persistenceGrain.RequestDeactivationAsync();
             LogToFile("Called RequestDeactivationAsync on persistence grain");

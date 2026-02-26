@@ -1,8 +1,8 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Orleans.Runtime;
-using Orleans.Runtime.GrainDirectory;
-using Orleans.Runtime.Placement;
+using Scynapse.Runtime;
+using Scynapse.Runtime.GrainDirectory;
+using Scynapse.Runtime.Placement;
 using UnitTests.GrainInterfaces;
 
 namespace UnitTests.Grains

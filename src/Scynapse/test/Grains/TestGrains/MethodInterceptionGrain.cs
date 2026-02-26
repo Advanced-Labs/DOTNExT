@@ -1,7 +1,7 @@
 using System.Globalization;
 using System.Reflection;
 using System.Runtime.Serialization;
-using Orleans.Runtime;
+using Scynapse.Runtime;
 using UnitTests.GrainInterfaces;
 
 namespace UnitTests.Grains

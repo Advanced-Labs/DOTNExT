@@ -1,7 +1,7 @@
 using Microsoft.Extensions.DependencyInjection;
-using Orleans.Placement;
-using Orleans.Runtime.Placement;
-using Orleans.TestingHost;
+using Scynapse.Placement;
+using Scynapse.Runtime.Placement;
+using Scynapse.TestingHost;
 using Xunit;
 
 namespace UnitTests.PlacementFilterTests;

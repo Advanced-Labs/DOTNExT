@@ -1,4 +1,4 @@
-using Orleans.Runtime;
+using Scynapse.Runtime;
 
 namespace UnitTests.GrainInterfaces
 {
@@ -65,6 +65,6 @@ namespace UnitTests.GrainInterfaces
 
     public interface IDebuggerHelperTestGrain : IGrain
     {
-        Task OrleansDebuggerHelper_GetGrainInstance_Test();
+        Task ScynapseDebuggerHelper_GetGrainInstance_Test();
     }
 }

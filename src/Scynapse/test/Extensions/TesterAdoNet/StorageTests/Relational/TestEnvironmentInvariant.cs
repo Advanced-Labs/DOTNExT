@@ -1,6 +1,6 @@
 using Newtonsoft.Json.Linq;
-using Orleans.Tests.SqlUtils;
-using Orleans.TestingHost.Utils;
+using Scynapse.Tests.SqlUtils;
+using Scynapse.TestingHost.Utils;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Reflection;
@@ -11,24 +11,24 @@ namespace UnitTests.StorageTests.Relational
 {
     [Serializable]
     [DebuggerDisplay("StorageInvariant = {StorageInvariant}, ConnectionString = {ConnectionString}")]
-    [Orleans.GenerateSerializer]
+    [Scynapse.GenerateSerializer]
     public struct StorageConnection
     {
-        [Orleans.Id(0)]
+        [Scynapse.Id(0)]
         public string StorageInvariant { get; set; }
 
-        [Orleans.Id(1)]
+        [Scynapse.Id(1)]
         public string ConnectionString { get; set; }
     }
 
     [Serializable]
-    [Orleans.GenerateSerializer]
+    [Scynapse.GenerateSerializer]
     public class TestEnvironmentSettings
     {
-        [Orleans.Id(0)]
+        [Scynapse.Id(0)]
         public ICollection<StorageConnection> ConnectionStrings { get; set; }
 
-        [Orleans.Id(1)]
+        [Scynapse.Id(1)]
         public string EnvironmentId { get; set; }
     }
 
@@ -98,7 +98,7 @@ namespace UnitTests.StorageTests.Relational
 
             if (AdoNetInvariants.Invariants.Contains(connection.StorageInvariant))
             {
-                const string RelationalStorageTestDb = "OrleansStorageTests";
+                const string RelationalStorageTestDb = "ScynapseStorageTests";
                 return RelationalStorageForTesting.SetupInstance(connection.StorageInvariant, storageName ?? RelationalStorageTestDb, connection.ConnectionString).GetAwaiter().GetResult();
             }
 

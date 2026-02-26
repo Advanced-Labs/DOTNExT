@@ -1,10 +1,10 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Orleans.Configuration;
-using Orleans.Runtime;
-using Orleans.Runtime.Messaging;
-using Orleans.Runtime.TestHooks;
-using Orleans.TestingHost;
+using Scynapse.Configuration;
+using Scynapse.Runtime;
+using Scynapse.Runtime.Messaging;
+using Scynapse.Runtime.TestHooks;
+using Scynapse.TestingHost;
 using TestExtensions;
 using UnitTests.GrainInterfaces;
 using UnitTests.Grains;
@@ -16,7 +16,7 @@ namespace UnitTests.General
     /// Tests for load shedding functionality when the gateway is overloaded.
     /// </summary>
     // if we parallelize tests, each test should run in isolation 
-    public class LoadSheddingTest : OrleansTestingBase, IClassFixture<LoadSheddingTest.Fixture>
+    public class LoadSheddingTest : ScynapseTestingBase, IClassFixture<LoadSheddingTest.Fixture>
     {
         private readonly Fixture fixture;
         private readonly TestHooksEnvironmentStatisticsProvider _environmentStatistics;

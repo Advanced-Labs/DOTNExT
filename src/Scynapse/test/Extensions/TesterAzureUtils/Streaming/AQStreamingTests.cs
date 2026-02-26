@@ -5,9 +5,9 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
-using Orleans.Configuration;
-using Orleans.Providers.Streams.AzureQueue;
-using Orleans.TestingHost;
+using Scynapse.Configuration;
+using Scynapse.Providers.Streams.AzureQueue;
+using Scynapse.TestingHost;
 using TestExtensions;
 using UnitTests.Streaming;
 using UnitTests.StreamingTests;
@@ -44,7 +44,7 @@ namespace Tester.AzureUtils.Streaming
                     Dictionary<string, string> queueConfig = [];
                     void ConfigureStreaming(string option, string value)
                     {
-                        var prefix = $"Orleans:Streaming:{AzureQueueStreamProviderName}:";
+                        var prefix = $"Scynapse:Streaming:{AzureQueueStreamProviderName}:";
                         queueConfig[$"{prefix}{option}"] = value;
                     }
 
@@ -173,7 +173,7 @@ namespace Tester.AzureUtils.Streaming
             await fixture.Runner.StreamTest_06_ManyDifferent_ManyProducerGrainManyConsumerClients();
         }
 
-        [SkippableFact(Skip = "https://github.com/dotnet/orleans/issues/5648"), TestCategory("Functional")]
+        [SkippableFact(Skip = "https://github.com/Scynapse/Core/issues/5648"), TestCategory("Functional")]
         public async Task AQ_07_ManyDifferent_ManyProducerClientsManyConsumerGrains()
         {
             await fixture.Runner.StreamTest_07_ManyDifferent_ManyProducerClientsManyConsumerGrains();

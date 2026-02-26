@@ -1,5 +1,5 @@
-using Orleans.Versions.Compatibility;
-using Orleans.Versions.Selector;
+using Scynapse.Versions.Compatibility;
+using Scynapse.Versions.Selector;
 using TestVersionGrainInterfaces;
 using Xunit;
 

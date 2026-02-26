@@ -1,14 +1,14 @@
 using System.Text;
-using Orleans.Runtime;
+using Scynapse.Runtime;
 using Azure.Messaging.EventHubs;
-using Orleans.Streaming.EventHubs;
-using Orleans.Streams;
+using Scynapse.Streaming.EventHubs;
+using Scynapse.Streams;
 
 namespace ServiceBus.Tests.TestStreamProviders.EventHub
 {
     public class StreamPerPartitionDataAdapter : EventHubDataAdapter
     {
-        public StreamPerPartitionDataAdapter(Orleans.Serialization.Serializer serializer) : base(serializer) {}
+        public StreamPerPartitionDataAdapter(Scynapse.Serialization.Serializer serializer) : base(serializer) {}
 
         public override StreamPosition GetStreamPosition(string partition, EventData queueMessage)
         {

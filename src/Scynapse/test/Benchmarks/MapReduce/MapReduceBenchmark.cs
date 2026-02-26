@@ -1,12 +1,12 @@
 using BenchmarkDotNet.Attributes;
 using BenchmarkGrainInterfaces.MapReduce;
 using BenchmarkGrains.MapReduce;
-using Orleans.TestingHost;
+using Scynapse.TestingHost;
 
 namespace Benchmarks.MapReduce
 {
     /// <summary>
-    /// Benchmarks Orleans' capability to perform map-reduce operations with complex processing pipelines.
+    /// Benchmarks Scynapse' capability to perform map-reduce operations with complex processing pipelines.
     /// </summary>
     public class MapReduceBenchmark : IDisposable
     {

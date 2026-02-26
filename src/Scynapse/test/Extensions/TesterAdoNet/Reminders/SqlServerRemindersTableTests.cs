@@ -1,8 +1,8 @@
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using Orleans.Configuration;
-using Orleans.Runtime.ReminderService;
-using Orleans.Tests.SqlUtils;
+using Scynapse.Configuration;
+using Scynapse.Runtime.ReminderService;
+using Scynapse.Tests.SqlUtils;
 using TestExtensions;
 using UnitTests.General;
 using Xunit;
@@ -10,7 +10,7 @@ using Xunit;
 namespace UnitTests.RemindersTest
 {
     /// <summary>
-    /// Tests for operation of Orleans Reminders Table using SQL Server
+    /// Tests for operation of Scynapse Reminders Table using SQL Server
     /// </summary>
     [TestCategory("Functional"), TestCategory("Reminders"), TestCategory("AdoNet"), TestCategory("SqlServer")]
     public class SqlServerRemindersTableTests : ReminderTableTestsBase

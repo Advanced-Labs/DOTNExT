@@ -1,11 +1,11 @@
 using System.CommandLine;
 using DistributedTests.GrainInterfaces;
 using Microsoft.Extensions.DependencyInjection;
-using Orleans.Configuration;
-using Orleans.Providers.Streams.Common;
-using Orleans.Providers.Streams.Generator;
-using Orleans.Runtime;
-using Orleans.Streams;
+using Scynapse.Configuration;
+using Scynapse.Providers.Streams.Common;
+using Scynapse.Providers.Streams.Generator;
+using Scynapse.Runtime;
+using Scynapse.Streams;
 
 namespace DistributedTests.Server.Configurator
 {

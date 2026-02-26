@@ -1,5 +1,5 @@
 using System.Data.SqlClient;
-using Orleans.Tests.SqlUtils;
+using Scynapse.Tests.SqlUtils;
 using TestExtensions;
 
 namespace UnitTests.General

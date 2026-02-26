@@ -1,12 +1,12 @@
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using Orleans.Runtime;
+using Scynapse.Runtime;
 using TestExtensions;
 using Xunit.Abstractions;
-using Orleans.Internal;
-using Orleans.Configuration;
-using Orleans.TestingHost.Utils;
-using Orleans.Reminders.Cosmos;
+using Scynapse.Internal;
+using Scynapse.Configuration;
+using Scynapse.TestingHost.Utils;
+using Scynapse.Reminders.Cosmos;
 
 namespace Tester.Cosmos.Reminders;
 

@@ -1,4 +1,4 @@
-﻿using Orleans.Runtime;
+﻿using Scynapse.Runtime;
 
 namespace UnitTests.GrainInterfaces
 {

@@ -1,14 +1,14 @@
-# Orleans Dashboard - Cohosted Example
+# Scynapse Dashboard - Cohosted Example
 
-This example demonstrates how to cohost the Orleans Dashboard within the same web application that runs your Orleans silo.
+This example demonstrates how to cohost the Scynapse Dashboard within the same web application that runs your Scynapse silo.
 
 ## Overview
 
-This is the simplest way to add the Orleans Dashboard to your application. The dashboard is hosted within the same process as your silo, using ASP.NET Core minimal APIs.
+This is the simplest way to add the Scynapse Dashboard to your application. The dashboard is hosted within the same process as your silo, using ASP.NET Core minimal APIs.
 
 ## Key Features
 
-- **Single Process**: Both Orleans and the dashboard run in the same web application
+- **Single Process**: Both Scynapse and the dashboard run in the same web application
 - **Minimal Configuration**: Simple setup with just a few lines of code
 - **ASP.NET Core Integration**: Uses `WebApplication.CreateBuilder()` and minimal APIs
 
@@ -17,9 +17,9 @@ This is the simplest way to add the Orleans Dashboard to your application. The d
 The example shows:
 
 1. Creating a web application with `WebApplication.CreateBuilder()`
-2. Configuring Orleans using `builder.UseOrleans()`
+2. Configuring Scynapse using `builder.UseScynapse()`
 3. Adding the dashboard with `siloBuilder.AddDashboard()`
-4. Mapping dashboard endpoints with `app.MapOrleansDashboard()`
+4. Mapping dashboard endpoints with `app.MapScynapseDashboard()`
 
 ## Running the Example
 
@@ -35,8 +35,8 @@ Once running, open your browser to:
 ```csharp
 var builder = WebApplication.CreateBuilder(args);
 
-// Configure Orleans
-builder.UseOrleans(siloBuilder =>
+// Configure Scynapse
+builder.UseScynapse(siloBuilder =>
 {
     siloBuilder.UseLocalhostClustering();
     siloBuilder.UseInMemoryReminderService();
@@ -49,7 +49,7 @@ builder.UseOrleans(siloBuilder =>
 var app = builder.Build();
 
 // Map dashboard endpoints
-app.MapOrleansDashboard();
+app.MapScynapseDashboard();
 
 app.Run();
 ```
@@ -58,7 +58,7 @@ app.Run();
 
 Use this cohosted approach when:
 - You want the simplest setup
-- You're building a web application that also hosts Orleans
+- You're building a web application that also hosts Scynapse
 - You want dashboard access on the same port as your web app
 - You're running a single silo or don't need a centralized dashboard
 
@@ -67,13 +67,13 @@ Use this cohosted approach when:
 ### Custom Route Prefix
 
 ```csharp
-app.MapOrleansDashboard(routePrefix: "/dashboard");
+app.MapScynapseDashboard(routePrefix: "/dashboard");
 ```
 
 ### Add Authentication
 
 ```csharp
-app.MapOrleansDashboard().RequireAuthorization();
+app.MapScynapseDashboard().RequireAuthorization();
 ```
 
 ### Configure Update Interval
@@ -88,7 +88,7 @@ siloBuilder.AddDashboard(options =>
 ## Important Notes
 
 > [!WARNING]
-> The Orleans Dashboard is designed for **development and testing scenarios only**. It is not recommended for production deployments as it can have a significant performance impact on your cluster.
+> The Scynapse Dashboard is designed for **development and testing scenarios only**. It is not recommended for production deployments as it can have a significant performance impact on your cluster.
 
 ## Related Examples
 
@@ -97,5 +97,5 @@ siloBuilder.AddDashboard(options =>
 
 ## Learn More
 
-- [Orleans Dashboard Documentation](../../../src/Dashboard/Orleans.Dashboard/README.md)
-- [Microsoft Orleans Documentation](https://learn.microsoft.com/dotnet/orleans/)
+- [Scynapse Dashboard Documentation](../../../src/Dashboard/Scynapse.Dashboard/README.md)
+- [Microsoft Scynapse Documentation](https://learn.microsoft.com/dotnet/scynapse/)

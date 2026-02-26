@@ -1,4 +1,4 @@
-namespace Orleans.Storage
+namespace Scynapse.Storage
 {
     public interface ILocalDataStore
     {

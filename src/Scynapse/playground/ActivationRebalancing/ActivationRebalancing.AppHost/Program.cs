@@ -2,18 +2,18 @@ using Aspire.Hosting;
 
 var builder = DistributedApplication.CreateBuilder(args);
 
-var redis = builder.AddRedis("orleans-redis");
+var redis = builder.AddRedis("scynapse-redis");
 
-var orleans = builder.AddOrleans("cluster")
+var scynapse = builder.AddScynapse("cluster")
     .WithClustering(redis);
 
 var backend = builder.AddProject<Projects.ActivationRebalancing_Cluster>("backend")
-    .WithReference(orleans)
+    .WithReference(scynapse)
     .WaitFor(redis)
     .WithReplicas(5);
 
 builder.AddProject<Projects.ActivationRebalancing_Frontend>("frontend")
-    .WithReference(orleans.AsClient())
+    .WithReference(scynapse.AsClient())
     .WaitFor(backend)
     .WithReplicas(1);
 

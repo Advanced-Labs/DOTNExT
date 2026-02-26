@@ -1,13 +1,13 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using Orleans.Configuration;
+using Scynapse.Configuration;
 
 var builder = Host.CreateApplicationBuilder(args);
-builder.AddKeyedRedisClient("orleans-redis");
-builder.Logging.AddFilter("Orleans.Runtime.Placement.Rebalancing", LogLevel.Trace);
-#pragma warning disable ORLEANSEXP002
-builder.UseOrleans(builder => builder
+builder.AddKeyedRedisClient("scynapse-redis");
+builder.Logging.AddFilter("Scynapse.Runtime.Placement.Rebalancing", LogLevel.Trace);
+#pragma warning disable SCYNAPSEEXP002
+builder.UseScynapse(builder => builder
     .Configure<GrainCollectionOptions>(o =>
     {
         o.CollectionQuantum = TimeSpan.FromSeconds(15);
@@ -25,7 +25,7 @@ builder.UseOrleans(builder => builder
         //o.SiloNumberWeight = 0; 
     })
     .AddActivationRebalancer());
-#pragma warning restore ORLEANSEXP002
+#pragma warning restore SCYNAPSEEXP002
 
 builder.Services.AddHostedService<LoadDriverBackgroundService>();
 var app = builder.Build();

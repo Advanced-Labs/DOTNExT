@@ -1,5 +1,5 @@
-using Orleans.Configuration;
-using Orleans.TestingHost;
+using Scynapse.Configuration;
+using Scynapse.TestingHost;
 using Xunit;
 using Xunit.Abstractions;
 

@@ -26,7 +26,7 @@ public class CassandraContainer
             var exposedPort = container.GetMappedPublicPort(containerPort);
 
             var cluster = Cluster.Builder()
-                .WithDefaultKeyspace("orleans")
+                .WithDefaultKeyspace("scynapse")
                 .AddContactPoints(new IPEndPoint(IPAddress.Loopback, exposedPort))
                 .Build();
 

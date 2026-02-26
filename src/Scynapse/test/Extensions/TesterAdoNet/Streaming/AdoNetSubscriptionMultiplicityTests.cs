@@ -1,7 +1,7 @@
 using Microsoft.Extensions.Configuration;
 using MySql.Data.MySqlClient;
-using Orleans.Streaming.AdoNet.Storage;
-using Orleans.TestingHost;
+using Scynapse.Streaming.AdoNet.Storage;
+using Scynapse.TestingHost;
 using TestExtensions;
 using UnitTests.General;
 using UnitTests.StreamingTests;
@@ -40,7 +40,7 @@ public class PostgreSqlAdoNetSubscriptionMultiplicityTests() : AdoNetSubscriptio
 [TestCategory("AdoNet"), TestCategory("Streaming")]
 public abstract class AdoNetSubscriptionMultiplicityTests : TestClusterPerTest
 {
-    private const string TestDatabaseName = "OrleansStreamTest";
+    private const string TestDatabaseName = "ScynapseStreamTest";
     private const string AdoNetStreamProviderName = "AdoNet";
     private const string StreamNamespace = "AdoNetSubscriptionMultiplicityTestsNamespace";
 

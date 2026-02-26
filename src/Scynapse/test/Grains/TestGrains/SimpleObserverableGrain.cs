@@ -1,5 +1,5 @@
 using Microsoft.Extensions.Logging;
-using Orleans.Utilities;
+using Scynapse.Utilities;
 using UnitTests.GrainInterfaces;
 
 namespace UnitTests.Grains
@@ -31,8 +31,8 @@ namespace UnitTests.Grains
             A = a;
 
             //If this were run with Task.Run there were no need for the added Unwrap call.
-            //However, Task.Run runs in ThreadPool and not in Orleans TaskScheduler, unlike Task.Factory.StartNew.
-            //See more at https://learn.microsoft.com/dotnet/orleans/grains/external-tasks-and-grains.
+            //However, Task.Run runs in ThreadPool and not in Scynapse TaskScheduler, unlike Task.Factory.StartNew.
+            //See more at https://learn.microsoft.com/dotnet/scynapse/grains/external-tasks-and-grains.
             //The extra task comes from the internal asynchronous lambda due to Task.Delay. For deeper
             //insight, see at http://blogs.msdn.com/b/pfxteam/archive/2012/02/08/10265476.aspx.
             await Task.Factory.StartNew(async () =>
@@ -47,8 +47,8 @@ namespace UnitTests.Grains
             this.B = b;
 
             //If this were run with Task.Run there were no need for the added Unwrap call.
-            //However, Task.Run runs in ThreadPool and not in Orleans TaskScheduler, unlike Task.Factory.StartNew.
-            //See more at https://learn.microsoft.com/dotnet/orleans/grains/external-tasks-and-grains.
+            //However, Task.Run runs in ThreadPool and not in Scynapse TaskScheduler, unlike Task.Factory.StartNew.
+            //See more at https://learn.microsoft.com/dotnet/scynapse/grains/external-tasks-and-grains.
             //The extra task comes from the internal asynchronous lambda due to Task.Delay. For deeper
             //insight, see at http://blogs.msdn.com/b/pfxteam/archive/2012/02/08/10265476.aspx.
             await Task.Factory.StartNew(async () =>

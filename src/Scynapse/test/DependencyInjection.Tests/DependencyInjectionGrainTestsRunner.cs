@@ -1,5 +1,5 @@
 using Microsoft.Extensions.DependencyInjection;
-using Orleans.TestingHost;
+using Scynapse.TestingHost;
 using TestExtensions;
 using UnitTests.GrainInterfaces;
 using UnitTests.Grains;
@@ -8,9 +8,9 @@ using Xunit;
 namespace DependencyInjection.Tests
 {
     /// <summary>
-    /// Test runner for Orleans dependency injection integration tests.
+    /// Test runner for Scynapse dependency injection integration tests.
     /// 
-    /// Orleans integrates with Microsoft.Extensions.DependencyInjection to support:
+    /// Scynapse integrates with Microsoft.Extensions.DependencyInjection to support:
     /// - Constructor injection in grains
     /// - Scoped services (one instance per grain activation)
     /// - Singleton services (shared across all grains)
@@ -26,7 +26,7 @@ namespace DependencyInjection.Tests
     /// This abstract base class contains the core test logic, while concrete
     /// implementations test different DI container integrations.
     /// </summary>
-    public abstract class DependencyInjectionGrainTestRunner : OrleansTestingBase
+    public abstract class DependencyInjectionGrainTestRunner : ScynapseTestingBase
     {
         private readonly BaseTestClusterFixture fixture;
 
@@ -47,8 +47,8 @@ namespace DependencyInjection.Tests
                     services.AddScoped<IInjectedScopedService, InjectedScopedService>();
 
                     // Explicitly register a grain class to test that it will NOT use this registration.
-                    // Orleans creates grains through its own activation system, not DI container.
-                    // This registration is here to verify that Orleans ignores it and fails
+                    // Scynapse creates grains through its own activation system, not DI container.
+                    // This registration is here to verify that Scynapse ignores it and fails
                     // when trying to create the grain (missing constructor parameters).
                     services.AddTransient(
                         sp => new ExplicitlyRegisteredSimpleDIGrain(
@@ -78,7 +78,7 @@ namespace DependencyInjection.Tests
         /// <summary>
         /// Tests that IGrainFactory is automatically available for injection.
         /// IGrainFactory is a framework service that allows grains to create other grains.
-        /// Note: Don't register your own IGrainFactory - Orleans provides this automatically.
+        /// Note: Don't register your own IGrainFactory - Scynapse provides this automatically.
         /// </summary>
         [Fact]
         public async Task CanGetGrainWithInjectedGrainFactory()
@@ -211,7 +211,7 @@ namespace DependencyInjection.Tests
 
         /// <summary>
         /// Tests that explicitly registered grain classes in DI are ignored.
-        /// Orleans must create grains through its activation system, not DI,
+        /// Scynapse must create grains through its activation system, not DI,
         /// to ensure proper lifecycle management and distributed behavior.
         /// This test verifies that the explicit registration is not used.
         /// </summary>

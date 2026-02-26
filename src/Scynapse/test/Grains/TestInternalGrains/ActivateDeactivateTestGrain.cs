@@ -407,7 +407,7 @@ namespace UnitTests.Grains
     {
         private readonly ILogger logger;
 
-        //private IEchoGrain orleansManagedGrain;
+        //private IEchoGrain scynapseManagedGrain;
         private ITestGrain grain;
 
         public CreateGrainReferenceTestGrain(ILoggerFactory loggerFactory)

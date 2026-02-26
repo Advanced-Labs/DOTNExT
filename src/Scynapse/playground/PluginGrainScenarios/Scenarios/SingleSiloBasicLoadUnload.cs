@@ -1,7 +1,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Orleans;
-using Orleans.Runtime.DynamicGrains;
+using Scynapse;
+using Scynapse.Runtime.DynamicGrains;
 using Spectre.Console;
 
 namespace PluginGrainScenarios.Scenarios;
@@ -38,7 +38,7 @@ public static class SingleSiloBasicLoadUnload
         AnsiConsole.WriteLine();
 
         // Start silo
-        AnsiConsole.MarkupLine("[yellow]Starting Orleans silo...[/]");
+        AnsiConsole.MarkupLine("[yellow]Starting Scynapse silo...[/]");
         using var host = SiloHelper.BuildSingleSilo();
         await host.StartAsync();
         AnsiConsole.MarkupLine("[green]Silo started successfully[/]");

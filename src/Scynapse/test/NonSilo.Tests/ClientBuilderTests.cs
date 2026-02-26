@@ -1,10 +1,10 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Orleans;
-using Orleans.Configuration;
-using Orleans.Hosting;
-using Orleans.Messaging;
-using Orleans.Runtime;
+using Scynapse;
+using Scynapse.Configuration;
+using Scynapse.Hosting;
+using Scynapse.Messaging;
+using Scynapse.Runtime;
 using Xunit;
 
 namespace NonSilo.Tests
@@ -31,9 +31,9 @@ namespace NonSilo.Tests
     }
 
     /// <summary>
-    /// Tests for the Orleans ClientBuilder, which is responsible for configuring and building Orleans client instances.
+    /// Tests for the Scynapse ClientBuilder, which is responsible for configuring and building Scynapse client instances.
     /// These tests verify client configuration validation, service registration, and proper initialization of client components
-    /// without requiring a full Orleans cluster.
+    /// without requiring a full Scynapse cluster.
     /// </summary>
     [TestCategory("BVT")]
     [TestCategory("ClientBuilder")]
@@ -45,10 +45,10 @@ namespace NonSilo.Tests
         [Fact]
         public void ClientBuilder_ClusterOptionsTest()
         {
-            Assert.Throws<OrleansConfigurationException>(() =>
+            Assert.Throws<ScynapseConfigurationException>(() =>
             {
                 var host = new HostBuilder()
-                    .UseOrleansClient((ctx, clientBuilder) =>
+                    .UseScynapseClient((ctx, clientBuilder) =>
                     {
                         clientBuilder.Configure<ClusterOptions>(options =>
                         {
@@ -64,10 +64,10 @@ namespace NonSilo.Tests
                 _ = host.Services.GetRequiredService<IClusterClient>();
             });
 
-            Assert.Throws<OrleansConfigurationException>(() =>
+            Assert.Throws<ScynapseConfigurationException>(() =>
             {
                 var host = new HostBuilder()
-                    .UseOrleansClient((ctx, clientBuilder) =>
+                    .UseScynapseClient((ctx, clientBuilder) =>
                     {
                         clientBuilder.Configure<ClusterOptions>(options =>
                         {
@@ -83,10 +83,10 @@ namespace NonSilo.Tests
                 _ = host.Services.GetRequiredService<IClusterClient>();
             });
 
-            Assert.Throws<OrleansConfigurationException>(() =>
+            Assert.Throws<ScynapseConfigurationException>(() =>
             {
                 var host = new HostBuilder()
-                    .UseOrleansClient((ctx, clientBuilder) =>
+                    .UseScynapseClient((ctx, clientBuilder) =>
                     {
                         clientBuilder.Configure<ClusterOptions>(options =>
                         {
@@ -103,7 +103,7 @@ namespace NonSilo.Tests
             });
 
             var host = new HostBuilder()
-                .UseOrleansClient((ctx, clientBuilder) =>
+                .UseScynapseClient((ctx, clientBuilder) =>
                 {
                     clientBuilder.Configure<ClusterOptions>(options =>
                     {
@@ -126,7 +126,7 @@ namespace NonSilo.Tests
         public void ClientBuilder_NoSpecifiedConfigurationTest()
         {
             var hostBuilder = new HostBuilder()
-                .UseOrleansClient((ctx, clientBuilder) =>
+                .UseScynapseClient((ctx, clientBuilder) =>
                 {
                     clientBuilder.ConfigureServices(services => services.AddSingleton<IGatewayListProvider, NoOpGatewaylistProvider>());
                 })
@@ -147,7 +147,7 @@ namespace NonSilo.Tests
         {
             // Add only an assembly with generated serializers but no grain interfaces
             var hostBuilder = new HostBuilder()
-                .UseOrleansClient((ctx, clientBuilder) =>
+                .UseScynapseClient((ctx, clientBuilder) =>
                 {
                     clientBuilder
                         .UseLocalhostClustering()
@@ -160,7 +160,7 @@ namespace NonSilo.Tests
 
             var host = hostBuilder.Build();
 
-            Assert.Throws<OrleansConfigurationException>(() => _ = host.Services.GetRequiredService<IClusterClient>());
+            Assert.Throws<ScynapseConfigurationException>(() => _ = host.Services.GetRequiredService<IClusterClient>());
         }
 
         /// <summary>
@@ -170,7 +170,7 @@ namespace NonSilo.Tests
         public void ClientBuilder_ServiceProviderTest()
         {
             var hostBuilder = new HostBuilder()
-                .UseOrleansClient((ctx, clientBuilder) =>
+                .UseScynapseClient((ctx, clientBuilder) =>
                 {
                     clientBuilder.ConfigureServices(services => services.AddSingleton<IGatewayListProvider, NoOpGatewaylistProvider>());
                 })
@@ -216,19 +216,19 @@ namespace NonSilo.Tests
 
         /// <summary>
         /// Tests that attempting to configure both a silo and a client in the same host throws an exception.
-        /// Orleans requires separate hosts for silos and clients.
+        /// Scynapse requires separate hosts for silos and clients.
         /// </summary>
         [Fact]
         public void ClientBuilderThrowsDuringStartupIfSiloBuildersAdded()
         {
-            Assert.Throws<OrleansConfigurationException>(() =>
+            Assert.Throws<ScynapseConfigurationException>(() =>
             {
                 _ = new HostBuilder()
-                    .UseOrleans((ctx, siloBuilder) =>
+                    .UseScynapse((ctx, siloBuilder) =>
                     {
                         siloBuilder.UseLocalhostClustering();
                     })
-                    .UseOrleansClient((ctx, clientBuilder) =>
+                    .UseScynapseClient((ctx, clientBuilder) =>
                     {
                         clientBuilder.UseLocalhostClustering();
                     });
@@ -242,14 +242,14 @@ namespace NonSilo.Tests
         [Fact]
         public void ClientBuilderWithHotApplicationBuilderThrowsDuringStartupIfSiloBuildersAdded()
         {
-            Assert.Throws<OrleansConfigurationException>(() =>
+            Assert.Throws<ScynapseConfigurationException>(() =>
             {
                 _ = Host.CreateApplicationBuilder()
-                    .UseOrleans(siloBuilder =>
+                    .UseScynapse(siloBuilder =>
                     {
                         siloBuilder.UseLocalhostClustering();
                     })
-                    .UseOrleansClient(clientBuilder =>
+                    .UseScynapseClient(clientBuilder =>
                     {
                         clientBuilder.UseLocalhostClustering();
                     });

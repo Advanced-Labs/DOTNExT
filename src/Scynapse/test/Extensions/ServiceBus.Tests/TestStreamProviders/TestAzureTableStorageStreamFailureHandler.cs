@@ -1,10 +1,10 @@
 using Azure.Data.Tables;
 using Azure.Identity;
 using Microsoft.Extensions.Logging.Abstractions;
-using Orleans.Providers.Streams.PersistentStreams;
-using Orleans.Serialization;
-using Orleans.Streaming.EventHubs;
-using Orleans.Streams;
+using Scynapse.Providers.Streams.PersistentStreams;
+using Scynapse.Serialization;
+using Scynapse.Streaming.EventHubs;
+using Scynapse.Streams;
 using TestExtensions;
 using Tester.AzureUtils;
 
@@ -50,9 +50,9 @@ namespace ServiceBus.Tests.TestStreamProviders.EventHub
             return options;
         }
 
-        private static Orleans.Streaming.AzureStorage.AzureStorageOperationOptions GetStreamingAzureStorageOperationOptions()
+        private static Scynapse.Streaming.AzureStorage.AzureStorageOperationOptions GetStreamingAzureStorageOperationOptions()
         {
-            var options = new Orleans.Streaming.AzureStorage.AzureStorageOperationOptions { TableName = TableName };
+            var options = new Scynapse.Streaming.AzureStorage.AzureStorageOperationOptions { TableName = TableName };
             options.TableServiceClient = AzureStorageOperationOptionsExtensions.GetTableServiceClient();
 
             return options;

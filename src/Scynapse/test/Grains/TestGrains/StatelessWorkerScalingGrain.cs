@@ -1,6 +1,6 @@
 using System.Collections.Concurrent;
-using Orleans.Concurrency;
-using Orleans.Runtime;
+using Scynapse.Concurrency;
+using Scynapse.Runtime;
 using UnitTests.GrainInterfaces;
 
 namespace UnitTests.Grains;

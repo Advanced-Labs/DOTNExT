@@ -6,7 +6,7 @@ using Xunit;
 namespace DefaultCluster.Tests.ActivationsLifeCycleTests
 {
     /// <summary>
-    /// Tests for Orleans grain activation and deactivation lifecycle.
+    /// Tests for Scynapse grain activation and deactivation lifecycle.
     /// Validates that grains properly execute OnActivateAsync and OnDeactivateAsync methods,
     /// handle activation failures, support reactivation after deactivation, and manage
     /// complex scenarios like deactivation during activation or with long-running operations.
@@ -321,7 +321,7 @@ namespace DefaultCluster.Tests.ActivationsLifeCycleTests
 
         /// <summary>
         /// Tests the scenario where a grain attempts to deactivate during activation.
-        /// Validates that Orleans properly handles and rejects this invalid state transition,
+        /// Validates that Scynapse properly handles and rejects this invalid state transition,
         /// preventing race conditions in the activation lifecycle.
         /// </summary>
         [Fact, TestCategory("BVT"), TestCategory("ActivateDeactivate")]
@@ -335,7 +335,7 @@ namespace DefaultCluster.Tests.ActivationsLifeCycleTests
                 string activation = await grain.DoSomething();
                 Assert.Fail("Should have thrown.");
             }
-            catch (OrleansMessageRejectionException exc)
+            catch (ScynapseMessageRejectionException exc)
             {
                 this.Logger.LogInformation(exc, "Thrown as expected");
                 Assert.True(

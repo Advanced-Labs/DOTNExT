@@ -1,8 +1,8 @@
 using Microsoft.Extensions.Configuration;
-using Orleans.TestingHost;
+using Scynapse.TestingHost;
 using TestExtensions;
 using Xunit.Abstractions;
-using Orleans.Streaming.EventHubs;
+using Scynapse.Streaming.EventHubs;
 using Tester;
 using Microsoft.Extensions.DependencyInjection;
 using Tester.StreamingTests;
@@ -15,8 +15,8 @@ namespace ServiceBus.Tests.StreamingTests
     [TestCategory("EventHub"), TestCategory("Streaming"), TestCategory("Functional"), TestCategory("StreamingCacheMiss")]
     public class EHStreamCacheMissTests : StreamingCacheMissTests
     {
-        private const string EHPath = "ehorleanstest";
-        private const string EHConsumerGroup = "orleansnightly";
+        private const string EHPath = "ehscynapsetest";
+        private const string EHConsumerGroup = "scynapsenightly";
 
         public EHStreamCacheMissTests(ITestOutputHelper output)
             : base(output)

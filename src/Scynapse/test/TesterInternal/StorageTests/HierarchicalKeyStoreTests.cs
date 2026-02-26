@@ -1,5 +1,5 @@
 using System.Globalization;
-using Orleans.Storage;
+using Scynapse.Storage;
 using Xunit;
 
 namespace UnitTests.StorageTests

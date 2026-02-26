@@ -1,13 +1,13 @@
 using Microsoft.Extensions.Logging.Abstractions;
 using MySql.Data.MySqlClient;
-using Orleans.Configuration;
-using Orleans.Providers.Streams.Common;
-using Orleans.Streaming.AdoNet;
-using Orleans.Streams;
-using Orleans.Tests.SqlUtils;
+using Scynapse.Configuration;
+using Scynapse.Providers.Streams.Common;
+using Scynapse.Streaming.AdoNet;
+using Scynapse.Streams;
+using Scynapse.Tests.SqlUtils;
 using UnitTests.General;
 using static System.String;
-using RelationalOrleansQueries = Orleans.Streaming.AdoNet.Storage.RelationalOrleansQueries;
+using RelationalScynapseQueries = Scynapse.Streaming.AdoNet.Storage.RelationalScynapseQueries;
 
 namespace Tester.AdoNet.Streaming;
 
@@ -44,9 +44,9 @@ public abstract class AdoNetStreamFailureHandlerTests(string invariant) : IAsync
 {
     private RelationalStorageForTesting _testing;
     private IRelationalStorage _storage;
-    private RelationalOrleansQueries _queries;
+    private RelationalScynapseQueries _queries;
 
-    private const string TestDatabaseName = "OrleansStreamTest";
+    private const string TestDatabaseName = "ScynapseStreamTest";
 
     public async Task InitializeAsync()
     {
@@ -55,7 +55,7 @@ public abstract class AdoNetStreamFailureHandlerTests(string invariant) : IAsync
         Skip.If(IsNullOrEmpty(_testing.CurrentConnectionString), $"Database '{TestDatabaseName}' not initialized");
 
         _storage = _testing.Storage;
-        _queries = await RelationalOrleansQueries.CreateInstance(invariant, _testing.CurrentConnectionString);
+        _queries = await RelationalScynapseQueries.CreateInstance(invariant, _testing.CurrentConnectionString);
     }
 
     /// <summary>
@@ -142,7 +142,7 @@ public abstract class AdoNetStreamFailureHandlerTests(string invariant) : IAsync
         var afterFailure = DateTime.UtcNow;
 
         // assert
-        var dead = Assert.Single(await _storage.ReadAsync<AdoNetStreamDeadLetter>("SELECT * FROM OrleansStreamDeadLetter"));
+        var dead = Assert.Single(await _storage.ReadAsync<AdoNetStreamDeadLetter>("SELECT * FROM ScynapseStreamDeadLetter"));
         Assert.Equal(clusterOptions.ServiceId, dead.ServiceId);
         Assert.Equal(providerId, dead.ProviderId);
         Assert.Equal(queueId, dead.QueueId);
@@ -207,7 +207,7 @@ public abstract class AdoNetStreamFailureHandlerTests(string invariant) : IAsync
         await handler.OnDeliveryFailure(GuidId.GetNewGuidId(), providerId, streamId, new EventSequenceTokenV2(ack.MessageId));
 
         // assert
-        Assert.Empty(await _storage.ReadAsync<AdoNetStreamDeadLetter>("SELECT * FROM OrleansStreamDeadLetter"));
+        Assert.Empty(await _storage.ReadAsync<AdoNetStreamDeadLetter>("SELECT * FROM ScynapseStreamDeadLetter"));
     }
 
     public Task DisposeAsync() => Task.CompletedTask;

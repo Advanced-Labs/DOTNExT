@@ -6,8 +6,8 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <StartupObject>AsyncPersistenceScenarios.Program</StartupObject>
-    <!-- Required for Orleans grain discovery via project references -->
-    <OrleansBuildTimeCodeGen>true</OrleansBuildTimeCodeGen>
+    <!-- Required for Scynapse grain discovery via project references -->
+    <ScynapseBuildTimeCodeGen>true</ScynapseBuildTimeCodeGen>
   </PropertyGroup>
 
   <ItemGroup>
@@ -26,13 +26,13 @@
     <ProjectReference Include="..\..\..\roslyn\src\Compilers\CSharp\Portable\Microsoft.CodeAnalysis.CSharp.csproj" />
   </ItemGroup>
 
-  <!-- Orleans project references -->
+  <!-- Scynapse project references -->
   <ItemGroup>
-    <ProjectReference Include="..\..\src\Orleans.Server\Orleans.Server.csproj" />
-    <ProjectReference Include="..\..\src\Orleans.Runtime\Orleans.Runtime.csproj" />
+    <ProjectReference Include="..\..\src\Scynapse.Server\Scynapse.Server.csproj" />
+    <ProjectReference Include="..\..\src\Scynapse.Runtime\Scynapse.Runtime.csproj" />
   </ItemGroup>
 
-  <!-- Scynapse.AsyncPlus library - Orleans-backed async persistence -->
+  <!-- Scynapse.AsyncPlus library - Scynapse-backed async persistence -->
   <ItemGroup>
     <ProjectReference Include="..\..\src\Scynapse.AsyncPlus\Scynapse.AsyncPlus.csproj" />
   </ItemGroup>

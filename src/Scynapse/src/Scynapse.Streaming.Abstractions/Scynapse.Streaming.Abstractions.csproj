@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <PackageId>Genesa.Scynapse.Streaming.Abstractions</PackageId>
+    <Title>Microsoft Scynapse Streaming Abstractions</Title>
+    <Description>Streaming abstractions library for Microsoft Scynapse</Description>
+    <TargetFrameworks>$(DefaultTargetFrameworks)</TargetFrameworks>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <RootNamespace>Scynapse</RootNamespace>
+    <ProduceReferenceAssembly>false</ProduceReferenceAssembly>
+    <ScynapseBuildTimeCodeGen>true</ScynapseBuildTimeCodeGen>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Scynapse.Core.Abstractions\Scynapse.Core.Abstractions.csproj" />
+  </ItemGroup>
+
+</Project>

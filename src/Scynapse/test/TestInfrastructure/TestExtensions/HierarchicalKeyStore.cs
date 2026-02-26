@@ -2,7 +2,7 @@ using System.Diagnostics;
 using System.Globalization;
 using System.Text;
 
-namespace Orleans.Storage
+namespace Scynapse.Storage
 {
     internal class HierarchicalKeyStore : ILocalDataStore
     {

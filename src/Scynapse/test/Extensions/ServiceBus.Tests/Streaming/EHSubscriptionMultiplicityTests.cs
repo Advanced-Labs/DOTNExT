@@ -1,7 +1,7 @@
 using System.Diagnostics.Metrics;
 using Microsoft.Extensions.Logging;
-using Orleans.Runtime;
-using Orleans.TestingHost;
+using Scynapse.Runtime;
+using Scynapse.TestingHost;
 using TestExtensions;
 using UnitTests.StreamingTests;
 using Xunit;
@@ -12,12 +12,12 @@ namespace ServiceBus.Tests.StreamingTests
     /// Tests for EventHub subscription multiplicity scenarios including parallel, linear, and resubscription behaviors.
     /// </summary>
     [TestCategory("Functional")]
-    public class EHSubscriptionMultiplicityTests : OrleansTestingBase, IClassFixture<EHSubscriptionMultiplicityTests.Fixture>
+    public class EHSubscriptionMultiplicityTests : ScynapseTestingBase, IClassFixture<EHSubscriptionMultiplicityTests.Fixture>
     {
         private const string StreamProviderName = "EventHubStreamProvider";
         private const string StreamNamespace = "EHSubscriptionMultiplicityTestsNamespace";
-        private const string EHPath = "ehorleanstest7";
-        private const string EHConsumerGroup = "orleansnightly";
+        private const string EHPath = "ehscynapsetest7";
+        private const string EHConsumerGroup = "scynapsenightly";
 
         private readonly SubscriptionMultiplicityTestRunner runner;
         private readonly Fixture fixture;

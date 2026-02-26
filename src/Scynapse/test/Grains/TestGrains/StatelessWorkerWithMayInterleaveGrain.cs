@@ -1,5 +1,5 @@
-using Orleans.Concurrency;
-using Orleans.Serialization.Invocation;
+using Scynapse.Concurrency;
+using Scynapse.Serialization.Invocation;
 using UnitTests.GrainInterfaces;
 
 namespace UnitTests.Grains;

@@ -1,15 +1,15 @@
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using Orleans.Configuration;
-using Orleans.Runtime.ReminderService;
-using Orleans.Tests.SqlUtils;
+using Scynapse.Configuration;
+using Scynapse.Runtime.ReminderService;
+using Scynapse.Tests.SqlUtils;
 using TestExtensions;
 using UnitTests.General;
 
 namespace UnitTests.RemindersTest
 {
     /// <summary>
-    /// Tests for Orleans reminders table operations using PostgreSQL as the storage backend.
+    /// Tests for Scynapse reminders table operations using PostgreSQL as the storage backend.
     /// </summary>
     [TestCategory("Functional"), TestCategory("Reminders"), TestCategory("AdoNet"), TestCategory("PostgreSql")]
     public class PostgreSqlRemindersTableTests : ReminderTableTestsBase

@@ -1,8 +1,8 @@
 using System;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
-using Orleans.Configuration;
-using Orleans.TestingHost;
+using Scynapse.Configuration;
+using Scynapse.TestingHost;
 using Tester;
 using Tester.DurableJobs;
 using TestExtensions;

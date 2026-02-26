@@ -1,13 +1,13 @@
 using Microsoft.Extensions.Logging;
-using Orleans.TestingHost;
-using Orleans.TestingHost.Utils;
+using Scynapse.TestingHost;
+using Scynapse.TestingHost.Utils;
 using UnitTests.GrainInterfaces;
 using Xunit;
 
 namespace UnitTests.StreamingTests
 {
     /// <summary>
-    /// Sample streaming tests demonstrating basic producer-consumer patterns in Orleans Streaming.
+    /// Sample streaming tests demonstrating basic producer-consumer patterns in Scynapse Streaming.
     /// 
     /// These tests showcase fundamental streaming scenarios:
     /// - Producer and consumer grain communication via streams

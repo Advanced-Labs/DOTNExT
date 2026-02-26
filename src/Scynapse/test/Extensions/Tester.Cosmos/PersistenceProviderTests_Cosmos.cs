@@ -4,18 +4,18 @@ using System.Text.Json.Serialization;
 using Microsoft.Extensions.DependencyInjection;
 using Xunit.Abstractions;
 using TestExtensions;
-using Orleans.Runtime;
-using Orleans.Storage;
-using Orleans.Providers;
-using Orleans.Configuration;
-using Orleans.Persistence.Cosmos;
+using Scynapse.Runtime;
+using Scynapse.Storage;
+using Scynapse.Providers;
+using Scynapse.Configuration;
+using Scynapse.Persistence.Cosmos;
 using UnitTests.Persistence;
 using Microsoft.Extensions.Options;
 
 namespace Tester.Cosmos.Persistence;
 
 /// <summary>
-/// Tests for Orleans grain state persistence operations using Azure Cosmos DB as the storage provider.
+/// Tests for Scynapse grain state persistence operations using Azure Cosmos DB as the storage provider.
 /// </summary>
 [Collection(TestEnvironmentFixture.DefaultCollection)]
 [TestCategory("Persistence"), TestCategory("Cosmos")]

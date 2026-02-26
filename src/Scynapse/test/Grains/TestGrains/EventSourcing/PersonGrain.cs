@@ -1,6 +1,6 @@
-using Orleans.EventSourcing;
+using Scynapse.EventSourcing;
 using TestGrainInterfaces;
-using Orleans.Runtime;
+using Scynapse.Runtime;
 
 namespace TestGrains
 {
@@ -99,7 +99,7 @@ namespace TestGrains
         private static void AssertEqual<T>(T a, T b)
         {
             if (!Object.Equals(a, b))
-                throw new OrleansException($"Test failed. Expected = {a}. Actual = {b}.");
+                throw new ScynapseException($"Test failed. Expected = {a}. Actual = {b}.");
         }
 
 

@@ -1,0 +1,25 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <PackageId>Genesa.Scynapse.DurableJobs</PackageId>
+    <Title>Microsoft Scynapse Durable Jobs Library</Title>
+    <Description>Durable Jobs library for Microsoft Scynapse used on the server.</Description>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <TargetFrameworks>$(DefaultTargetFrameworks)</TargetFrameworks>
+    <ScynapseBuildTimeCodeGen>true</ScynapseBuildTimeCodeGen>
+    <ProduceReferenceAssembly>false</ProduceReferenceAssembly>
+    <DefineConstants>$(DefineConstants)</DefineConstants>
+    <VersionSuffix Condition="$(VersionSuffix) != ''">$(VersionSuffix).alpha.1</VersionSuffix>
+    <VersionSuffix Condition="$(VersionSuffix) == ''">alpha.1</VersionSuffix>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="$(SourceRoot)src\Scynapse.Runtime\Scynapse.Runtime.csproj" />
+    <ProjectReference Include="$(SourceRoot)src\Scynapse.Core.Abstractions\Scynapse.Core.Abstractions.csproj" />
+    <ProjectReference Include="..\Scynapse.Sdk\Scynapse.Sdk.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="README.md" Pack="true" PackagePath="\" />
+  </ItemGroup>
+</Project>

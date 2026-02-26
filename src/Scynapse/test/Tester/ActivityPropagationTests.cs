@@ -1,7 +1,7 @@
 using System.Diagnostics;
 using Microsoft.Extensions.Configuration;
-using Orleans.Runtime;
-using Orleans.TestingHost;
+using Scynapse.Runtime;
+using Scynapse.TestingHost;
 using TestExtensions;
 using UnitTests.GrainInterfaces;
 using Xunit;
@@ -9,9 +9,9 @@ using Xunit;
 namespace UnitTests.General
 {
     /// <summary>
-    /// Tests for distributed tracing and activity propagation across Orleans grain calls.
+    /// Tests for distributed tracing and activity propagation across Scynapse grain calls.
     /// 
-    /// Orleans supports distributed tracing through .NET's Activity API, which is compatible with OpenTelemetry.
+    /// Scynapse supports distributed tracing through .NET's Activity API, which is compatible with OpenTelemetry.
     /// These tests verify that:
     /// - Activity context (trace ID, span ID, trace state) is properly propagated from client to grain
     /// - Both W3C and Hierarchical activity ID formats are supported
@@ -21,14 +21,14 @@ namespace UnitTests.General
     /// The ActivityPropagationGrainCallFilter is responsible for creating child activities for grain calls
     /// and ensuring proper context propagation throughout the distributed system.
     /// </summary>
-    public class ActivityPropagationTests : OrleansTestingBase, IClassFixture<ActivityPropagationTests.Fixture>
+    public class ActivityPropagationTests : ScynapseTestingBase, IClassFixture<ActivityPropagationTests.Fixture>
     {
         private static readonly ActivityListener Listener;
 
         static ActivityPropagationTests()
         {
             // Configure an ActivityListener to monitor grain call activities
-            // This listener specifically targets activities created by Orleans for grain calls
+            // This listener specifically targets activities created by Scynapse for grain calls
             Listener = new()
             {
                 ShouldListenTo = p => p.Name == ActivityPropagationGrainCallFilter.ApplicationGrainActivitySourceName,
@@ -54,7 +54,7 @@ namespace UnitTests.General
         }
 
         /// <summary>
-        /// Test fixture that configures an Orleans cluster with activity propagation enabled.
+        /// Test fixture that configures an Scynapse cluster with activity propagation enabled.
         /// Both the silo and client are configured to support distributed tracing.
         /// </summary>
         public class Fixture : PluginLoadingTestClusterFixture
@@ -100,7 +100,7 @@ namespace UnitTests.General
         /// <summary>
         /// Tests that grain calls create new activities when no parent activity exists.
         /// Verifies both W3C (standard format) and Hierarchical (legacy .NET format) activity ID formats.
-        /// When no parent activity is present, Orleans creates a new root activity for the grain call.
+        /// When no parent activity is present, Scynapse creates a new root activity for the grain call.
         /// </summary>
         [Theory]
         [InlineData(ActivityIdFormat.W3C)]

@@ -2,7 +2,7 @@
 
 ## Overview
 
-This document describes the dynamic grain loading system implemented in Orleans, enabling runtime loading and unloading of grain assemblies without application restart. The implementation uses McMaster.NETCore.Plugins (MDCP) for assembly isolation and unloadability.
+This document describes the dynamic grain loading system implemented in Scynapse (our Orleans fork), enabling runtime loading and unloading of grain assemblies without application restart. The implementation uses McMaster.NETCore.Plugins (MDCP) for assembly isolation and unloadability.
 
 ---
 
@@ -29,17 +29,17 @@ This document describes the dynamic grain loading system implemented in Orleans,
 
 | Feature | Status | Location |
 |---------|--------|----------|
-| MDCP-based assembly loading | Complete | `Orleans.Runtime/DynamicGrains/PluginAssemblyLoader.cs` |
-| Assembly unloading with GC | Complete | `Orleans.Runtime/DynamicGrains/PluginGrainUnloaderService.cs` |
-| Cluster manifest propagation | Complete | `Orleans.Runtime/Manifest/ClusterManifestProvider.cs` |
-| Grain Type Directory (GTD) | Complete | `Orleans.Runtime/DynamicGrains/GrainTypeDirectoryGrain.cs` |
-| Dynamic Grain Client | Complete | `Orleans.Runtime/DynamicGrains/DynamicGrainClient.cs` |
-| Package Cache (File System) | Complete | `Orleans.Core/DynamicGrains/FileSystemPackageCache.cs` |
-| Package Store (Multi-source) | Complete | `Orleans.Runtime/DynamicGrains/GrainPackageStore.cs` |
-| GrainPackage metadata model | Complete | `Orleans.Core.Abstractions/Manifest/GrainPackage.cs` |
-| GrainTypeMeta hierarchy | Complete | `Orleans.Core.Abstractions/Manifest/GrainTypeMeta.cs` |
-| DLR dynamic invocation | Complete | `Orleans.Core/DynamicGrains/DynamicGrainReference.cs` |
-| GetGrainDynamic extensions | Complete | `Orleans.Core/DynamicGrains/GrainFactoryExtensions.cs` |
+| MDCP-based assembly loading | Complete | `Scynapse.Runtime/DynamicGrains/PluginAssemblyLoader.cs` |
+| Assembly unloading with GC | Complete | `Scynapse.Runtime/DynamicGrains/PluginGrainUnloaderService.cs` |
+| Cluster manifest propagation | Complete | `Scynapse.Runtime/Manifest/ClusterManifestProvider.cs` |
+| Grain Type Directory (GTD) | Complete | `Scynapse.Runtime/DynamicGrains/GrainTypeDirectoryGrain.cs` |
+| Dynamic Grain Client | Complete | `Scynapse.Runtime/DynamicGrains/DynamicGrainClient.cs` |
+| Package Cache (File System) | Complete | `Scynapse.Core/DynamicGrains/FileSystemPackageCache.cs` |
+| Package Store (Multi-source) | Complete | `Scynapse.Runtime/DynamicGrains/GrainPackageStore.cs` |
+| GrainPackage metadata model | Complete | `Scynapse.Core.Abstractions/Manifest/GrainPackage.cs` |
+| GrainTypeMeta hierarchy | Complete | `Scynapse.Core.Abstractions/Manifest/GrainTypeMeta.cs` |
+| DLR dynamic invocation | Complete | `Scynapse.Core/DynamicGrains/DynamicGrainReference.cs` |
+| GetGrainDynamic extensions | Complete | `Scynapse.Core/DynamicGrains/GrainFactoryExtensions.cs` |
 
 ### Partially Implemented ⚠️
 
@@ -65,7 +65,7 @@ This document describes the dynamic grain loading system implemented in Orleans,
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────────────┐
-│                              Orleans Cluster                                     │
+│                             Scynapse Cluster                                     │
 ├─────────────────────────────────────────────────────────────────────────────────┤
 │                                                                                 │
 │  ┌─────────────────────────────────────────────────────────────────────────┐   │
@@ -118,7 +118,7 @@ This document describes the dynamic grain loading system implemented in Orleans,
                                         │ DynamicGrainClient
                                         ▼
                     ┌───────────────────────────────────────┐
-                    │         Orleans Client / Silo          │
+                    │        Scynapse Client / Silo          │
                     │                                       │
                     │  ┌─────────────────────────────────┐  │
                     │  │ IDynamicGrainClient             │  │
@@ -141,7 +141,7 @@ This document describes the dynamic grain loading system implemented in Orleans,
 
 ## Component Locations & Responsibilities
 
-### Orleans.Core.Abstractions (Interfaces & Metadata)
+### Scynapse.Core.Abstractions (Interfaces & Metadata)
 
 | File | Type | Purpose |
 |------|------|---------|
@@ -151,7 +151,7 @@ This document describes the dynamic grain loading system implemented in Orleans,
 | `DynamicGrains/IGrainTypeDirectoryGrain.cs` | `IGrainTypeDirectoryGrain` | GTD interface - cluster-wide grain registry |
 | `DynamicGrains/IGrainPackageStore.cs` | `IGrainPackageStore`, `IGrainPackageSource` | Package storage abstraction |
 
-### Orleans.Core (Client-Side Implementations)
+### Scynapse.Core (Client-Side Implementations)
 
 | File | Type | Purpose |
 |------|------|---------|
@@ -162,7 +162,7 @@ This document describes the dynamic grain loading system implemented in Orleans,
 | `DynamicGrains/IGrainPackageCache.cs` | `IGrainPackageCache` | Cache interface for packages |
 | `DynamicGrains/FileSystemPackageCache.cs` | `FileSystemPackageCache` | Disk-based cache with LRU/LFU eviction |
 
-### Orleans.Runtime (Server-Side Implementations)
+### Scynapse.Runtime (Server-Side Implementations)
 
 | File | Type | Purpose |
 |------|------|---------|
@@ -170,7 +170,7 @@ This document describes the dynamic grain loading system implemented in Orleans,
 | `DynamicGrains/DynamicGrainClient.cs` | `DynamicGrainClient` | Client implementation with caching |
 | `DynamicGrains/GrainPackageStore.cs` | `GrainPackageStore` | Orchestrates multiple package sources |
 | `DynamicGrains/FileSystemPackageSource.cs` | `FileSystemPackageSource` | File-based package source |
-| `DynamicGrains/GrainStoragePackageSource.cs` | `GrainStoragePackageSource` | Orleans storage-based package source |
+| `DynamicGrains/GrainStoragePackageSource.cs` | `GrainStoragePackageSource` | Scynapse storage-based package source |
 | `DynamicGrains/PluginGrainLoaderService.cs` | `PluginGrainLoaderService` | Assembly loading with manifest updates |
 | `DynamicGrains/PluginGrainUnloaderService.cs` | `PluginGrainUnloaderService` | Assembly unloading with GC |
 | `DynamicGrains/PluginAssemblyLoader.cs` | `PluginAssemblyLoader` | MDCP-based isolated assembly loading |
@@ -187,7 +187,7 @@ The GTD is a **cluster-wide singleton grain** that serves as a registry of all a
 ### Current Implementation
 
 ```csharp
-// Interface: Orleans.Core.Abstractions/DynamicGrains/IGrainTypeDirectoryGrain.cs
+// Interface: Scynapse.Core.Abstractions/DynamicGrains/IGrainTypeDirectoryGrain.cs
 public interface IGrainTypeDirectoryGrain : IGrainWithStringKey
 {
     // Package Registration
@@ -213,7 +213,7 @@ public interface IGrainTypeDirectoryGrain : IGrainWithStringKey
 
 ### Persistence
 
-**Storage**: Uses Orleans default grain storage (`[StorageProvider(ProviderName = ProviderConstants.DEFAULT_STORAGE_PROVIDER_NAME)]`)
+**Storage**: Uses Scynapse default grain storage (`[StorageProvider(ProviderName = ProviderConstants.DEFAULT_STORAGE_PROVIDER_NAME)]`)
 
 **State Structure**:
 ```csharp
@@ -240,7 +240,7 @@ The GTD and Package Cache are **separate systems**:
 
 | System | Purpose | Storage |
 |--------|---------|---------|
-| **GTD** | Cluster-wide registry of grain types and their metadata | Orleans Grain Storage |
+| **GTD** | Cluster-wide registry of grain types and their metadata | Scynapse Grain Storage |
 | **Package Cache** | Local cache of downloaded package binaries | Local file system |
 
 The GTD **does not use** the Package Cache. They serve different purposes:
@@ -253,7 +253,7 @@ The GTD **does not use** the Package Cache. They serve different purposes:
 
 ### Current Implementation: FileSystemPackageCache
 
-**Location**: `Orleans.Core/DynamicGrains/FileSystemPackageCache.cs`
+**Location**: `Scynapse.Core/DynamicGrains/FileSystemPackageCache.cs`
 
 ```csharp
 public interface IGrainPackageCache
@@ -305,7 +305,7 @@ Enables **both clients AND silos** to access grains dynamically without compile-
 ### Current Implementation
 
 ```csharp
-// Interface: Orleans.Core/DynamicGrains/IDynamicGrainClient.cs
+// Interface: Scynapse.Core/DynamicGrains/IDynamicGrainClient.cs
 public interface IDynamicGrainClient
 {
     // Package Management
@@ -353,7 +353,7 @@ Wraps a grain reference to enable C# `dynamic` keyword usage:
 dynamic grain = await client.GetGrainDynamicAsync("MyApp.IHelloGrain", "key-1");
 string result = await grain.SayHello("World");  // DLR dispatches this
 
-// Implementation: Orleans.Core/DynamicGrains/DynamicGrainReference.cs
+// Implementation: Scynapse.Core/DynamicGrains/DynamicGrainReference.cs
 public class DynamicGrainReference : DynamicObject
 {
     public override bool TryInvokeMember(InvokeMemberBinder binder, object?[]? args, out object? result)
@@ -551,7 +551,7 @@ The user's question about leveraging NuGet is excellent. Here's an analysis:
 | Challenge | Notes |
 |-----------|-------|
 | **Custom package types** | Can mark packages as "grain packages" |
-| **Distributed feed** | Would need Orleans-backed NuGet feed or gateway |
+| **Distributed feed** | Would need Scynapse-backed NuGet feed or gateway |
 | **Runtime resolution** | NuGet is build-time focused, need runtime equivalent |
 | **Hot updates** | NuGet assumes rebuild, we want hot-swap |
 | **Cluster awareness** | Which silos have which packages? |
@@ -560,7 +560,7 @@ The user's question about leveraging NuGet is excellent. Here's an analysis:
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────────┐
-│                     Orleans Distributed Package System                       │
+│                    Scynapse Distributed Package System                       │
 ├─────────────────────────────────────────────────────────────────────────────┤
 │                                                                             │
 │  ┌─────────────────────────────────────────────────────────────────────┐   │
@@ -570,7 +570,7 @@ The user's question about leveraging NuGet is excellent. Here's an analysis:
 │  │  - Metadata queries (versions, dependencies)                          │   │
 │  │  - Package search                                                     │   │
 │  │  - Version resolution                                                 │   │
-│  │  - Orleans storage backend                                            │   │
+│  │  - Scynapse storage backend                                            │   │
 │  └─────────────────────────────────────────────────────────────────────┘   │
 │                              │                                              │
 │                              ▼                                              │
@@ -608,12 +608,12 @@ The user's question about leveraging NuGet is excellent. Here's an analysis:
 
 1. **NuGet Protocol Study**
    - V3 API for metadata/search/download
-   - Can we implement Orleans-backed NuGet feed?
+   - Can we implement Scynapse-backed NuGet feed?
    - [NuGet Server API](https://docs.microsoft.com/en-us/nuget/api/overview)
 
 2. **BaGet Analysis**
    - Open-source NuGet server
-   - Could be adapted for Orleans storage backend
+   - Could be adapted for Scynapse storage backend
    - [BaGet GitHub](https://github.com/loic-sharma/BaGet)
 
 3. **NuGet Client Libraries**
@@ -623,8 +623,8 @@ The user's question about leveraging NuGet is excellent. Here's an analysis:
 
 4. **Custom Package Types**
    - `.nupkg` is just a ZIP with conventions
-   - Could add Orleans-specific metadata
-   - Mark as `<PackageType>OrleanGrainPackage</PackageType>`
+   - Could add Scynapse-specific metadata
+   - Mark as `<PackageType>ScynapseGrainPackage</PackageType>`
 
 ---
 
@@ -632,36 +632,36 @@ The user's question about leveraging NuGet is excellent. Here's an analysis:
 
 ### Important: Project References vs NuGet Packages
 
-When developing Orleans itself (using project references to `src/Orleans.*` instead of NuGet packages), **host/application projects must include `<OrleansBuildTimeCodeGen>true</OrleansBuildTimeCodeGen>`** in their .csproj file.
+When developing Scynapse itself (using project references to `src/Scynapse.*` instead of NuGet packages), **host/application projects must include `<ScynapseBuildTimeCodeGen>true</ScynapseBuildTimeCodeGen>`** in their .csproj file.
 
 #### Why This Is Required
 
-Orleans discovers grain implementations at runtime using `ReferencedAssemblyProvider`. This provider filters assemblies based on their dependency chain to `Orleans.Serialization`:
+Scynapse discovers grain implementations at runtime using `ReferencedAssemblyProvider`. This provider filters assemblies based on their dependency chain to `Scynapse.Serialization`:
 
 ```csharp
-// From ReferencedAssemblyProvider.cs - only processes assemblies with direct Orleans.Serialization dependency
-if (!lib.Name.Contains("Orleans.Serialization") &&
-    !lib.Dependencies.Any(dep => dep.Name.Contains("Orleans.Serialization")))
+// From ReferencedAssemblyProvider.cs - only processes assemblies with direct Scynapse.Serialization dependency
+if (!lib.Name.Contains("Scynapse.Serialization") &&
+    !lib.Dependencies.Any(dep => dep.Name.Contains("Scynapse.Serialization")))
 {
     continue;  // Skip assembly!
 }
 ```
 
-**The issue**: `Orleans.Persistence.Memory` depends on `Orleans.Serialization` *transitively* (via `Orleans.Runtime` → `Orleans.Core`), not directly. When using project references, this can cause the `MemoryStorageGrain` (and other framework grains) to not be discovered.
+**The issue**: `Scynapse.Persistence.Memory` depends on `Scynapse.Serialization` *transitively* (via `Scynapse.Runtime` → `Scynapse.Core`), not directly. When using project references, this can cause the `MemoryStorageGrain` (and other framework grains) to not be discovered.
 
 #### The Solution
 
-Adding `OrleansBuildTimeCodeGen=true` to your application project causes the Orleans source generator to:
+Adding `ScynapseBuildTimeCodeGen=true` to your application project causes the Scynapse source generator to:
 1. Run at **compile-time** on your application
-2. Scan **all** transitively referenced assemblies (including `Orleans.Persistence.Memory`)
+2. Scan **all** transitively referenced assemblies (including `Scynapse.Persistence.Memory`)
 3. Generate a **comprehensive** `TypeManifestProvider` that includes ALL grain types
 4. No runtime discovery needed - everything is baked into your generated code
 
 #### NuGet Package Users
 
-When using Orleans via NuGet packages (the normal case), this is handled automatically:
-- The `Microsoft.Orleans.Sdk` package sets up code generation
-- Each Orleans package has pre-compiled generated code baked in
+When using Scynapse via NuGet packages (the normal case), this is handled automatically:
+- The `Genesa.Scynapse.Sdk` package sets up code generation
+- Each Scynapse package has pre-compiled generated code baked in
 - Assembly discovery works because packages have proper dependency metadata
 
 ---
@@ -715,9 +715,9 @@ Located in `playground/PluginGrainScenarios/`:
 
 ## Files Summary
 
-### Core Abstractions (Orleans.Core.Abstractions)
+### Core Abstractions (Scynapse.Core.Abstractions)
 ```
-src/Orleans.Core.Abstractions/
+src/Scynapse.Core.Abstractions/
 ├── Manifest/
 │   ├── GrainPackage.cs              # GrainPackage, GrainPackageInfo, GrainPackageAssembly
 │   ├── GrainTypeMeta.cs             # GrainTypeMeta
@@ -727,9 +727,9 @@ src/Orleans.Core.Abstractions/
     └── IGrainPackageStore.cs        # Package store interface
 ```
 
-### Client-Side (Orleans.Core)
+### Client-Side (Scynapse.Core)
 ```
-src/Orleans.Core/DynamicGrains/
+src/Scynapse.Core/DynamicGrains/
 ├── IDynamicGrainClient.cs           # Dynamic client interface
 ├── GrainPackageHandle.cs            # Loaded package handle
 ├── DynamicGrainReference.cs         # DLR wrapper
@@ -738,14 +738,14 @@ src/Orleans.Core/DynamicGrains/
 └── FileSystemPackageCache.cs        # Disk cache implementation
 ```
 
-### Server-Side (Orleans.Runtime)
+### Server-Side (Scynapse.Runtime)
 ```
-src/Orleans.Runtime/DynamicGrains/
+src/Scynapse.Runtime/DynamicGrains/
 ├── GrainTypeDirectoryGrain.cs       # GTD implementation
 ├── DynamicGrainClient.cs            # Dynamic client implementation
 ├── GrainPackageStore.cs             # Multi-source package store
 ├── FileSystemPackageSource.cs       # File-based source
-├── GrainStoragePackageSource.cs     # Orleans storage source
+├── GrainStoragePackageSource.cs     # Scynapse storage source
 ├── PluginGrainLoaderService.cs      # Assembly loading
 ├── PluginGrainUnloaderService.cs    # Assembly unloading
 ├── PluginAssemblyLoader.cs          # MDCP wrapper
@@ -772,4 +772,4 @@ playground/
 - [AssemblyLoadContext](https://docs.microsoft.com/en-us/dotnet/core/dependency-loading/understanding-assemblyloadcontext) - .NET assembly isolation
 - [NuGet Server API](https://docs.microsoft.com/en-us/nuget/api/overview) - For distributed package system research
 - [BaGet](https://github.com/loic-sharma/BaGet) - Open-source NuGet server to study
-- Orleans Manifest System - `src/Orleans.Runtime/Manifest/`
+- Scynapse Manifest System - `src/Scynapse.Runtime/Manifest/`

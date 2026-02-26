@@ -5,9 +5,9 @@ using Xunit;
 namespace UnitTests.ConcurrencyTests
 {
     /// <summary>
-    /// Tests for Orleans grain concurrency features and read-only methods.
+    /// Tests for Scynapse grain concurrency features and read-only methods.
     /// 
-    /// Orleans provides several concurrency models for grains:
+    /// Scynapse provides several concurrency models for grains:
     /// - Default: Turn-based concurrency (one request at a time)
     /// - [ReadOnly]: Methods can execute concurrently with other methods
     /// - [AlwaysInterleave]: All methods can interleave
@@ -19,7 +19,7 @@ namespace UnitTests.ConcurrencyTests
     /// - Reducing latency when multiple clients read the same data
     /// - Maintaining grain state consistency
     /// </summary>
-    public class ConcurrencyTests : OrleansTestingBase, IClassFixture<ConcurrencyTests.Fixture>
+    public class ConcurrencyTests : ScynapseTestingBase, IClassFixture<ConcurrencyTests.Fixture>
     {
         private readonly Fixture fixture;
 
@@ -58,7 +58,7 @@ namespace UnitTests.ConcurrencyTests
         /// Stress test for concurrent execution with collection return values.
         /// Verifies that:
         /// - Multiple concurrent calls can safely return collections
-        /// - Orleans properly handles deep copying of return values
+        /// - Scynapse properly handles deep copying of return values
         /// - No data corruption occurs under high concurrency (2000 iterations × 20 concurrent calls)
         /// 
         /// This test is important because returning mutable collections from concurrent

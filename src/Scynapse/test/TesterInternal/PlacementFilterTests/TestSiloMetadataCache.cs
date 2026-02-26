@@ -1,4 +1,4 @@
-using Orleans.Runtime.MembershipService.SiloMetadata;
+using Scynapse.Runtime.MembershipService.SiloMetadata;
 
 namespace UnitTests.PlacementFilterTests;
 

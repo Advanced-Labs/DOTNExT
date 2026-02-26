@@ -1,0 +1,9 @@
+namespace Scynapse.Dashboard.Metrics.TypeFormatting;
+
+internal enum ParseState
+{
+    TypeNameSection,
+    GenericCount,
+    GenericArray,
+    TypeArray
+}

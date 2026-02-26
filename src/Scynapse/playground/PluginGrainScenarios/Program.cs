@@ -2,10 +2,10 @@ using System.Net;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using Orleans;
-using Orleans.Configuration;
-using Orleans.Hosting;
-using Orleans.Runtime.DynamicGrains;
+using Scynapse;
+using Scynapse.Configuration;
+using Scynapse.Hosting;
+using Scynapse.Runtime.DynamicGrains;
 using Spectre.Console;
 
 namespace PluginGrainScenarios;
@@ -175,9 +175,9 @@ public static class TestGrainsFinder
             Path.Combine(baseDir, "..", "DynamicGrainLoading.TestGrains", "bin", "Release", "net8.0", "DynamicGrainLoading.TestGrains.dll"),
         };
 
-        // Also search upward for Orleans root
+        // Also search upward for Scynapse root
         var currentDir = new DirectoryInfo(baseDir);
-        while (currentDir != null && !File.Exists(Path.Combine(currentDir.FullName, "Orleans.slnx")))
+        while (currentDir != null && !File.Exists(Path.Combine(currentDir.FullName, "Scynapse.slnx")))
         {
             currentDir = currentDir.Parent;
         }
@@ -216,7 +216,7 @@ public static class SiloHelper
     public static IHost BuildSingleSilo(int siloPort = 11111, int gatewayPort = 30000, LogLevel logLevel = LogLevel.Information)
     {
         return Host.CreateDefaultBuilder()
-            .UseOrleans(siloBuilder =>
+            .UseScynapse(siloBuilder =>
             {
                 siloBuilder
                     .UseLocalhostClustering(siloPort, gatewayPort)
@@ -232,7 +232,7 @@ public static class SiloHelper
                 logging.ClearProviders();
                 logging.AddConsole();
                 logging.SetMinimumLevel(logLevel);
-                logging.AddFilter("Orleans.Runtime.DynamicGrains", LogLevel.Debug);
+                logging.AddFilter("Scynapse.Runtime.DynamicGrains", LogLevel.Debug);
                 logging.AddFilter("Microsoft.Hosting", LogLevel.Warning);
             })
             .Build();
@@ -241,7 +241,7 @@ public static class SiloHelper
     public static IHost BuildSingleSiloWithStreams(int siloPort = 11111, int gatewayPort = 30000, LogLevel logLevel = LogLevel.Information)
     {
         return Host.CreateDefaultBuilder()
-            .UseOrleans(siloBuilder =>
+            .UseScynapse(siloBuilder =>
             {
                 siloBuilder
                     .UseLocalhostClustering(siloPort, gatewayPort)
@@ -259,8 +259,8 @@ public static class SiloHelper
                 logging.ClearProviders();
                 logging.AddConsole();
                 logging.SetMinimumLevel(logLevel);
-                logging.AddFilter("Orleans.Runtime.DynamicGrains", LogLevel.Debug);
-                logging.AddFilter("Orleans.Streams", LogLevel.Debug);
+                logging.AddFilter("Scynapse.Runtime.DynamicGrains", LogLevel.Debug);
+                logging.AddFilter("Scynapse.Streams", LogLevel.Debug);
                 logging.AddFilter("Microsoft.Hosting", LogLevel.Warning);
             })
             .Build();
@@ -269,7 +269,7 @@ public static class SiloHelper
     public static IHost BuildClusterSilo(string name, int siloPort, int gatewayPort, int primarySiloPort, LogLevel logLevel = LogLevel.Information)
     {
         return Host.CreateDefaultBuilder()
-            .UseOrleans(siloBuilder =>
+            .UseScynapse(siloBuilder =>
             {
                 siloBuilder
                     .Configure<ClusterOptions>(options =>
@@ -288,8 +288,8 @@ public static class SiloHelper
                 logging.ClearProviders();
                 logging.AddConsole();
                 logging.SetMinimumLevel(logLevel);
-                logging.AddFilter("Orleans.Runtime.DynamicGrains", LogLevel.Debug);
-                logging.AddFilter($"Orleans.{name}", LogLevel.Information);
+                logging.AddFilter("Scynapse.Runtime.DynamicGrains", LogLevel.Debug);
+                logging.AddFilter($"Scynapse.{name}", LogLevel.Information);
                 logging.AddFilter("Microsoft.Hosting", LogLevel.Warning);
             })
             .Build();

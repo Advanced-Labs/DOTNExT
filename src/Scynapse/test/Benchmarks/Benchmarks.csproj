@@ -8,7 +8,7 @@
     <ServerGarbageCollection>true</ServerGarbageCollection>
     <ConcurrentGarbageCollection>true</ConcurrentGarbageCollection>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <OrleansBuildTimeCodeGen>true</OrleansBuildTimeCodeGen>
+    <ScynapseBuildTimeCodeGen>true</ScynapseBuildTimeCodeGen>
     <GenerateProgramFile>false</GenerateProgramFile>
     <!-- Do not warn on errors caused by Protocol Buffers codegen, eg: "error CS8981: The type name 'pb' only contains lower-cased ascii characters. Such names may become reserved for the language." -->
     <NoWarn>$(NoWarn);8981</NoWarn>
@@ -41,13 +41,13 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="$(SourceRoot)src\Azure\Orleans.Persistence.AzureStorage\Orleans.Persistence.AzureStorage.csproj" />
-    <ProjectReference Include="$(SourceRoot)src\Azure\Orleans.Transactions.AzureStorage\Orleans.Transactions.AzureStorage.csproj" />
-    <ProjectReference Include="$(SourceRoot)src\AdoNet\Orleans.Persistence.AdoNet\Orleans.Persistence.AdoNet.csproj" />
+    <ProjectReference Include="$(SourceRoot)src\Azure\Scynapse.Persistence.AzureStorage\Scynapse.Persistence.AzureStorage.csproj" />
+    <ProjectReference Include="$(SourceRoot)src\Azure\Scynapse.Transactions.AzureStorage\Scynapse.Transactions.AzureStorage.csproj" />
+    <ProjectReference Include="$(SourceRoot)src\AdoNet\Scynapse.Persistence.AdoNet\Scynapse.Persistence.AdoNet.csproj" />
     <ProjectReference Include="..\Grains\TestGrainInterfaces\TestGrainInterfaces.csproj" />
     <ProjectReference Include="..\Grains\BenchmarkGrains\BenchmarkGrains.csproj" />
     <ProjectReference Include="..\TestInfrastructure\TestExtensions\TestExtensions.csproj" />
-    <ProjectReference Include="..\..\src\Dashboard\Orleans.Dashboard\Orleans.Dashboard.csproj" />
+    <ProjectReference Include="..\..\src\Dashboard\Scynapse.Dashboard\Scynapse.Dashboard.csproj" />
   </ItemGroup>
 
   <ItemGroup>

@@ -8,11 +8,11 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.VisualStudio.TestPlatform.Utilities;
 using NSubstitute;
-using Orleans.GrainDirectory;
-using Orleans.Hosting;
-using Orleans.Runtime;
-using Orleans.Runtime.GrainDirectory;
-using Orleans.Runtime.Hosting;
+using Scynapse.GrainDirectory;
+using Scynapse.Hosting;
+using Scynapse.Runtime;
+using Scynapse.Runtime.GrainDirectory;
+using Scynapse.Runtime.Hosting;
 using TestExtensions;
 using UnitTests.Grains.Directories;
 using Xunit;
@@ -35,7 +35,7 @@ namespace NonSilo.Tests.Directory
             this.customDirectory = Substitute.For<IGrainDirectory>();
 
             var hostBuilder = new HostBuilder();
-            hostBuilder.UseOrleans((ctx, siloBuilder) =>
+            hostBuilder.UseScynapse((ctx, siloBuilder) =>
             {
                 siloBuilder
                     .ConfigureServices(svc => svc.AddSingleton(Substitute.For<DhtGrainLocator>(null, null)))

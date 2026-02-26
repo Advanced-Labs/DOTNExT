@@ -54,7 +54,7 @@ public static class Extensions
                     .AddHttpClientInstrumentation()
                     .AddRuntimeInstrumentation()
                     .AddMeter("System.Runtime")
-                    .AddMeter("Microsoft.Orleans");
+                    .AddMeter("Genesa.Scynapse");
             });
 
         builder.AddOpenTelemetryExporters();

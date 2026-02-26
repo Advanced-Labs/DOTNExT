@@ -2,8 +2,8 @@ namespace UnitTests.GrainInterfaces
 {
     using System.Threading.Tasks;
 
-    using Orleans;
-    using Orleans.Runtime;
+    using Scynapse;
+    using Scynapse.Runtime;
 
     internal interface IDefaultPlacementGrain : IGrainWithIntegerKey
     {

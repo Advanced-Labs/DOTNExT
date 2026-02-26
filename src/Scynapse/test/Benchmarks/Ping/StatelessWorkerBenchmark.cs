@@ -1,7 +1,7 @@
 using System.Diagnostics;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Orleans.Concurrency;
+using Scynapse.Concurrency;
 
 namespace Benchmarks.Ping;
 
@@ -16,7 +16,7 @@ public class StatelessWorkerBenchmark : IDisposable
     public StatelessWorkerBenchmark()
     {
         _host = new HostBuilder()
-            .UseOrleans((_, siloBuilder) => siloBuilder
+            .UseScynapse((_, siloBuilder) => siloBuilder
             .UseLocalhostClustering())
             .Build();
 

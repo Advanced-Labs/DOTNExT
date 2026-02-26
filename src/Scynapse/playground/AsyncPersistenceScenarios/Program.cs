@@ -9,9 +9,9 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Scynapse.AsyncPlus.Extensions;
 using Scynapse.AsyncPlus.Services;
-using Orleans;
-using Orleans.Configuration;
-using Orleans.Hosting;
+using Scynapse;
+using Scynapse.Configuration;
+using Scynapse.Hosting;
 using Spectre.Console;
 
 namespace AsyncPersistenceScenarios;
@@ -49,12 +49,12 @@ public static class Program
         {
             e.Cancel = true; // Prevent immediate termination
             AnsiConsole.MarkupLine("\n[yellow]Shutting down gracefully...[/]");
-            if (_orleansSiloHost != null)
+            if (_scynapseSiloHost != null)
             {
                 try
                 {
-                    await _orleansSiloHost.StopAsync(TimeSpan.FromSeconds(5));
-                    _orleansSiloHost.Dispose();
+                    await _scynapseSiloHost.StopAsync(TimeSpan.FromSeconds(5));
+                    _scynapseSiloHost.Dispose();
                 }
                 catch { }
             }
@@ -79,7 +79,7 @@ public static class Program
                 ("", "───────────────────────────────"),
                 ("6", "★ Instrumented State Machine (Roslyn Demo)"),
                 ("7", "★★ Dynamic Compilation (Modified Roslyn)"),
-                ("8", "★★★ Orleans/RavenDB Persistence (Manual)"),
+                ("8", "★★★ Scynapse/RavenDB Persistence (Manual)"),
                 ("", "───────────────────────────────"),
                 ("S", "★★★★ SELF-MANAGING SCENARIOS →"),
                 ("", "───────────────────────────────"),
@@ -127,7 +127,7 @@ public static class Program
             case "5": await RunLoopChallengeAsync(); break;
             case "6": await RunInstrumentedWorkflowChallengeAsync(); break;
             case "7": await RunDynamicCompilationChallengeAsync(); break;
-            case "8": await RunOrleansRavenDbChallengeAsync(); break;
+            case "8": await RunScynapseRavenDbChallengeAsync(); break;
             case "S": await RunSelfManagingScenariosMenuAsync(); break;
             case "V": ViewPersistedState(); break;
             case "C": ClearAllState(); break;
@@ -1008,27 +1008,27 @@ public static class Program
     }
 
     /// <summary>
-    /// Challenge 8: Orleans/RavenDB persistence using Scynapse.AsyncPlus.
-    /// Starts an Orleans silo with RavenDB-backed grain storage and runs
+    /// Challenge 8: Scynapse/RavenDB persistence using Scynapse.AsyncPlus.
+    /// Starts an Scynapse silo with RavenDB-backed grain storage and runs
     /// [Persistable] workflows with real distributed persistence.
     /// </summary>
-    private static async Task RunOrleansRavenDbChallengeAsync()
+    private static async Task RunScynapseRavenDbChallengeAsync()
     {
         while (true)
         {
             Console.Clear();
             AnsiConsole.MarkupLine("[cyan]═══════════════════════════════════════════════════════════════════[/]");
-            AnsiConsole.MarkupLine("[cyan]    CHALLENGE 8: ORLEANS/RAVENDB PERSISTENCE (Scynapse.AsyncPlus)[/]");
+            AnsiConsole.MarkupLine("[cyan]    CHALLENGE 8: SCYNAPSE/RAVENDB PERSISTENCE (Scynapse.AsyncPlus)[/]");
             AnsiConsole.MarkupLine("[cyan]═══════════════════════════════════════════════════════════════════[/]");
             AnsiConsole.WriteLine();
 
             // Scenario explanation
             var explanation = new Panel(
-                "[white]Tests Orleans grain persistence with the Scynapse.AsyncPlus library.\n\n" +
+                "[white]Tests Scynapse grain persistence with the Scynapse.AsyncPlus library.\n\n" +
                 "[yellow]What it does:[/]\n" +
                 "• Runs InstrumentedSimpleWorkflow - a hand-written state machine that\n" +
                 "  demonstrates the exact pattern Roslyn generates for [[Persistable]] methods\n" +
-                "• 2 await points, each triggering a checkpoint to Orleans grain storage\n" +
+                "• 2 await points, each triggering a checkpoint to Scynapse grain storage\n" +
                 "• With RavenDB: checkpoints persist to database, survive process restarts\n\n" +
                 "[yellow]The workflow:[/]\n" +
                 "  input(42) → Step1: 42*2=84 → [[CHECKPOINT]] → Step2: 84+10=94 → [[CHECKPOINT]] → Result: 94\n\n" +
@@ -1041,7 +1041,7 @@ public static class Program
             AnsiConsole.WriteLine();
 
             // Show silo status
-            var siloStatus = _orleansSiloHost != null ? "[green]● Running[/]" : "[grey]○ Stopped[/]";
+            var siloStatus = _scynapseSiloHost != null ? "[green]● Running[/]" : "[grey]○ Stopped[/]";
             AnsiConsole.MarkupLine($"Silo Status: {siloStatus}");
             AnsiConsole.WriteLine();
 
@@ -1049,7 +1049,7 @@ public static class Program
             {
                 ("1", "Start Silo with MemoryStorage (for testing)"),
                 ("2", "Start Silo with RavenDB Storage"),
-                ("3", "Run [[Persistable]] Workflow on Orleans"),
+                ("3", "Run [[Persistable]] Workflow on Scynapse"),
                 ("4", "View Grain State"),
                 ("5", "Stop Silo"),
                 ("", "───────────────────────────────"),
@@ -1062,11 +1062,11 @@ public static class Program
                 break;
 
             Console.Clear();
-            if (action == "1") await StartOrleansSiloAsync(useRavenDb: false);
-            else if (action == "2") await StartOrleansSiloAsync(useRavenDb: true);
-            else if (action == "3") await RunPersistableOnOrleansAsync();
-            else if (action == "4") await ViewOrleansGrainStateAsync();
-            else if (action == "5") await StopOrleansSiloAsync();
+            if (action == "1") await StartScynapseSiloAsync(useRavenDb: false);
+            else if (action == "2") await StartScynapseSiloAsync(useRavenDb: true);
+            else if (action == "3") await RunPersistableOnScynapseAsync();
+            else if (action == "4") await ViewScynapseGrainStateAsync();
+            else if (action == "5") await StopScynapseSiloAsync();
             else if (action == "S") ViewInstrumentedWorkflowSource();
 
             AnsiConsole.WriteLine();
@@ -1092,7 +1092,7 @@ public static class Program
 
             var explanation = new Panel(
                 "[white]These scenarios are fully self-contained:\n" +
-                "• Auto-start Orleans silos with RavenDB\n" +
+                "• Auto-start Scynapse silos with RavenDB\n" +
                 "• Auto-stop silos when done\n" +
                 "• Produce structured output with Spectre.Console tables\n\n" +
                 "[yellow]Scenario Types:[/]\n" +
@@ -1250,25 +1250,25 @@ public static class Program
         }
     }
 
-    // Static fields for Orleans silo management
-    private static IHost? _orleansSiloHost;
-    private static ScynapseAsyncPersistenceService? _orleansPersistence;
+    // Static fields for Scynapse silo management
+    private static IHost? _scynapseSiloHost;
+    private static ScynapseAsyncPersistenceService? _scynapsePersistence;
     private static EventHandler<DOTNExT.Persistence.CheckpointEventArgs>? _checkpointHandler;
     private static EventHandler<DOTNExT.Persistence.CompleteEventArgs>? _completeHandler;
 
-    private static async Task StartOrleansSiloAsync(bool useRavenDb)
+    private static async Task StartScynapseSiloAsync(bool useRavenDb)
     {
-        if (_orleansSiloHost != null)
+        if (_scynapseSiloHost != null)
         {
             AnsiConsole.MarkupLine("[yellow]Silo is already running. Stop it first.[/]");
             return;
         }
 
         await AnsiConsole.Status()
-            .StartAsync($"Starting Orleans silo ({(useRavenDb ? "RavenDB" : "Memory")} storage)...", async ctx =>
+            .StartAsync($"Starting Scynapse silo ({(useRavenDb ? "RavenDB" : "Memory")} storage)...", async ctx =>
             {
                 var siloBuilder = Host.CreateDefaultBuilder()
-                    .UseOrleans(silo =>
+                    .UseScynapse(silo =>
                     {
                         silo.UseLocalhostClustering(siloPort: 11112, gatewayPort: 30001)
                             .Configure<ClusterOptions>(options =>
@@ -1302,41 +1302,41 @@ public static class Program
                         logging.AddFilter("Scynapse.AsyncPlus", LogLevel.Information);
                     });
 
-                _orleansSiloHost = siloBuilder.Build();
-                await _orleansSiloHost.StartAsync();
+                _scynapseSiloHost = siloBuilder.Build();
+                await _scynapseSiloHost.StartAsync();
 
                 // Get the persistence service from the silo
-                _orleansPersistence = _orleansSiloHost.Services.GetRequiredService<IAsyncPersistenceService>()
+                _scynapsePersistence = _scynapseSiloHost.Services.GetRequiredService<IAsyncPersistenceService>()
                     as ScynapseAsyncPersistenceService;
 
                 ctx.Status("Silo started!");
             });
 
-        AnsiConsole.MarkupLine("[green]Orleans silo started successfully![/]");
+        AnsiConsole.MarkupLine("[green]Scynapse silo started successfully![/]");
         AnsiConsole.MarkupLine("[grey]  Cluster: async-persistence-test[/]");
         AnsiConsole.MarkupLine("[grey]  Storage: AsyncPlusStorage[/]");
         AnsiConsole.MarkupLine("[grey]  Silo Port: 11112[/]");
         AnsiConsole.MarkupLine("[grey]  Gateway: 30001[/]");
     }
 
-    private static async Task RunPersistableOnOrleansAsync()
+    private static async Task RunPersistableOnScynapseAsync()
     {
-        if (_orleansSiloHost == null || _orleansPersistence == null)
+        if (_scynapseSiloHost == null || _scynapsePersistence == null)
         {
-            AnsiConsole.MarkupLine("[red]Orleans silo not running. Start it first.[/]");
+            AnsiConsole.MarkupLine("[red]Scynapse silo not running. Start it first.[/]");
             return;
         }
 
-        const string workflowId = "orleans-persistable-workflow-1";
+        const string workflowId = "scynapse-persistable-workflow-1";
 
-        AnsiConsole.MarkupLine("[yellow]Running [[Persistable]] workflow with Orleans persistence...[/]");
+        AnsiConsole.MarkupLine("[yellow]Running [[Persistable]] workflow with Scynapse persistence...[/]");
         AnsiConsole.WriteLine();
 
         // Track checkpoints
         int checkpointCount = 0;
 
         // Unsubscribe any previous handlers first to avoid accumulation
-        if (_orleansPersistence is IAsyncPersistenceService persistenceWithEvents)
+        if (_scynapsePersistence is IAsyncPersistenceService persistenceWithEvents)
         {
             if (_checkpointHandler != null)
                 persistenceWithEvents.OnCheckpoint -= _checkpointHandler;
@@ -1347,11 +1347,11 @@ public static class Program
             _checkpointHandler = (s, e) =>
             {
                 checkpointCount++;
-                AnsiConsole.MarkupLine($"[blue]Orleans Checkpoint: {e.MethodId} at state {e.StateNumber}[/]");
+                AnsiConsole.MarkupLine($"[blue]Scynapse Checkpoint: {e.MethodId} at state {e.StateNumber}[/]");
             };
             _completeHandler = (s, e) =>
             {
-                AnsiConsole.MarkupLine($"[green]Orleans Complete: {e.MethodId}[/]");
+                AnsiConsole.MarkupLine($"[green]Scynapse Complete: {e.MethodId}[/]");
             };
 
             // Subscribe
@@ -1361,8 +1361,8 @@ public static class Program
 
         try
         {
-            // Use the Orleans persistence context
-            using (AsyncPersistenceContext.SetCurrent(_orleansPersistence))
+            // Use the Scynapse persistence context
+            using (AsyncPersistenceContext.SetCurrent(_scynapsePersistence))
             {
                 // Run the instrumented workflow (which has the Roslyn-compatible state machine)
                 var runner = new InstrumentedWorkflowRunner(workflowId);
@@ -1370,7 +1370,7 @@ public static class Program
 
                 AnsiConsole.WriteLine();
                 AnsiConsole.MarkupLine($"[green]Workflow completed with result: {result}[/]");
-                AnsiConsole.MarkupLine($"[cyan]Total Orleans checkpoints: {checkpointCount}[/]");
+                AnsiConsole.MarkupLine($"[cyan]Total Scynapse checkpoints: {checkpointCount}[/]");
             }
         }
         catch (Exception ex)
@@ -1380,11 +1380,11 @@ public static class Program
         }
     }
 
-    private static async Task ViewOrleansGrainStateAsync()
+    private static async Task ViewScynapseGrainStateAsync()
     {
-        if (_orleansSiloHost == null)
+        if (_scynapseSiloHost == null)
         {
-            AnsiConsole.MarkupLine("[red]Orleans silo not running.[/]");
+            AnsiConsole.MarkupLine("[red]Scynapse silo not running.[/]");
             return;
         }
 
@@ -1392,12 +1392,12 @@ public static class Program
         AnsiConsole.MarkupLine("[grey]Or querying grain directly...[/]");
 
         // Get the grain factory and query state
-        var grainFactory = _orleansSiloHost.Services.GetRequiredService<IGrainFactory>();
+        var grainFactory = _scynapseSiloHost.Services.GetRequiredService<IGrainFactory>();
 
         var workflowIds = new[]
         {
-            "orleans-persistable-workflow-1",
-            "orleans-dynamic-workflow-1"
+            "scynapse-persistable-workflow-1",
+            "scynapse-dynamic-workflow-1"
         };
 
         var table = new Table();
@@ -1429,25 +1429,25 @@ public static class Program
         await Task.CompletedTask;
     }
 
-    private static async Task StopOrleansSiloAsync()
+    private static async Task StopScynapseSiloAsync()
     {
-        if (_orleansSiloHost == null)
+        if (_scynapseSiloHost == null)
         {
             AnsiConsole.MarkupLine("[yellow]No silo running.[/]");
             return;
         }
 
         await AnsiConsole.Status()
-            .StartAsync("Stopping Orleans silo...", async ctx =>
+            .StartAsync("Stopping Scynapse silo...", async ctx =>
             {
-                await _orleansSiloHost.StopAsync();
-                _orleansSiloHost.Dispose();
-                _orleansSiloHost = null;
-                _orleansPersistence = null;
+                await _scynapseSiloHost.StopAsync();
+                _scynapseSiloHost.Dispose();
+                _scynapseSiloHost = null;
+                _scynapsePersistence = null;
                 ctx.Status("Silo stopped!");
             });
 
-        AnsiConsole.MarkupLine("[green]Orleans silo stopped.[/]");
+        AnsiConsole.MarkupLine("[green]Scynapse silo stopped.[/]");
     }
 
     /// <summary>
@@ -1745,29 +1745,29 @@ public static class Program
             }
             Log("");
 
-            // === Challenge 8: Orleans/RavenDB Persistence ===
-            Log("--- Challenge 8: Orleans/RavenDB Persistence ---");
+            // === Challenge 8: Scynapse/RavenDB Persistence ===
+            Log("--- Challenge 8: Scynapse/RavenDB Persistence ---");
             try
             {
-                Log("  Starting Orleans silo with memory storage...");
+                Log("  Starting Scynapse silo with memory storage...");
 
                 // Start silo with memory storage for the automated test
-                await StartOrleansSiloAsync(useRavenDb: false);
+                await StartScynapseSiloAsync(useRavenDb: false);
 
-                if (_orleansSiloHost != null && _orleansPersistence != null)
+                if (_scynapseSiloHost != null && _scynapsePersistence != null)
                 {
-                    const string wf8Id = "report-orleans-workflow";
+                    const string wf8Id = "report-scynapse-workflow";
                     checkpointCounts.Clear();
 
-                    // Subscribe to Orleans persistence events
-                    int orleansCheckpoints = 0;
-                    void CountOrleansCheckpoints(object? s, CheckpointEventArgs e)
+                    // Subscribe to Scynapse persistence events
+                    int scynapseCheckpoints = 0;
+                    void CountScynapseCheckpoints(object? s, CheckpointEventArgs e)
                     {
-                        orleansCheckpoints++;
+                        scynapseCheckpoints++;
                     }
-                    _orleansPersistence.OnCheckpoint += CountOrleansCheckpoints;
+                    _scynapsePersistence.OnCheckpoint += CountScynapseCheckpoints;
 
-                    using (AsyncPersistenceContext.SetCurrent(_orleansPersistence))
+                    using (AsyncPersistenceContext.SetCurrent(_scynapsePersistence))
                     {
                         var runner = new InstrumentedWorkflowRunner(wf8Id);
                         var result = await runner.InstrumentedSimpleWorkflow(7);
@@ -1775,37 +1775,37 @@ public static class Program
                         Log($"  Result: {result}");
                     }
 
-                    _orleansPersistence.OnCheckpoint -= CountOrleansCheckpoints;
+                    _scynapsePersistence.OnCheckpoint -= CountScynapseCheckpoints;
 
-                    Log($"  Orleans checkpoints created: {orleansCheckpoints}");
+                    Log($"  Scynapse checkpoints created: {scynapseCheckpoints}");
 
                     // Query grain state
-                    var grainFactory = _orleansSiloHost.Services.GetRequiredService<IGrainFactory>();
+                    var grainFactory = _scynapseSiloHost.Services.GetRequiredService<IGrainFactory>();
                     var grain = grainFactory.GetGrain<Scynapse.AsyncPlus.IAsyncStatePersistenceGrain>(wf8Id);
                     var hasState = await grain.HasPersistedStateAsync();
                     Log($"  Grain has persisted state: {hasState}");
 
-                    scenarioResults.Add(("Challenge 8: Orleans Persistence", true, orleansCheckpoints, null));
+                    scenarioResults.Add(("Challenge 8: Scynapse Persistence", true, scynapseCheckpoints, null));
 
                     // Stop silo
-                    await StopOrleansSiloAsync();
+                    await StopScynapseSiloAsync();
                 }
                 else
                 {
-                    Log("  ERROR: Failed to start Orleans silo");
-                    scenarioResults.Add(("Challenge 8: Orleans Persistence", false, 0, "Silo failed to start"));
+                    Log("  ERROR: Failed to start Scynapse silo");
+                    scenarioResults.Add(("Challenge 8: Scynapse Persistence", false, 0, "Silo failed to start"));
                 }
             }
             catch (Exception ex)
             {
                 Log($"  ERROR: {ex.Message}");
                 Log($"  Stack: {ex.StackTrace}");
-                scenarioResults.Add(("Challenge 8: Orleans Persistence", false, 0, ex.Message));
+                scenarioResults.Add(("Challenge 8: Scynapse Persistence", false, 0, ex.Message));
 
                 // Try to clean up silo if it was started
-                if (_orleansSiloHost != null)
+                if (_scynapseSiloHost != null)
                 {
-                    try { await StopOrleansSiloAsync(); } catch { }
+                    try { await StopScynapseSiloAsync(); } catch { }
                 }
             }
             Log("");

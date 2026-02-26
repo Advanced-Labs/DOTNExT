@@ -1,5 +1,5 @@
-using Orleans.EventSourcing;
-using Orleans.Providers;
+using Scynapse.EventSourcing;
+using Scynapse.Providers;
 using System.Xml.Linq;
 using TestGrainInterfaces;
 

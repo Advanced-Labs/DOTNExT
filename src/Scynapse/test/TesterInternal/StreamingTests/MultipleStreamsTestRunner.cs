@@ -1,6 +1,6 @@
 using Microsoft.Extensions.Logging;
-using Orleans.TestingHost;
-using Orleans.TestingHost.Utils;
+using Scynapse.TestingHost;
+using Scynapse.TestingHost.Utils;
 using UnitTests.StreamingTests;
 
 namespace UnitTests.Streaming

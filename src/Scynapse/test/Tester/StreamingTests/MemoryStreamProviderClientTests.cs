@@ -1,8 +1,8 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
-using Orleans.Configuration;
-using Orleans.Providers;
-using Orleans.TestingHost;
+using Scynapse.Configuration;
+using Scynapse.Providers;
+using Scynapse.TestingHost;
 using TestExtensions;
 using Xunit;
 using Xunit.Abstractions;
@@ -20,7 +20,7 @@ namespace Tester.StreamingTests
     /// These tests focus on client disconnection scenarios to ensure
     /// proper cleanup and recovery of stream producers and consumers.
     /// </summary>
-    public class MemoryStreamProviderClientTests : OrleansTestingBase, IClassFixture<MemoryStreamProviderClientTests.Fixture>
+    public class MemoryStreamProviderClientTests : ScynapseTestingBase, IClassFixture<MemoryStreamProviderClientTests.Fixture>
     {
         /// <summary>
         /// Test fixture that configures a cluster with MemoryStreamProvider.

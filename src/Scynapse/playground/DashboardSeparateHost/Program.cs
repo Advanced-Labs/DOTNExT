@@ -1,5 +1,5 @@
-using Orleans.Configuration;
-using Orleans.Dashboard;
+using Scynapse.Configuration;
+using Scynapse.Dashboard;
 using System.Net;
 using TestGrains;
 
@@ -7,7 +7,7 @@ using TestGrains;
 // In this sample we integrate the Dashboard Minimal APIs into the client application.
 //
 var siloHostBuilder = Host.CreateApplicationBuilder(args);
-siloHostBuilder.UseOrleans(builder =>
+siloHostBuilder.UseScynapse(builder =>
 {
     builder.UseDevelopmentClustering(options => options.PrimarySiloEndpoint = new IPEndPoint(IPAddress.Loopback, 11111));
     builder.UseInMemoryReminderService();
@@ -25,19 +25,19 @@ await Task.Delay(1000);
 // Create a WebApplication for hosting the dashboard
 var dashboardBuilder = WebApplication.CreateBuilder(args);
 
-// Configure Orleans client
-dashboardBuilder.UseOrleansClient(clientBuilder =>
+// Configure Scynapse client
+dashboardBuilder.UseScynapseClient(clientBuilder =>
 {
     clientBuilder.UseStaticClustering(options => options.Gateways.Add(new IPEndPoint(IPAddress.Loopback, 30000).ToGatewayUri()));
 
     // Add dashboard services
-    clientBuilder.AddOrleansDashboard();
+    clientBuilder.AddScynapseDashboard();
 });
 
 var dashboardApp = dashboardBuilder.Build();
 
 // Map dashboard endpoints
-dashboardApp.MapOrleansDashboard();
+dashboardApp.MapScynapseDashboard();
 
 await dashboardApp.RunAsync();
 

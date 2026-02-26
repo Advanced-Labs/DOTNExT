@@ -1,5 +1,5 @@
 using Microsoft.Extensions.Logging;
-using Orleans.Placement;
+using Scynapse.Placement;
 using TestVersionGrainInterfaces;
 using UnitTests.GrainInterfaces;
 

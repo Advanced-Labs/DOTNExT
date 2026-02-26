@@ -1,4 +1,4 @@
-﻿using Orleans.Providers;
+﻿using Scynapse.Providers;
 using UnitTests.GrainInterfaces;
 
 namespace UnitTests.Grains

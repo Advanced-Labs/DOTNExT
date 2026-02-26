@@ -1,8 +1,8 @@
 using System.Diagnostics;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
-using Orleans.Configuration;
-using Orleans.Runtime;
+using Scynapse.Configuration;
+using Scynapse.Runtime;
 using TestExtensions;
 using UnitTests.GrainInterfaces;
 using UnitTests.Grains;
@@ -12,7 +12,7 @@ using Xunit.Abstractions;
 namespace DefaultCluster.Tests.General
 {
     /// <summary>
-    /// Tests for Orleans Stateless Worker grains.
+    /// Tests for Scynapse Stateless Worker grains.
     /// Stateless workers are a special grain type that can have multiple activations
     /// per silo for parallel processing. They're ideal for functional operations
     /// that don't maintain state between calls. The [StatelessWorker] attribute
@@ -189,7 +189,7 @@ namespace DefaultCluster.Tests.General
         /// <summary>
         /// Tests that MayInterleave predicates are properly evaluated for stateless workers.
         /// Verifies that when the MayInterleave predicate returns false, calls are
-        /// not interleaved and execute sequentially, maintaining Orleans' turn-based
+        /// not interleaved and execute sequentially, maintaining Scynapse' turn-based
         /// concurrency for those specific calls even in stateless workers.
         /// </summary>
         [Fact, TestCategory("SlowBVT"), TestCategory("StatelessWorker")]

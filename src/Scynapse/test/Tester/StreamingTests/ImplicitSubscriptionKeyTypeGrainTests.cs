@@ -1,7 +1,7 @@
 using Microsoft.Extensions.Configuration;
-using Orleans.Streams;
-using Orleans.TestingHost;
-using Orleans.TestingHost.Utils;
+using Scynapse.Streams;
+using Scynapse.TestingHost;
+using Scynapse.TestingHost.Utils;
 using TestExtensions;
 using UnitTests.GrainInterfaces;
 using UnitTests.Grains;
@@ -12,7 +12,7 @@ namespace UnitTests.StreamingTests
     /// <summary>
     /// Tests implicit stream subscriptions with different grain key types, specifically testing long key type grain subscriptions.
     /// </summary>
-    public sealed class ImplicitSubscriptionKeyTypeGrainTests : OrleansTestingBase, IClassFixture<ImplicitSubscriptionKeyTypeGrainTests.Fixture>
+    public sealed class ImplicitSubscriptionKeyTypeGrainTests : ScynapseTestingBase, IClassFixture<ImplicitSubscriptionKeyTypeGrainTests.Fixture>
     {
         private readonly Fixture fixture;
         private readonly IStreamProvider _streamProvider;

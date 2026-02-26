@@ -1,5 +1,5 @@
 using Microsoft.Extensions.DependencyInjection;
-using Orleans.Runtime;
+using Scynapse.Runtime;
 using Tester.StorageFacet.Abstractions;
 
 namespace Tester.StorageFacet.Implementations

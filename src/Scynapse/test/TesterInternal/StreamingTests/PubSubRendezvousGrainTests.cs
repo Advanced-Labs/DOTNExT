@@ -1,13 +1,13 @@
 using Microsoft.Extensions.Logging;
-using Orleans.Runtime;
-using Orleans.Streams;
-using Orleans.TestingHost;
+using Scynapse.Runtime;
+using Scynapse.Streams;
+using Scynapse.TestingHost;
 using TestExtensions;
 using Xunit;
 
 namespace UnitTests.StreamingTests
 {
-    public class PubSubRendezvousGrainTests : OrleansTestingBase, IClassFixture<PubSubRendezvousGrainTests.Fixture>
+    public class PubSubRendezvousGrainTests : ScynapseTestingBase, IClassFixture<PubSubRendezvousGrainTests.Fixture>
     {
         private readonly Fixture fixture;
 
@@ -51,7 +51,7 @@ namespace UnitTests.StreamingTests
             await faultGrain.AddFaultOnWrite(pubSubGrain.GetGrainId(), new ApplicationException("Write"));
 
             // expect exception when registering a new consumer
-            await Assert.ThrowsAsync<OrleansException>(
+            await Assert.ThrowsAsync<ScynapseException>(
                     () => pubSubGrain.RegisterConsumer(GuidId.GetGuidId(Guid.NewGuid()), streamId, default, null));
 
             // pubsub grain should recover and still function
@@ -80,7 +80,7 @@ namespace UnitTests.StreamingTests
             await faultGrain.AddFaultOnWrite(pubSubGrain.GetGrainId(), new ApplicationException("Write"));
 
             // expect exception when unregistering a consumer
-            await Assert.ThrowsAsync<OrleansException>(
+            await Assert.ThrowsAsync<ScynapseException>(
                     () => pubSubGrain.UnregisterConsumer(subscriptionId1, streamId));
 
             // pubsub grain should recover and still function
@@ -92,7 +92,7 @@ namespace UnitTests.StreamingTests
             await faultGrain.AddFaultOnClear(pubSubGrain.GetGrainId(), new ApplicationException("Write"));
 
             // expect exception when unregistering a consumer
-            await Assert.ThrowsAsync<OrleansException>(
+            await Assert.ThrowsAsync<ScynapseException>(
                     () => pubSubGrain.UnregisterConsumer(subscriptionId2, streamId));
 
             // pubsub grain should recover and still function
@@ -123,7 +123,7 @@ namespace UnitTests.StreamingTests
             await faultGrain.AddFaultOnWrite(pubSubGrain.GetGrainId(), new ApplicationException("Write"));
 
             // expect exception when registering a new producer
-            await Assert.ThrowsAsync<OrleansException>(
+            await Assert.ThrowsAsync<ScynapseException>(
                     () => pubSubGrain.RegisterProducer(streamId, default));
 
             // pubsub grain should recover and still function
@@ -156,7 +156,7 @@ namespace UnitTests.StreamingTests
             await faultGrain.AddFaultOnWrite(pubSubGrain.GetGrainId(), new ApplicationException("Write"));
 
             // expect exception when unregistering a producer
-            await Assert.ThrowsAsync<OrleansException>(
+            await Assert.ThrowsAsync<ScynapseException>(
                     () => pubSubGrain.UnregisterProducer(streamId, firstProducer.GetGrainId()));
 
             // pubsub grain should recover and still function
@@ -168,7 +168,7 @@ namespace UnitTests.StreamingTests
             await faultGrain.AddFaultOnClear(pubSubGrain.GetGrainId(), new ApplicationException("Write"));
 
             // expect exception when unregistering a consumer
-            await Assert.ThrowsAsync<OrleansException>(
+            await Assert.ThrowsAsync<ScynapseException>(
                     () => pubSubGrain.UnregisterProducer(streamId, secondProducer.GetGrainId()));
 
             // pubsub grain should recover and still function
@@ -178,10 +178,10 @@ namespace UnitTests.StreamingTests
         }
 
         [Serializable]
-        [Orleans.GenerateSerializer]
+        [Scynapse.GenerateSerializer]
         public class DummyStreamProducerExtension : IStreamProducerExtension
         {
-            [Orleans.Id(0)]
+            [Scynapse.Id(0)]
             private readonly Guid id;
 
             public DummyStreamProducerExtension()

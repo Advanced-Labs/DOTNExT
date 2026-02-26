@@ -1,8 +1,8 @@
-using Orleans.Providers.Streams.Common;
-using Orleans.Streaming.EventHubs;
-using Orleans.Streams;
+using Scynapse.Providers.Streams.Common;
+using Scynapse.Streaming.EventHubs;
+using Scynapse.Streams;
 using Microsoft.Extensions.Logging;
-using Orleans.Runtime;
+using Scynapse.Runtime;
 using Azure.Messaging.EventHubs;
 
 namespace ServiceBus.Tests.EvictionStrategyTests
@@ -30,7 +30,7 @@ namespace ServiceBus.Tests.EvictionStrategyTests
         private long sequenceNumberCounter = 0;
         private readonly int eventIndex = 1;
         private readonly string eventHubOffset = "OffSet";
-        public MockEventHubCacheAdaptor(Orleans.Serialization.Serializer serializer) : base(serializer)
+        public MockEventHubCacheAdaptor(Scynapse.Serialization.Serializer serializer) : base(serializer)
         { }
 
         public override StreamPosition GetStreamPosition(string partition, EventData queueMessage)

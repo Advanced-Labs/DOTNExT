@@ -2,7 +2,7 @@ using System.Collections;
 
 namespace UnitTests.GrainInterfaces
 {
-    using Orleans.Concurrency;
+    using Scynapse.Concurrency;
 
     namespace One
     {
@@ -21,7 +21,7 @@ namespace UnitTests.GrainInterfaces
     }
 
     /// <summary>
-    /// Repro for https://github.com/dotnet/orleans/issues/3713.
+    /// Repro for https://github.com/Scynapse/Core/issues/3713.
     /// Having multiple methods with the same name and same parameter type
     /// name would cause a code generation failure because only one of the
     /// methods would be implemented in the generated GrainReference.
@@ -327,7 +327,7 @@ namespace UnitTests.GrainInterfaces
     }
 
     /// <summary>
-    /// Regression test for https://github.com/dotnet/orleans/issues/5243.
+    /// Regression test for https://github.com/Scynapse/Core/issues/5243.
     /// </summary>
     [Serializable]
     [GenerateSerializer]

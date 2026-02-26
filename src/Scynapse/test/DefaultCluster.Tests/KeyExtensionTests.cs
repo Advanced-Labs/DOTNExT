@@ -1,4 +1,4 @@
-using Orleans.Runtime;
+using Scynapse.Runtime;
 using TestExtensions;
 using UnitTests.GrainInterfaces;
 using Xunit;
@@ -6,7 +6,7 @@ using Xunit;
 namespace DefaultCluster.Tests.General
 {
     /// <summary>
-    /// Tests for Orleans grain key extensions functionality.
+    /// Tests for Scynapse grain key extensions functionality.
     /// Key extensions allow grains to have compound keys by combining a primary key
     /// (GUID, long, or string) with a string extension. This enables scenarios like
     /// multi-tenancy where the same grain type can have different instances per tenant.

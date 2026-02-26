@@ -1,9 +1,9 @@
 using Microsoft.Extensions.Configuration;
-using Orleans.Configuration;
-using Orleans.Core.Internal;
-using Orleans.Placement.Rebalancing;
-using Orleans.Runtime.Placement;
-using Orleans.TestingHost;
+using Scynapse.Configuration;
+using Scynapse.Core.Internal;
+using Scynapse.Placement.Rebalancing;
+using Scynapse.Runtime.Placement;
+using Scynapse.TestingHost;
 using TestExtensions;
 using Xunit;
 using Xunit.Abstractions;
@@ -190,7 +190,7 @@ public class StatePreservationRebalancingTests(SPFixture fixture, ITestOutputHel
             builder.Options.InitialSilosCount = 4;
             builder.Options.UseRealEnvironmentStatistics = true;
             builder.ConfigureSilo((options, siloBuilder)
-#pragma warning disable ORLEANSEXP002
+#pragma warning disable SCYNAPSEEXP002
                 => siloBuilder
                     .Configure<SiloMessagingOptions>(o =>
                     {
@@ -204,7 +204,7 @@ public class StatePreservationRebalancingTests(SPFixture fixture, ITestOutputHel
                         o.SessionCyclePeriod = SessionCyclePeriod;
                     })
                     .AddActivationRebalancer());
-#pragma warning restore ORLEANSEXP002
+#pragma warning restore SCYNAPSEEXP002
         }
     }
 }

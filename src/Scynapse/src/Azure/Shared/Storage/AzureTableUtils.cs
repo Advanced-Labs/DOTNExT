@@ -11,22 +11,22 @@ using LogLevel = Microsoft.Extensions.Logging.LogLevel;
 // Number of #ifs can be reduced (or removed), once we separate test projects by feature/area, otherwise we are ending up with ambiguous types and build errors.
 //
 
-#if ORLEANS_CLUSTERING
-namespace Orleans.Clustering.AzureStorage
-#elif ORLEANS_PERSISTENCE
-namespace Orleans.Persistence.AzureStorage
-#elif ORLEANS_REMINDERS
-namespace Orleans.Reminders.AzureStorage
-#elif ORLEANS_STREAMING
-namespace Orleans.Streaming.AzureStorage
-#elif ORLEANS_EVENTHUBS
-namespace Orleans.Streaming.EventHubs
+#if SCYNAPSE_CLUSTERING
+namespace Scynapse.Clustering.AzureStorage
+#elif SCYNAPSE_PERSISTENCE
+namespace Scynapse.Persistence.AzureStorage
+#elif SCYNAPSE_REMINDERS
+namespace Scynapse.Reminders.AzureStorage
+#elif SCYNAPSE_STREAMING
+namespace Scynapse.Streaming.AzureStorage
+#elif SCYNAPSE_EVENTHUBS
+namespace Scynapse.Streaming.EventHubs
 #elif TESTER_AZUREUTILS
-namespace Orleans.Tests.AzureUtils
-#elif ORLEANS_TRANSACTIONS
-namespace Orleans.Transactions.AzureStorage
-#elif ORLEANS_DIRECTORY
-namespace Orleans.GrainDirectory.AzureStorage
+namespace Scynapse.Tests.AzureUtils
+#elif SCYNAPSE_TRANSACTIONS
+namespace Scynapse.Transactions.AzureStorage
+#elif SCYNAPSE_DIRECTORY
+namespace Scynapse.GrainDirectory.AzureStorage
 #else
 // No default namespace intentionally to cause compile errors if something is not defined
 #endif

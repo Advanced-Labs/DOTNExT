@@ -1,5 +1,5 @@
 using System.Collections.Immutable;
-using Orleans.Runtime.GrainDirectory;
+using Scynapse.Runtime.GrainDirectory;
 using CsCheck;
 using Xunit;
 

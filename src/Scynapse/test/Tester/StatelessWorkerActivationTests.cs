@@ -1,5 +1,5 @@
 using Microsoft.Extensions.DependencyInjection;
-using Orleans.TestingHost;
+using Scynapse.TestingHost;
 using TestExtensions;
 using UnitTests.GrainInterfaces;
 using UnitTests.Grains;
@@ -52,7 +52,7 @@ public class StatelessWorkerActivationTests : IClassFixture<StatelessWorkerActiv
     /// <summary>
     /// Verifies that a stateless worker grain maintains a single activation
     /// when requests are sequential (no concurrent load).
-    /// This demonstrates that Orleans doesn't unnecessarily create multiple
+    /// This demonstrates that Scynapse doesn't unnecessarily create multiple
     /// activations when they're not needed.
     /// </summary>
     [Fact, TestCategory("BVT"), TestCategory("StatelessWorker")]
@@ -73,10 +73,10 @@ public class StatelessWorkerActivationTests : IClassFixture<StatelessWorkerActiv
     /// Process:
     /// 1. Start with single activation
     /// 2. Create concurrent requests that block (using Wait())
-    /// 3. Orleans detects blocked activations and creates new ones
+    /// 3. Scynapse detects blocked activations and creates new ones
     /// 4. Scaling continues up to MaxLocalWorkers (4 in this test)
     /// 
-    /// This demonstrates Orleans' ability to automatically scale stateless
+    /// This demonstrates Scynapse' ability to automatically scale stateless
     /// workers based on actual load, not just request count.
     /// </summary>
     [Fact, TestCategory("BVT"), TestCategory("StatelessWorker")]

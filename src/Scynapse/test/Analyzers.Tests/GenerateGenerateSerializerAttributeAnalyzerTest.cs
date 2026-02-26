@@ -1,12 +1,12 @@
 using Microsoft.CodeAnalysis;
-using Orleans.Analyzers;
+using Scynapse.Analyzers;
 using Xunit;
 
 namespace Analyzers.Tests;
 
 /// <summary>
 /// Tests for the analyzer that suggests using [GenerateSerializer] instead of [Serializable] attribute.
-/// Orleans uses its own serialization system for efficient grain communication, and the [GenerateSerializer]
+/// Scynapse uses its own serialization system for efficient grain communication, and the [GenerateSerializer]
 /// attribute enables code generation for optimal serialization performance. Using the legacy [Serializable]
 /// attribute can lead to slower serialization and larger message sizes.
 /// </summary>
@@ -27,7 +27,7 @@ public class GenerateGenerateSerializerAttributeAnalyzerTest : DiagnosticAnalyze
 
     /// <summary>
     /// Verifies that the analyzer detects when a class uses [Serializable] attribute
-    /// and suggests using [GenerateSerializer] instead for better Orleans serialization performance.
+    /// and suggests using [GenerateSerializer] instead for better Scynapse serialization performance.
     /// </summary>
     [Fact]
     public Task SerializableClass()
@@ -35,7 +35,7 @@ public class GenerateGenerateSerializerAttributeAnalyzerTest : DiagnosticAnalyze
 
     /// <summary>
     /// Verifies that the analyzer detects when a struct uses [Serializable] attribute
-    /// and suggests using [GenerateSerializer] instead for better Orleans serialization performance.
+    /// and suggests using [GenerateSerializer] instead for better Scynapse serialization performance.
     /// </summary>
     [Fact]
     public Task SerializableStruct()
@@ -43,7 +43,7 @@ public class GenerateGenerateSerializerAttributeAnalyzerTest : DiagnosticAnalyze
 
     /// <summary>
     /// Verifies that the analyzer detects when a record uses [Serializable] attribute
-    /// and suggests using [GenerateSerializer] instead for better Orleans serialization performance.
+    /// and suggests using [GenerateSerializer] instead for better Scynapse serialization performance.
     /// </summary>
     [Fact]
     public Task SerializableRecord()
@@ -51,7 +51,7 @@ public class GenerateGenerateSerializerAttributeAnalyzerTest : DiagnosticAnalyze
 
     /// <summary>
     /// Verifies that the analyzer detects when a record struct uses [Serializable] attribute
-    /// and suggests using [GenerateSerializer] instead for better Orleans serialization performance.
+    /// and suggests using [GenerateSerializer] instead for better Scynapse serialization performance.
     /// </summary>
     [Fact]
     public Task SerializableRecordStruct()

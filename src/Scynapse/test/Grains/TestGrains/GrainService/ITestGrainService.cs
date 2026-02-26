@@ -1,5 +1,5 @@
-using Orleans.Runtime;
-using Orleans.Services;
+using Scynapse.Runtime;
+using Scynapse.Services;
 
 namespace Tester
 {

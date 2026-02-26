@@ -1,9 +1,9 @@
 using System.Net;
 using System.Text.Json;
 using Microsoft.Extensions.DependencyInjection;
-using Orleans;
-using Orleans.GrainReferences;
-using Orleans.Runtime;
+using Scynapse;
+using Scynapse.GrainReferences;
+using Scynapse.Runtime;
 using TestExtensions;
 using Xunit;
 using Xunit.Abstractions;
@@ -11,7 +11,7 @@ using Xunit.Abstractions;
 namespace UnitTests.General
 {
     /// <summary>
-    /// Tests for various Orleans identifier types including GrainId, UniqueKey, SiloAddress, and related functionality.
+    /// Tests for various Scynapse identifier types including GrainId, UniqueKey, SiloAddress, and related functionality.
     /// </summary>
     [Collection(TestEnvironmentFixture.DefaultCollection)]
     public class IdentifierTests
@@ -362,7 +362,7 @@ namespace UnitTests.General
             Assert.Equal(grainRef, roundTripped); // GrainReference.ToKeyString
 
             roundTripped = this.environment.Serializer.Deserialize<GrainReference>(environment.Serializer.SerializeToArray(grainRef));
-            Assert.Equal(grainRef, roundTripped); // GrainReference.OrleansSerializer
+            Assert.Equal(grainRef, roundTripped); // GrainReference.ScynapseSerializer
         }
 
         private GrainReference RoundTripGrainReferenceToKey(GrainReference input)

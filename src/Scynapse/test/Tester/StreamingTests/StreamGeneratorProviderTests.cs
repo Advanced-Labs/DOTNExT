@@ -1,11 +1,11 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Orleans.Configuration;
-using Orleans.Providers.Streams.Generator;
-using Orleans.Runtime;
-using Orleans.Streams;
-using Orleans.TestingHost;
-using Orleans.TestingHost.Utils;
+using Scynapse.Configuration;
+using Scynapse.Providers.Streams.Generator;
+using Scynapse.Runtime;
+using Scynapse.Streams;
+using Scynapse.TestingHost;
+using Scynapse.TestingHost.Utils;
 using TestExtensions;
 using TestGrainInterfaces;
 using TestGrains;
@@ -17,7 +17,7 @@ namespace UnitTests.StreamingTests
     /// <summary>
     /// Tests for stream generator provider functionality, validating automatic stream generation and event delivery.
     /// </summary>
-    public class StreamGeneratorProviderTests : OrleansTestingBase, IClassFixture<StreamGeneratorProviderTests.Fixture>
+    public class StreamGeneratorProviderTests : ScynapseTestingBase, IClassFixture<StreamGeneratorProviderTests.Fixture>
     {
         private const int TotalQueueCount = 4;
         private readonly Fixture fixture;

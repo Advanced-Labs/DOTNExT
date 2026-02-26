@@ -2,10 +2,10 @@ using System.Collections.ObjectModel;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
-using Orleans.Configuration;
-using Orleans.Messaging;
-using Orleans.Runtime;
-using Orleans.TestingHost;
+using Scynapse.Configuration;
+using Scynapse.Messaging;
+using Scynapse.Runtime;
+using Scynapse.TestingHost;
 using TestExtensions;
 using Xunit;
 
@@ -40,7 +40,7 @@ namespace Tester.ClientConnectionTests
                 return Task.FromResult(true);
             }
 
-            using var host = new HostBuilder().UseOrleansClient((ctx, clientBuilder) =>
+            using var host = new HostBuilder().UseScynapseClient((ctx, clientBuilder) =>
                 {
                     clientBuilder
                         .Configure<ClusterOptions>(options =>

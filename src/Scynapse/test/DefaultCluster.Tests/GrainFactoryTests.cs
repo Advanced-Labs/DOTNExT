@@ -6,7 +6,7 @@ using Xunit;
 namespace DefaultCluster.Tests
 {
     /// <summary>
-    /// Tests for Orleans' grain factory and grain type resolution mechanisms.
+    /// Tests for Scynapse' grain factory and grain type resolution mechanisms.
     /// Validates how the grain factory resolves grain implementations from interfaces,
     /// handles ambiguous type mappings, supports grain class prefixes and full names,
     /// and manages inheritance hierarchies in grain type resolution.
@@ -20,7 +20,7 @@ namespace DefaultCluster.Tests
         /// <summary>
         /// Tests that ambiguous grain type resolution throws an exception.
         /// When multiple grain implementations exist for an interface without explicit resolution,
-        /// Orleans should throw an ArgumentException to prevent undefined behavior.
+        /// Scynapse should throw an ArgumentException to prevent undefined behavior.
         /// </summary>
         [Fact, TestCategory("BVT"), TestCategory("Factory"), TestCategory("GetGrain")]
         public void GetGrain_Ambiguous()
@@ -33,7 +33,7 @@ namespace DefaultCluster.Tests
 
         /// <summary>
         /// Tests grain resolution when a default implementation is specified.
-        /// Validates that Orleans correctly uses the default grain implementation
+        /// Validates that Scynapse correctly uses the default grain implementation
         /// when multiple implementations exist but one is marked as default.
         /// </summary>
         [Fact, TestCategory("BVT"), TestCategory("Factory"), TestCategory("GetGrain")]
@@ -58,7 +58,7 @@ namespace DefaultCluster.Tests
 
         /// <summary>
         /// Tests grain resolution using grain class name prefixes.
-        /// Validates that Orleans can resolve grains using partial type names (prefixes)
+        /// Validates that Scynapse can resolve grains using partial type names (prefixes)
         /// as a convenience feature for grain identification.
         /// </summary>
         [Fact, TestCategory("BVT"), TestCategory("Factory"), TestCategory("GetGrain")]
@@ -70,7 +70,7 @@ namespace DefaultCluster.Tests
 
         /// <summary>
         /// Tests that ambiguous grain prefixes throw an exception.
-        /// When a prefix matches multiple grain implementations, Orleans should
+        /// When a prefix matches multiple grain implementations, Scynapse should
         /// throw an ArgumentException to prevent ambiguous resolution.
         /// </summary>
         [Fact, TestCategory("BVT"), TestCategory("Factory"), TestCategory("GetGrain")]
@@ -98,7 +98,7 @@ namespace DefaultCluster.Tests
 
         /// <summary>
         /// Tests grain resolution for derived grain interfaces without prefixes.
-        /// Validates that Orleans correctly resolves grain implementations that
+        /// Validates that Scynapse correctly resolves grain implementations that
         /// implement derived interfaces in inheritance hierarchies.
         /// </summary>
         [Fact, TestCategory("BVT"), TestCategory("Factory"), TestCategory("GetGrain")]
@@ -165,7 +165,7 @@ namespace DefaultCluster.Tests
 
         /// <summary>
         /// Tests automatic grain resolution when only one implementation exists.
-        /// Validates that Orleans can automatically resolve the single implementation
+        /// Validates that Scynapse can automatically resolve the single implementation
         /// of an interface without requiring prefixes or full names.
         /// </summary>
         [Fact, TestCategory("BVT"), TestCategory("Factory"), TestCategory("GetGrain")]
@@ -190,7 +190,7 @@ namespace DefaultCluster.Tests
 
         /// <summary>
         /// Tests grains implementing multiple unrelated interfaces.
-        /// Validates that Orleans correctly handles grains that implement multiple
+        /// Validates that Scynapse correctly handles grains that implement multiple
         /// independent interfaces, allowing access through any implemented interface.
         /// </summary>
         [Fact, TestCategory("BVT"), TestCategory("Factory"), TestCategory("GetGrain")]

@@ -1,15 +1,15 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Orleans.Configuration;
-using Orleans.Hosting;
+using Scynapse.Configuration;
+using Scynapse.Hosting;
 
 var builder = Host.CreateApplicationBuilder(args);
-builder.UseOrleans(orleans =>
+builder.UseScynapse(scynapse =>
 {
-    orleans.UseLocalhostClustering();
-#pragma warning disable ORLEANSEXP003 // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
-    orleans.AddDistributedGrainDirectory();
-#pragma warning restore ORLEANSEXP003 // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
+    scynapse.UseLocalhostClustering();
+#pragma warning disable SCYNAPSEEXP003 // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
+    scynapse.AddDistributedGrainDirectory();
+#pragma warning restore SCYNAPSEEXP003 // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
 });
 
 builder.Services.Configure<GrainCollectionOptions>(options =>

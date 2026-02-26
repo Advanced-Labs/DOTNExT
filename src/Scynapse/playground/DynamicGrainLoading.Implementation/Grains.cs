@@ -1,5 +1,5 @@
 using Microsoft.Extensions.Logging;
-using Orleans;
+using Scynapse;
 using DynamicGrainLoading.Contracts;
 
 namespace DynamicGrainLoading.Implementation;

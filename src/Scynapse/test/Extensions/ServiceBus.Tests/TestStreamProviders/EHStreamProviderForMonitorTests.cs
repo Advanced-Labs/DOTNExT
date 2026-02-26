@@ -1,12 +1,12 @@
-using Orleans.Providers.Streams.Common;
+using Scynapse.Providers.Streams.Common;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Orleans.Runtime;
-using Orleans.Streaming.EventHubs;
-using Orleans.Streaming.EventHubs.Testing;
-using Orleans.Configuration;
+using Scynapse.Runtime;
+using Scynapse.Streaming.EventHubs;
+using Scynapse.Streaming.EventHubs.Testing;
+using Scynapse.Configuration;
 using ServiceBus.Tests.MonitorTests;
-using Orleans.Statistics;
+using Scynapse.Statistics;
 
 namespace ServiceBus.Tests.TestStreamProviders
 {

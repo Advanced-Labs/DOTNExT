@@ -1,12 +1,12 @@
 using Microsoft.CodeAnalysis;
-using Orleans.Analyzers;
+using Scynapse.Analyzers;
 using Xunit;
 
 namespace Analyzers.Tests;
 
 /// <summary>
 /// Tests for the analyzer that detects duplicate [Id] attributes in serializable types.
-/// In Orleans serialization, each field must have a unique [Id] attribute value to ensure
+/// In Scynapse serialization, each field must have a unique [Id] attribute value to ensure
 /// proper deserialization and version tolerance. Duplicate IDs would cause serialization
 /// conflicts and data corruption when messages are exchanged between grains.
 /// </summary>
@@ -77,7 +77,7 @@ public class IdClashAttributeAnalyzerTest : DiagnosticAnalyzerTestBase<IdClashAt
 
     /// <summary>
     /// Verifies that the analyzer doesn't report issues when all fields in a [GenerateSerializer]
-    /// type have unique [Id] values. This is the correct pattern for Orleans serialization.
+    /// type have unique [Id] values. This is the correct pattern for Scynapse serialization.
     /// </summary>
     [Fact]
     public Task TypesWithGenerateSerializerAndNoDuplicatedIds_ShouldNoTriggerDiagnostic()
@@ -120,7 +120,7 @@ public class IdClashAttributeAnalyzerTest : DiagnosticAnalyzerTestBase<IdClashAt
     /// <summary>
     /// Verifies that the analyzer ignores types without [GenerateSerializer] attribute,
     /// even if they have duplicate [Id] attributes. The analyzer only validates types
-    /// that participate in Orleans serialization.
+    /// that participate in Scynapse serialization.
     /// </summary>
     [Fact]
     public Task TypesWithoutGenerateSerializerAndDuplicatedIds_ShouldNotTriggerDiagnostic()

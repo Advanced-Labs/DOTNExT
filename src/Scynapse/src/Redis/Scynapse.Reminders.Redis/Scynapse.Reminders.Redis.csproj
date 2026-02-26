@@ -1,0 +1,27 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageId>Genesa.Scynapse.Reminders.Redis</PackageId>
+    <Title>Microsoft Scynapse Reminders Redis Provider</Title>
+    <Description>Microsoft Scynapse Reminders implementation that uses Redis</Description>
+    <PackageTags>$(PackageTags) Redis Reminders</PackageTags>
+    <TargetFrameworks>$(DefaultTargetFrameworks)</TargetFrameworks>
+    <ScynapseBuildTimeCodeGen>true</ScynapseBuildTimeCodeGen>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="StackExchange.Redis" />
+    <PackageReference Include="Newtonsoft.Json" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="$(SourceRoot)src\Scynapse.Runtime\Scynapse.Runtime.csproj" />
+    <ProjectReference Include="$(SourceRoot)src\Scynapse.Reminders\Scynapse.Reminders.csproj" />
+  </ItemGroup>
+
+
+  <ItemGroup>
+    <None Include="README.md" Pack="true" PackagePath="\" />
+  </ItemGroup>
+</Project>

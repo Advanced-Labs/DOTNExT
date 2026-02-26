@@ -7,14 +7,14 @@
   <!-- Set common properties regarding assembly information and nuget packages -->
   <PropertyGroup>
     <Authors>Microsoft</Authors>
-    <Product>Microsoft Orleans</Product>
+    <Product>Microsoft Scynapse</Product>
     <Copyright>© Microsoft Corporation. All rights reserved.</Copyright>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <PackageProjectUrl>https://github.com/dotnet/orleans</PackageProjectUrl>
+    <PackageProjectUrl>https://github.com/Scynapse/Core</PackageProjectUrl>
     <PackageIcon>logo_128.png</PackageIcon>
-    <PackageTags>Orleans Cloud-Computing Actor-Model Actors Distributed-Systems C# .NET</PackageTags>
+    <PackageTags>Scynapse Cloud-Computing Actor-Model Actors Distributed-Systems C# .NET</PackageTags>
     <PackageReleaseNotes></PackageReleaseNotes>
-    <PublicRepositoryUrl>https://github.com/dotnet/orleans</PublicRepositoryUrl>
+    <PublicRepositoryUrl>https://github.com/Scynapse/Core</PublicRepositoryUrl>
     <PrivateRepositoryUrl>$(RepositoryUrl)</PrivateRepositoryUrl>
     <RepositoryUrl>$(RepositoryUrl)</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
@@ -60,7 +60,7 @@
     <VersionSuffix Condition=" '$(VersionDateSuffix)'!='' ">$(VersionSuffix)-$(VersionDateSuffix)</VersionSuffix>
   </PropertyGroup>
 
-  <Import Condition=" '$(OrleansBuildTimeCodeGen)' == 'true' " Project="$(MSBuildThisFileDirectory)src/Orleans.CodeGenerator/build/Microsoft.Orleans.CodeGenerator.props" />
+  <Import Condition=" '$(ScynapseBuildTimeCodeGen)' == 'true' " Project="$(MSBuildThisFileDirectory)src/Scynapse.CodeGenerator/build/Genesa.Scynapse.CodeGenerator.props" />
 
   <!-- Set output folder for created NuGet packages -->
   <PropertyGroup>

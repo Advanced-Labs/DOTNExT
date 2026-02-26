@@ -1,6 +1,6 @@
 using Microsoft.Extensions.Logging;
-using Orleans.Concurrency;
-using Orleans.Streams;
+using Scynapse.Concurrency;
+using Scynapse.Streams;
 using UnitTests.GrainInterfaces;
 
 namespace UnitTests.Grains

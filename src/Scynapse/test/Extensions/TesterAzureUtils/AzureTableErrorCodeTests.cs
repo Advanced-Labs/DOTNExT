@@ -1,5 +1,5 @@
 using System.Net;
-using Orleans.Persistence.AzureStorage;
+using Scynapse.Persistence.AzureStorage;
 using Xunit;
 
 namespace Tester.AzureUtils
@@ -74,7 +74,7 @@ namespace Tester.AzureUtils
             AzureBlobUtils.ValidateBlobName(".");
             AzureBlobUtils.ValidateBlobName("/");
             AzureBlobUtils.ValidateContainerName("123");
-            AzureBlobUtils.ValidateContainerName("orleans-blob");
+            AzureBlobUtils.ValidateContainerName("scynapse-blob");
         }
 
         [Fact, TestCategory("Functional")]

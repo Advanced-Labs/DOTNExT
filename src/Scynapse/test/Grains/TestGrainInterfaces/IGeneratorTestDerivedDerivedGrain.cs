@@ -1,12 +1,12 @@
 ﻿namespace UnitTests.GrainInterfaces
 {
     [Serializable]
-    [Orleans.GenerateSerializer]
+    [Scynapse.GenerateSerializer]
     public class ReplaceArguments
     {
-        [Orleans.Id(0)]
+        [Scynapse.Id(0)]
         public string OldString { get; private set; }
-        [Orleans.Id(1)]
+        [Scynapse.Id(1)]
         public string NewString { get; private set; }
 
         public ReplaceArguments(string oldStr, string newStr)

@@ -3,13 +3,13 @@
 * Make only high confidence suggestions when reviewing code changes.
 * Always use the latest version C#, currently C# 13 features.
 * Never change global.json unless explicitly asked to.
-* Orleans is a distributed actor framework for .NET - understand the grain-based programming model when making changes.
+* Scynapse is a distributed actor framework for .NET - understand the grain-based programming model when making changes.
 
 ## Build and Test
 
 ### Building the Project
 
-* Use `dotnet build` to build the solution (Orleans.slnx).
+* Use `dotnet build` to build the solution (Scynapse.slnx).
 * The solution uses .NET SDK 9.0.306 as specified in global.json.
 * Build scripts are available: `Build.cmd` (Windows) or `build.ps1` (PowerShell).
 * Debug builds include a date suffix in version numbers.
@@ -48,20 +48,20 @@
 
 ## Repository Structure
 
-* **src/** - Core Orleans runtime, serialization, client, hosting, and provider implementations.
-  * Orleans.Core - Core runtime abstractions and implementations
-  * Orleans.Serialization - High-performance serialization framework
-  * Orleans.Client - Client-side grain communication
-  * Orleans.Runtime - Server-side runtime implementation
-  * Orleans.Hosting.Kubernetes - Kubernetes hosting support
+* **src/** - Core Scynapse runtime, serialization, client, hosting, and provider implementations.
+  * Scynapse.Core - Core runtime abstractions and implementations
+  * Scynapse.Serialization - High-performance serialization framework
+  * Scynapse.Client - Client-side grain communication
+  * Scynapse.Runtime - Server-side runtime implementation
+  * Scynapse.Hosting.Kubernetes - Kubernetes hosting support
   * Provider subdirectories: AWS/, Azure/, AdoNet/, Cassandra/, Redis/ for various storage and clustering providers
 * **test/** - All test projects, mirroring the src/ structure.
-* **samples/** - Example applications demonstrating Orleans usage.
+* **samples/** - Example applications demonstrating Scynapse usage.
 * **playground/** - Experimental code and development workspace.
 
 ## Common Patterns
 
 * Grains are the fundamental building blocks - they have stable identity, behavior, and state.
 * Grain interfaces inherit from IGrain or IGrainWithGuidKey/IGrainWithStringKey/etc.
-* Use async/await consistently - Orleans is built on asynchronous patterns.
+* Use async/await consistently - Scynapse is built on asynchronous patterns.
 * Follow the Virtual Actor Model - grains are automatically activated/deactivated by the runtime.

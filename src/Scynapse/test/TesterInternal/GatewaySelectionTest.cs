@@ -2,19 +2,19 @@
 using System.Net;
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
-using Orleans.Configuration;
-using Orleans.Messaging;
-using Orleans.Runtime;
-using Orleans.Internal;
+using Scynapse.Configuration;
+using Scynapse.Messaging;
+using Scynapse.Runtime;
+using Scynapse.Internal;
 using Xunit;
 using Xunit.Abstractions;
 
 namespace UnitTests.MessageCenterTests
 {
     /// <summary>
-    /// Tests for Orleans gateway selection and load balancing mechanisms.
+    /// Tests for Scynapse gateway selection and load balancing mechanisms.
     /// 
-    /// Gateways are the entry points for client connections to an Orleans cluster.
+    /// Gateways are the entry points for client connections to an Scynapse cluster.
     /// Each silo can act as a gateway, and clients need to:
     /// - Discover available gateways (via IGatewayListProvider)
     /// - Select which gateway to connect to

@@ -1,4 +1,4 @@
-using Orleans.Runtime;
+using Scynapse.Runtime;
 using UnitTests.GrainInterfaces;
 using UnitTests.Grains;
 
@@ -50,7 +50,7 @@ namespace UnitTests.PersistentState.Grains
         }
     }
 
-    [Orleans.Providers.StorageProvider(ProviderName = "GrainStorageForTest")]
+    [Scynapse.Providers.StorageProvider(ProviderName = "GrainStorageForTest")]
     [GrainType("new-test-storage-grain-with-extended-key")]
     public class GrainStorageTestGrainExtendedKey : Grain,
         IGrainStorageTestGrain_GuidExtendedKey, IGrainStorageTestGrain_LongExtendedKey

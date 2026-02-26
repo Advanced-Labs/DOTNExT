@@ -1,0 +1,32 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageId>Genesa.Scynapse.Transactions.AzureStorage</PackageId>
+    <Title>Microsoft Scynapse Azure Storage Transactions Provider</Title>
+    <Description>Microsoft Scynapse transactions storage provider backed by Azure Storage</Description>
+    <PackageTags>$(PackageTags) Azure Transactions</PackageTags>
+    <TargetFrameworks>$(DefaultTargetFrameworks)</TargetFrameworks>
+    <AssemblyName>Scynapse.Transactions.AzureStorage</AssemblyName>
+    <RootNamespace>Scynapse.Transactions.AzureStorage</RootNamespace>
+    <DefineConstants>$(DefineConstants);SCYNAPSE_TRANSACTIONS</DefineConstants>
+    <ScynapseBuildTimeCodeGen>true</ScynapseBuildTimeCodeGen>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="..\Shared\Storage\AzureTableDataManager.cs" Link="Storage\AzureTableDataManager.cs" />
+    <Compile Include="..\Shared\Storage\AzureTableUtils.cs" Link="Storage\AzureTableUtils.cs" />
+    <Compile Include="..\Shared\Storage\AzureStorageOperationOptions.cs" Link="Storage\AzureStorageOperationOptions.cs" />
+    <Compile Include="..\Shared\Storage\AzureStoragePolicyOptions.cs" Link="Storage\AzureStoragePolicyOptions.cs" />
+    <Compile Include="..\Shared\Utilities\ErrorCode.cs" Link="Utilities\ErrorCode.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Azure.Core" />
+    <PackageReference Include="Azure.Data.Tables" />
+    <ProjectReference Include="..\..\Scynapse.Transactions\Scynapse.Transactions.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="README.md" Pack="true" PackagePath="\" />
+  </ItemGroup>
+</Project>

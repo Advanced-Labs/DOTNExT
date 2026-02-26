@@ -4,19 +4,19 @@
     /// A generic state used to test if saving, reading and clearing of the storage functions as expected.
     /// </summary>
     [Serializable]
-    [Orleans.GenerateSerializer]
+    [Scynapse.GenerateSerializer]
     public class TestStateGeneric1<T>: IEquatable<TestStateGeneric1<T>>
     {
-        [Orleans.Id(0)]
+        [Scynapse.Id(0)]
         public T SomeData { get; set; }
 
-        [Orleans.Id(1)]
+        [Scynapse.Id(1)]
         public string A { get; set; }
 
-        [Orleans.Id(2)]
+        [Scynapse.Id(2)]
         public int B { get; set; }
 
-        [Orleans.Id(3)]
+        [Scynapse.Id(3)]
         public long C { get; set; }
 
 

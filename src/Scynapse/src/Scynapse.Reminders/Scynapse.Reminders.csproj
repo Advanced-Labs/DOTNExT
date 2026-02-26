@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <PackageId>Genesa.Scynapse.Reminders</PackageId>
+    <Title>Microsoft Scynapse Reminders Library</Title>
+    <Description>Reminders library for Microsoft Scynapse used on the server.</Description>
+    <TargetFrameworks>$(DefaultTargetFrameworks)</TargetFrameworks>
+    <ScynapseBuildTimeCodeGen>true</ScynapseBuildTimeCodeGen>
+    <ProduceReferenceAssembly>false</ProduceReferenceAssembly>
+    <DefineConstants>$(DefineConstants);SCYNAPSE_REMINDERS_PROVIDER</DefineConstants>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="$(SourceRoot)src\Scynapse.Runtime\Scynapse.Runtime.csproj" />
+    <ProjectReference Include="$(SourceRoot)src\Scynapse.Core.Abstractions\Scynapse.Core.Abstractions.csproj" />
+    <ProjectReference Include="..\Scynapse.Sdk\Scynapse.Sdk.csproj" />
+  </ItemGroup>
+</Project>

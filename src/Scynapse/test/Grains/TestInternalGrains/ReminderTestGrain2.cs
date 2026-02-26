@@ -2,9 +2,9 @@ using System.Globalization;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using Orleans.Runtime;
-using Orleans.Runtime.Services;
-using Orleans.Timers;
+using Scynapse.Runtime;
+using Scynapse.Runtime.Services;
+using Scynapse.Timers;
 using UnitTests.GrainInterfaces;
 
 
@@ -149,7 +149,7 @@ namespace UnitTests.Grains
                 else
                 {
                     //var reminders = await this.GetRemindersList();
-                    throw new OrleansException(string.Format(
+                    throw new ScynapseException(string.Format(
                         "Could not find reminder {0} in grain {1}", reminderName, this.IdentityString));
                 }
             }

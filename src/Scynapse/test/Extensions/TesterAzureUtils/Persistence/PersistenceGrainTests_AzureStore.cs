@@ -1,6 +1,6 @@
 using Microsoft.Extensions.Configuration;
 using Xunit.Abstractions;
-using Orleans.TestingHost;
+using Scynapse.TestingHost;
 using TestExtensions;
 using TestExtensions.Runners;
 

@@ -1,6 +1,6 @@
-using Orleans.Configuration;
-using Orleans.Hosting.Developer;
-using Orleans.TestingHost;
+using Scynapse.Configuration;
+using Scynapse.Hosting.Developer;
+using Scynapse.TestingHost;
 using Tester.StreamingTests;
 using TestExtensions;
 using Xunit;
@@ -54,7 +54,7 @@ namespace ServiceBus.Tests
             this.fixture = fixture;
         }
 
-        [Fact(Skip = "https://github.com/dotnet/orleans/issues/4317"), TestCategory("BVT")]
+        [Fact(Skip = "https://github.com/Scynapse/Core/issues/4317"), TestCategory("BVT")]
         public Task PluggableQueueBalancerTest_ShouldUseInjectedQueueBalancerAndBalanceCorrectly()
         {
             return base.ShouldUseInjectedQueueBalancerAndBalanceCorrectly(this.fixture, StreamProviderName, SiloCount, TotalQueueCount);

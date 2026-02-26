@@ -1,15 +1,15 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using Orleans;
-using Orleans.Configuration;
-using Orleans.Hosting;
-using Orleans.Runtime;
-using Orleans.Runtime.DynamicGrains;
+using Scynapse;
+using Scynapse.Configuration;
+using Scynapse.Hosting;
+using Scynapse.Runtime;
+using Scynapse.Runtime.DynamicGrains;
 using System.Net;
 
 Console.WriteLine("═══════════════════════════════════════════════════════");
-Console.WriteLine("  Orleans Plugin Grain Loading - Multi-Silo Test");
+Console.WriteLine("  Scynapse Plugin Grain Loading - Multi-Silo Test");
 Console.WriteLine("═══════════════════════════════════════════════════════");
 Console.WriteLine();
 
@@ -297,7 +297,7 @@ static async Task<IHost> StartSilo(string siloName, int siloPort, int gatewayPor
     Console.WriteLine($"Starting {siloName}...");
 
     var host = Host.CreateDefaultBuilder()
-        .UseOrleans((context, siloBuilder) =>
+        .UseScynapse((context, siloBuilder) =>
         {
             siloBuilder
                 .Configure<ClusterOptions>(options =>
@@ -317,9 +317,9 @@ static async Task<IHost> StartSilo(string siloName, int siloPort, int gatewayPor
             logging.ClearProviders();
             logging.AddConsole();
             logging.SetMinimumLevel(LogLevel.Information);
-            logging.AddFilter("Orleans.Runtime.DynamicGrains", LogLevel.Debug);
-            logging.AddFilter($"Orleans.Runtime.Management.ManagementGrain.{siloName}", LogLevel.Warning);
-            logging.AddFilter("Orleans.Runtime.SiloControl", LogLevel.Warning);
+            logging.AddFilter("Scynapse.Runtime.DynamicGrains", LogLevel.Debug);
+            logging.AddFilter($"Scynapse.Runtime.Management.ManagementGrain.{siloName}", LogLevel.Warning);
+            logging.AddFilter("Scynapse.Runtime.SiloControl", LogLevel.Warning);
         })
         .Build();
 

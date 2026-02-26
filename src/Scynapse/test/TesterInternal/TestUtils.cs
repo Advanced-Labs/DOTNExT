@@ -1,5 +1,5 @@
-using Orleans.Runtime;
-using Orleans.TestingHost;
+using Scynapse.Runtime;
+using Scynapse.TestingHost;
 
 namespace UnitTests.TestHelper
 {

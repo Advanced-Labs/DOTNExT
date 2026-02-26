@@ -3,9 +3,9 @@ using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
 using Microsoft.Extensions.Time.Testing;
 using NSubstitute;
-using Orleans.Configuration;
-using Orleans.Runtime;
-using Orleans.Statistics;
+using Scynapse.Configuration;
+using Scynapse.Runtime;
+using Scynapse.Statistics;
 using TestGrains;
 using Xunit;
 

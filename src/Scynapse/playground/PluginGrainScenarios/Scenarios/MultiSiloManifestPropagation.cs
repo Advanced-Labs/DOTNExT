@@ -1,6 +1,6 @@
 using Microsoft.Extensions.DependencyInjection;
-using Orleans.Runtime;
-using Orleans.Runtime.DynamicGrains;
+using Scynapse.Runtime;
+using Scynapse.Runtime.DynamicGrains;
 using Spectre.Console;
 
 namespace PluginGrainScenarios.Scenarios;

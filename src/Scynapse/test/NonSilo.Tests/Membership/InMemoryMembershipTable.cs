@@ -1,5 +1,5 @@
-using Orleans.Runtime;
-using Orleans;
+using Scynapse.Runtime;
+using Scynapse;
 using System.Collections.Immutable;
 
 namespace NonSilo.Tests.Membership

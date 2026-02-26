@@ -1,6 +1,6 @@
 using System.Diagnostics;
 using BenchmarkGrainInterfaces.Transaction;
-using Orleans.Transactions;
+using Scynapse.Transactions;
 
 namespace BenchmarkGrains.Transaction
 {
@@ -61,7 +61,7 @@ namespace BenchmarkGrains.Transaction
             {
                 if (t.IsFaulted || t.IsCanceled)
                 {
-                    if(t.Exception.Flatten().GetBaseException() is OrleansStartTransactionFailedException)
+                    if(t.Exception.Flatten().GetBaseException() is ScynapseStartTransactionFailedException)
                     {
                         report.Throttled++;
 
@@ -87,7 +87,7 @@ namespace BenchmarkGrains.Transaction
             try
             {
                 await GrainFactory.GetGrain<ITransactionRootGrain>(Guid.Empty).Run(new List<int>() { index * 2, index * 2 + 1 });
-            } catch(OrleansStartTransactionFailedException)
+            } catch(ScynapseStartTransactionFailedException)
             {
                 // Depay before retry
                 await Task.Delay(TimeSpan.FromSeconds(1));

@@ -1,10 +1,10 @@
 //#define USE_SQL_SERVER
 
-using Orleans.TestingHost;
+using Scynapse.TestingHost;
 using TestExtensions;
 using UnitTests.GrainInterfaces;
 using Xunit;
-using Orleans.Internal;
+using Scynapse.Internal;
 
 // ReSharper disable InconsistentNaming
 // ReSharper disable UnusedVariable
@@ -37,7 +37,7 @@ namespace UnitTests.TimerTests
 
         public ReminderTests_TableGrain(Fixture fixture) : base(fixture)
         {
-            // ReminderTable.Clear() cannot be called from a non-Orleans thread,
+            // ReminderTable.Clear() cannot be called from a non-Scynapse thread,
             // so we must proxy the call through a grain.
             var controlProxy = this.GrainFactory.GetGrain<IReminderTestGrain2>(Guid.NewGuid());
             controlProxy.EraseReminderTable().WaitAsync(TestConstants.InitTimeout).Wait();
@@ -57,7 +57,7 @@ namespace UnitTests.TimerTests
         /// <summary>
         /// Tests basic reminder list operations including creation and retrieval.
         /// </summary>
-        [Fact(Skip = "https://github.com/dotnet/orleans/issues/9555")]
+        [Fact(Skip = "https://github.com/Scynapse/Core/issues/9555")]
         public async Task Rem_Grain_Basic_ListOps()
         {
             await Test_Reminders_Basic_ListOps();
@@ -78,7 +78,7 @@ namespace UnitTests.TimerTests
         /// <summary>
         /// Tests single join scenario with multiple grains and multiple reminders.
         /// </summary>
-        [SkippableFact(Skip = "https://github.com/dotnet/orleans/issues/4318")]
+        [SkippableFact(Skip = "https://github.com/Scynapse/Core/issues/4318")]
         public async Task Rem_Grain_1J_MultiGrainMultiReminders()
         {
             await Test_Reminders_1J_MultiGrainMultiReminders();

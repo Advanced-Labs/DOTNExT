@@ -2,10 +2,10 @@ using System;
 using System.Text.Json.Nodes;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
-using Orleans;
-using Orleans.Hosting;
-using Orleans.Serialization;
-using Orleans.TestingHost;
+using Scynapse;
+using Scynapse.Hosting;
+using Scynapse.Serialization;
+using Scynapse.TestingHost;
 using TestExtensions;
 using Xunit;
 using Xunit.Abstractions;
@@ -13,7 +13,7 @@ using Xunit.Abstractions;
 namespace DefaultCluster.Tests
 {
     /// <summary>
-    /// Grain interface for testing JsonNode serialization through Orleans grain calls.
+    /// Grain interface for testing JsonNode serialization through Scynapse grain calls.
     /// This interface reproduces the scenario from GitHub issue #9568 where JsonNode parameters
     /// are used in grain methods, which can receive JsonValue instances at runtime.
     /// </summary>
@@ -44,7 +44,7 @@ namespace DefaultCluster.Tests
     }
 
     /// <summary>
-    /// Test fixture that configures an in-process Orleans cluster with JSON serialization support.
+    /// Test fixture that configures an in-process Scynapse cluster with JSON serialization support.
     /// Sets up both silo and client to use the JsonCodec for System.Text.Json types.
     /// </summary>
     public class JsonNodeGrainTestFixture : BaseInProcessTestClusterFixture
@@ -73,7 +73,7 @@ namespace DefaultCluster.Tests
     }
 
     /// <summary>
-    /// Integration tests for JsonNode serialization in Orleans grains.
+    /// Integration tests for JsonNode serialization in Scynapse grains.
     /// These tests verify that the fix for GitHub issue #9568 works correctly when JsonNode types
     /// are passed through grain method calls, particularly when JsonValue is passed to a JsonNode parameter.
     /// </summary>

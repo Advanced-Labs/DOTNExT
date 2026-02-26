@@ -1,12 +1,12 @@
-using Orleans.Runtime;
+using Scynapse.Runtime;
 using Xunit;
 using Xunit.Abstractions;
 
 namespace UnitTests.General;
 
 /// <summary>
-/// Tests for the CounterAggregatorGroup, which is part of Orleans' instrumentation and metrics infrastructure.
-/// This component aggregates counter values from multiple sources and is used throughout Orleans for collecting
+/// Tests for the CounterAggregatorGroup, which is part of Scynapse' instrumentation and metrics infrastructure.
+/// This component aggregates counter values from multiple sources and is used throughout Scynapse for collecting
 /// performance metrics such as message counts, activation counts, and other operational statistics.
 /// </summary>
 public class CounterAggregatorGroupTests
@@ -57,7 +57,7 @@ public class CounterAggregatorGroupTests
 
     /// <summary>
     /// Stress test to verify thread-safety of the counter aggregator under high concurrent load.
-    /// This ensures metrics collection remains accurate in Orleans' multi-threaded runtime environment.
+    /// This ensures metrics collection remains accurate in Scynapse' multi-threaded runtime environment.
     /// </summary>
     [Fact, TestCategory("Functional"), TestCategory("Aggregators")]
     public void TestMultithreadedCorrectness()

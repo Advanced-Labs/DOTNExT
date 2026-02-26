@@ -1,6 +1,6 @@
-using Orleans.Streams;
-using Orleans.Runtime;
-using Orleans.Streams.PubSub;
+using Scynapse.Streams;
+using Scynapse.Runtime;
+using Scynapse.Streams.PubSub;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace UnitTests.Grains.ProgrammaticSubscribe

@@ -5,10 +5,10 @@
 /[Tt]ools/
 /src/[Bb]ootstrap/
 
-# Orleans code-gen files
-orleans.codegen.cs
-orleans.codegen.fs
-orleans.codegen.vb
+# Scynapse code-gen files
+scynapse.codegen.cs
+scynapse.codegen.fs
+scynapse.codegen.vb
 src/SDK/VSIX/
 
 # User-specific files

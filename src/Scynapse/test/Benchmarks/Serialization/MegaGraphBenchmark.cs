@@ -1,19 +1,19 @@
 using BenchmarkDotNet.Attributes;
 using Benchmarks.Utilities;
-using Orleans.Serialization;
-using Orleans.Serialization.Buffers;
-using Orleans.Serialization.Session;
+using Scynapse.Serialization;
+using Scynapse.Serialization.Buffers;
+using Scynapse.Serialization.Session;
 using Microsoft.Extensions.DependencyInjection;
 using System.Buffers;
 using System.Globalization;
 using System.IO.Pipelines;
 using Xunit;
-using SerializerSession = Orleans.Serialization.Session.SerializerSession;
+using SerializerSession = Scynapse.Serialization.Session.SerializerSession;
 
 namespace Benchmarks
 {
     /// <summary>
-    /// Benchmarks Orleans serialization performance for very large object graphs with hundreds of thousands of items.
+    /// Benchmarks Scynapse serialization performance for very large object graphs with hundreds of thousands of items.
     /// </summary>
     [Trait("Category", "Benchmark")]
     [Config(typeof(BenchmarkConfig))]

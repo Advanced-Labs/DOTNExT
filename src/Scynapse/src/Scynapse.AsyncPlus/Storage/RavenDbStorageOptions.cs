@@ -1,4 +1,4 @@
-using Orleans.Storage;
+using Scynapse.Storage;
 
 namespace Scynapse.AsyncPlus.Storage;
 
@@ -13,9 +13,9 @@ public class RavenDbStorageOptions
     public string[] Urls { get; set; } = new[] { "http://127.0.0.1:38880" };
 
     /// <summary>
-    /// Database name for grain storage. Default: "OrleansGrainState"
+    /// Database name for grain storage. Default: "ScynapseGrainState"
     /// </summary>
-    public string DatabaseName { get; set; } = "OrleansGrainState";
+    public string DatabaseName { get; set; } = "ScynapseGrainState";
 
     /// <summary>
     /// Optional certificate path for secured connections.
@@ -84,7 +84,7 @@ public class GrainStateDocument
     public DateTime LastModifiedUtc { get; set; } = DateTime.UtcNow;
 
     /// <summary>
-    /// Service ID from Orleans cluster options.
+    /// Service ID from Scynapse cluster options.
     /// </summary>
     public string ServiceId { get; set; } = string.Empty;
 }

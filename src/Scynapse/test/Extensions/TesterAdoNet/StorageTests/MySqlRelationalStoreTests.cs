@@ -1,5 +1,5 @@
 using System.Runtime.ExceptionServices;
-using Orleans.Tests.SqlUtils;
+using Scynapse.Tests.SqlUtils;
 using TestExtensions;
 using UnitTests.General;
 using Xunit;
@@ -12,7 +12,7 @@ namespace UnitTests.StorageTests.AdoNet
     [TestCategory("Persistence"), TestCategory("MySql")]
     public class MySqlRelationalStoreTests : RelationalStoreTestsBase, IClassFixture<MySqlRelationalStoreTests.Fixture>
     {
-        private const string TestDatabaseName = "OrleansStreamTest";
+        private const string TestDatabaseName = "ScynapseStreamTest";
         private const string AdoNetInvariantName = AdoNetInvariants.InvariantNameMySql;
 
         private readonly RelationalStorageForTesting _storage;

@@ -1,4 +1,4 @@
-using Orleans.Internal;
+using Scynapse.Internal;
 using TestExtensions;
 using UnitTests.GrainInterfaces;
 using Xunit;
@@ -6,7 +6,7 @@ using Xunit;
 namespace DefaultCluster.Tests.General
 {
     /// <summary>
-    /// Tests for Orleans one-way method calls.
+    /// Tests for Scynapse one-way method calls.
     /// One-way methods are grain methods that return immediately to the caller
     /// without waiting for the method execution to complete. This fire-and-forget
     /// pattern is useful for notifications, logging, and other scenarios where

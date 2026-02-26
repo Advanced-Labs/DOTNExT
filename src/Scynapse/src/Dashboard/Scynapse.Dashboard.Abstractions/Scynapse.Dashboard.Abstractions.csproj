@@ -1,0 +1,20 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <PackageId>Genesa.Scynapse.Dashboard.Abstractions</PackageId>
+    <Title>Microsoft Scynapse Dashboard Abstractions</Title>
+    <Description>Shared types used by the Scynapse Dashboard package.</Description>
+    <TargetFramework>net8.0</TargetFramework>
+    <RootNamespace>Scynapse.Dashboard</RootNamespace>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="README.md" Pack="true" PackagePath="\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <AssemblyAttribute Remove="Scynapse.Metadata.FrameworkPartAttribute"/>
+  </ItemGroup>
+
+</Project>

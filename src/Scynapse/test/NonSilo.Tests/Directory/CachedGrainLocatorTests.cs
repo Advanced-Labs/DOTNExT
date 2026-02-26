@@ -7,12 +7,12 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using NSubstitute;
 using NSubstitute.ReceivedExtensions;
-using Orleans.Configuration;
-using Orleans.GrainDirectory;
-using Orleans.Metadata;
-using Orleans.Runtime;
-using Orleans.Runtime.GrainDirectory;
-using Orleans.Runtime.Hosting;
+using Scynapse.Configuration;
+using Scynapse.GrainDirectory;
+using Scynapse.Metadata;
+using Scynapse.Runtime;
+using Scynapse.Runtime.GrainDirectory;
+using Scynapse.Runtime.Hosting;
 using TestExtensions;
 using Xunit;
 using Xunit.Abstractions;
@@ -20,7 +20,7 @@ using Xunit.Abstractions;
 namespace UnitTests.Directory
 {
     /// <summary>
-    /// Tests for the CachedGrainLocator, which is Orleans' primary mechanism for locating grain activations across the cluster.
+    /// Tests for the CachedGrainLocator, which is Scynapse' primary mechanism for locating grain activations across the cluster.
     /// The locator maintains a local cache of grain locations to minimize directory lookups and improve performance.
     /// It handles registration, lookup, and cleanup of grain activations while maintaining consistency with the distributed directory.
     /// </summary>

@@ -1,5 +1,5 @@
-using Orleans.Concurrency;
-using Orleans.Runtime;
+using Scynapse.Concurrency;
+using Scynapse.Runtime;
 
 namespace UnitTests.GrainInterfaces
 {

@@ -5,7 +5,7 @@ using Xunit;
 namespace DefaultCluster.Tests
 {
     /// <summary>
-    /// Tests for Orleans Reminders functionality.
+    /// Tests for Scynapse Reminders functionality.
     /// Reminders are a durable scheduling mechanism that persist across grain
     /// deactivations and cluster restarts. Unlike timers (which are grain-local
     /// and transient), reminders are stored in external storage and will

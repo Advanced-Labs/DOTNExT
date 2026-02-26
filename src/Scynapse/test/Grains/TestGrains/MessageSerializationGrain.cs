@@ -1,5 +1,5 @@
 using Microsoft.Extensions.DependencyInjection;
-using Orleans.Runtime.Placement;
+using Scynapse.Runtime.Placement;
 using UnitTests.GrainInterfaces;
 
 namespace UnitTests.Grains

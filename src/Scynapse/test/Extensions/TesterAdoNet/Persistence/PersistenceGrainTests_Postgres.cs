@@ -1,7 +1,7 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
-using Orleans.TestingHost;
-using Orleans.Tests.SqlUtils;
+using Scynapse.TestingHost;
+using Scynapse.Tests.SqlUtils;
 using TestExtensions;
 using TestExtensions.Runners;
 using UnitTests.General;
@@ -11,12 +11,12 @@ using Xunit.Abstractions;
 namespace Tester.AdoNet.Persistence
 {
     /// <summary>
-    /// Tests for Orleans grain state persistence functionality using PostgreSQL as the storage provider.
+    /// Tests for Scynapse grain state persistence functionality using PostgreSQL as the storage provider.
     /// </summary>
     [TestCategory("Persistence"), TestCategory("PostgreSql")]
     public class PersistenceGrainTests_Postgres : GrainPersistenceTestsRunner, IClassFixture<PersistenceGrainTests_Postgres.Fixture>
     {
-        public const string TestDatabaseName = "OrleansTest_Postgres_Storage";
+        public const string TestDatabaseName = "ScynapseTest_Postgres_Storage";
         public static string AdoInvariant = AdoNetInvariants.InvariantNamePostgreSql;
         public static string ConnectionStringKey = "AdoNetConnectionString";
 
@@ -47,7 +47,7 @@ namespace Tester.AdoNet.Persistence
                 {
                     var connectionString = hostBuilder.GetConfiguration()[ConnectionStringKey];
 
-                    hostBuilder.UseOrleans((ctx, siloBuilder) =>
+                    hostBuilder.UseScynapse((ctx, siloBuilder) =>
                     {
                         siloBuilder
                             .AddAdoNetGrainStorage("GrainStorageForTest", options =>

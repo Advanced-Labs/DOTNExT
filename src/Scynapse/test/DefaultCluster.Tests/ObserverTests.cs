@@ -1,7 +1,7 @@
 using System.Diagnostics;
 using Microsoft.Extensions.Logging;
-using Orleans.Runtime;
-using Orleans.TestingHost.Utils;
+using Scynapse.Runtime;
+using Scynapse.TestingHost.Utils;
 using TestExtensions;
 using UnitTests.GrainInterfaces;
 using Xunit;
@@ -9,9 +9,9 @@ using Xunit;
 namespace DefaultCluster.Tests.General
 {
     /// <summary>
-    /// Tests for the Orleans Observer pattern implementation.
+    /// Tests for the Scynapse Observer pattern implementation.
     /// Observers enable grains to send notifications to clients or other grains
-    /// through callback interfaces. This is Orleans' mechanism for push-based
+    /// through callback interfaces. This is Scynapse' mechanism for push-based
     /// communication, allowing grains to notify interested parties of state changes
     /// or events without polling. Observers are weakly referenced to prevent
     /// memory leaks and support automatic cleanup.
@@ -123,7 +123,7 @@ namespace DefaultCluster.Tests.General
 
         /// <summary>
         /// Tests that subscribing the same observer reference twice is prevented.
-        /// Verifies that Orleans detects and rejects duplicate subscriptions
+        /// Verifies that Scynapse detects and rejects duplicate subscriptions
         /// to prevent duplicate notifications and maintain subscription integrity.
         /// </summary>
         [Fact, TestCategory("SlowBVT")]
@@ -149,7 +149,7 @@ namespace DefaultCluster.Tests.General
             {
                 Exception baseException = exc.GetBaseException();
                 this.Logger.LogInformation(baseException, "Received exception");
-                Assert.IsAssignableFrom<OrleansException>(baseException);
+                Assert.IsAssignableFrom<ScynapseException>(baseException);
                 if (!baseException.Message.StartsWith("Cannot subscribe already subscribed observer"))
                 {
                     Assert.Fail("Unexpected exception message: " + baseException);
@@ -239,7 +239,7 @@ namespace DefaultCluster.Tests.General
             catch (Exception exc)
             {
                 Exception baseException = exc.GetBaseException();
-                if (!(baseException is OrleansException))
+                if (!(baseException is ScynapseException))
                     Assert.True(false);
             }
         }

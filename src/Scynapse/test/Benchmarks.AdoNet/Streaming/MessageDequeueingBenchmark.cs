@@ -1,14 +1,14 @@
 using System.Data.SqlClient;
 using BenchmarkDotNet.Attributes;
 using BenchmarkDotNet.Engines;
-using Orleans.Streaming.AdoNet;
-using Orleans.Tests.SqlUtils;
+using Scynapse.Streaming.AdoNet;
+using Scynapse.Tests.SqlUtils;
 using UnitTests.General;
 using static System.String;
 
 namespace Benchmarks.AdoNet.Streaming;
 
-public class SqlServerMessageDequeuingBenchmark() : MessageDequeuingBenchmark(AdoNetInvariants.InvariantNameSqlServer, "OrleansStreamTest")
+public class SqlServerMessageDequeuingBenchmark() : MessageDequeuingBenchmark(AdoNetInvariants.InvariantNameSqlServer, "ScynapseStreamTest")
 {
     public override void GlobalSetup()
     {
@@ -28,7 +28,7 @@ public abstract class MessageDequeuingBenchmark(string invariant, string databas
 
     private readonly Consumer _consumer = new();
     private IRelationalStorage _storage = default!;
-    private RelationalOrleansQueries _queries = default!;
+    private RelationalScynapseQueries _queries = default!;
     private byte[] _payload = [];
     private string[] _queueIds = default!;
     private AdoNetStreamMessageAck[] _acks = [];
@@ -78,7 +78,7 @@ public abstract class MessageDequeuingBenchmark(string invariant, string databas
                 throw new InvalidOperationException($"Database '{database}' not initialized");
             }
             _storage = RelationalStorage.CreateInstance(invariant, testing.CurrentConnectionString);
-            _queries = await RelationalOrleansQueries.CreateInstance(invariant, testing.CurrentConnectionString);
+            _queries = await RelationalScynapseQueries.CreateInstance(invariant, testing.CurrentConnectionString);
         }
     }
 
@@ -89,7 +89,7 @@ public abstract class MessageDequeuingBenchmark(string invariant, string databas
 
         async Task Async()
         {
-            await _storage.ExecuteAsync("TRUNCATE TABLE OrleansStreamMessage");
+            await _storage.ExecuteAsync("TRUNCATE TABLE ScynapseStreamMessage");
 
             // generate test data to dequeue
             var count = (int)Math.Ceiling(OperationsPerInvoke * QueueCount * BatchSize * FullnessRatio);

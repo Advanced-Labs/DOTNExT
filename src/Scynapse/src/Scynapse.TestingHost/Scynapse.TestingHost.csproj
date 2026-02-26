@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <PackageId>Genesa.Scynapse.TestingHost</PackageId>
+    <Title>Microsoft Scynapse Testing Host Library</Title>
+    <Description>Microsoft Scynapse library for hosting a silo in a testing project.</Description>
+    <TargetFrameworks>$(DefaultTargetFrameworks)</TargetFrameworks>
+    <ScynapseBuildTimeCodeGen>true</ScynapseBuildTimeCodeGen>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="$(SourceRoot)src\Scynapse.Persistence.Memory\Scynapse.Persistence.Memory.csproj" />
+    <ProjectReference Include="$(SourceRoot)src\Scynapse.Runtime\Scynapse.Runtime.csproj" />
+    <ProjectReference Include="$(SourceRoot)src\Scynapse.Streaming\Scynapse.Streaming.csproj" />
+    <ProjectReference Include="$(SourceRoot)src\Scynapse.Reminders\Scynapse.Reminders.csproj" />
+    <ProjectReference Include="$(SourceRoot)src\Scynapse.DurableJobs\Scynapse.DurableJobs.csproj" />
+    <PackageReference Include="Microsoft.Extensions.Hosting" />
+  </ItemGroup>
+</Project>

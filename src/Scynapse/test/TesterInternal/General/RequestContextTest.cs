@@ -1,7 +1,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Orleans.Runtime;
-using Orleans.TestingHost;
+using Scynapse.Runtime;
+using Scynapse.TestingHost;
 using Tester;
 using TestExtensions;
 using UnitTests.GrainInterfaces;
@@ -13,7 +13,7 @@ namespace UnitTests.General
     /// <summary>
     /// Tests for request context propagation across grain calls and activities.
     /// </summary>
-    public class RequestContextTests_Silo : OrleansTestingBase, IClassFixture<RequestContextTests_Silo.Fixture>, IDisposable
+    public class RequestContextTests_Silo : ScynapseTestingBase, IClassFixture<RequestContextTests_Silo.Fixture>, IDisposable
     {
         private readonly ITestOutputHelper output;
         private readonly Fixture fixture;
@@ -111,7 +111,7 @@ namespace UnitTests.General
             result = await grain.TraceIdDelayedEchoAwait();
             Assert.Equal(val,  result); // "Delayed (Await) RequestContext echo was not correct");
 
-            // Expected behaviour is this won't work, because Task.Run by design does not use Orleans task scheduler
+            // Expected behaviour is this won't work, because Task.Run by design does not use Scynapse task scheduler
             //RequestContext.Set(key, val2);
             //result = await grain.TraceIdDelayedEchoTaskRun();
             //Assert.Equal(val2,  result); // "Delayed (Task.Run) RequestContext echo was not correct");
@@ -329,7 +329,7 @@ namespace UnitTests.General
         }
     }
 
-    public class Halo_RequestContextTests : OrleansTestingBase
+    public class Halo_RequestContextTests : ScynapseTestingBase
     {
         private readonly ITestOutputHelper output;
 
@@ -374,7 +374,7 @@ namespace UnitTests.General
         }
     }
 
-    public class Halo_CallContextTests : OrleansTestingBase
+    public class Halo_CallContextTests : ScynapseTestingBase
     {
         private readonly ITestOutputHelper output;
 

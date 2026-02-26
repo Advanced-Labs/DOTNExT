@@ -1,5 +1,5 @@
-using Orleans.Configuration;
-using Orleans.TestingHost;
+using Scynapse.Configuration;
+using Scynapse.TestingHost;
 using TestExtensions;
 using UnitTests.GrainInterfaces;
 using Xunit;
@@ -7,9 +7,9 @@ using Xunit;
 namespace UnitTests.CatalogTests
 {
     /// <summary>
-    /// Tests the Orleans catalog's ability to prevent duplicate grain activations under high concurrency.
+    /// Tests the Scynapse catalog's ability to prevent duplicate grain activations under high concurrency.
     /// 
-    /// Orleans guarantees single activation semantics - each grain ID should have at most one activation
+    /// Scynapse guarantees single activation semantics - each grain ID should have at most one activation
     /// in the cluster at any time. This test stress-tests this guarantee by having multiple runner grains
     /// simultaneously make calls to the same set of target grains.
     /// 

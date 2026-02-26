@@ -2,10 +2,10 @@ using System.Diagnostics;
 using System.Diagnostics.Metrics;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Orleans.Runtime;
-using Orleans.Streams;
-using Orleans.TestingHost;
-using Orleans.TestingHost.Utils;
+using Scynapse.Runtime;
+using Scynapse.Streams;
+using Scynapse.TestingHost;
+using Scynapse.TestingHost.Utils;
 using UnitTests.GrainInterfaces;
 using Xunit;
 

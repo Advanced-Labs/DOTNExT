@@ -1,8 +1,8 @@
 using Azure.Data.Tables;
 using Azure.Identity;
 using Microsoft.Extensions.Logging.Abstractions;
-using Orleans.Persistence.AzureStorage;
-using Orleans.Providers.Streams.PersistentStreams;
+using Scynapse.Persistence.AzureStorage;
+using Scynapse.Providers.Streams.PersistentStreams;
 using TestExtensions;
 
 namespace Tester.AzureUtils.Streaming

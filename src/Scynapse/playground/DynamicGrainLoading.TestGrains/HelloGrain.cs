@@ -1,5 +1,5 @@
 using Microsoft.Extensions.Logging;
-using Orleans;
+using Scynapse;
 
 namespace DynamicGrainLoading.TestGrains;
 

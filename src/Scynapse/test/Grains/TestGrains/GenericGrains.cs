@@ -2,9 +2,9 @@ using System.Globalization;
 using System.Runtime.CompilerServices;
 using System.Threading.Channels;
 using Microsoft.Extensions.Logging;
-using Orleans.Concurrency;
-using Orleans.Providers;
-using Orleans.Timers;
+using Scynapse.Concurrency;
+using Scynapse.Providers;
+using Scynapse.Timers;
 using UnitTests.GrainInterfaces;
 
 namespace UnitTests.Grains
@@ -665,10 +665,10 @@ namespace UnitTests.Grains
         public Task<bool> GrainCancellationTokenCallbackResolve(GrainCancellationToken tc, Guid callId)
         {
             var tcs = new TaskCompletionSource<bool>();
-            var orleansTs = TaskScheduler.Current;
+            var scynapseTs = TaskScheduler.Current;
             tc.CancellationToken.Register(() =>
             {
-                if (TaskScheduler.Current != orleansTs)
+                if (TaskScheduler.Current != scynapseTs)
                 {
                     var exception = new Exception("Callback executed on wrong thread");
                     _cancelledCalls.Writer.TryWrite((callId, exception));
@@ -687,10 +687,10 @@ namespace UnitTests.Grains
         public Task<bool> CancellationTokenCallbackResolve(CancellationToken tc, Guid callId)
         {
             var tcs = new TaskCompletionSource<bool>();
-            var orleansTs = TaskScheduler.Current;
+            var scynapseTs = TaskScheduler.Current;
             tc.Register(() =>
             {
-                if (TaskScheduler.Current != orleansTs)
+                if (TaskScheduler.Current != scynapseTs)
                 {
                     var exception = new Exception("Callback executed on wrong thread");
                     _cancelledCalls.Writer.TryWrite((callId, exception));

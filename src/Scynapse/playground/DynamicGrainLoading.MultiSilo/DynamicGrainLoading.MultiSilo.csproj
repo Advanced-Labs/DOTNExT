@@ -5,8 +5,8 @@
     <TargetFramework>net8.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-    <!-- Required when using Orleans via project references instead of NuGet packages -->
-    <OrleansBuildTimeCodeGen>true</OrleansBuildTimeCodeGen>
+    <!-- Required when using Scynapse via project references instead of NuGet packages -->
+    <ScynapseBuildTimeCodeGen>true</ScynapseBuildTimeCodeGen>
   </PropertyGroup>
 
   <ItemGroup>
@@ -15,8 +15,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\Orleans.Server\Orleans.Server.csproj" />
-    <ProjectReference Include="..\..\src\Orleans.Runtime\Orleans.Runtime.csproj" />
+    <ProjectReference Include="..\..\src\Scynapse.Server\Scynapse.Server.csproj" />
+    <ProjectReference Include="..\..\src\Scynapse.Runtime\Scynapse.Runtime.csproj" />
   </ItemGroup>
 
 </Project>

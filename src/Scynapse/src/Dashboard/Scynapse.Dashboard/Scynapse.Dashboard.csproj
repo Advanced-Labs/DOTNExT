@@ -1,0 +1,40 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <PackageId>Genesa.Scynapse.Dashboard</PackageId>
+    <Title>Microsoft Scynapse Dashboard</Title>
+    <Description>Real-time monitoring and visualization dashboard for Microsoft Scynapse showing grain statistics, performance metrics, and cluster health.</Description>
+    <TargetFramework>net8.0</TargetFramework>
+    <ScynapseBuildTimeCodeGen>true</ScynapseBuildTimeCodeGen>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <RootNamespace>Scynapse.Dashboard</RootNamespace>
+  </PropertyGroup>
+
+  <Import Project="Scynapse.Dashboard.Frontend.targets" />
+
+  <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="README.md" Pack="true" PackagePath="\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="OpenTelemetry" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Scynapse.Dashboard.Abstractions\Scynapse.Dashboard.Abstractions.csproj" />
+    <ProjectReference Include="..\..\Scynapse.Reminders\Scynapse.Reminders.csproj" />
+    <ProjectReference Include="..\..\Scynapse.Runtime\Scynapse.Runtime.csproj" />
+    <ProjectReference Include="..\..\Scynapse.Sdk\Scynapse.Sdk.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="Scynapse.Dashboard.TestGrains" />
+    <InternalsVisibleTo Include="Scynapse.Dashboard.UnitTests" />
+    <InternalsVisibleTo Include="Benchmarks" />
+  </ItemGroup>
+  
+</Project>

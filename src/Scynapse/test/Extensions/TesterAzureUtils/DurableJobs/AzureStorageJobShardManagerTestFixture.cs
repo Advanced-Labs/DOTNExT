@@ -3,14 +3,14 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
-using Orleans.Hosting;
-using Orleans.Runtime;
-using Orleans.DurableJobs;
-using Orleans.DurableJobs.AzureStorage;
+using Scynapse.Hosting;
+using Scynapse.Runtime;
+using Scynapse.DurableJobs;
+using Scynapse.DurableJobs.AzureStorage;
 using Tester.AzureUtils;
 using Tester.DurableJobs;
 
-namespace Orleans.Tests.DurableJobs.AzureStorage;
+namespace Scynapse.Tests.DurableJobs.AzureStorage;
 
 /// <summary>
 /// Azure Storage implementation of <see cref="IJobShardManagerTestFixture"/>.

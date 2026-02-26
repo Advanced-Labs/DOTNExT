@@ -1,7 +1,7 @@
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using Orleans.Configuration;
-using Orleans.Reminders.Redis;
+using Scynapse.Configuration;
+using Scynapse.Reminders.Redis;
 using StackExchange.Redis;
 using TestExtensions;
 using UnitTests;

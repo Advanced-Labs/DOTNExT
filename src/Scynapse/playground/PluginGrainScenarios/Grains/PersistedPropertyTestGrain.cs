@@ -1,5 +1,5 @@
-using Orleans;
-using Orleans.Runtime;
+using Scynapse;
+using Scynapse.Runtime;
 
 namespace PluginGrainScenarios.Grains;
 

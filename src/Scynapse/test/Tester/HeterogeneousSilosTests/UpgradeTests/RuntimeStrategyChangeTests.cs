@@ -1,6 +1,6 @@
-using Orleans.Metadata;
-using Orleans.Versions.Compatibility;
-using Orleans.Versions.Selector;
+using Scynapse.Metadata;
+using Scynapse.Versions.Compatibility;
+using Scynapse.Versions.Selector;
 using TestVersionGrainInterfaces;
 using Microsoft.Extensions.DependencyInjection;
 using Xunit;

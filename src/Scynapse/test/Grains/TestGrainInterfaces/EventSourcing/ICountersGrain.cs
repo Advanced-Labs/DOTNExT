@@ -4,7 +4,7 @@
     /// <summary>
     /// A grain that maintains a number of counters, indexed by a string key
     /// </summary>
-    public interface ICountersGrain : Orleans.IGrainWithIntegerKey
+    public interface ICountersGrain : Scynapse.IGrainWithIntegerKey
     {
         /// <summary> Updates the counter for the given key by the given amount </summary>
         Task Add(string key, int amount, bool wait_for_confirmation);

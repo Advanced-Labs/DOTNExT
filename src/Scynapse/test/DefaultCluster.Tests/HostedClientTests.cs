@@ -2,15 +2,15 @@ using System.Diagnostics;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using Orleans.Concurrency;
-using Orleans.Configuration;
-using Orleans.Internal;
-using Orleans.Metadata;
-using Orleans.Providers;
-using Orleans.Runtime;
-using Orleans.Streams;
-using Orleans.TestingHost;
-using Orleans.TestingHost.Utils;
+using Scynapse.Concurrency;
+using Scynapse.Configuration;
+using Scynapse.Internal;
+using Scynapse.Metadata;
+using Scynapse.Providers;
+using Scynapse.Runtime;
+using Scynapse.Streams;
+using Scynapse.TestingHost;
+using Scynapse.TestingHost.Utils;
 using Tester.CodeGenTests;
 using UnitTests.GrainInterfaces;
 using Xunit;
@@ -18,10 +18,10 @@ using Xunit;
 namespace DefaultCluster.Tests.General
 {
     /// <summary>
-    /// Tests for hosted client functionality in Orleans.
-    /// A hosted client is an Orleans client that runs within the same process as the silo,
+    /// Tests for hosted client functionality in Scynapse.
+    /// A hosted client is an Scynapse client that runs within the same process as the silo,
     /// enabling in-process communication between application code and grains.
-    /// This pattern is common in ASP.NET Core applications hosting Orleans.
+    /// This pattern is common in ASP.NET Core applications hosting Scynapse.
     /// </summary>
     [TestCategory("BVT"), TestCategory("HostedClient")]
     public class HostedClientTests : IClassFixture<HostedClientTests.Fixture>
@@ -43,7 +43,7 @@ namespace DefaultCluster.Tests.General
             {
                 var (siloPort, gatewayPort) = portAllocator.AllocateConsecutivePortPairs(1);
                 Host = Microsoft.Extensions.Hosting.Host.CreateApplicationBuilder()
-                    .UseOrleans(siloBuilder =>
+                    .UseScynapse(siloBuilder =>
                     {
                         siloBuilder
                             .UseLocalhostClustering(siloPort, gatewayPort)
@@ -236,7 +236,7 @@ namespace DefaultCluster.Tests.General
 
         /// <summary>
         /// Tests streaming functionality from a hosted client.
-        /// Verifies that clients can subscribe to Orleans streams and receive
+        /// Verifies that clients can subscribe to Scynapse streams and receive
         /// messages published to those streams, demonstrating the streaming
         /// abstraction for event-driven communication patterns.
         /// </summary>

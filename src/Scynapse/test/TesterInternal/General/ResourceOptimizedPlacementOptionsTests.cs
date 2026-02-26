@@ -1,5 +1,5 @@
 using Microsoft.Extensions.Options;
-using Orleans.Configuration;
+using Scynapse.Configuration;
 using Xunit;
 
 namespace UnitTests.General;
@@ -56,7 +56,7 @@ public sealed class ResourceOptimizedPlacementOptionsTests
         });
 
         var validator = new ResourceOptimizedPlacementOptionsValidator(options);
-        Assert.Throws<OrleansConfigurationException>(validator.ValidateConfiguration);
+        Assert.Throws<ScynapseConfigurationException>(validator.ValidateConfiguration);
     }
 
     [Theory, TestCategory("PlacementOptions"), TestCategory("BVT")]

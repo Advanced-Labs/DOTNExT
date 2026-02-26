@@ -1,8 +1,8 @@
 using Microsoft.Extensions.Configuration;
 using MySql.Data.MySqlClient;
-using Orleans.Configuration;
-using Orleans.Streaming.AdoNet.Storage;
-using Orleans.TestingHost;
+using Scynapse.Configuration;
+using Scynapse.Streaming.AdoNet.Storage;
+using Scynapse.TestingHost;
 using Tester.StreamingTests;
 using TestExtensions;
 using UnitTests.General;
@@ -50,7 +50,7 @@ public abstract class AdoNetClientStreamTests : TestClusterPerTest
     }
 
     private static string _invariant;
-    private const string TestDatabaseName = "OrleansStreamTest";
+    private const string TestDatabaseName = "ScynapseStreamTest";
     private const string AdoNetStreamProviderName = "AdoNet";
     private const string StreamNamespace = "AdoNetSubscriptionMultiplicityTestsNamespace";
 
@@ -117,7 +117,7 @@ public abstract class AdoNetClientStreamTests : TestClusterPerTest
             StreamNamespace,
             _output,
             async () => (await _testing.Storage.ReadAsync(
-                "SELECT COUNT(*) FROM OrleansStreamDeadLetter",
+                "SELECT COUNT(*) FROM ScynapseStreamDeadLetter",
                 _ => { },
                 (record, i, ct) => Task.FromResult(record.GetInt32(0))))
                 .Single());

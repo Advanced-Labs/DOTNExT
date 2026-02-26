@@ -1,13 +1,13 @@
 using BenchmarkDotNet.Attributes;
 using Benchmarks.Models;
 using Benchmarks.Utilities;
-using Orleans.Serialization;
-using Orleans.Serialization.Buffers;
-using Orleans.Serialization.Session;
+using Scynapse.Serialization;
+using Scynapse.Serialization.Buffers;
+using Scynapse.Serialization.Session;
 using Microsoft.Extensions.DependencyInjection;
 using Newtonsoft.Json;
 using Xunit;
-using SerializerSession = Orleans.Serialization.Session.SerializerSession;
+using SerializerSession = Scynapse.Serialization.Session.SerializerSession;
 using Utf8JsonNS = Utf8Json;
 using Hyperion;
 using System.Buffers;
@@ -15,7 +15,7 @@ using System.Buffers;
 namespace Benchmarks.Comparison
 {
     /// <summary>
-    /// Compares Orleans deserialization performance against other popular serializers for class types.
+    /// Compares Scynapse deserialization performance against other popular serializers for class types.
     /// </summary>
     [Trait("Category", "Benchmark")]
     [Config(typeof(BenchmarkConfig))]
@@ -102,7 +102,7 @@ namespace Benchmarks.Comparison
                    result.MyProperty9;
 
         [Benchmark(Baseline = true)]
-        public int Orleans()
+        public int Scynapse()
         {
             Session.Reset();
             var instance = Serializer.Deserialize(Input, Session);

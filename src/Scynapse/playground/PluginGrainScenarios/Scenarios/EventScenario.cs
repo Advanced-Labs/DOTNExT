@@ -1,6 +1,6 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Orleans;
+using Scynapse;
 using PluginGrainScenarios.Grains;
 using Spectre.Console;
 
@@ -47,10 +47,10 @@ public static class EventScenario
         // Phase 1: Start silo with SMS stream provider
         // ════════════════════════════════════════════════════════════════════
         AnsiConsole.MarkupLine("[blue]───────────────────────────────────────────────────────[/]");
-        AnsiConsole.MarkupLine("[blue]Phase 1: Starting Orleans silo with SMS provider[/]");
+        AnsiConsole.MarkupLine("[blue]Phase 1: Starting Scynapse silo with SMS provider[/]");
         AnsiConsole.MarkupLine("[blue]───────────────────────────────────────────────────────[/]");
 
-        AnsiConsole.MarkupLine("[yellow]Starting Orleans silo with memory streams...[/]");
+        AnsiConsole.MarkupLine("[yellow]Starting Scynapse silo with memory streams...[/]");
         using var host = SiloHelper.BuildSingleSiloWithStreams(logLevel: LogLevel.Warning);
         await host.StartAsync();
         AnsiConsole.MarkupLine("[green]Silo started with SMS stream provider[/]");

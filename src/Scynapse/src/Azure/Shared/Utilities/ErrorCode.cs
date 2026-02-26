@@ -4,24 +4,24 @@ using System.Diagnostics.CodeAnalysis;
 // Number of #ifs can be reduced (or removed), once we separate test projects by feature/area, otherwise we are ending up with ambigous types and build errors.
 //
 
-#if ORLEANS_CLUSTERING
-namespace Orleans.Clustering.AzureStorage.Utilities
-#elif ORLEANS_PERSISTENCE
-namespace Orleans.Persistence.AzureStorage.Utilities
-#elif ORLEANS_REMINDERS_PROVIDER
-namespace Orleans.Reminders
-#elif ORLEANS_REMINDERS
-namespace Orleans.Reminders.AzureStorage.Utilities
-#elif ORLEANS_STREAMING
-namespace Orleans.Streaming.AzureStorage.Utilities
-#elif ORLEANS_EVENTHUBS
-namespace Orleans.Streaming.EventHubs.Utilities
+#if SCYNAPSE_CLUSTERING
+namespace Scynapse.Clustering.AzureStorage.Utilities
+#elif SCYNAPSE_PERSISTENCE
+namespace Scynapse.Persistence.AzureStorage.Utilities
+#elif SCYNAPSE_REMINDERS_PROVIDER
+namespace Scynapse.Reminders
+#elif SCYNAPSE_REMINDERS
+namespace Scynapse.Reminders.AzureStorage.Utilities
+#elif SCYNAPSE_STREAMING
+namespace Scynapse.Streaming.AzureStorage.Utilities
+#elif SCYNAPSE_EVENTHUBS
+namespace Scynapse.Streaming.EventHubs.Utilities
 #elif TESTER_AZUREUTILS
-namespace Orleans.Tests.AzureUtils.Utilities
-#elif ORLEANS_TRANSACTIONS
-namespace Orleans.Transactions.AzureStorage.Utilities
-#elif ORLEANS_DIRECTORY
-namespace Orleans.GrainDirectory.AzureStorage.Utilities
+namespace Scynapse.Tests.AzureUtils.Utilities
+#elif SCYNAPSE_TRANSACTIONS
+namespace Scynapse.Transactions.AzureStorage.Utilities
+#elif SCYNAPSE_DIRECTORY
+namespace Scynapse.GrainDirectory.AzureStorage.Utilities
 #else
 // No default namespace intentionally to cause compile errors if something is not defined
 #endif

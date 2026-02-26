@@ -1,13 +1,13 @@
-#if ORLEANS_CLUSTERING
-namespace Orleans.Clustering.Cosmos;
-#elif ORLEANS_PERSISTENCE
-namespace Orleans.Persistence.Cosmos;
-#elif ORLEANS_REMINDERS
-namespace Orleans.Reminders.Cosmos;
-#elif ORLEANS_STREAMING
-namespace Orleans.Streaming.Cosmos;
-#elif ORLEANS_DIRECTORY
-namespace Orleans.GrainDirectory.Cosmos;
+#if SCYNAPSE_CLUSTERING
+namespace Scynapse.Clustering.Cosmos;
+#elif SCYNAPSE_PERSISTENCE
+namespace Scynapse.Persistence.Cosmos;
+#elif SCYNAPSE_REMINDERS
+namespace Scynapse.Reminders.Cosmos;
+#elif SCYNAPSE_STREAMING
+namespace Scynapse.Streaming.Cosmos;
+#elif SCYNAPSE_DIRECTORY
+namespace Scynapse.GrainDirectory.Cosmos;
 #else
 // No default namespace intentionally to cause compile errors if something is not defined
 #endif
@@ -36,16 +36,16 @@ public class CosmosOptionsValidator<TOptions> : IConfigurationValidator where TO
     public void ValidateConfiguration()
     {
         if (string.IsNullOrWhiteSpace(_options.DatabaseName))
-            throw new OrleansConfigurationException(
+            throw new ScynapseConfigurationException(
                 $"Configuration for Azure Cosmos DB provider {_name} is invalid. {nameof(_options.DatabaseName)} is not valid.");
 
         if (string.IsNullOrWhiteSpace(_options.ContainerName))
-            throw new OrleansConfigurationException(
+            throw new ScynapseConfigurationException(
                 $"Configuration for Azure Cosmos DB provider {_name} is invalid. {nameof(_options.ContainerName)} is not valid.");
 
         if (_options.CreateClient is null)
         {
-            throw new OrleansConfigurationException(
+            throw new ScynapseConfigurationException(
                 $"Configuration for Azure Cosmos DB provider {_name} is invalid. You must call {nameof(_options.ConfigureCosmosClient)} to configure access to Azure Cosmos DB.");
         }
     }

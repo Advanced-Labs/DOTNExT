@@ -1,6 +1,6 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Orleans.Serialization;
+using Scynapse.Serialization;
 
 namespace TestExtensions
 {
@@ -9,7 +9,7 @@ namespace TestExtensions
         public SerializationTestEnvironment(Action<IClientBuilder> configureClientBuilder = null)
         {
             var host = new HostBuilder()
-                .UseOrleansClient((ctx, clientBuilder) =>
+                .UseScynapseClient((ctx, clientBuilder) =>
                 {
                     clientBuilder.UseLocalhostClustering();
                     configureClientBuilder?.Invoke(clientBuilder);

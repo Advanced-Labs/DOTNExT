@@ -1,11 +1,11 @@
 # --------------------
-# Orleans build script
+# Scynapse build script
 # --------------------
 
 . ./common.ps1
 
 $scriptDir = Split-Path $script:MyInvocation.MyCommand.Path
-$solution = Join-Path $scriptDir "Orleans.slnx"
+$solution = Join-Path $scriptDir "Scynapse.slnx"
 
 # Define build flags & config
 if ($null -eq $env:BUILD_FLAGS)

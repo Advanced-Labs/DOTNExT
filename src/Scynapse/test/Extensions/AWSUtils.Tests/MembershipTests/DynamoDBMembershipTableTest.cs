@@ -1,9 +1,9 @@
 using AWSUtils.Tests.StorageTests;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using Orleans.Clustering.DynamoDB;
-using Orleans.Configuration;
-using Orleans.Messaging;
+using Scynapse.Clustering.DynamoDB;
+using Scynapse.Configuration;
+using Scynapse.Messaging;
 using TestExtensions;
 using UnitTests;
 using UnitTests.MembershipTests;
@@ -12,7 +12,7 @@ using Xunit;
 namespace AWSUtils.Tests.MembershipTests
 {
     /// <summary>
-    /// Tests for operation of Orleans Membership Table using AWS DynamoDB - Requires access to external DynamoDB storage
+    /// Tests for operation of Scynapse Membership Table using AWS DynamoDB - Requires access to external DynamoDB storage
     /// </summary>
     [TestCategory("Membership"), TestCategory("AWS"), TestCategory("DynamoDb")]
     public class DynamoDBMembershipTableTest : MembershipTableTestsBase, IClassFixture<DynamoDBStorageTestsFixture>
@@ -25,7 +25,7 @@ namespace AWSUtils.Tests.MembershipTests
         {
             var filters = new LoggerFilterOptions();
             filters.AddFilter("DynamoDBDataManager", LogLevel.Trace);
-            filters.AddFilter("OrleansSiloInstanceManager", LogLevel.Trace);
+            filters.AddFilter("ScynapseSiloInstanceManager", LogLevel.Trace);
             filters.AddFilter("Storage", LogLevel.Trace);
             return filters;
         }

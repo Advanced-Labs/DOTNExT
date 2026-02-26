@@ -1,4 +1,4 @@
-using Orleans.Dashboard.Metrics.History;
+using Scynapse.Dashboard.Metrics.History;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;

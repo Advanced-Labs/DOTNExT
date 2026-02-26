@@ -1,7 +1,7 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
-using Orleans.Providers;
-using Orleans.TestingHost;
+using Scynapse.Providers;
+using Scynapse.TestingHost;
 using TestExtensions;
 using UnitTests.GrainInterfaces;
 using Xunit;
@@ -12,7 +12,7 @@ namespace UnitTests.StreamingTests
     /// Tests for stream subscription behavior with stateless worker grains, verifying subscription restrictions.
     /// </summary>
     [TestCategory("Streaming")]
-    public class StatelessWorkersStreamTests : OrleansTestingBase, IClassFixture<StatelessWorkersStreamTests.Fixture>
+    public class StatelessWorkersStreamTests : ScynapseTestingBase, IClassFixture<StatelessWorkersStreamTests.Fixture>
     {
         private readonly Fixture fixture;
 

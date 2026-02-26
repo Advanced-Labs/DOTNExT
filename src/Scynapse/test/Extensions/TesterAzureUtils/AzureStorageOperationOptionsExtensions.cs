@@ -10,7 +10,7 @@ namespace Tester.AzureUtils
     {
         public static DefaultAzureCredential Credential = new DefaultAzureCredential();
 
-        public static Orleans.Clustering.AzureStorage.AzureStorageOperationOptions ConfigureTestDefaults(this Orleans.Clustering.AzureStorage.AzureStorageOperationOptions options)
+        public static Scynapse.Clustering.AzureStorage.AzureStorageOperationOptions ConfigureTestDefaults(this Scynapse.Clustering.AzureStorage.AzureStorageOperationOptions options)
         {
             options.TableServiceClient = GetTableServiceClient();
 
@@ -24,28 +24,28 @@ namespace Tester.AzureUtils
                 : new(TestDefaultConfiguration.DataConnectionString);
         }
 
-        public static Orleans.GrainDirectory.AzureStorage.AzureStorageOperationOptions ConfigureTestDefaults(this Orleans.GrainDirectory.AzureStorage.AzureStorageOperationOptions options)
+        public static Scynapse.GrainDirectory.AzureStorage.AzureStorageOperationOptions ConfigureTestDefaults(this Scynapse.GrainDirectory.AzureStorage.AzureStorageOperationOptions options)
         {
             options.TableServiceClient = GetTableServiceClient();
 
             return options;
         }
 
-        public static Orleans.Persistence.AzureStorage.AzureStorageOperationOptions ConfigureTestDefaults(this Orleans.Persistence.AzureStorage.AzureStorageOperationOptions options)
+        public static Scynapse.Persistence.AzureStorage.AzureStorageOperationOptions ConfigureTestDefaults(this Scynapse.Persistence.AzureStorage.AzureStorageOperationOptions options)
         {
             options.TableServiceClient = GetTableServiceClient();
 
             return options;
         }
 
-        public static Orleans.Reminders.AzureStorage.AzureStorageOperationOptions ConfigureTestDefaults(this Orleans.Reminders.AzureStorage.AzureStorageOperationOptions options)
+        public static Scynapse.Reminders.AzureStorage.AzureStorageOperationOptions ConfigureTestDefaults(this Scynapse.Reminders.AzureStorage.AzureStorageOperationOptions options)
         {
             options.TableServiceClient = GetTableServiceClient();
 
             return options;
         }
 
-        public static Orleans.Configuration.AzureBlobStorageOptions ConfigureTestDefaults(this Orleans.Configuration.AzureBlobStorageOptions options)
+        public static Scynapse.Configuration.AzureBlobStorageOptions ConfigureTestDefaults(this Scynapse.Configuration.AzureBlobStorageOptions options)
         {
             if (TestDefaultConfiguration.UseAadAuthentication)
             {
@@ -73,7 +73,7 @@ namespace Tester.AzureUtils
             return options;
         }
 
-        public static Orleans.Configuration.AzureQueueOptions ConfigureTestDefaults(this Orleans.Configuration.AzureQueueOptions options)
+        public static Scynapse.Configuration.AzureQueueOptions ConfigureTestDefaults(this Scynapse.Configuration.AzureQueueOptions options)
         {
             if (TestDefaultConfiguration.UseAadAuthentication)
             {
@@ -87,7 +87,7 @@ namespace Tester.AzureUtils
             return options;
         }
 
-        public static Orleans.Configuration.AzureBlobLeaseProviderOptions ConfigureTestDefaults(this Orleans.Configuration.AzureBlobLeaseProviderOptions options)
+        public static Scynapse.Configuration.AzureBlobLeaseProviderOptions ConfigureTestDefaults(this Scynapse.Configuration.AzureBlobLeaseProviderOptions options)
         {
             if (TestDefaultConfiguration.UseAadAuthentication)
             {

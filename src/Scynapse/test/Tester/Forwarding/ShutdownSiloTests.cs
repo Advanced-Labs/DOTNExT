@@ -1,13 +1,13 @@
-using Orleans.TestingHost;
+using Scynapse.TestingHost;
 using TestExtensions;
 using UnitTests.GrainInterfaces;
 using Xunit;
-using Orleans.Configuration;
+using Scynapse.Configuration;
 using System.Diagnostics;
 using Microsoft.Extensions.DependencyInjection;
 using Azure.Data.Tables;
 using Azure.Identity;
-using Orleans.Runtime.Placement;
+using Scynapse.Runtime.Placement;
 
 namespace Tester.Forwarding
 {
@@ -62,7 +62,7 @@ namespace Tester.Forwarding
             this.EnsurePreconditionsMet();
         }
 
-        [Fact(Skip = "https://github.com/dotnet/orleans/issues/6423"), TestCategory("Forward"), TestCategory("Functional")]
+        [Fact(Skip = "https://github.com/Scynapse/Core/issues/6423"), TestCategory("Forward"), TestCategory("Functional")]
         public async Task SiloGracefulShutdown_ForwardPendingRequest()
         {
             var grain = await GetLongRunningTaskGrainOnSecondary<bool>();

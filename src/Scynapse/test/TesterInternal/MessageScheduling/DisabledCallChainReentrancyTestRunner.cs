@@ -18,7 +18,7 @@ namespace UnitTests
 
         public void NonReentrantGrain(bool performDeadlockDetection)
         {
-            INonReentrantGrain nonreentrant = this.grainFactory.GetGrain<INonReentrantGrain>(OrleansTestingBase.GetRandomGrainId());
+            INonReentrantGrain nonreentrant = this.grainFactory.GetGrain<INonReentrantGrain>(ScynapseTestingBase.GetRandomGrainId());
             nonreentrant.SetSelf(nonreentrant).Wait();
             bool timeout = false;
             bool deadlock = false;
@@ -43,7 +43,7 @@ namespace UnitTests
 
         public void NonReentrantGrain_WithMayInterleaveStaticPredicate_WhenPredicateReturnsFalse(bool performDeadlockDetection)
         {
-            var grain = this.grainFactory.GetGrain<IMayInterleaveStaticPredicateGrain>(OrleansTestingBase.GetRandomGrainId());
+            var grain = this.grainFactory.GetGrain<IMayInterleaveStaticPredicateGrain>(ScynapseTestingBase.GetRandomGrainId());
             grain.SetSelf(grain).Wait();
             bool timeout = false;
             bool deadlock = false;
@@ -68,7 +68,7 @@ namespace UnitTests
 
         public void NonReentrantGrain_WithMayInterleaveInstancedPredicate_WhenPredicateReturnsFalse(bool performDeadlockDetection)
         {
-            var grain = this.grainFactory.GetGrain<IMayInterleaveInstancedPredicateGrain>(OrleansTestingBase.GetRandomGrainId());
+            var grain = this.grainFactory.GetGrain<IMayInterleaveInstancedPredicateGrain>(ScynapseTestingBase.GetRandomGrainId());
             grain.SetSelf(grain).Wait();
             bool timeout = false;
             bool deadlock = false;
@@ -93,7 +93,7 @@ namespace UnitTests
 
         public void UnorderedNonReentrantGrain(bool performDeadlockDetection)
         {
-            IUnorderedNonReentrantGrain unonreentrant = this.grainFactory.GetGrain<IUnorderedNonReentrantGrain>(OrleansTestingBase.GetRandomGrainId());
+            IUnorderedNonReentrantGrain unonreentrant = this.grainFactory.GetGrain<IUnorderedNonReentrantGrain>(ScynapseTestingBase.GetRandomGrainId());
             unonreentrant.SetSelf(unonreentrant).Wait();
             bool timeout = false;
             bool deadlock = false;

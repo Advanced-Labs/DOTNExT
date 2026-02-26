@@ -7,12 +7,12 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <StartupObject>PluginGrainScenarios.Program</StartupObject>
-    <!-- Required when using Orleans via project references instead of NuGet packages.
+    <!-- Required when using Scynapse via project references instead of NuGet packages.
          The source generator runs on this project and discovers all grain types from
-         transitively referenced Orleans assemblies (like Orleans.Persistence.Memory).
-         Without this, runtime assembly discovery may miss some Orleans framework grains
-         because it only follows direct (not transitive) dependencies on Orleans.Serialization. -->
-    <OrleansBuildTimeCodeGen>true</OrleansBuildTimeCodeGen>
+         transitively referenced Scynapse assemblies (like Scynapse.Persistence.Memory).
+         Without this, runtime assembly discovery may miss some Scynapse framework grains
+         because it only follows direct (not transitive) dependencies on Scynapse.Serialization. -->
+    <ScynapseBuildTimeCodeGen>true</ScynapseBuildTimeCodeGen>
     <!-- Emit generated source files to disk for IDE visibility -->
     <EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
   </PropertyGroup>
@@ -24,18 +24,18 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\Orleans.Server\Orleans.Server.csproj" />
-    <ProjectReference Include="..\..\src\Orleans.Runtime\Orleans.Runtime.csproj" />
-    <ProjectReference Include="..\..\src\Orleans.Streaming\Orleans.Streaming.csproj" />
+    <ProjectReference Include="..\..\src\Scynapse.Server\Scynapse.Server.csproj" />
+    <ProjectReference Include="..\..\src\Scynapse.Runtime\Scynapse.Runtime.csproj" />
+    <ProjectReference Include="..\..\src\Scynapse.Streaming\Scynapse.Streaming.csproj" />
   </ItemGroup>
 
   <ItemGroup>
-     <ProjectReference Include="..\..\src\Orleans.CodeGenerator\Orleans.CodeGenerator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+     <ProjectReference Include="..\..\src\Scynapse.CodeGenerator\Scynapse.CodeGenerator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
   </ItemGroup>
 
-  <!-- Make generated Orleans files visible in IDE without re-compiling them -->
+  <!-- Make generated Scynapse files visible in IDE without re-compiling them -->
   <ItemGroup>
-    <None Include="$(IntermediateOutputPath)generated\**\*.norleans.g.cs"
+    <None Include="$(IntermediateOutputPath)generated\**\*.nscynapse.g.cs"
           Link="Grains\Generated\%(Filename)%(Extension)"
           Visible="true" />
   </ItemGroup>

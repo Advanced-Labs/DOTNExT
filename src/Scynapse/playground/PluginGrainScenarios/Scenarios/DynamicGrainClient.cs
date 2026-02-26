@@ -1,9 +1,9 @@
 using System.Collections.Immutable;
 using Microsoft.Extensions.DependencyInjection;
-using Orleans;
-using Orleans.DynamicGrains;
-using Orleans.Metadata;
-using Orleans.Runtime;
+using Scynapse;
+using Scynapse.DynamicGrains;
+using Scynapse.Metadata;
+using Scynapse.Runtime;
 using Spectre.Console;
 
 namespace PluginGrainScenarios.Scenarios;
@@ -153,17 +153,17 @@ public static class DynamicGrainClient
         typesTable.AddColumn("Location");
         typesTable.AddColumn("Purpose");
 
-        typesTable.AddRow("[green]GrainPackage[/]", "Orleans.Core.Abstractions/Manifest/", "Distributable package with grain types");
-        typesTable.AddRow("[green]GrainTypeMeta[/]", "Orleans.Core.Abstractions/Manifest/", "Full type metadata with interfaces");
-        typesTable.AddRow("[green]GrainInterfaceMeta[/]", "Orleans.Core.Abstractions/Manifest/", "Interface method metadata");
-        typesTable.AddRow("[green]GrainMethodMeta[/]", "Orleans.Core.Abstractions/Manifest/", "Method parameter metadata");
-        typesTable.AddRow("[green]GrainPackageHandle[/]", "Orleans.Core/DynamicGrains/", "Handle to loaded package");
-        typesTable.AddRow("[green]DynamicGrainReference[/]", "Orleans.Core/DynamicGrains/", "DLR wrapper for late-bound calls");
-        typesTable.AddRow("[green]IGrainPackageStore[/]", "Orleans.Core.Abstractions/DynamicGrains/", "Package storage abstraction");
-        typesTable.AddRow("[green]IGrainPackageCache[/]", "Orleans.Core/DynamicGrains/", "Package cache interface");
-        typesTable.AddRow("[green]FileSystemPackageCache[/]", "Orleans.Core/DynamicGrains/", "Disk cache with LRU/LFU/FIFO");
-        typesTable.AddRow("[green]FileSystemPackageSource[/]", "Orleans.Runtime/DynamicGrains/", "Load packages from disk");
-        typesTable.AddRow("[green]GrainStoragePackageSource[/]", "Orleans.Runtime/DynamicGrains/", "Load packages from Orleans storage");
+        typesTable.AddRow("[green]GrainPackage[/]", "Scynapse.Core.Abstractions/Manifest/", "Distributable package with grain types");
+        typesTable.AddRow("[green]GrainTypeMeta[/]", "Scynapse.Core.Abstractions/Manifest/", "Full type metadata with interfaces");
+        typesTable.AddRow("[green]GrainInterfaceMeta[/]", "Scynapse.Core.Abstractions/Manifest/", "Interface method metadata");
+        typesTable.AddRow("[green]GrainMethodMeta[/]", "Scynapse.Core.Abstractions/Manifest/", "Method parameter metadata");
+        typesTable.AddRow("[green]GrainPackageHandle[/]", "Scynapse.Core/DynamicGrains/", "Handle to loaded package");
+        typesTable.AddRow("[green]DynamicGrainReference[/]", "Scynapse.Core/DynamicGrains/", "DLR wrapper for late-bound calls");
+        typesTable.AddRow("[green]IGrainPackageStore[/]", "Scynapse.Core.Abstractions/DynamicGrains/", "Package storage abstraction");
+        typesTable.AddRow("[green]IGrainPackageCache[/]", "Scynapse.Core/DynamicGrains/", "Package cache interface");
+        typesTable.AddRow("[green]FileSystemPackageCache[/]", "Scynapse.Core/DynamicGrains/", "Disk cache with LRU/LFU/FIFO");
+        typesTable.AddRow("[green]FileSystemPackageSource[/]", "Scynapse.Runtime/DynamicGrains/", "Load packages from disk");
+        typesTable.AddRow("[green]GrainStoragePackageSource[/]", "Scynapse.Runtime/DynamicGrains/", "Load packages from Scynapse storage");
 
         AnsiConsole.Write(typesTable);
         AnsiConsole.WriteLine();
@@ -241,7 +241,7 @@ public static class DynamicGrainClient
             try
             {
                 // Test with a known grain type
-                var grainInterfaceType = "Orleans.Runtime.GrainTypeDirectoryGrain";
+                var grainInterfaceType = "Scynapse.Runtime.GrainTypeDirectoryGrain";
                 AnsiConsole.MarkupLine($"  Testing GetGrainDynamic with type: {grainInterfaceType}");
 
                 // This will throw if the type isn't found, which is expected for non-existent types

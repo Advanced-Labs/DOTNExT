@@ -1,7 +1,7 @@
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using Orleans.Clustering.Redis;
-using Orleans.Messaging;
+using Scynapse.Clustering.Redis;
+using Scynapse.Messaging;
 using Xunit;
 using UnitTests.MembershipTests;
 using TestExtensions;
@@ -11,7 +11,7 @@ using StackExchange.Redis;
 namespace Tester.Redis.Clustering
 {
     /// <summary>
-    /// Tests for Orleans membership table operations using Redis as the backing store.
+    /// Tests for Scynapse membership table operations using Redis as the backing store.
     /// </summary>
     [TestCategory("Redis"), TestCategory("Clustering"), TestCategory("Functional")]
     [Collection(TestEnvironmentFixture.DefaultCollection)]
