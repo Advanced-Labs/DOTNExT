@@ -23,4 +23,11 @@ public interface IAssertionStore
     /// Check if a specific assertion has been revoked.
     /// </summary>
     ValueTask<bool> IsRevokedAsync(ReadOnlyMemory<byte> assertionId);
+
+    /// <summary>
+    /// Find an assertion where the given public key is the subject.
+    /// Returns the first matching assertion, or null if none found.
+    /// Used by transport security to look up a peer's identity by their public key.
+    /// </summary>
+    ValueTask<SignedAssertion?> FindBySubjectAsync(ReadOnlyMemory<byte> subjectPublicKey);
 }

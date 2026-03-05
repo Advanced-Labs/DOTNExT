@@ -39,6 +39,19 @@ public sealed class InMemoryAssertionStore : IAssertionStore
         }
     }
 
+    public ValueTask<SignedAssertion?> FindBySubjectAsync(ReadOnlyMemory<byte> subjectPublicKey)
+    {
+        lock (_lock)
+        {
+            foreach (var assertion in _assertions.Values)
+            {
+                if (assertion.Subject.Span.SequenceEqual(subjectPublicKey.Span))
+                    return new ValueTask<SignedAssertion?>(assertion);
+            }
+            return new ValueTask<SignedAssertion?>(result: null);
+        }
+    }
+
     /// <summary>
     /// Mark an assertion as revoked.
     /// </summary>
