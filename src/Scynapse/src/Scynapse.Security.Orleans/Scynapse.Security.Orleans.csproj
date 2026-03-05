@@ -1,0 +1,23 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <PackageId>Genesa.Scynapse.Security.Orleans</PackageId>
+    <Title>Scynapse Security Orleans Integration</Title>
+    <Description>Orleans grain call filter integration for Scynapse capability-based security.</Description>
+    <TargetFrameworks>$(DefaultTargetFrameworks)</TargetFrameworks>
+    <RootNamespace>Scynapse.Security.Orleans</RootNamespace>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <AssemblyAttribute Remove="Scynapse.Metadata.FrameworkPartAttribute" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Scynapse.Security\Scynapse.Security.csproj" />
+    <ProjectReference Include="..\Scynapse.Runtime\Scynapse.Runtime.csproj" />
+    <ProjectReference Include="..\Scynapse.Connections.Security\Scynapse.Connections.Security.csproj" />
+  </ItemGroup>
+
+</Project>
