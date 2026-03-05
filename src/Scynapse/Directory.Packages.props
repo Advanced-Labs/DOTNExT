@@ -9,6 +9,9 @@
     <xUnitRunnerVersion Condition=" '$(TargetFramework)' == 'netcoreapp3.1' or '$(TargetFramework)' == 'netstandard2.1' ">2.4.5</xUnitRunnerVersion>
   </PropertyGroup>
   <ItemGroup>
+    <!-- Scynapse Security packages -->
+    <PackageVersion Include="NSec.Cryptography" Version="25.4.0" />
+    <PackageVersion Include="PeterO.Cbor" Version="4.5.5" />
     <!-- System packages -->
     <PackageVersion Include="Aspire.Azure.Storage.Queues" Version="9.0.0" />
     <PackageVersion Include="System.Diagnostics.PerformanceCounter" Version="8.0.1" />

@@ -52,6 +52,9 @@
     <Project Path="src/Scynapse.Connections.Security/Scynapse.Connections.Security.csproj" />
     <Project Path="src/Scynapse.Hosting.Kubernetes/Scynapse.Hosting.Kubernetes.csproj" />
   </Folder>
+  <Folder Name="/src/Security/">
+    <Project Path="src/Scynapse.Security/Scynapse.Security.csproj" />
+  </Folder>
   <Folder Name="/src/Extensions/AdoNet/">
     <Project Path="src/AdoNet/Scynapse.Clustering.AdoNet/Scynapse.Clustering.AdoNet.csproj" />
     <Project Path="src/AdoNet/Scynapse.GrainDirectory.AdoNet/Scynapse.GrainDirectory.AdoNet.csproj" />
@@ -104,6 +107,7 @@
     <Project Path="test/NonSilo.Tests/NonSilo.Tests.csproj" />
     <Project Path="test/Scynapse.CodeGenerator.Tests/Scynapse.CodeGenerator.Tests.csproj" />
     <Project Path="test/Scynapse.Connections.Security.Tests/Scynapse.Connections.Security.Tests.csproj" />
+    <Project Path="test/Scynapse.Security.Tests/Scynapse.Security.Tests.csproj" />
     <Project Path="test/Scynapse.Journaling.Tests/Scynapse.Journaling.Tests.csproj" />
     <Project Path="test/Scynapse.Serialization.FSharp.Tests/Scynapse.Serialization.FSharp.Tests.fsproj" />
     <Project Path="test/Scynapse.Serialization.UnitTests/Scynapse.Serialization.UnitTests.csproj" />
