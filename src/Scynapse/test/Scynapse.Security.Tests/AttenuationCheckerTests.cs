@@ -24,18 +24,43 @@ public class AttenuationCheckerTests
     }
 
     [Fact]
-    public void IdentityParent_AllowsAnything()
+    public void SelfSignedIdentityParent_AllowsAnything()
     {
         var root = ScynapseKeyPair.Generate(ScynapseKeyType.Organization);
         var node = ScynapseKeyPair.Generate(ScynapseKeyType.Node);
 
-        var identity = AssertionBuilder.CreateIdentity(root);
+        var identity = AssertionBuilder.CreateIdentity(root); // self-signed: issuer == subject
         var capability = AssertionBuilder.CreateCapability(
             root, node.PublicKeyBytes,
             "scynapse:grain/X", "invoke",
             proofs: new[] { identity.Id.ToArray() });
 
         Assert.True(_checker.Check(identity, capability));
+    }
+
+    [Fact]
+    public void DelegatedIdentityParent_CannotDelegate()
+    {
+        // Non-self-signed identity (issuer != subject) should NOT have blanket authority
+        var root = ScynapseKeyPair.Generate(ScynapseKeyType.Organization);
+        var node = ScynapseKeyPair.Generate(ScynapseKeyType.Node);
+        var target = ScynapseKeyPair.Generate(ScynapseKeyType.Instance);
+
+        var rootIdentity = AssertionBuilder.CreateIdentity(root);
+        // Root issues identity FOR node (issuer=root, subject=node — NOT self-signed)
+        var nodeIdentity = new AssertionBuilder()
+            .SetIssuer(root)
+            .SetSubject(node.PublicKeyBytes)
+            .SetClaim(ClaimType.Identity, System.Array.Empty<byte>())
+            .AddProof(rootIdentity.Id.Span)
+            .Build();
+
+        var capability = AssertionBuilder.CreateCapability(
+            node, target.PublicKeyBytes,
+            "scynapse:grain/X", "invoke",
+            proofs: new[] { nodeIdentity.Id.ToArray() });
+
+        Assert.False(_checker.Check(nodeIdentity, capability));
     }
 
     [Fact]

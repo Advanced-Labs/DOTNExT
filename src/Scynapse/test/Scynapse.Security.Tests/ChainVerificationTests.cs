@@ -350,6 +350,45 @@ public class ChainVerificationTests
         Assert.Contains("replay", result2.FailureReason);
     }
 
+    // ---- Delegated identity cannot issue capabilities directly ----
+
+    [Fact]
+    public async Task DelegatedIdentity_CannotIssueCapability_WithoutDelegation()
+    {
+        // Root delegates an identity to node (not a delegation assertion — just an identity).
+        // Node then tries to use that identity as proof to issue a capability.
+        // This should fail: only self-signed root identities have blanket authority.
+        // Authority for non-roots flows through explicit Delegation assertions.
+        var root = ScynapseKeyPair.Generate(ScynapseKeyType.Organization);
+        var node = ScynapseKeyPair.Generate(ScynapseKeyType.Node);
+        var target = ScynapseKeyPair.Generate(ScynapseKeyType.Instance);
+
+        var rootIdentity = AssertionBuilder.CreateIdentity(root);
+
+        // Root issues an identity assertion FOR node (issuer=root, subject=node)
+        var nodeIdentity = new AssertionBuilder()
+            .SetIssuer(root)
+            .SetSubject(node.PublicKeyBytes)
+            .SetClaim(ClaimType.Identity, Array.Empty<byte>())
+            .AddProof(rootIdentity.Id.Span)
+            .Build();
+
+        // Node tries to issue a capability using the delegated identity as proof
+        var capability = AssertionBuilder.CreateCapability(
+            node, target.PublicKeyBytes,
+            "scynapse:grain/X", "invoke",
+            proofs: new[] { nodeIdentity.Id.ToArray() });
+
+        var (verifier, store) = CreateVerifier(TrustedRoots(root));
+        await store.StoreAsync(rootIdentity);
+        await store.StoreAsync(nodeIdentity);
+        await store.StoreAsync(capability);
+
+        var result = await verifier.VerifyAsync(capability);
+        Assert.False(result.IsValid);
+        Assert.Contains("attenuation", result.FailureReason);
+    }
+
     // ---- Unresolvable proof ----
 
     [Fact]

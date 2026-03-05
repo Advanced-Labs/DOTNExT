@@ -18,8 +18,11 @@ public sealed class DefaultAttenuationChecker : IAttenuationChecker
         if (!CheckTemporalAttenuation(parent, child))
             return false;
 
-        // Identity assertions can delegate anything (they are root authority)
-        if (parent.ClaimType == ClaimType.Identity)
+        // Self-signed identity assertions (root authority) can delegate anything.
+        // Delegated identities (issuer != subject) have no inherent delegation authority —
+        // authority flows through explicit Delegation assertions, not through identity.
+        if (parent.ClaimType == ClaimType.Identity
+            && parent.Issuer.Span.SequenceEqual(parent.Subject.Span))
             return true;
 
         // Delegation → child: check the delegation's scope authorizes the child
