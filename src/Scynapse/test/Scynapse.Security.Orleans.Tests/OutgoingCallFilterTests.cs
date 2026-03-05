@@ -26,10 +26,14 @@ public class OutgoingCallFilterTests
         // CCap issued by node (who received the delegation)
         var ccap = AssertionBuilder.CreateCapability(
             node, node.PublicKeyBytes,
-            "scynapse:*", "*",
+            "scynapse:grain/*", "*",
             proofs: new[] { delegation.Id.ToArray() });
 
-        var filter = new ScynapseOutgoingCallFilter(node, ccap);
+        // Store CCap in wallet
+        var wallet = new InMemoryCCapWallet();
+        wallet.Store(ccap);
+
+        var filter = new ScynapseOutgoingCallFilter(node, wallet);
         var ctx = new TestOutgoingGrainCallContext
         {
             InterfaceName = "ISecureTestGrain",
@@ -62,4 +66,39 @@ public class OutgoingCallFilterTests
 
         RequestContext.Clear();
     }
+
+    [Fact]
+    public async Task NoCCapInWallet_AttachesIdentityOnly()
+    {
+        var node = ScynapseKeyPair.Generate(ScynapseKeyType.Node);
+        var wallet = new InMemoryCCapWallet(); // empty wallet
+
+        var filter = new ScynapseOutgoingCallFilter(node, wallet);
+        var ctx = new TestOutgoingGrainCallContext
+        {
+            InterfaceName = "IOpenTestGrain",
+            MethodName = "Hello",
+            InterfaceMethod = typeof(IOpenTestGrain).GetMethod(nameof(IOpenTestGrain.Hello))!,
+        };
+
+        ctx.KeysToCapture.Add(ScynapseSecurityConstants.CallerPublicKeyKey);
+        ctx.KeysToCapture.Add(ScynapseSecurityConstants.CCapKey);
+
+        RequestContext.Clear();
+        await filter.Invoke(ctx);
+
+        Assert.True(ctx.Invoked);
+        var callerKey = ctx.CapturedRequestContext[ScynapseSecurityConstants.CallerPublicKeyKey] as byte[];
+        Assert.NotNull(callerKey);
+        Assert.Null(ctx.CapturedRequestContext[ScynapseSecurityConstants.CCapKey]); // no CCap
+
+        RequestContext.Clear();
+    }
+}
+
+// Test grain interfaces for outgoing filter tests
+[SecurityPolicy(AllowAnonymous = true)]
+public interface IOpenTestGrain
+{
+    Task Hello();
 }

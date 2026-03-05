@@ -1,0 +1,23 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>$(TestTargetFrameworks)</TargetFrameworks>
+    <ScynapseBuildTimeCodeGen>true</ScynapseBuildTimeCodeGen>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" />
+    <PackageReference Include="xunit" />
+    <PackageReference Include="xunit.runner.visualstudio" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Scynapse.Security\Scynapse.Security.csproj" />
+    <ProjectReference Include="..\..\src\Scynapse.Security.Orleans\Scynapse.Security.Orleans.csproj" />
+    <ProjectReference Include="..\..\src\Scynapse.Connections.Security\Scynapse.Connections.Security.csproj" />
+    <ProjectReference Include="..\..\src\Scynapse.TestingHost\Scynapse.TestingHost.csproj" />
+  </ItemGroup>
+
+</Project>

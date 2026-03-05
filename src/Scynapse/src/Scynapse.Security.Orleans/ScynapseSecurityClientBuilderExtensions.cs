@@ -1,7 +1,7 @@
-using System.Security.Cryptography.X509Certificates;
 using Microsoft.Extensions.DependencyInjection;
 using Scynapse.Connections.Security;
 using Scynapse.Hosting;
+using Scynapse.Runtime;
 using Scynapse.Security.Assertions;
 using Scynapse.Security.Crypto;
 using Scynapse.Security.Transport;
@@ -10,75 +10,55 @@ using Scynapse.Security.Verification;
 namespace Scynapse.Security.Orleans;
 
 /// <summary>
-/// ISiloBuilder extension to wire all Scynapse security infrastructure:
-/// TLS, assertion store, verifier, call filters, policy provider, lifecycle participant.
+/// IClientBuilder extension to wire Scynapse security for external clients.
+/// Configures TLS, outgoing call filter with CCap wallet, and identity.
 /// </summary>
-public static class ScynapseSecuritySiloBuilderExtensions
+public static class ScynapseSecurityClientBuilderExtensions
 {
     /// <summary>
-    /// Configure the silo for Scynapse capability-based security.
-    /// Sets up mTLS with Ed25519 identities, assertion verification,
-    /// grain call filters, and security policy enforcement.
+    /// Configure the client for Scynapse capability-based security.
+    /// Sets up TLS to silo gateway, CCap wallet, and outgoing call filter.
     /// </summary>
-    public static ISiloBuilder UseScynapseSecurity(
-        this ISiloBuilder builder,
+    public static IClientBuilder UseScynapseSecurity(
+        this IClientBuilder builder,
         ScynapseSecurityOptions options,
         Action<IServiceCollection>? configureServices = null)
     {
-        // Register options and identity
+        // Register core services
         builder.Services.AddSingleton(options);
         builder.Services.AddSingleton(options.NodeKeyPair);
-
-        // Register default implementations (can be overridden by configureServices)
         builder.Services.AddSingleton<IAssertionStore, InMemoryAssertionStore>();
         builder.Services.AddSingleton<INonceStore, InMemoryNonceStore>();
         builder.Services.AddSingleton<IAttenuationChecker, DefaultAttenuationChecker>();
         builder.Services.AddSingleton<ICCapWallet, InMemoryCCapWallet>();
 
-        // Register grain security policy provider
-        builder.Services.AddSingleton<IGrainSecurityPolicyProvider, AttributeBasedPolicyProvider>();
-
-        // Register grain call filters
-        builder.Services.AddSingleton<IIncomingGrainCallFilter>(sp =>
-        {
-            var store = sp.GetRequiredService<IAssertionStore>();
-            var nonceStore = sp.GetRequiredService<INonceStore>();
-            var policyProvider = sp.GetRequiredService<IGrainSecurityPolicyProvider>();
-            var attenuationChecker = sp.GetRequiredService<IAttenuationChecker>();
-            return new ScynapseIncomingCallFilter(store, nonceStore, options.TrustedRoots, policyProvider, attenuationChecker);
-        });
-
+        // Register outgoing call filter (clients only send, they don't receive grain calls)
         builder.Services.AddSingleton<IOutgoingGrainCallFilter>(sp =>
         {
             var wallet = sp.GetRequiredService<ICCapWallet>();
             return new ScynapseOutgoingCallFilter(options.NodeKeyPair, wallet);
         });
 
-        // Register lifecycle participant for bootstrap assertion and CCap loading
-        builder.Services.AddSingleton<ILifecycleParticipant<Scynapse.Runtime.ISiloLifecycle>>(sp =>
-        {
-            var store = sp.GetRequiredService<IAssertionStore>();
-            var wallet = sp.GetRequiredService<ICCapWallet>();
-            return new ScynapseSecurityLifecycleParticipant(options, store, wallet);
-        });
-
         // Allow caller to override default implementations
         configureServices?.Invoke(builder.Services);
 
-        // Configure mTLS with Ed25519-derived certificates
+        // Load bootstrap assertions and capabilities via lifecycle participant
+        builder.Services.AddSingleton<ILifecycleParticipant<IClusterClientLifecycle>>(sp =>
+        {
+            var store = sp.GetRequiredService<IAssertionStore>();
+            var wallet = sp.GetRequiredService<ICCapWallet>();
+            return new ScynapseClientLifecycleParticipant(options, store, wallet);
+        });
+
+        // Configure TLS to gateway
         var cert = ScynapseCertificateFactory.CreateSelfSigned(options.NodeKeyPair);
-        var remoteCertMode = options.RequireMutualTls
-            ? RemoteCertificateMode.RequireCertificate
-            : RemoteCertificateMode.AllowCertificate;
 
         builder.UseTls(cert, tlsOptions =>
         {
-            tlsOptions.ClientCertificateMode = remoteCertMode;
             tlsOptions.RemoteCertificateMode = RemoteCertificateMode.RequireCertificate;
-            // Custom validation: verify Ed25519 assertion chain, not X.509 CA chain
+            // Verify server's Scynapse identity
             tlsOptions.RemoteCertificateValidation = (certificate, chain, errors) =>
             {
-                // Build a store containing all bootstrap and peer assertions for validation
                 var validationStore = new InMemoryAssertionStore();
                 foreach (var assertion in options.BootstrapAssertions)
                     validationStore.StoreAsync(assertion).AsTask().GetAwaiter().GetResult();
@@ -92,5 +72,42 @@ public static class ScynapseSecuritySiloBuilderExtensions
         });
 
         return builder;
+    }
+}
+
+/// <summary>
+/// Loads bootstrap assertions and capabilities when the client lifecycle starts.
+/// </summary>
+internal sealed class ScynapseClientLifecycleParticipant : ILifecycleParticipant<IClusterClientLifecycle>
+{
+    private readonly ScynapseSecurityOptions _options;
+    private readonly IAssertionStore _store;
+    private readonly ICCapWallet _wallet;
+
+    public ScynapseClientLifecycleParticipant(
+        ScynapseSecurityOptions options,
+        IAssertionStore store,
+        ICCapWallet wallet)
+    {
+        _options = options;
+        _store = store;
+        _wallet = wallet;
+    }
+
+    public void Participate(IClusterClientLifecycle lifecycle)
+    {
+        lifecycle.Subscribe<ScynapseClientLifecycleParticipant>(
+            ServiceLifecycleStage.First,
+            OnStart);
+    }
+
+    private async Task OnStart(CancellationToken ct)
+    {
+        foreach (var assertion in _options.BootstrapAssertions)
+            await _store.StoreAsync(assertion);
+        foreach (var assertion in _options.PeerAssertions)
+            await _store.StoreAsync(assertion);
+        foreach (var ccap in _options.BootstrapCapabilities)
+            _wallet.Store(ccap);
     }
 }

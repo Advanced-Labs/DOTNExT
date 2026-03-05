@@ -17,6 +17,7 @@
   <ItemGroup>
     <ProjectReference Include="..\Scynapse.Security\Scynapse.Security.csproj" />
     <ProjectReference Include="..\Scynapse.Runtime\Scynapse.Runtime.csproj" />
+    <ProjectReference Include="..\Scynapse.Core\Scynapse.Core.csproj" />
     <ProjectReference Include="..\Scynapse.Connections.Security\Scynapse.Connections.Security.csproj" />
   </ItemGroup>
 

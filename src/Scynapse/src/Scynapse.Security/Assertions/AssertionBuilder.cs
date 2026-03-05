@@ -210,4 +210,23 @@ public sealed class AssertionBuilder
             .SetScope(expiresAt: expiresAt)
             .Build();
     }
+
+    /// <summary>
+    /// Create a Revocation assertion revoking a previously issued assertion.
+    /// The issuer must be the original issuer of the target assertion.
+    /// Subject is set to the issuer (self-referential).
+    /// </summary>
+    public static SignedAssertion CreateRevocation(
+        ScynapseKeyPair issuer,
+        byte[] targetAssertionId,
+        string? reason = null)
+    {
+        var claim = new RevocationClaim(targetAssertionId, reason);
+        var pubKey = issuer.PublicKeyBytes.ToArray();
+        return new AssertionBuilder()
+            .SetIssuer(issuer)
+            .SetSubject(pubKey)
+            .SetClaim(ClaimType.Revocation, claim.Serialize())
+            .Build();
+    }
 }
