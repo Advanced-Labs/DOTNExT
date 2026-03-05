@@ -1,0 +1,1450 @@
+﻿Folder PATH listing for volume AUX
+Volume serial number is 38A0-D83E
+D:\DEV\DOTNEXT\DOCS
++---Async+
+ª       Async+.md
+ª       
++---For AI
+ª       BUILD-role-prompt.md
+ª       CODE-role-prompt.md
+ª       DEPLOY-role-prompt.md
+ª       DOTNExT-Agent-Roles.md
+ª       DOTNExT-Index.md
+ª       DOTNExT-Master-Reference.md
+ª       DOTNExT-Terminology.md
+ª       DOTNExT-Workflows.md
+ª       REPO-role-prompt.md
+ª       SAGE-role-prompt.md
+ª       TEST-role-prompt.md
+ª       
++---New dotnet-runtime
+ª   +---AI analysis of whole repo
+ª           00-Repository-Overview.md
+ª           01-Directory-Structure.md
+ª           02-CoreCLR-Guide.md
+ª           03-Mono-Runtime-Guide.md
+ª           04-Libraries-Guide.md
+ª           05-Native-And-Hosting.md
+ª           06-Build-System.md
+ª           07-Testing-Guide.md
+ª           08-Feature-Location-Reference.md
+ª           09-Contribution-Workflows.md
+ª           10-Architecture-Concepts.md
+ª           11-Major-Subsystem-Integration.md
+ª           12-Component-Dependencies.md
+ª           13-Modification-Impact-Zones.md
+ª           14-Extension-Points-Catalog.md
+ª           README.md
+ª           SUMMARY.md
+ª           
++---New Orleans
+ª   ª   New Orleans.md
+ª   ª   
+ª   +---New Orleans Features
+ª   ª       DynamicGrainAccess.md
+ª   ª       OrleansAsync+.md
+ª   ª       PluginGrainArchitecture.md
+ª   ª       
+ª   +---Original Orleans Internals
+ª   ª       00-index.md
+ª   ª       01-paradigms-and-concepts.md
+ª   ª       02-systems-and-subsystems.md
+ª   ª       03-layer-architecture.md
+ª   ª       04-codegen-system.md
+ª   ª       05-runtime-activation.md
+ª   ª       06-clustering-membership.md
+ª   ª       07-messaging-networking.md
+ª   ª       08-persistence-state.md
+ª   ª       09-serialization.md
+ª   ª       10-additional-systems.md
+ª   ª       11-key-abstractions.md
+ª   ª       12-directory-structure.md
+ª   ª       OrleansDistributedGrainDirectory.md
+ª   ª       
+ª   +---Researches
+ª       +---Ancient
+ª               ClarificationsAboutDirectoriesAndArchitecture.md
+ª               
++---New Roslyn
+ª   +---AI Analysis of Original Roslyn REPO Sources
+ª           01-repository-structure.md
+ª           02-component-guide.md
+ª           03-feature-location-guide.md
+ª           04-architecture.md
+ª           05-developer-guide.md
+ª           06-compiler-internals.md
+ª           README.md
+ª           
++---Pre Fork Docs - All projects
+    +---aspire
+    ª   ª   api-review-process.md
+    ª   ª   contributing.md
+    ª   ª   getting-perf-traces.md
+    ª   ª   machine-requirements.md
+    ª   ª   open-telemetry-architecture.md
+    ª   ª   tips-and-known-issues.md
+    ª   ª   updating-container-registry.md
+    ª   ª   using-latest-daily.md
+    ª   ª   
+    ª   +---specs
+    ª           future-of-workload.md
+    ª           IDE-execution.md
+    ª           manifest-spec.md
+    ª           
+    +---aspnetcore
+    ª       AddingNewProjects.md
+    ª       APIBaselines.md
+    ª       APIReviewProcess.md
+    ª       area-owners.md
+    ª       Artifacts.md
+    ª       Benchmarks.md
+    ª       BuildErrors.md
+    ª       BuildFromSource.md
+    ª       DailyBuilds.md
+    ª       EventSourceAndCounters.md
+    ª       Helix.md
+    ª       HelpWantedIssueSummaryCommentTemplate.md
+    ª       HelpWantedProcess.md
+    ª       IssueManagementPolicies.md
+    ª       list-of-diagnostics.md
+    ª       PreparingPatchUpdates.md
+    ª       ProjectProperties.md
+    ª       README.md
+    ª       ReferenceResolution.md
+    ª       ReleasePlanning.md
+    ª       repro.md
+    ª       Servicing.md
+    ª       SharedFramework.md
+    ª       Submodules.md
+    ª       tooling-consolidation.md
+    ª       TriageProcess.md
+    ª       Trimming.md
+    ª       UpdatingMajorVersionAndTFM.md
+    ª       UpdatingMinifiedJsFiles.md
+    ª       vs-iis-express-aspnet-core-mvc-sandbox.jpg
+    ª       WebTransport.md
+    ª       
+    +---command-line-api
+    ª       dotnet-suggest.md
+    ª       DragonFruit-overview.md
+    ª       Functional-goals.md
+    ª       History.md
+    ª       model-binding.md
+    ª       readme.md
+    ª       Technical-motivations.md
+    ª       Your-first-app-with-System-CommandLine-DragonFruit.md
+    ª       
+    +---deployment-tools
+    ª   +---dotnet-mage
+    ª           ApplicationDeployment.cs
+    ª           README.md
+    ª           
+    +---efcore
+    ª       DailyBuilds.md
+    ª       getting-and-building-the-code.md
+    ª       rate_limiting.png
+    ª       security.md
+    ª       
+    +---fsharp
+    ª   ª   builder-caches.md
+    ª   ª   changing-the-ast.md
+    ª   ª   coding-standards.md
+    ª   ª   compiler-startup-performance.md
+    ª   ª   debug-emit.md
+    ª   ª   diagnostics.md
+    ª   ª   fsharp-core-notes.md
+    ª   ª   fsi-emit.md
+    ª   ª   index.md
+    ª   ª   large-inputs-and-stack-overflows.md
+    ª   ª   lsp.md
+    ª   ª   memory-usage.md
+    ª   ª   names.md
+    ª   ª   optimizations-equality.md
+    ª   ª   optimizations.md
+    ª   ª   overview.md
+    ª   ª   perf-discussions-archive.md
+    ª   ª   project-builds.md
+    ª   ª   representations.md
+    ª   ª   running-documentation-locally.md
+    ª   ª   tooling-features.md
+    ª   ª   
+    ª   +---content
+    ª   ª       fsdocs-theme.css
+    ª   ª       
+    ª   +---fcs
+    ª   ª       caches.fsx
+    ª   ª       compiler.fsx
+    ª   ª       corelib.fsx
+    ª   ª       editor.fsx
+    ª   ª       filesystem.fsx
+    ª   ª       index.md
+    ª   ª       interactive.fsx
+    ª   ª       project.fsx
+    ª   ª       react.fsx
+    ª   ª       symbols.fsx
+    ª   ª       tokenizer.fsx
+    ª   ª       typedtree.fsx
+    ª   ª       untypedtree-apis.fsx
+    ª   ª       untypedtree.fsx
+    ª   ª       
+    ª   +---fcs-samples
+    ª   ª   +---EditorService
+    ª   ª   ª       App.config
+    ª   ª   ª       EditorService.fsproj
+    ª   ª   ª       Program.fs
+    ª   ª   ª       
+    ª   ª   +---FscExe
+    ª   ª   ª       App.config
+    ª   ª   ª       FscExe.fsproj
+    ª   ª   ª       FscMain.fs
+    ª   ª   ª       
+    ª   ª   +---FsiExe
+    ª   ª   ª       App.config
+    ª   ª   ª       console.fs
+    ª   ª   ª       FsiExe.fsproj
+    ª   ª   ª       fsimain.fs
+    ª   ª   ª       fsiserver.fs
+    ª   ª   ª       
+    ª   ª   +---InteractiveService
+    ª   ª   ª       App.config
+    ª   ª   ª       InteractiveService.fsproj
+    ª   ª   ª       Program.fs
+    ª   ª   ª       
+    ª   ª   +---Tokenizer
+    ª   ª   ª       App.config
+    ª   ª   ª       Program.fs
+    ª   ª   ª       Tokenizer.fsproj
+    ª   ª   ª       
+    ª   ª   +---UntypedTree
+    ª   ª           App.config
+    ª   ª           Program.fs
+    ª   ª           UntypedTree.fsproj
+    ª   ª           
+    ª   +---img
+    ª   ª       favicon.ico
+    ª   ª       logo.png
+    ª   ª       
+    ª   +---release-notes
+    ª       ª   About.md
+    ª       ª   FSharp.Compiler.Service.fsx
+    ª       ª   FSharp.Core.fsx
+    ª       ª   Language.fsx
+    ª       ª   
+    ª       +---.aux
+    ª       ª       Common.fsx
+    ª       ª       
+    ª       +---.FSharp.Compiler.Service
+    ª       ª       8.0.100.md
+    ª       ª       8.0.200.md
+    ª       ª       8.0.202.md
+    ª       ª       8.0.300.md
+    ª       ª       8.0.400.md
+    ª       ª       9.0.100.md
+    ª       ª       
+    ª       +---.FSharp.Core
+    ª       ª       8.0.200.md
+    ª       ª       8.0.300.md
+    ª       ª       8.0.400.md
+    ª       ª       9.0.100.md
+    ª       ª       
+    ª       +---.Language
+    ª       ª       8.0.md
+    ª       ª       9.0.md
+    ª       ª       preview.md
+    ª       ª       
+    ª       +---.VisualStudio
+    ª               17.10.md
+    ª               17.11.md
+    ª               17.12.md
+    ª               17.9.md
+    ª               
+    +---nuget-client
+    ª   ª   coding-guidelines.md
+    ª   ª   cross-platform-debugging.md
+    ª   ª   debugging.md
+    ª   ª   design-review-guide.md
+    ª   ª   feature-guide.md
+    ª   ª   localizability.md
+    ª   ª   nuget-project-types.md
+    ª   ª   nuget-sdk.md
+    ª   ª   plugin-logging.md
+    ª   ª   project-overview.md
+    ª   ª   ui-guidelines.md
+    ª   ª   updating-target-frameworks.md
+    ª   ª   workflow.md
+    ª   ª   
+    ª   +---images
+    ª           bad-commit-message.png
+    ª           good-commit-message-expanded.png
+    ª           good-commit-message.png
+    ª           project-tfm-selection.png
+    ª           release-branch-commit-message.png
+    ª           
+    +---razor
+    ª   ª   CollectionBestPractices.md
+    ª   ª   CSharpLanguageServerFramework.md
+    ª   ª   InsertingRazorIntoVSCodeCSharp.md
+    ª   ª   IssueManagementPolicies.md
+    ª   ª   overview.svg
+    ª   ª   Parsing.md
+    ª   ª   ProjectsAndLayering.md
+    ª   ª   
+    ª   +---contributing
+    ª   ª       ASPNetCore-Debugging.md
+    ª   ª       BuildFromSource.md
+    ª   ª       Roslyn-Debugging.md
+    ª   ª       
+    ª   +---images
+    ª   ª       blobartifacts.png
+    ª   ª       build_summary.png
+    ª   ª       remaining_files.png
+    ª   ª       
+    ª   +---Onboarding Docs
+    ª           01_Razor_Basics.md
+    ª           
+    +---roslyn
+    ª   ª   Adding Optional Parameters in Public API.md
+    ª   ª   area-owners.md
+    ª   ª   Breaking API Changes.md
+    ª   ª   Language Feature Status.md
+    ª   ª   README.md
+    ª   ª   TestAccessor Pattern.md
+    ª   ª   
+    ª   +---analyzers
+    ª   ª       Analyzer Actions Semantics.md
+    ª   ª       Analyzer Samples.md
+    ª   ª       DiagnosticSuppressorDesign.md
+    ª   ª       FixAllProvider.md
+    ª   ª       Localizing Analyzers.md
+    ª   ª       Report Analyzer Format.md
+    ª   ª       Using Additional Files.md
+    ª   ª       
+    ª   +---compilers
+    ª   ª   ª   analyzer-config.md
+    ª   ª   ª   Boolean Representation.md
+    ª   ª   ª   Co-located core types.md
+    ª   ª   ª   Compiler Server.md
+    ª   ª   ª   Compiler Toolset NuPkgs.md
+    ª   ª   ª   Deterministic Inputs.md
+    ª   ª   ª   Error Log Format.md
+    ª   ª   ª   Extension Methods in Aliased Assemblies.md
+    ª   ª   ª   Interactive Imports.md
+    ª   ª   ª   IOperation Test Hook.md
+    ª   ª   ª   README.md
+    ª   ª   ª   Rule Set Format.md
+    ª   ª   ª   terrapin.md
+    ª   ª   ª   
+    ª   ª   +---API Notes
+    ª   ª   ª       10-29-19.md
+    ª   ª   ª       4-15-20.md
+    ª   ª   ª       6-11-20.md
+    ª   ª   ª       8-19-20.md
+    ª   ª   ª       9-30-19.md
+    ª   ª   ª       
+    ª   ª   +---CSharp
+    ª   ª   ª       CodeGen Differences.md
+    ª   ª   ª       COM Interop.md
+    ª   ª   ª       CommandLine.md
+    ª   ª   ª       Compiler Breaking Changes - DotNet 5.md
+    ª   ª   ª       Compiler Breaking Changes - DotNet 6.md
+    ª   ª   ª       Compiler Breaking Changes - DotNet 7.md
+    ª   ª   ª       Compiler Breaking Changes - DotNet 8.md
+    ª   ª   ª       Compiler Breaking Changes - DotNet 9.md
+    ª   ª   ª       Compiler Breaking Changes - post DotNet 5.md
+    ª   ª   ª       Compiler Breaking Changes - post VS2017.md
+    ª   ª   ª       Compiler Breaking Changes - post VS2019.md
+    ª   ª   ª       Compiler Breaking Changes - VS2015.md
+    ª   ª   ª       Compiler Breaking Changes - VS2017.md
+    ª   ª   ª       Compiler Breaking Changes - VS2019.md
+    ª   ª   ª       Definite Assignment And Dynamic.md
+    ª   ª   ª       Definite Assignment And Partials.md
+    ª   ª   ª       Definite Assignment.md
+    ª   ª   ª       Deviations from Standard.md
+    ª   ª   ª       Expression Breakpoints.md
+    ª   ª   ª       Indexed Property Access.md
+    ª   ª   ª       Internal Access.md
+    ª   ª   ª       Multiple Inheritance Lookup Ambuguity.md
+    ª   ª   ª       Nullability Public API Design Notes.md
+    ª   ª   ª       Overload Resolution.md
+    ª   ª   ª       readme.md
+    ª   ª   ª       Source-Metadata Conflict.md
+    ª   ª   ª       Static Type Constraints.md
+    ª   ª   ª       System.TypedReference.md
+    ª   ª   ª       Unicode Version.md
+    ª   ª   ª       Warnversion Warning Waves.md
+    ª   ª   ª       Win32 Resources.md
+    ª   ª   ª       __arglist.md
+    ª   ª   ª       
+    ª   ª   +---Design
+    ª   ª   ª       Bound Node Design.md
+    ª   ª   ª       Closure Conversion.md
+    ª   ª   ª       Editor Config.md
+    ª   ª   ª       Parser.md
+    ª   ª   ª       README.md
+    ª   ª   ª       Unexpected Conditions.md
+    ª   ª   ª       
+    ª   ª   +---Dynamic Analysis
+    ª   ª   ª       MetadataFormat.md
+    ª   ª   ª       
+    ª   ª   +---images
+    ª   ª   ª       bootstrap-logs.png
+    ª   ª   ª       
+    ª   ª   +---Visual Basic
+    ª   ª           Clashing Enum Members.md
+    ª   ª           CommandLine.md
+    ª   ª           Compiler Breaking Changes - DotNet 7.md
+    ª   ª           Compiler Breaking Changes - post VS2017.md
+    ª   ª           Compiler Breaking Changes - post VS2019.md
+    ª   ª           Compiler Breaking Changes - VS2015.md
+    ª   ª           Compiler Breaking Changes - VS2019.md
+    ª   ª           Overflow In Embedded Runtime.md
+    ª   ª           
+    ª   +---contributing
+    ª   ª       API Review Process.md
+    ª   ª       Bootstrap Builds.md
+    ª   ª       Building, Debugging, and Testing on Unix.md
+    ª   ª       Building, Debugging, and Testing on Windows.md
+    ª   ª       Compiler Test Plan.md
+    ª   ª       Developing a Language Feature.md
+    ª   ª       Documentation for IDE CodeStyle analyzers.md
+    ª   ª       IDE Test Plan.md
+    ª   ª       ide_design_process.md
+    ª   ª       Localization In Compiler Tests.md
+    ª   ª       Nullable Annotations.md
+    ª   ª       Powershell Guidelines.md
+    ª   ª       README.md
+    ª   ª       Target Framework Strategy.md
+    ª   ª       Testing for Interactive readiness.md
+    ª   ª       
+    ª   +---features
+    ª   ª   ª   async-main.md
+    ª   ª   ª   async-main.test.md
+    ª   ª   ª   async-streams.md
+    ª   ª   ª   CheckedUserDefinedOperators.md
+    ª   ª   ª   deconstruction.md
+    ª   ª   ª   DefaultInterfaceImplementation.md
+    ª   ª   ª   discards.md
+    ª   ª   ª   dynamic-analysis.work.md
+    ª   ª   ª   enhanced-using.md
+    ª   ª   ª   ExperimentalAttribute.md
+    ª   ª   ª   ExpressionVariables.md
+    ª   ª   ª   generators.md
+    ª   ª   ª   GlobalUsingDirective.md
+    ª   ª   ª   incremental-generators.cookbook.md
+    ª   ª   ª   incremental-generators.md
+    ª   ª   ª   interceptors.md
+    ª   ª   ª   local-functions.md
+    ª   ª   ª   local-functions.test.md
+    ª   ª   ª   local-functions.work.md
+    ª   ª   ª   NativeIntegerAttribute.md
+    ª   ª   ª   nullable-metadata.md
+    ª   ª   ª   nullable-reference-types.md
+    ª   ª   ª   outvar.md
+    ª   ª   ª   patterns.md
+    ª   ª   ª   patterns.work.md
+    ª   ª   ª   pdb-compilation-options.md
+    ª   ª   ª   private-protected.md
+    ª   ª   ª   private-protected.work.md
+    ª   ª   ª   readonly-instance-members.md
+    ª   ª   ª   records.md
+    ª   ª   ª   records.work.md
+    ª   ª   ª   ref-reassignment.md
+    ª   ª   ª   refout.md
+    ª   ª   ª   sdk.md
+    ª   ª   ª   skiplocalsinit.md
+    ª   ª   ª   source-generators.cookbook.md
+    ª   ª   ª   source-generators.md
+    ª   ª   ª   StaticAbstractMembersInInterfaces.md
+    ª   ª   ª   task-types.md
+    ª   ª   ª   throwexpr.md
+    ª   ª   ª   TopLevelStatements.md
+    ª   ª   ª   tuples.md
+    ª   ª   ª   UsedAssemblyReferences.md
+    ª   ª   ª   utf8-string-literals.md
+    ª   ª   ª   wildcards.work.md
+    ª   ª   ª   
+    ª   ª   +---img
+    ª   ª           install-valuetuple.png
+    ª   ª           
+    ª   +---ide
+    ª   ª   ª   external-access.md
+    ª   ª   ª   glossary.md
+    ª   ª   ª   README.md
+    ª   ª   ª   
+    ª   ª   +---api-designs
+    ª   ª   ª       Workspace and Source Generated Documents.md
+    ª   ª   ª       
+    ª   ª   +---specs
+    ª   ª   ª       semantic_snippets.md
+    ª   ª   ª       
+    ª   ª   +---test-plans
+    ª   ª           source-generators.md
+    ª   ª           
+    ª   +---img
+    ª   ª       discord-mark-white.png
+    ª   ª       
+    ª   +---infrastructure
+    ª   ª       cross-platform.md
+    ª   ª       feature branches azure.md
+    ª   ª       msbuild.md
+    ª   ª       
+    ª   +---specs
+    ª   ª   ª   PortablePdb-Metadata.md
+    ª   ª   ª   
+    ª   ª   +---CSharp 6
+    ª   ª           Better Betterness.md
+    ª   ª           
+    ª   +---wiki
+    ª       ª   API-Changes.md
+    ª       ª   Branch-Cleanup.md
+    ª       ª   Building-Testing-and-Debugging.md
+    ª       ª   C#-Interactive-Walkthrough.md
+    ª       ª   Changelog-for-C#-and-VB-compilers.md
+    ª       ª   Compiler-Queries.md
+    ª       ª   Compiler-release-process.md
+    ª       ª   Compiler-supporting-types.md
+    ª       ª   Contributing-Code.md
+    ª       ª   Diagnosing-Project-System-Build-Errors.md
+    ª       ª   EnC-Supported-Edits.md
+    ª       ª   FAQ.md
+    ª       ª   Getting-Started-C#-Semantic-Analysis.md
+    ª       ª   Getting-Started-C#-Syntax-Analysis.md
+    ª       ª   Getting-Started-C#-Syntax-Transformation.md
+    ª       ª   Getting-Started-on-Visual-Studio-2015-CTP-5.md
+    ª       ª   Getting-Started-on-Visual-Studio-2015-CTP-6.md
+    ª       ª   Getting-Started-on-Visual-Studio-2015-Preview.md
+    ª       ª   Getting-Started-on-Visual-Studio-2015-RC.md
+    ª       ª   Getting-Started-on-Visual-Studio-2015.md
+    ª       ª   Getting-Started-VB-Semantic-Analysis.md
+    ª       ª   Getting-Started-VB-Syntax-Analysis.md
+    ª       ª   Getting-Started-VB-Syntax-Transformation.md
+    ª       ª   Getting-Started-Writing-a-Custom-Analyzer-&-Code-Fix.md
+    ª       ª   How-To-Investigate-CI-Test-Failures.md
+    ª       ª   How-to-support-new-C#-language-features-by-Edit-And-Continue-(ENC).md
+    ª       ª   How-To-Write-a-C#-Analyzer-and-Code-Fix.md
+    ª       ª   How-To-Write-a-Visual-Basic-Analyzer-and-Code-Fix.md
+    ª       ª   Interactive-Window.md
+    ª       ª   Labels-used-for-issues.md
+    ª       ª   Languages-features-in-C#-6-and-VB-14.md
+    ª       ª   Linux-Instructions.md
+    ª       ª   Manual-Testing.md
+    ª       ª   Measuring-Compiler-Performance.md
+    ª       ª   New-Language-Features-in-C#-6.md
+    ª       ª   New-Language-Features-in-VB-14.md
+    ª       ª   Notes-on-formatting.md
+    ª       ª   Notes-on-nullability.md
+    ª       ª   NuGet-packages.md
+    ª       ª   Performance-considerations-for-large-solutions.md
+    ª       ª   Performance-Investigations.md
+    ª       ª   README.md
+    ª       ª   Recording-performance-traces-with-PerfView.md
+    ª       ª   Reporting-Visual-Studio-crashes-and-performance-issues.md
+    ª       ª   Responding-to-customers-encountering-crashes-or-performance-issues.md
+    ª       ª   Roadmap.md
+    ª       ª   Roslyn-Overview.md
+    ª       ª   Runtime-code-generation-using-Roslyn-compilations-in-.NET-Core-App.md
+    ª       ª   Samples-and-Walkthroughs.md
+    ª       ª   Scripting-API-Samples.md
+    ª       ª   Syntax-Visualizer.md
+    ª       ª   Troubleshooting-tips.md
+    ª       ª   VS-2015-CTP-5-API-Changes.md
+    ª       ª   VS-2015-CTP-6-API-Changes.md
+    ª       ª   VS-2015-RC-API-Changes.md
+    ª       ª   Walkthroughs.md
+    ª       ª   
+    ª       +---documents
+    ª       ª       csharp-diag.docx
+    ª       ª       csharp-diag.pdf
+    ª       ª       csharp-semantic.docx
+    ª       ª       csharp-semantic.pdf
+    ª       ª       csharp-syntax-transform.docx
+    ª       ª       csharp-syntax-transform.pdf
+    ª       ª       csharp-syntax.docx
+    ª       ª       csharp-syntax.pdf
+    ª       ª       vb-diag.docx
+    ª       ª       vb-diag.pdf
+    ª       ª       vb-semantic.docx
+    ª       ª       vb-semantic.pdf
+    ª       ª       vb-syntax-transform.docx
+    ª       ª       vb-syntax-transform.pdf
+    ª       ª       vb-syntax.docx
+    ª       ª       vb-syntax.pdf
+    ª       ª       
+    ª       +---images
+    ª           ª   alex-api-layers.png
+    ª           ª   compiler-pipeline-api.png
+    ª           ª   compiler-pipeline-lang-svc.png
+    ª           ª   compiler-pipeline.png
+    ª           ª   fig1.png
+    ª           ª   fig10.png
+    ª           ª   fig11.png
+    ª           ª   fig12.png
+    ª           ª   fig13.png
+    ª           ª   fig14.png
+    ª           ª   fig15.png
+    ª           ª   fig16.png
+    ª           ª   fig17.png
+    ª           ª   fig18.png
+    ª           ª   fig19.png
+    ª           ª   fig2.png
+    ª           ª   fig20.png
+    ª           ª   fig3.png
+    ª           ª   fig4.png
+    ª           ª   fig5.png
+    ª           ª   fig6.png
+    ª           ª   fig7.png
+    ª           ª   fig8.png
+    ª           ª   fig9.png
+    ª           ª   how-to-investigate-ci-test-failures-figure1.png
+    ª           ª   how-to-investigate-ci-test-failures-figure10.png
+    ª           ª   how-to-investigate-ci-test-failures-figure11.png
+    ª           ª   how-to-investigate-ci-test-failures-figure12.png
+    ª           ª   how-to-investigate-ci-test-failures-figure13.png
+    ª           ª   how-to-investigate-ci-test-failures-figure14.png
+    ª           ª   how-to-investigate-ci-test-failures-figure15.png
+    ª           ª   how-to-investigate-ci-test-failures-figure16.png
+    ª           ª   how-to-investigate-ci-test-failures-figure17.png
+    ª           ª   how-to-investigate-ci-test-failures-figure18.png
+    ª           ª   how-to-investigate-ci-test-failures-figure2.png
+    ª           ª   how-to-investigate-ci-test-failures-figure3.png
+    ª           ª   how-to-investigate-ci-test-failures-figure4.png
+    ª           ª   how-to-investigate-ci-test-failures-figure5.png
+    ª           ª   how-to-investigate-ci-test-failures-figure6.png
+    ª           ª   how-to-investigate-ci-test-failures-figure7.png
+    ª           ª   how-to-investigate-ci-test-failures-figure8.png
+    ª           ª   how-to-investigate-ci-test-failures-figure9.png
+    ª           ª   how-to-investigate-ci-test-failures-servicehub-failure-infobar.png
+    ª           ª   how-to-investigate-ci-test-failures-servicehub-log-artifacts.png
+    ª           ª   how-to-write-a-csharp-analyzer-and-code-fix-figure1.png
+    ª           ª   how-to-write-a-csharp-analyzer-and-code-fix-figure2.png
+    ª           ª   how-to-write-a-csharp-analyzer-and-code-fix-figure3.png
+    ª           ª   how-to-write-a-csharp-analyzer-and-code-fix-figure4.png
+    ª           ª   how-to-write-a-csharp-analyzer-and-code-fix-figure5.png
+    ª           ª   how-to-write-a-csharp-analyzer-and-code-fix-figure6.png
+    ª           ª   how-to-write-a-visual-basic-analyzer-and-code-fix-figure1.png
+    ª           ª   how-to-write-a-visual-basic-analyzer-and-code-fix-figure2.png
+    ª           ª   how-to-write-a-visual-basic-analyzer-and-code-fix-figure3.png
+    ª           ª   how-to-write-a-visual-basic-analyzer-and-code-fix-figure4.png
+    ª           ª   how-to-write-a-visual-basic-analyzer-and-code-fix-figure5.png
+    ª           ª   pool-name-attempt1.png
+    ª           ª   walkthrough-csharp-syntax-figure1.png
+    ª           ª   walkthrough-csharp-syntax-transformation-figure1.png
+    ª           ª   walkthrough-vb-syntax-figure1.png
+    ª           ª   walkthrough-vb-syntax-transformation-figure1.png
+    ª           ª   workspace-obj-relations.png
+    ª           ª   
+    ª           +---design-time-build-errors
+    ª                   ide0006.png
+    ª                   miscellaneous-files.png
+    ª                   run-developer-command-prompt.png
+    ª                   
+    +---roslyn-analyzers
+    ª   ª   Analyzer Configuration.md
+    ª   ª   Analyzer reference page template.md
+    ª   ª   Documenting your analyzers.md
+    ª   ª   MakeStatic.PNG
+    ª   ª   NetCore_GettingStarted.md
+    ª   ª   Performance.md
+    ª   ª   SuppressErrorList.PNG
+    ª   ª   Writing dataflow analysis based analyzers.md
+    ª   ª   
+    ª   +---FxCopPort
+    ª   ª       Porting FxCop Rules to Roslyn.md
+    ª   ª       Proposed FxCop rule changes in Roslyn.md
+    ª   ª       RulesInventory.csv
+    ª   ª       
+    ª   +---rules
+    ª           RS1022.md
+    ª           RS1038.md
+    ª           RS1041.md
+    ª           
+    +---runtime
+    ª   ª   area-owners.md
+    ª   ª   deep-dive-blog-posts.md
+    ª   ª   issue-cleanup.md
+    ª   ª   issues-pr-management.md
+    ª   ª   README.md
+    ª   ª   
+    ª   +---coding-guidelines
+    ª   ª   ª   adding-api-guidelines.md
+    ª   ª   ª   breaking-change-definitions.md
+    ª   ª   ª   breaking-change-rules.md
+    ª   ª   ª   breaking-changes.md
+    ª   ª   ª   clr-code-guide.md
+    ª   ª   ª   clr-jit-coding-conventions.md
+    ª   ª   ª   code-formatting-tools.md
+    ª   ª   ª   coding-style.md
+    ª   ª   ª   cross-platform-guidelines.md
+    ª   ª   ª   cross-platform-performance-and-eventing.md
+    ª   ª   ª   EventLogging.md
+    ª   ª   ª   framework-design-guidelines-digest.md
+    ª   ª   ª   interop-guidelines.md
+    ª   ª   ª   libraries-packaging.md
+    ª   ª   ª   mono-code-guide.md
+    ª   ª   ª   performance-guidelines.md
+    ª   ª   ª   project-guidelines.md
+    ª   ª   ª   updating-ref-source.md
+    ª   ª   ª   vectorization-guidelines.md
+    ª   ª   ª   vs-cpp-formatting.png
+    ª   ª   ª   vs-csharp-formatting.png
+    ª   ª   ª   
+    ª   ª   +---api-guidelines
+    ª   ª           nullability.md
+    ª   ª           README.md
+    ª   ª           System.Memory.md
+    ª   ª           
+    ª   +---design
+    ª   ª   +---coreclr
+    ª   ª   ª   +---botr
+    ª   ª   ª   ª   ª   botr-faq.md
+    ª   ª   ª   ª   ª   clr-abi.md
+    ª   ª   ª   ª   ª   corelib.md
+    ª   ª   ª   ª   ª   dac-notes.md
+    ª   ª   ª   ª   ª   exceptions.md
+    ª   ª   ª   ª   ª   garbage-collection.md
+    ª   ª   ª   ª   ª   guide-for-porting.md
+    ª   ª   ª   ª   ª   ilc-architecture.md
+    ª   ª   ª   ª   ª   intro-to-clr.md
+    ª   ª   ª   ª   ª   managed-type-system.md
+    ª   ª   ª   ª   ª   method-descriptor.md
+    ª   ª   ª   ª   ª   mixed-mode.md
+    ª   ª   ª   ª   ª   profilability.md
+    ª   ª   ª   ª   ª   profiling.md
+    ª   ª   ª   ª   ª   r2r-perfmap-format.md
+    ª   ª   ª   ª   ª   README.md
+    ª   ª   ª   ª   ª   readytorun-format.md
+    ª   ª   ª   ª   ª   readytorun-overview.md
+    ª   ª   ª   ª   ª   shared-generics.md
+    ª   ª   ª   ª   ª   stackwalking.md
+    ª   ª   ª   ª   ª   threading.md
+    ª   ª   ª   ª   ª   type-loader.md
+    ª   ª   ª   ª   ª   type-system.md
+    ª   ª   ª   ª   ª   vectors-and-intrinsics.md
+    ª   ª   ª   ª   ª   virtual-stub-dispatch.md
+    ª   ª   ª   ª   ª   xplat-minidump-generation.md
+    ª   ª   ª   ª   ª   
+    ª   ª   ª   ª   +---images
+    ª   ª   ª   ª           dac-overview.png
+    ª   ª   ª   ª           methoddesc-fig1.png
+    ª   ª   ª   ª           methoddesc-fig2.png
+    ª   ª   ª   ª           methoddesc-fig3.png
+    ª   ª   ª   ª           profiling-exception-callback-sequence.png
+    ª   ª   ª   ª           profiling-gc.png
+    ª   ª   ª   ª           profiling-overview.png
+    ª   ª   ª   ª           simple-dependency-graph.gv
+    ª   ª   ª   ª           simple-dependency-graph.svg
+    ª   ª   ª   ª           stack.png
+    ª   ª   ª   ª           type-system-dependencies.png
+    ª   ª   ª   ª           typeloader-fig1.png
+    ª   ª   ª   ª           typeloader-fig2.png
+    ª   ª   ª   ª           typeloader-fig3.png
+    ª   ª   ª   ª           typeloader-fig4.png
+    ª   ª   ª   ª           typesystem-hierarchy.svg
+    ª   ª   ª   ª           virtualstubdispatch-fig1.png
+    ª   ª   ª   ª           virtualstubdispatch-fig2.png
+    ª   ª   ª   ª           virtualstubdispatch-fig3.png
+    ª   ª   ª   ª           virtualstubdispatch-fig4.png
+    ª   ª   ª   ª           
+    ª   ª   ª   +---jit
+    ª   ª   ª   ª   ª   arm64-jit-frame-layout.md
+    ª   ª   ª   ª   ª   eh-writethru.md
+    ª   ª   ª   ª   ª   finally-optimizations.md
+    ª   ª   ª   ª   ª   first-class-structs.md
+    ª   ª   ª   ª   ª   GuardedDevirtualization.md
+    ª   ª   ª   ª   ª   hot-cold-splitting.md
+    ª   ª   ª   ª   ª   inline-size-estimates.md
+    ª   ª   ª   ª   ª   inlining-plans.md
+    ª   ª   ª   ª   ª   investigate-stress.md
+    ª   ª   ª   ª   ª   Jit Architecture Plan 2009.md
+    ª   ª   ª   ª   ª   jit-call-morphing.md
+    ª   ª   ª   ª   ª   JitOptimizerPlanningGuide.md
+    ª   ª   ª   ª   ª   JitOptimizerTodoAssessment.md
+    ª   ª   ª   ª   ª   longs-on-32bit-arch.md
+    ª   ª   ª   ª   ª   lsra-detail.md
+    ª   ª   ª   ª   ª   lsra-heuristic-tuning.md
+    ª   ª   ª   ª   ª   lsra-throughput.md
+    ª   ª   ª   ª   ª   multi-reg-call-nodes.md
+    ª   ª   ª   ª   ª   object-stack-allocation.md
+    ª   ª   ª   ª   ª   Optimization of Heap Access in Value Numbering.md
+    ª   ª   ª   ª   ª   Perf-Score.md
+    ª   ª   ª   ª   ª   porting-ryujit.md
+    ª   ª   ª   ª   ª   profile-count-reconstruction.md
+    ª   ª   ª   ª   ª   removing-embedded-statements.md
+    ª   ª   ª   ª   ª   ryujit-overview.md
+    ª   ª   ª   ª   ª   ryujit-tutorial.md
+    ª   ª   ª   ª   ª   struct-abi.md
+    ª   ª   ª   ª   ª   variabletracking.md
+    ª   ª   ª   ª   ª   viewing-jit-dumps.md
+    ª   ª   ª   ª   ª   
+    ª   ª   ª   ª   +---images
+    ª   ª   ª   ª           GreenNode_WriteTo_CallGraph.png
+    ª   ª   ª   ª           ryujit-backend-phases.png
+    ª   ª   ª   ª           ryujit-flowgraph.png
+    ª   ª   ª   ª           ryujit-high-level-overview.png
+    ª   ª   ª   ª           ryujit-initial-phases.png
+    ª   ª   ª   ª           ryujit-ir-ordered.png
+    ª   ª   ª   ª           ryujit-ir-overview.png
+    ª   ª   ª   ª           ryujit-lir.png
+    ª   ª   ª   ª           ryujit-optimization-phases.png
+    ª   ª   ª   ª           ryujit-phase-diagram.png
+    ª   ª   ª   ª           ThreeClassesDevirt.JPG
+    ª   ª   ª   ª           ThreeClassesDevirtDetail.JPG
+    ª   ª   ª   ª           ThreeClassesDevirtFull.JPG
+    ª   ª   ª   ª           ThreeClassesInterface.JPG
+    ª   ª   ª   ª           TwoClassesBaseline.JPG
+    ª   ª   ª   ª           TwoClassesDevirt.JPG
+    ª   ª   ª   ª           TwoClassesInterface.JPG
+    ª   ª   ª   ª           
+    ª   ª   ª   +---profiling
+    ª   ª   ª       ª   IL Rewriting Basics.md
+    ª   ª   ª       ª   Profiler Attach on CoreCLR.md
+    ª   ª   ª       ª   Profiler Breaking Changes.md
+    ª   ª   ª       ª   Profiler Loading.md
+    ª   ª   ª       ª   ReJIT on Attach.md
+    ª   ª   ª       ª   
+    ª   ª   ª       +---davbr-blog-archive
+    ª   ª   ª           ª   Attach.md
+    ª   ª   ª           ª   Attach2.md
+    ª   ª   ª           ª   CORPROF_E_UNSUPPORTED_CALL_SEQUENCE.md
+    ª   ª   ª           ª   Creating an IL-rewriting profiler.md
+    ª   ª   ª           ª   Debugging - Activation.md
+    ª   ª   ª           ª   Debugging - SOS and IDs.md
+    ª   ª   ª           ª   DoStackSnapshot - Callback CONTEXT Registers.md
+    ª   ª   ª           ª   DoStackSnapshot - Exception Filters.md
+    ª   ª   ª           ª   DoStackSnapshot - HRESULTs.md
+    ª   ª   ª           ª   ELT Hooks - tail calls.md
+    ª   ª   ª           ª   ELT Hooks - The Basics.md
+    ª   ª   ª           ª   GC Heap and Alignment Padding.md
+    ª   ª   ª           ª   Generics and Your Profiler.md
+    ª   ª   ª           ª   Metadata Tokens, Run-Time IDs, and Type Loading.md
+    ª   ª   ª           ª   Profiler Detach.md
+    ª   ª   ª           ª   Profiler stack walking Basics and beyond.md
+    ª   ª   ª           ª   README.md
+    ª   ª   ª           ª   ReJIT - Limitations.md
+    ª   ª   ª           ª   ReJIT - The Basics.md
+    ª   ª   ª           ª   Sample A Signature Blob Parser for your Profiler.md
+    ª   ª   ª           ª   Tail call JIT conditions.md
+    ª   ª   ª           ª   Type Forwarding.md
+    ª   ª   ª           ª   When is it safe to use ObjectIDs.md
+    ª   ª   ª           ª   
+    ª   ª   ª           +---media
+    ª   ª   ª           ª       2110.image_051F632D.png
+    ª   ª   ª           ª       4276.image1_31CAADB7.png
+    ª   ª   ª           ª       8715.image1_thumb_38118445.png
+    ª   ª   ª           ª       8715.image_thumb_01A0D243.png
+    ª   ª   ª           ª       Attach.jpg
+    ª   ª   ª           ª       deadlock.jpg
+    ª   ª   ª           ª       gccycle.jpg
+    ª   ª   ª           ª       NoBirthAnnouncement.JPG
+    ª   ª   ª           ª       
+    ª   ª   ª           +---samples
+    ª   ª   ª                   Add local to LocalVarSig.cpp
+    ª   ª   ª                   PlugInToYourProfiler.cpp
+    ª   ª   ª                   sigformat.cpp
+    ª   ª   ª                   sigparse.cpp
+    ª   ª   ª                   
+    ª   ª   +---datacontracts
+    ª   ª   ª   ª   contract-descriptor.md
+    ª   ª   ª   ª   contract_csharp_api_design.cs
+    ª   ª   ª   ª   DacStreams.md
+    ª   ª   ª   ª   datacontracts_design.md
+    ª   ª   ª   ª   data_descriptor.md
+    ª   ª   ª   ª   EcmaMetadata.md
+    ª   ª   ª   ª   Exception.md
+    ª   ª   ª   ª   GCHandle.md
+    ª   ª   ª   ª   Loader.md
+    ª   ª   ª   ª   Object.md
+    ª   ª   ª   ª   RuntimeTypeSystem.md
+    ª   ª   ª   ª   Thread.md
+    ª   ª   ª   ª   
+    ª   ª   ª   +---data
+    ª   ª   ª           empty.jsonc
+    ª   ª   ª           
+    ª   ª   +---features
+    ª   ª   ª   ª   additional-deps.md
+    ª   ª   ª   ª   arm64-intrinsics.md
+    ª   ª   ª   ª   assembly-conflict-resolution.md
+    ª   ª   ª   ª   AssemblyLoadContext.ContextualReflection.md
+    ª   ª   ª   ª   assemblyloadcontext.md
+    ª   ª   ª   ª   byreflike-generics.md
+    ª   ª   ª   ª   cet-feature.md
+    ª   ª   ª   ª   code-generation-strategies.md
+    ª   ª   ª   ª   code-versioning-ideal-tree-active.png
+    ª   ª   ª   ª   code-versioning-ideal-tree-update.png
+    ª   ª   ª   ª   code-versioning-ideal-tree.png
+    ª   ª   ª   ª   code-versioning-profiler-breaking-changes.md
+    ª   ª   ª   ª   code-versioning.md
+    ª   ª   ª   ª   COM-activation.md
+    ª   ª   ª   ª   counter-accuracy-detail.png
+    ª   ª   ª   ª   counter-accuracy-tunable.png
+    ª   ª   ª   ª   counter-accuracy.png
+    ª   ª   ª   ª   counter-scaling-detail.png
+    ª   ª   ª   ª   counter-scaling.png
+    ª   ª   ª   ª   covariant-return-methods.md
+    ª   ª   ª   ª   cross-dac.md
+    ª   ª   ª   ª   crossgen2-compilation-structure-enhancements.md
+    ª   ª   ª   ª   default-interface-methods.md
+    ª   ª   ª   ª   dllmap.md
+    ª   ª   ª   ª   dotnet-pgo.md
+    ª   ª   ª   ª   DotNetCore-SharedPackageStore.md
+    ª   ª   ª   ª   DynamicPgo-InstrumentedTiers-ilsize-histogram1.png
+    ª   ª   ª   ª   DynamicPgo-InstrumentedTiers-msft-service.png
+    ª   ª   ª   ª   DynamicPgo-InstrumentedTiers-Plaintext-opt.png
+    ª   ª   ª   ª   DynamicPgo-InstrumentedTiers-Plaintext.png
+    ª   ª   ª   ª   DynamicPgo-InstrumentedTiers.md
+    ª   ª   ª   ª   DynamicPgo.md
+    ª   ª   ª   ª   event-counter.md
+    ª   ª   ª   ª   framework-version-resolution.md
+    ª   ª   ª   ª   globalization-hybrid-mode.md
+    ª   ª   ª   ª   globalization-icu-wasm.md
+    ª   ª   ª   ª   globalization-invariant-mode.md
+    ª   ª   ª   ª   host-component-dependencies-resolution.md
+    ª   ª   ª   ª   host-components.md
+    ª   ª   ª   ª   host-download-urls.md
+    ª   ª   ª   ª   host-error-codes.md
+    ª   ª   ª   ª   host-probing.md
+    ª   ª   ª   ª   host-runtime-information.md
+    ª   ª   ª   ª   host-startup-hook.md
+    ª   ª   ª   ª   host-testing.md
+    ª   ª   ª   ª   host-tracing.md
+    ª   ª   ª   ª   hosting-layer-apis.md
+    ª   ª   ª   ª   hw-intrinsics.md
+    ª   ª   ª   ª   IJW-activation.md
+    ª   ª   ª   ª   jump-stubs.md
+    ª   ª   ª   ª   Linux-Hugepage-Crossgen2.md
+    ª   ª   ª   ª   localization-options.md
+    ª   ª   ª   ª   native-hosting.md
+    ª   ª   ª   ª   NonGC-Heap.md
+    ª   ª   ª   ª   OnStackReplacement.md
+    ª   ª   ª   ª   OsrDetailsAndDebugging.md
+    ª   ª   ª   ª   OSRX64EpilogRedesign.md
+    ª   ª   ª   ª   PinnedHeap.md
+    ª   ª   ª   ª   raw-eventlistener.md
+    ª   ª   ª   ª   readytorun-composite-format-design.md
+    ª   ª   ª   ª   readytorun-pinvoke.md
+    ª   ª   ª   ª   roll-forward-on-no-candidate-fx.md
+    ª   ª   ª   ª   ScalableApproximateCounting.md
+    ª   ª   ª   ª   sharedfx-lookup.md
+    ª   ª   ª   ª   source-generator-com.md
+    ª   ª   ª   ª   source-generator-pinvokes.md
+    ª   ª   ª   ª   standalone-gc-eventing.md
+    ª   ª   ª   ª   standalone-gc-loading.md
+    ª   ª   ª   ª   StringDeduplication.md
+    ª   ª   ª   ª   tailcalls-with-helpers.md
+    ª   ª   ª   ª   tiered-compilation.md
+    ª   ª   ª   ª   timezone-invariant-mode.md
+    ª   ª   ª   ª   unloadability.md
+    ª   ª   ª   ª   unloadability.svg
+    ª   ª   ª   ª   unsafeaccessors.md
+    ª   ª   ª   ª   user-events.md
+    ª   ª   ª   ª   y2038.md
+    ª   ª   ª   ª   
+    ª   ª   ª   +---images
+    ª   ª   ª           intel-cet-dotnet6-fig1.png
+    ª   ª   ª           
+    ª   ª   +---libraries
+    ª   ª   ª   +---ComInterfaceGenerator
+    ª   ª   ª   ª       Compatibility.md
+    ª   ª   ª   ª       DerivedComInterfaces.md
+    ª   ª   ª   ª       UnmanagedToManagedEH.md
+    ª   ª   ª   ª       VTableStubs.md
+    ª   ª   ª   ª       
+    ª   ª   ª   +---LibraryImportGenerator
+    ª   ª   ª           Compatibility.md
+    ª   ª   ª           Pipeline.md
+    ª   ª   ª           SpanMarshallers.md
+    ª   ª   ª           StructMarshalling.md
+    ª   ª   ª           UserTypeMarshallingV2.md
+    ª   ª   ª           
+    ª   ª   +---mono
+    ª   ª   ª   ª   aot.md
+    ª   ª   ª   ª   components.md
+    ª   ª   ª   ª   debugger.md
+    ª   ª   ª   ª   diagnostics-tracing.md
+    ª   ª   ª   ª   jiterpreter.md
+    ª   ª   ª   ª   llvm.md
+    ª   ª   ª   ª   mobile-runtimeconfig-json.md
+    ª   ª   ª   ª   mono-library-mode.md
+    ª   ª   ª   ª   mono-manpage-1.md
+    ª   ª   ª   ª   mono-thread-state-machine.md
+    ª   ª   ª   ª   profiled-aot.md
+    ª   ª   ª   ª   runtime-ilgen.md
+    ª   ª   ª   ª   unloadability.md
+    ª   ª   ª   ª   wasm-aot.md
+    ª   ª   ª   ª   webcil.md
+    ª   ª   ª   ª   
+    ª   ª   ª   +---web
+    ª   ª   ª       ª   aot.md
+    ª   ª   ª       ª   bitcode.md
+    ª   ª   ª       ª   coop-suspend.md
+    ª   ª   ª       ª   exception-handling.md
+    ª   ª   ª       ª   generic-sharing.md
+    ª   ª   ª       ª   generics.md
+    ª   ª   ª       ª   glossary.md
+    ª   ª   ª       ª   gsharedvt.md
+    ª   ª   ª       ª   linear-ir.md
+    ª   ª   ª       ª   llvm-backend.md
+    ª   ª   ª       ª   memory-management.md
+    ª   ª   ª       ª   mini-porting.md
+    ª   ª   ª       ª   mono-error.md
+    ª   ª   ª       ª   other.md
+    ª   ª   ª       ª   README.md
+    ª   ª   ª       ª   register-allocation.md
+    ª   ª   ª       ª   soft-debugger-wire-format.md
+    ª   ª   ª       ª   soft-debugger.md
+    ª   ª   ª       ª   thread-safety.md
+    ª   ª   ª       ª   trampolines.md
+    ª   ª   ª       ª   
+    ª   ª   ª       +---images
+    ª   ª   ª               0911030528Mp6F5SHL.png
+    ª   ª   ª               coop-state-machine.png
+    ª   ª   ª               igv-diff.png
+    ª   ª   ª               igv-screenshot.png
+    ª   ª   ª               
+    ª   ª   +---security
+    ª   ª   ª       unix-tmp.md
+    ª   ª   ª       
+    ª   ª   +---specs
+    ª   ª   ª       Ecma-335-Augments.md
+    ª   ª   ª       Memory-model.md
+    ª   ª   ª       PE-COFF.md
+    ª   ª   ª       PortablePdb-Metadata.md
+    ª   ª   ª       
+    ª   ª   +---tools
+    ª   ª       +---illink
+    ª   ª               compiler-generated-code-handling.md
+    ª   ª               constant-propagation-and-branch-removal.md
+    ª   ª               DAM-on-type-and-RUC-interaction.md
+    ª   ª               feature-attribute-semantics.md
+    ª   ª               feature-checks.md
+    ª   ª               redundant-suppressions.md
+    ª   ª               reflection-flow.md
+    ª   ª               trimmed-assemblies.md
+    ª   ª               
+    ª   +---infra
+    ª   ª       automation.md
+    ª   ª       test-configurations.md
+    ª   ª       
+    ª   +---issue-mappings
+    ª   ª       core-setup.mapping.txt
+    ª   ª       coreclr.mapping.txt
+    ª   ª       corefx.mapping.txt
+    ª   ª       README.md
+    ª   ª       
+    ª   +---project
+    ª   ª       analyzers.md
+    ª   ª       api-review-process.md
+    ª   ª       branching-guide.md
+    ª   ª       breaking-change-process.md
+    ª   ª       copyright.md
+    ª   ª       dogfooding.md
+    ª   ª       dotnet-filenames.md
+    ª   ª       dotnet-standards.md
+    ª   ª       garbage-collector-guidelines.md
+    ª   ª       glossary.md
+    ª   ª       issue-guide.md
+    ª   ª       jit-testing.md
+    ª   ª       library-servicing.md
+    ª   ª       linux-performance-tracing.md
+    ª   ª       list-of-diagnostics.md
+    ª   ª       pcl-targets-dialog-net46-aspnetcore10.png
+    ª   ª       performance-guidelines.md
+    ª   ª       profiling-api-status.md
+    ª   ª       public-signing.md
+    ª   ª       repo-organization.md
+    ª   ª       strong-name-signing.md
+    ª   ª       updating-jitinterface.md
+    ª   ª       versioning.md
+    ª   ª       writing-tests.md
+    ª   ª       
+    ª   +---tools
+    ª   ª   +---illink
+    ª   ª           custom-steps.md
+    ª   ª           data-formats.md
+    ª   ª           error-codes.md
+    ª   ª           illink-options.md
+    ª   ª           illink-tasks.md
+    ª   ª           methods-kept-by-interface.md
+    ª   ª           optimizations.md
+    ª   ª           README.md
+    ª   ª           serialization.md
+    ª   ª           
+    ª   +---workflow
+    ª       ª   codespace-dev-container-configuration.png
+    ª       ª   codespace-machine-size.png
+    ª       ª   Codespaces.md
+    ª       ª   editing-and-debugging.md
+    ª       ª   README.md
+    ª       ª   
+    ª       +---building
+    ª       ª   +---coreclr
+    ª       ª   ª       android.md
+    ª       ª   ª       cross-building.md
+    ª       ª   ª       freebsd-instructions.md
+    ª       ª   ª       linux-instructions.md
+    ª       ª   ª       macos-instructions.md
+    ª       ª   ª       nativeaot.md
+    ª       ª   ª       README.md
+    ª       ª   ª       windows-instructions.md
+    ª       ª   ª       
+    ª       ª   +---libraries
+    ª       ª   ª       code-coverage.md
+    ª       ª   ª       cross-building.md
+    ª       ª   ª       README.md
+    ª       ª   ª       webassembly-instructions.md
+    ª       ª   ª       
+    ª       ª   +---mono
+    ª       ª           README.md
+    ª       ª           
+    ª       +---ci
+    ª       ª       analysis-check.png
+    ª       ª       coreclr-ci-health.md
+    ª       ª       disabling-tests.md
+    ª       ª       failed-build.png
+    ª       ª       failed-test.png
+    ª       ª       failure-analysis.md
+    ª       ª       issue-impact.png
+    ª       ª       known-issue-example.png
+    ª       ª       pipelines-overview.md
+    ª       ª       pr-guide.md
+    ª       ª       theory-azdo.png
+    ª       ª       triaging-failures.md
+    ª       ª       
+    ª       +---debugging
+    ª       ª   +---coreclr
+    ª       ª   ª       debugging-aot-compilers.md
+    ª       ª   ª       debugging-compiler-dependency-analysis.md
+    ª       ª   ª       debugging-runtime.md
+    ª       ª   ª       
+    ª       ª   +---libraries
+    ª       ª   ª       debugging-corelib.md
+    ª       ª   ª       debugging-vscode.md
+    ª       ª   ª       perfview_example.gif
+    ª       ª   ª       unix-instructions.md
+    ª       ª   ª       windows-instructions.md
+    ª       ª   ª       
+    ª       ª   +---mono
+    ª       ª           android-debugging.md
+    ª       ª           wasm-debugging.md
+    ª       ª           
+    ª       +---requirements
+    ª       ª       freebsd-requirements.md
+    ª       ª       linux-requirements.md
+    ª       ª       macos-requirements.md
+    ª       ª       windows-requirements.md
+    ª       ª       
+    ª       +---testing
+    ª       ª   ª   testing-managed-tools.md
+    ª       ª   ª   testing-workloads.md
+    ª       ª   ª   using-corerun-and-coreroot.md
+    ª       ª   ª   using-dev-shipping-packages.md
+    ª       ª   ª   using-your-build-with-installed-sdk.md
+    ª       ª   ª   visualstudio.md
+    ª       ª   ª   
+    ª       ª   +---coreclr
+    ª       ª   ª       automated-stress-testing-diagnostic-server.md
+    ª       ª   ª       disasm-checks.md
+    ª       ª   ª       gc-stress-run-readme.md
+    ª       ª   ª       running-aspnet-benchmarks-with-crossgen2.md
+    ª       ª   ª       test-configuration.md
+    ª       ª   ª       testing.md
+    ª       ª   ª       unix-test-instructions.md
+    ª       ª   ª       windows-test-instructions.md
+    ª       ª   ª       
+    ª       ª   +---host
+    ª       ª   ª       testing.md
+    ª       ª   ª       using-apphost.md
+    ª       ª   ª       
+    ª       ª   +---libraries
+    ª       ª   ª       debugging-wasm.md
+    ª       ª   ª       filtering-tests.md
+    ª       ª   ª       testing-android.md
+    ª       ª   ª       testing-apple.md
+    ª       ª   ª       testing-wasm.md
+    ª       ª   ª       testing.md
+    ª       ª   ª       
+    ª       ª   +---mono
+    ª       ª           testing.md
+    ª       ª           
+    ª       +---trimming
+    ª               feature-switches.md
+    ª               ILLink-files.md
+    ª               
+    +---source-build-reference-packages
+    ª       known_generator_issues.md
+    ª       
+    +---sourcelink
+    ª   ª   README.md
+    ª   ª   
+    ª   +---GitSpec
+    ª   ª       GitSpec.md
+    ª   ª       License.txt
+    ª   ª       
+    ª   +---Implementation
+    ª   ª       AzureDevOpsServerUrls.png
+    ª   ª       AzureDevOpsServicesUrls.png
+    ª   ª       AzureDevOpsUrlParser.md
+    ª   ª       
+    ª   +---StandardCI
+    ª   ª       README.md
+    ª   ª       
+    ª   +---TfsVirtualDirectory
+    ª           AzureDevOpsServer.png
+    ª           README.md
+    ª           TeamFoundationServer.png
+    ª           
+    +---templating
+    ª   ª   Available-Symbols-Generators.md
+    ª   ª   Available-templates-for-dotnet-new.md
+    ª   ª   Binding-and-project-context-evaluation.md
+    ª   ª   Blog-posts.md
+    ª   ª   Conditional-processing-and-comment-syntax.md
+    ª   ª   Conditions.md
+    ª   ª   Constraints.md
+    ª   ª   Exit-Codes.md
+    ª   ª   Home.md
+    ª   ª   Naming-and-default-value-forms.md
+    ª   ª   Post-Action-Registry.md
+    ª   ª   Reference-for-template.json.md
+    ª   ª   Reserved-Aliases.md
+    ª   ª   template-resolution-for-dotnet-cli.md
+    ª   ª   TestExplorerEnvironments.png
+    ª   ª   Using-Group-Identity.md
+    ª   ª   Using-Primary-Outputs-for-Post-Actions.md
+    ª   ª   Value-Forms.md
+    ª   ª   
+    ª   +---api
+    ª   ª       api-migration-from-net-5-to-net-6.md
+    ª   ª       Inside-the-Template-Engine.md
+    ª   ª       
+    ª   +---authoring-tools
+    ª   ª       Authoring-Tools.md
+    ª   ª       Localization.md
+    ª   ª       Templates-Testing-Tooling.md
+    ª   ª       
+    ª   +---contributing
+    ª   ª       how-to-create-new-generated-symbol.md
+    ª   ª       how-to-create-new-value-form.md
+    ª   ª       
+    ª   +---design
+    ª       +---done
+    ª       ª       constraints.md
+    ª       ª       
+    ª       +---proposed
+    ª               interactive-mode.md
+    ª               sample-interactive-mode.png
+    ª               
+    +---vstest
+    ª   ª   analyze.md
+    ª   ª   configure.md
+    ª   ª   contribute.md
+    ª   ª   diagnose.md
+    ª   ª   dotnetcoretests.md
+    ª   ª   filter.md
+    ª   ª   issuetracking.md
+    ª   ª   Overview.md
+    ª   ª   Problems.md
+    ª   ª   quickstart.md
+    ª   ª   releases.md
+    ª   ª   report.md
+    ª   ª   roadmap.md
+    ª   ª   RunSettingsArguments.md
+    ª   ª   testplatform-migration-known-issues.md
+    ª   ª   toc.yml
+    ª   ª   TODO.md
+    ª   ª   troubleshooting.md
+    ª   ª   
+    ª   +---extensions
+    ª   ª       blame-datacollector.md
+    ª   ª       datacollector-migration.md
+    ª   ª       datacollector.md
+    ª   ª       JSTestAdapter.md
+    ª   ª       
+    ª   +---RFCs
+    ª       ª   0001-Test-Platform-Architecture.md
+    ª       ª   0002-Test-Discovery-Protocol.md
+    ª       ª   0003-Test-Execution-Protocol.md
+    ª       ª   0004-Adapter-Extensibility.md
+    ª       ª   0005-Test-Platform-SDK.md
+    ª       ª   0006-DataCollection-Protocol.md
+    ª       ª   0007-Editors-API-Specification.md
+    ª       ª   0008-TranslationLayer.md
+    ª       ª   0009-Editors-API-RevisionUpdate.md
+    ª       ª   0010-Source-Information-For-Discovered-Tests.md
+    ª       ª   0011-Test-Session-Timeout.md
+    ª       ª   0012-Editors-API-RevisionUpdate-15.4.md
+    ª       ª   0013-Test-Adapter-Lookup.md
+    ª       ª   0014-Packaging.md
+    ª       ª   0015-Telemetry.md
+    ª       ª   0016-Loggers-Information-From-RunSettings.md
+    ª       ª   0017-Managed-TestCase-Properties.md
+    ª       ª   0018-Skip-Default-Adapters.md
+    ª       ª   0019-Disable-Appdomain-While-Running-Tests.md
+    ª       ª   0020-Improving-Logic-To-Pass-Sources-To-Adapters.md
+    ª       ª   0021-CodeCoverageForNetCore.md
+    ª       ª   0022-User-Specified-TestAdapter-Lookup.md
+    ª       ª   0023-TestSettings-Deprecation.md
+    ª       ª   0024-Blame-Collector-Options.md
+    ª       ª   0025-Test-Host-Runtime-Provider.md
+    ª       ª   0026-Passing-TestPlatform-Properties-to-DataCollector.md
+    ª       ª   0027-Merge-Dotnet-Test-And-VsTest-Verbs.md
+    ª       ª   0028-BlameCollector-Hang-Detection.md
+    ª       ª   0029-Debugging-External-Test-Processes.md
+    ª       ª   0029-Dotnet-Test-MultiTarget-Project-Trx-Logger.md
+    ª       ª   0029-Passing-TestRunParameters-via-CLI.md
+    ª       ª   0030-Specify-Environment-Variables-In-Runsettings.md
+    ª       ª   0031-Test-Run-Attachments-Processing.md
+    ª       ª   0032- Extensions versioning attribute.md
+    ª       ª   0033-Hierarchy-TestCase-Property.md
+    ª       ª   toc.yml
+    ª       ª   
+    ª       +---Images
+    ª               datacollection-custom.png
+    ª               datacollection-custom.vsdx
+    ª               datacollection.png
+    ª               datacollection.vsdx
+    ª               dotnet-test-protocol-v2-discovery.png
+    ª               dotnet-test-protocol-v2-execution-customhost.png
+    ª               dotnet-test-protocol-v2-execution.png
+    ª               TestPlatform.vsdx
+    ª               vstest.console-discovery.png
+    ª               vstest.console-execution.png
+    ª               vstest.console-overall-architecture.png
+    ª               vstest.telemetry.png
+    ª               
+    +---winforms
+        ª   building.md
+        ª   coding-style.md
+        ª   debugging.md
+        ª   designer-accessibility.md
+        ª   developer-guide.md
+        ª   getting-started.md
+        ª   issue-guide.md
+        ª   list-of-diagnostics.md
+        ª   porting-guidelines.md
+        ª   release-activity.md
+        ª   roadmap.md
+        ª   runtime-configuration.md
+        ª   testing-in-vs.md
+        ª   testing.md
+        ª   
+        +---accessibility
+        ª       accessible-role-controltype.md
+        ª       listview-expected-behavior.md
+        ª       monthcalendar-expected-behavior.md
+        ª       
+        +---analyzers
+        ª       akams.txt
+        ª       ApplicationConfigurationGenerator.Help.md
+        ª       AppManifestAnalyzer.Help.md
+        ª       Experimental.Help.md
+        ª       WinFormsCSharpAnalyzers.Help.md
+        ª       WinFormsVisualBasicAnalyzers.Help.md
+        ª       
+        +---design
+        ª       anchor-layout-changes-in-net80.md
+        ª       
+        +---designer
+        ª   ª   designer-high-dpi-mode.md
+        ª   ª   designer-selection.md
+        ª   ª   net-inproc-designer.md
+        ª   ª   readme.md
+        ª   ª   troubleshooting.md
+        ª   ª   
+        ª   +---modernization-of-code-behind-in-OOP-designer
+        ª       ª   modernization-of-code-behind-in-oop-designer.md
+        ª       ª   
+        ª       +---images
+        ª               Form1-Designer-C#-comparison.png
+        ª               Form1-Designer-VB-comparison.png
+        ª               
+        +---images
+        ª       accessibleobject-getpropertyvalue-implementation.png
+        ª       accessibleobject-role-implementation.png
+        ª       add-as-link.png
+        ª       add-netfx-project.png
+        ª       add-new-form-dialog.png
+        ª       add-new-form.png
+        ª       AnchorCalculations.png
+        ª       AnchorLayoutKnownIssue_MissingControl.png
+        ª       AnchorLayoutKnownIssue_OverlappedControl.png
+        ª       designer-selection-feature-dialog.png
+        ª       designer-selection-feature-flag.png
+        ª       designer-selection-project-configuration.png
+        ª       edit-namespace.png
+        ª       edit-project-file.png
+        ª       inspect-accessibility-properties.png
+        ª       listview-disabledstyles-inspect-details-view-tree.png
+        ª       listview-disabledstyles-inspect-largeicon-view-tree.png
+        ª       listview-disabledstyles-inspect-list-view-tree.png
+        ª       listview-disabledstyles-inspect-smallicon-view-tree.png
+        ª       listview-disabledstyles-inspect-tile-view-tree.png
+        ª       listview-inspect-details-view-tree.png
+        ª       listview-inspect-largeicon-view-tree.png
+        ª       listview-inspect-list-view-tree.png
+        ª       listview-inspect-smallicon-view-tree.png
+        ª       listview-inspect-tile-view-tree.png
+        ª       listview-showgroupdisabled-inspect-details-view-tree.png
+        ª       listview-showgroupdisabled-inspect-largeicon-view-tree.png
+        ª       listview-showgroupdisabled-inspect-list-view-tree.png
+        ª       listview-showgroupdisabled-inspect-smallicon-view-tree.png
+        ª       listview-showgroupdisabled-inspect-tile-view-tree.png
+        ª       listview-virtualmode-inspect-details-view-tree.png
+        ª       listview-virtualmode-inspect-largeicon-view-tree.png
+        ª       listview-virtualmode-inspect-list-view-tree.png
+        ª       listview-virtualmode-inspect-smallicon-view-tree.png
+        ª       listview-withgroup-inspect-details-view-tree.png
+        ª       listview-withgroup-inspect-largeicon-view-tree.png
+        ª       listview-withgroup-inspect-list-view-tree.png
+        ª       listview-withgroup-inspect-smallicon-view-tree.png
+        ª       listview-withgroup-inspect-tile-view-tree.png
+        ª       listview-withoutgroup-inspect-details-view-tree.png
+        ª       listview-withoutgroup-inspect-largeicon-view-tree.png
+        ª       listview-withoutgroup-inspect-list-view-tree.png
+        ª       listview-withoutgroup-inspect-smallicon-view-tree.png
+        ª       listview-withoutgroup-inspect-tile-view-tree.png
+        ª       listviewsubitem-disabledvisualstyles-inspect-tile-view-tree.png
+        ª       listviewsubitem-inspect-details-view-tree.png
+        ª       listviewsubitem-inspect-largeicon-view-tree.png
+        ª       listviewsubitem-inspect-list-view-tree.png
+        ª       listviewsubitem-inspect-smallicon-view-tree.png
+        ª       listviewsubitem-inspect-tile-view-tree.png
+        ª       listviewsubitem-smallsize-inspect-tile-view-tree.png
+        ª       listviewsubitem-threeitems-inspect-tile-view-tree.png
+        ª       listviewsubitem-twocolumns-inspect-details-view-tree.png
+        ª       listviewsubitem-twocolumns-inspect-tile-view-tree.png
+        ª       listviewsubitem-twosubitems-inspect-details-view-tree.png
+        ª       monthcalendar-calendar-accessible-from-point.png
+        ª       monthcalendar-control-accessible-from-point.png
+        ª       monthcalendar-first-weeknumber-accessible-from-point.png
+        ª       monthcalendar-gray-dates-accessible-from-point.png
+        ª       monthcalendar-inspect-century-view-tree.png
+        ª       monthcalendar-inspect-decade-view-tree.png
+        ª       monthcalendar-inspect-month-view-tree.png
+        ª       monthcalendar-inspect-year-view-tree.png
+        ª       monthcalendar-last-weeknumbers-accessible-from-point.png
+        ª       netfx-oop-designer-infobar.png
+        ª       RuntimeOptionsDemo.gif
+        ª       Serialization.png
+        ª       templates-check-installed.png
+        ª       
+        +---infra
+        ª       automation.md
+        ª       
+        +---serialization
+        ª       register-custom-type-converter.md
+        ª       
+        +---src
+        ª   +---System
+        ª       +---Windows
+        ª           +---Forms
+        ª               +---TaskDialog
+        ª                       Issue_AccessViolation_NavigationInButtonClicked.md
+        ª                       Issue_AccessViolation_NavigationInRadioButtonClicked.md
+        ª                       Issue_ButtonClickHandlerCalledTwice.md
+        ª                       Issue_RadioButton_InfiniteLoop.md
+        ª                       Issue_RadioButton_WeirdBehavior.md
+        ª                       
+        +---trimming
+                feature-switches.md
+                

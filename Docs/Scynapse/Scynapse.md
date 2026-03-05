@@ -19,7 +19,8 @@ This document describes the dynamic grain loading system implemented in Scynapse
 9. [What's Missing / Incomplete](#whats-missing--incomplete)
 10. [Future Vision: Distributed Package System](#future-vision-distributed-package-system)
 11. [Development Guidelines](#development-guidelines)
-12. [Test Scenarios](#test-scenarios)
+12. [State Property Access](#state-property-access)
+13. [Test Scenarios](#test-scenarios)
 
 ---
 
@@ -40,6 +41,12 @@ This document describes the dynamic grain loading system implemented in Scynapse
 | GrainTypeMeta hierarchy | Complete | `Scynapse.Core.Abstractions/Manifest/GrainTypeMeta.cs` |
 | DLR dynamic invocation | Complete | `Scynapse.Core/DynamicGrains/DynamicGrainReference.cs` |
 | GetGrainDynamic extensions | Complete | `Scynapse.Core/DynamicGrains/GrainFactoryExtensions.cs` |
+| StateTask\<T\> awaitable type | Complete | `Orleans.Core.Abstractions/State/StateTask.cs` |
+| State/NotState attributes | Complete | `Orleans.Core.Abstractions/State/StateAttribute.cs` |
+| Property→Interface codegen | Complete | `Orleans.CodeGenerator/StatePropertyCodeGenerator.cs` |
+| Partial property backing fields | Complete | `Orleans.CodeGenerator/StatePropertyCodeGenerator.cs` |
+| Proxy StateTask generation | Complete | `Orleans.CodeGenerator/ProxyGenerator.cs` |
+| IPersistentState mapping | Complete | `Orleans.CodeGenerator/StatePropertyCodeGenerator.cs` |
 
 ### Partially Implemented ⚠️
 
@@ -666,6 +673,155 @@ When using Scynapse via NuGet packages (the normal case), this is handled automa
 
 ---
 
+## State Property Access
+
+### What It Is
+
+A code-generation feature that enables **property-like syntax** for accessing grain state remotely, replacing verbose `GetX()`/`SetX()` boilerplate with natural property access:
+
+```csharp
+// Property-style syntax (new)
+string name = await player.Name;           // Remote get via awaiting
+await (player.Name << "Louis");            // Remote set via << operator
+
+// Traditional Orleans style (still works)
+string name = await player.GetName();
+await player.SetName("Louis");
+```
+
+### How It Works
+
+The system is **property-driven**: developers define properties on grain classes, and the Scynapse code generator automatically produces interface methods, implementation wiring, and proxy enhancements.
+
+**Developer writes:**
+
+```csharp
+// Interface (partial, only custom methods)
+public partial interface IPlayerGrain : IGrainWithStringKey
+{
+    Task<PlayerSnapshot> GetSnapshotAsync();
+    Task ApplyDamageAsync(int amount);
+}
+
+// Implementation (with properties)
+public partial class PlayerGrain : Grain, IPlayerGrain
+{
+    public partial string Name { get; set; }    // Codegen implements this
+    public partial int Score { get; set; }      // Codegen implements this
+
+    public Task<PlayerSnapshot> GetSnapshotAsync() => ...;
+    public Task ApplyDamageAsync(int amount) => ...;
+}
+```
+
+**Code generator produces:**
+
+1. **Interface extension** — `GetName()`/`SetName()`, `GetScore()`/`SetScore()` method signatures
+2. **Class extension** — backing fields (`_name_backing`), partial property implementations, and explicit interface method implementations
+3. **Proxy StateTask properties** — `StateTask<string> Name` wrappers that bridge property syntax to RPC calls
+
+### Core Types
+
+#### StateTask\<T\>
+
+**Location**: `src/Scynapse/src/Orleans.Core.Abstractions/State/StateTask.cs`
+
+A readonly struct that enables both `await` (get) and `<<` (set) on grain properties:
+
+```csharp
+public readonly struct StateTask<T>
+{
+    private readonly Func<ValueTask<T>> _getter;
+    private readonly Func<T, ValueTask> _setter;
+
+    public ValueTask<T> GetAsync();
+    public ValueTask SetAsync(T value);
+    public ValueTaskAwaiter<T> GetAwaiter();                     // enables: await grain.Name
+    public static ValueTask operator <<(StateTask<T> state, T value);  // enables: await (grain.Name << "x")
+}
+```
+
+**Why `<<`?** C# property setters must return `void`, making them incompatible with async. The `<<` operator visually suggests "pushing" a value and can return `ValueTask`.
+
+#### StateAttribute / NotStateAttribute
+
+**Location**: `src/Scynapse/src/Orleans.Core.Abstractions/State/`
+
+| Attribute | Purpose |
+|-----------|---------|
+| `[State]` | Configures code generation: `Persisted`, `StateProperty`, `AutoSave`, `CanSet`, `MethodName` |
+| `[NotState]` | Excludes a public property from state code generation (for loggers, DI dependencies, etc.) |
+
+### Property Detection Rules
+
+The `StatePropertyCodeGenerator` scans grain classes and includes a property if:
+- It is `public`
+- It does NOT have `[NotState]`
+- It is NOT an indexer
+- The grain class implements a grain interface (inherits from `IGrainWithXXXKey`)
+
+### Persistence Integration
+
+Properties can map directly to Orleans `IPersistentState<T>` fields:
+
+```csharp
+public partial class PlayerGrain : Grain, IPlayerGrain
+{
+    private readonly IPersistentState<PlayerData> _state;
+
+    [State(Persisted = true, StateProperty = nameof(_state))]
+    public partial int Score { get; set; }
+    // Generated: get => _state.State.Score; set => _state.State.Score = value;
+
+    [State(Persisted = true, StateProperty = nameof(_state), AutoSave = true)]
+    public partial int Level { get; set; }
+    // Generated: get => _state.State.Level; set { _state.State.Level = value; _ = _state.WriteStateAsync(); }
+}
+```
+
+### Generated Code Structure
+
+For a grain class, the generator outputs a single partial class extension:
+
+```csharp
+partial class PlayerGrain
+{
+    // 1. Backing fields (for partial properties without persistence)
+    private string _name_backing = default!;
+
+    // 2. Partial property implementations
+    public partial string Name { get => _name_backing; set => _name_backing = value; }
+
+    // 3. Explicit interface method implementations
+    Task<string> IPlayerGrain.GetName() => Task.FromResult(Name);
+    Task IPlayerGrain.SetName(string value) { Name = value; return Task.CompletedTask; }
+}
+```
+
+And on the proxy side:
+
+```csharp
+internal sealed class Proxy_IPlayerGrain : GrainReference, IPlayerGrain
+{
+    public StateTask<string> Name => new StateTask<string>(
+        () => new ValueTask<string>(GetName()),
+        v => new ValueTask(SetName(v)));
+}
+```
+
+### Implementation Status
+
+| Phase | Status | Key Components |
+|-------|--------|----------------|
+| Phase 1: Core Infrastructure | ✅ Complete | `StateTask<T>`, `StateAttribute`, `NotStateAttribute`, `LibraryTypes` |
+| Phase 2: Code Generation | ✅ Complete | `StatePropertyCodeGenerator`, `CodeGenerator` integration, `ProxyGenerator` integration |
+| Phase 3: Partial Properties | ✅ Complete | Backing field generation, partial property implementations |
+| Phase 4: Persistence | ✅ Complete | `IPersistentState<T>` detection, persisted property generation, AutoSave |
+
+**Detailed design document**: `Docs/Scynapse/Scynapse Features/StatePropertyAccess.md`
+
+---
+
 ## Test Scenarios
 
 Located in `playground/PluginGrainScenarios/`:
@@ -751,6 +907,20 @@ src/Scynapse.Runtime/DynamicGrains/
 ├── PluginAssemblyLoader.cs          # MDCP wrapper
 ├── PluginSerializationManager.cs    # Serializer registration
 └── GrainLifecycleManager.cs         # Activation tracking
+```
+
+### State Property Access (Orleans.Core.Abstractions + Orleans.CodeGenerator)
+```
+src/Scynapse/src/Orleans.Core.Abstractions/State/
+├── StateTask.cs                    # StateTask<T> awaitable struct with << operator
+├── StateAttribute.cs               # [State] configuration attribute
+└── NotStateAttribute.cs            # [NotState] exclusion attribute
+
+src/Scynapse/src/Orleans.CodeGenerator/
+├── StatePropertyCodeGenerator.cs   # Property scanning, interface/class/proxy generation
+├── CodeGenerator.cs                # Integration point (state property processing)
+├── ProxyGenerator.cs               # StateTask property generation on proxies
+└── LibraryTypes.cs                 # Type references (StateTask_1, StateAttribute, etc.)
 ```
 
 ### Playground Projects
