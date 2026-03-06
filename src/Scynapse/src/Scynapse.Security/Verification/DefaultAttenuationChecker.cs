@@ -1,4 +1,3 @@
-using System.Text.RegularExpressions;
 using Scynapse.Security.Assertions;
 
 namespace Scynapse.Security.Verification;
@@ -145,13 +144,12 @@ public sealed class DefaultAttenuationChecker : IAttenuationChecker
     }
 
     /// <summary>
-    /// Simple glob-style pattern matching. Supports '*' as wildcard.
-    /// "scynapse:grain/*" matches "scynapse:grain/MyGrain".
+    /// NATS-style dot-separated pattern matching.
+    /// * matches one segment, > matches one or more trailing segments.
+    /// "scynapse.app.>" matches "scynapse.app.IMyGrain.DoWork".
     /// </summary>
     public static bool MatchesPattern(string pattern, string value)
     {
-        // Convert glob to regex: escape everything except *, then replace * with .*
-        var regexPattern = "^" + Regex.Escape(pattern).Replace("\\*", ".*") + "$";
-        return Regex.IsMatch(value, regexPattern);
+        return SubjectNameMatcher.Matches(pattern, value);
     }
 }

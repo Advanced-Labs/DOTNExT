@@ -116,12 +116,6 @@ public sealed class ScynapseIncomingCallFilter : IIncomingGrainCallFilter
 
     private static bool ResourceMatches(string granted, string required)
     {
-        if (granted == "*") return true;
-        if (granted.EndsWith("*"))
-        {
-            var prefix = granted[..^1];
-            return required.StartsWith(prefix, StringComparison.Ordinal);
-        }
-        return string.Equals(granted, required, StringComparison.Ordinal);
+        return SubjectNameMatcher.Matches(granted, required);
     }
 }

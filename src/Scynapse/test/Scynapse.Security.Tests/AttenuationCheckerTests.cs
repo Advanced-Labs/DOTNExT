@@ -10,14 +10,17 @@ public class AttenuationCheckerTests
     private readonly DefaultAttenuationChecker _checker = new();
 
     [Theory]
-    [InlineData("scynapse:grain/*", "scynapse:grain/MyGrain", true)]
-    [InlineData("scynapse:grain/*", "scynapse:other/X", false)]
+    [InlineData("scynapse.app.*", "scynapse.app.MyGrain", true)]
+    [InlineData("scynapse.app.*", "scynapse.other.X", false)]
+    [InlineData("scynapse.app.>", "scynapse.app.MyGrain", true)]
+    [InlineData("scynapse.app.>", "scynapse.app.MyGrain.DoWork", true)]
+    [InlineData("scynapse.>", "scynapse.app.MyGrain", true)]
+    [InlineData("scynapse.>", "scynapse.system.membership", true)]
     [InlineData("*", "anything", true)]
     [InlineData("exact", "exact", true)]
     [InlineData("exact", "different", false)]
-    [InlineData("pre*suf", "preXsuf", true)]
-    [InlineData("pre*suf", "preXYZsuf", true)]
-    [InlineData("pre*suf", "preXsufBAD", false)]
+    [InlineData("scynapse.app.*.GetItem", "scynapse.app.IOrderGrain.GetItem", true)]
+    [InlineData("scynapse.app.*.GetItem", "scynapse.app.IOrderGrain.Other", false)]
     public void PatternMatching(string pattern, string value, bool expected)
     {
         Assert.Equal(expected, DefaultAttenuationChecker.MatchesPattern(pattern, value));
@@ -32,7 +35,7 @@ public class AttenuationCheckerTests
         var identity = AssertionBuilder.CreateIdentity(root); // self-signed: issuer == subject
         var capability = AssertionBuilder.CreateCapability(
             root, node.PublicKeyBytes,
-            "scynapse:grain/X", "invoke",
+            "scynapse.app.X", "invoke",
             proofs: new[] { identity.Id.ToArray() });
 
         Assert.True(_checker.Check(identity, capability));
@@ -57,7 +60,7 @@ public class AttenuationCheckerTests
 
         var capability = AssertionBuilder.CreateCapability(
             node, target.PublicKeyBytes,
-            "scynapse:grain/X", "invoke",
+            "scynapse.app.X", "invoke",
             proofs: new[] { nodeIdentity.Id.ToArray() });
 
         Assert.False(_checker.Check(nodeIdentity, capability));
@@ -72,10 +75,10 @@ public class AttenuationCheckerTests
 
         var cap1 = AssertionBuilder.CreateCapability(
             root, node.PublicKeyBytes,
-            "scynapse:grain/X", "invoke");
+            "scynapse.app.X", "invoke");
         var cap2 = AssertionBuilder.CreateCapability(
             node, target.PublicKeyBytes,
-            "scynapse:grain/X", "invoke",
+            "scynapse.app.X", "invoke",
             proofs: new[] { cap1.Id.ToArray() });
 
         Assert.False(_checker.Check(cap1, cap2));
@@ -93,7 +96,7 @@ public class AttenuationCheckerTests
             root, domain.PublicKeyBytes,
             new[] { ClaimType.Capability, ClaimType.Delegation },
             proofs: new[] { rootIdentity.Id.ToArray() },
-            resourcePattern: "scynapse:grain/*",
+            resourcePattern: "scynapse.app.>",
             actionPattern: "*",
             maxDepth: 3);
 
@@ -101,7 +104,7 @@ public class AttenuationCheckerTests
             domain, node.PublicKeyBytes,
             new[] { ClaimType.Capability },
             proofs: new[] { parentDelegation.Id.ToArray() },
-            resourcePattern: "scynapse:grain/MyGrain",
+            resourcePattern: "scynapse.app.MyGrain",
             actionPattern: "invoke",
             maxDepth: 2);
 

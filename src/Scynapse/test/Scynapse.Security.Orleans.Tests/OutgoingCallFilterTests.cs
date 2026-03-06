@@ -20,13 +20,13 @@ public class OutgoingCallFilterTests
             root, node.PublicKeyBytes,
             new[] { ClaimType.Capability },
             proofs: new[] { rootIdentity.Id.ToArray() },
-            resourcePattern: "scynapse:*",
+            resourcePattern: "scynapse.>",
             actionPattern: "*");
 
         // CCap issued by node (who received the delegation)
         var ccap = AssertionBuilder.CreateCapability(
             node, node.PublicKeyBytes,
-            "scynapse:grain/*", "*",
+            "scynapse.>", "*",
             proofs: new[] { delegation.Id.ToArray() });
 
         // Store CCap in wallet

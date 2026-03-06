@@ -52,7 +52,7 @@ public static class GrainSecurityExtensions
 
         resource ??= grainInterfaceType != null
             ? GrainResourceInference.FromGrainInterface(grainInterfaceType)
-            : "scynapse:grain/*";
+            : GrainResourceInference.WildcardAll;
 
         return AssertionBuilder.CreateCapability(
             nodeKeyPair, callerKey, resource, action,

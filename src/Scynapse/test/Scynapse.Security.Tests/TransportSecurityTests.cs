@@ -113,7 +113,7 @@ public class ScynapseRemoteCertificateValidatorTests
             root, node.PublicKeyBytes,
             new[] { ClaimType.Capability },
             proofs: new[] { rootIdentity.Id.ToArray() },
-            resourcePattern: "scynapse:*",
+            resourcePattern: "scynapse.>",
             actionPattern: "*");
 
         var store = new InMemoryAssertionStore();

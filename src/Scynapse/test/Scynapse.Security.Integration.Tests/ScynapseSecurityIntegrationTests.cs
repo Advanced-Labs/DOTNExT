@@ -86,7 +86,7 @@ internal static class TestSecuritySetup
     /// Returns everything needed as serialized strings for TestClusterBuilder.Properties.
     /// </summary>
     public static Dictionary<string, string> CreateTestHierarchy(
-        string ccapResource = "scynapse:grain/*",
+        string ccapResource = "scynapse.>",
         string ccapAction = "*",
         long? ccapExpiresAt = null)
     {
@@ -100,7 +100,7 @@ internal static class TestSecuritySetup
             orgKey, nodeKey.PublicKeyBytes,
             new[] { ClaimType.Capability, ClaimType.Delegation },
             new[] { orgIdentity.Id.ToArray() },
-            resourcePattern: "scynapse:*",
+            resourcePattern: "scynapse.>",
             actionPattern: "*");
 
         // Client key
@@ -109,7 +109,7 @@ internal static class TestSecuritySetup
             orgKey, clientKey.PublicKeyBytes,
             new[] { ClaimType.Capability },
             new[] { orgIdentity.Id.ToArray() },
-            resourcePattern: "scynapse:*",
+            resourcePattern: "scynapse.>",
             actionPattern: "*");
 
         // CCap for the client (issued by org, subject = client)
@@ -329,7 +329,7 @@ public class ScynapseSecurityIntegrationTests
         {
             // Create CCap with "read" action only, then try to call "write" method
             var props = TestSecuritySetup.CreateTestHierarchy(
-                ccapResource: "scynapse:grain/*",
+                ccapResource: "scynapse.>",
                 ccapAction: "read");
             var builder = new TestClusterBuilder(1)
                 .AddSiloBuilderConfigurator<SecuredSiloConfigurator>()

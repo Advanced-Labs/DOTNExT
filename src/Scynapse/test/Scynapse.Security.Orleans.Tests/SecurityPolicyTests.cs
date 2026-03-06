@@ -40,7 +40,7 @@ public class RequireCapabilityAttributeTests
     [Fact]
     public void Resource_CanBeExplicitlySet()
     {
-        var attr = new RequireCapabilityAttribute { Action = "read", Resource = "scynapse:data" };
-        Assert.Equal("scynapse:data", attr.Resource);
+        var attr = new RequireCapabilityAttribute { Action = "read", Resource = "scynapse.app.data" };
+        Assert.Equal("scynapse.app.data", attr.Resource);
     }
 }

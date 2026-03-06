@@ -28,7 +28,7 @@ public sealed class ScynapseOutgoingCallFilter : IOutgoingGrainCallFilter
         var grainInterfaceType = context.InterfaceMethod.DeclaringType;
         var resource = grainInterfaceType != null
             ? GrainResourceInference.FromGrainInterface(grainInterfaceType)
-            : "scynapse:grain/*";
+            : GrainResourceInference.WildcardAll;
 
         // Derive action from [RequireCapability] attribute or default to method name
         var reqCapAttr = context.InterfaceMethod

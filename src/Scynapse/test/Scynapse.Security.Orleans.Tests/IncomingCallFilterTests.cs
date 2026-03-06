@@ -28,7 +28,7 @@ public class IncomingCallFilterTests
             _root, _caller.PublicKeyBytes,
             new[] { ClaimType.Capability },
             proofs: new[] { _rootIdentity.Id.ToArray() },
-            resourcePattern: "scynapse:*",
+            resourcePattern: "scynapse.>",
             actionPattern: "*");
 
         _store = new InMemoryAssertionStore();
@@ -86,7 +86,7 @@ public class IncomingCallFilterTests
     [Fact]
     public async Task ValidCCap_Succeeds()
     {
-        var ccap = CreateCallerCCap("scynapse:grain/ISecureTestGrain", "read");
+        var ccap = CreateCallerCCap("scynapse.app.ISecureTestGrain", "read");
         await _store.StoreAsync(ccap);
 
         var filter = CreateFilter();
@@ -128,7 +128,7 @@ public class IncomingCallFilterTests
             .SetIssuer(_caller)
             .SetSubject(_caller.PublicKeyBytes)
             .SetClaim(ClaimType.Capability,
-                new CapabilityClaim("scynapse:grain/ISecureTestGrain", "read").Serialize())
+                new CapabilityClaim("scynapse.app.ISecureTestGrain", "read").Serialize())
             .SetScope(expiresAt: DateTimeOffset.UtcNow.AddHours(-1).ToUnixTimeSeconds())
             .AddProof(_delegation.Id.Span)
             .Build();
@@ -149,7 +149,7 @@ public class IncomingCallFilterTests
     public async Task WrongAction_Rejected()
     {
         // CCap grants "write" but method requires "read"
-        var ccap = CreateCallerCCap("scynapse:grain/ISecureTestGrain", "write");
+        var ccap = CreateCallerCCap("scynapse.app.ISecureTestGrain", "write");
         await _store.StoreAsync(ccap);
 
         var filter = CreateFilter();
@@ -181,7 +181,7 @@ public class IncomingCallFilterTests
     [Fact]
     public async Task BearerProofFailure_Rejected()
     {
-        var ccap = CreateCallerCCap("scynapse:grain/ISecureTestGrain", "read");
+        var ccap = CreateCallerCCap("scynapse.app.ISecureTestGrain", "read");
         await _store.StoreAsync(ccap);
 
         // Use a different key to sign the bearer proof (wrong key)
@@ -225,7 +225,7 @@ public class IncomingCallFilterTests
     public async Task MethodWithNoCapabilityAttr_AuthenticatedCallSucceeds()
     {
         // BasicActionAsync has no [RequireCapability] — any authenticated caller can call it
-        var ccap = CreateCallerCCap("scynapse:grain/IPartiallySecuredGrain", "anything");
+        var ccap = CreateCallerCCap("scynapse.app.IPartiallySecuredGrain", "anything");
         await _store.StoreAsync(ccap);
 
         var filter = CreateFilter();
