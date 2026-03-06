@@ -54,7 +54,7 @@ public static class VerifyCommand
         // Also store the assertion being verified
         store.StoreAsync(assertion).GetAwaiter().GetResult();
 
-        var verifier = new AssertionVerifier(store, new InMemoryNonceStore(), trustedRoots);
+        var verifier = new AssertionVerifier(store, new InMemoryNonceStore(), trustedRoots, new DefaultAttenuationChecker());
         var result = verifier.VerifyAsync(assertion).GetAwaiter().GetResult();
 
         if (result.IsValid)
@@ -63,7 +63,7 @@ public static class VerifyCommand
         }
         else
         {
-            AnsiConsole.MarkupLine("[red]INVALID[/] — {0}", result.FailureReason);
+            AnsiConsole.MarkupLine("[red]INVALID[/] — {0}", result.FailureReason ?? "Unknown failure");
         }
     }
 }

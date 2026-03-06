@@ -37,7 +37,7 @@ public static class InitUserCommand
         var delegationFile = Path.Combine(userDir, "user-delegation.assertion");
 
         SecurityConfigurationLoader.SaveSeed(seedFile, userKp, ScynapseKeyType.User);
-        SecurityConfigurationLoader.SavePublicKey(pubFile, userKp.PublicKeyBytes, ScynapseKeyType.User);
+        SecurityConfigurationLoader.SavePublicKey(pubFile, userKp.PublicKeyBytes.ToArray(), ScynapseKeyType.User);
 
         // Create delegation: org → user (limited to capability claims)
         var delegation = AssertionBuilder.CreateDelegation(

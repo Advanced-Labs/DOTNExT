@@ -166,8 +166,8 @@ internal class SecuredSiloConfigurator : IHostConfigurator
             {
                 NodeKeyPair = nodeKey,
                 TrustedRoots = { orgKey.PublicKeyBytes.ToArray() },
-                BootstrapAssertions = { orgIdentity, nodeDelegation },
-                PeerAssertions = { clientDelegation },
+                BootstrapAssertions = { orgIdentity, nodeDelegation, clientDelegation },
+                PeerAssertions = { },
                 RequireMutualTls = false,
                 // TLS disabled for TestCluster: in-process transport doesn't need encryption.
                 // TLS transport is tested separately in Scynapse.Connections.Security.Tests.

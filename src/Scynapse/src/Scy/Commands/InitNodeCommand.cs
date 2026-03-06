@@ -38,7 +38,7 @@ public static class InitNodeCommand
         var delegationFile = Path.Combine(nodeDir, "node-delegation.assertion");
 
         SecurityConfigurationLoader.SaveSeed(seedFile, nodeKp, ScynapseKeyType.Node);
-        SecurityConfigurationLoader.SavePublicKey(pubFile, nodeKp.PublicKeyBytes, ScynapseKeyType.Node);
+        SecurityConfigurationLoader.SavePublicKey(pubFile, nodeKp.PublicKeyBytes.ToArray(), ScynapseKeyType.Node);
 
         // Create delegation: org → node
         var delegation = AssertionBuilder.CreateDelegation(

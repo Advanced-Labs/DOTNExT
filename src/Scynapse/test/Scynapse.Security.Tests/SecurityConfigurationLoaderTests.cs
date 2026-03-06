@@ -45,7 +45,7 @@ public class SecurityConfigurationLoaderTests : IDisposable
         var kp = ScynapseKeyPair.Generate(ScynapseKeyType.Organization);
         var pubPath = Path.Combine(_tempDir, "keys", "org.pub");
 
-        SecurityConfigurationLoader.SavePublicKey(pubPath, kp.PublicKeyBytes, ScynapseKeyType.Organization);
+        SecurityConfigurationLoader.SavePublicKey(pubPath, kp.PublicKeyBytes.ToArray(), ScynapseKeyType.Organization);
         Assert.True(File.Exists(pubPath));
 
         var loaded = SecurityConfigurationLoader.LoadPublicKey(pubPath);
@@ -81,7 +81,7 @@ public class SecurityConfigurationLoaderTests : IDisposable
 
         // Save seed and public key
         SecurityConfigurationLoader.SaveSeed(Path.Combine(keysDir, "node.seed"), node, ScynapseKeyType.Node);
-        SecurityConfigurationLoader.SavePublicKey(Path.Combine(keysDir, "org.pub"), org.PublicKeyBytes, ScynapseKeyType.Organization);
+        SecurityConfigurationLoader.SavePublicKey(Path.Combine(keysDir, "org.pub"), org.PublicKeyBytes.ToArray(), ScynapseKeyType.Organization);
 
         // Save bootstrap assertion
         var orgIdentity = AssertionBuilder.CreateIdentity(org);
@@ -245,8 +245,8 @@ public class SecurityConfigurationLoaderTests : IDisposable
 
         var org1 = ScynapseKeyPair.Generate(ScynapseKeyType.Organization);
         var org2 = ScynapseKeyPair.Generate(ScynapseKeyType.Organization);
-        SecurityConfigurationLoader.SavePublicKey(Path.Combine(_tempDir, "org1.pub"), org1.PublicKeyBytes, ScynapseKeyType.Organization);
-        SecurityConfigurationLoader.SavePublicKey(Path.Combine(_tempDir, "org2.pub"), org2.PublicKeyBytes, ScynapseKeyType.Organization);
+        SecurityConfigurationLoader.SavePublicKey(Path.Combine(_tempDir, "org1.pub"), org1.PublicKeyBytes.ToArray(), ScynapseKeyType.Organization);
+        SecurityConfigurationLoader.SavePublicKey(Path.Combine(_tempDir, "org2.pub"), org2.PublicKeyBytes.ToArray(), ScynapseKeyType.Organization);
 
         var config = new SecurityConfigurationSection
         {

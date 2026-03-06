@@ -1,5 +1,3 @@
-using Scynapse.Security.Assertions;
-
 namespace Scynapse.Security.Orleans;
 
 /// <summary>
@@ -26,8 +24,9 @@ public interface ISecurityGatewayGrain : IGrainWithStringKey
     /// <summary>
     /// Request a specific capability for a resource/action pair.
     /// Returns null if the caller's identity doesn't authorize the requested capability.
+    /// Returns CBOR-serialized SignedAssertion bytes.
     /// </summary>
-    Task<SignedAssertion?> RequestCapabilityAsync(string resource, string action);
+    Task<byte[]?> RequestCapabilityAsync(string resource, string action);
 
     /// <summary>
     /// Refresh expiring CCaps. Returns new CCaps with extended validity.

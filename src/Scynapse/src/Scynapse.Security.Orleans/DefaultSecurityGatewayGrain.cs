@@ -80,7 +80,7 @@ public class DefaultSecurityGatewayGrain : Grain, ISecurityGatewayGrain
         return bundle;
     }
 
-    public Task<SignedAssertion?> RequestCapabilityAsync(string resource, string action)
+    public Task<byte[]?> RequestCapabilityAsync(string resource, string action)
     {
         var callerKey = GetVerifiedCallerKey();
         var expiresAt = DateTimeOffset.UtcNow.AddHours(1).ToUnixTimeSeconds();
@@ -91,7 +91,7 @@ public class DefaultSecurityGatewayGrain : Grain, ISecurityGatewayGrain
             resource, action,
             expiresAt: expiresAt);
 
-        return Task.FromResult<SignedAssertion?>(ccap);
+        return Task.FromResult<byte[]?>(ccap.Serialize());
     }
 
     public Task<CCapBundle> RefreshAsync(byte[] expiringCCapsCbor)

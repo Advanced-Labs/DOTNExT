@@ -25,7 +25,10 @@ public static class GrainSecurityExtensions
     /// Returns null if the call was unauthenticated or node-trusted.
     /// </summary>
     public static SignedAssertion? GetCallerCapability()
-        => RequestContext.Get(ScynapseSecurityConstants.VerifiedCCapKey) as SignedAssertion;
+    {
+        var bytes = RequestContext.Get(ScynapseSecurityConstants.VerifiedCCapKey) as byte[];
+        return bytes is not null ? SignedAssertion.Deserialize(bytes) : null;
+    }
 
     /// <summary>
     /// Get the original end-user's public key that initiated the call chain.

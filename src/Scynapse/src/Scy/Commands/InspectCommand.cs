@@ -56,8 +56,8 @@ public static class InspectCommand
         if (assertion.ExpiresAt.HasValue)
             table.AddRow("Expires At", DateTimeOffset.FromUnixTimeSeconds(assertion.ExpiresAt.Value).ToString("u"));
 
-        table.AddRow("Proofs", assertion.Proofs.Length.ToString());
-        for (int i = 0; i < assertion.Proofs.Length; i++)
+        table.AddRow("Proofs", assertion.Proofs.Count.ToString());
+        for (int i = 0; i < assertion.Proofs.Count; i++)
             table.AddRow($"  Proof[{i}]", TruncateHex(assertion.Proofs[i].Span));
 
         // Decode claim data based on type

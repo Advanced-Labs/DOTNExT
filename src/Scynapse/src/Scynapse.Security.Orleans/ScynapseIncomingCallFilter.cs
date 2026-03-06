@@ -101,7 +101,9 @@ public sealed class ScynapseIncomingCallFilter : IIncomingGrainCallFilter
         // Deserialize and verify the CCap
         var ccap = SignedAssertion.Deserialize(ccapBytes);
 
-        var verifier = new AssertionVerifier(_store, _nonceStore, _trustedRoots, _attenuationChecker);
+        // Use a fresh nonce store per verification — CCap presentations are reusable,
+        // so we must not flag the same CCap as "replay" across calls.
+        var verifier = new AssertionVerifier(_store, new InMemoryNonceStore(), _trustedRoots, _attenuationChecker);
         var result = await verifier.VerifyAsync(ccap);
         if (!result.IsValid)
         {
@@ -144,7 +146,7 @@ public sealed class ScynapseIncomingCallFilter : IIncomingGrainCallFilter
 
         // Set verified caller identity for grain code
         RequestContext.Set(ScynapseSecurityConstants.VerifiedCallerKeyKey, callerKey);
-        RequestContext.Set(ScynapseSecurityConstants.VerifiedCCapKey, ccap);
+        RequestContext.Set(ScynapseSecurityConstants.VerifiedCCapKey, ccapBytes);
 
         await context.Invoke();
     }

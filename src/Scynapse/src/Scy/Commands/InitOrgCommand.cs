@@ -24,7 +24,7 @@ public static class InitOrgCommand
         var identityPath = Path.Combine(dir, "org-identity.assertion");
 
         SecurityConfigurationLoader.SaveSeed(seedPath, orgKp, ScynapseKeyType.Organization);
-        SecurityConfigurationLoader.SavePublicKey(pubPath, orgKp.PublicKeyBytes, ScynapseKeyType.Organization);
+        SecurityConfigurationLoader.SavePublicKey(pubPath, orgKp.PublicKeyBytes.ToArray(), ScynapseKeyType.Organization);
 
         var identity = AssertionBuilder.CreateIdentity(orgKp);
         SecurityConfigurationLoader.SaveAssertion(identityPath, identity);
