@@ -405,6 +405,168 @@ public class ScynapseSecurityIntegrationTests
 }
 
 // ────────────────────────────────────────────────────────
+// Cross-silo test grain interfaces and implementations
+// ────────────────────────────────────────────────────────
+
+[SecurityPolicy(RequiresAuthentication = true)]
+public interface IFrontGrain : IGrainWithStringKey
+{
+    [RequireCapability(Action = "read")]
+    Task<string> CallBackend(string backendId);
+}
+
+[SecurityPolicy(RequiresAuthentication = true)]
+public interface IBackendGrain : IGrainWithStringKey
+{
+    [RequireCapability(Action = "read")]
+    Task<string> GetValue();
+}
+
+public class FrontGrain : Grain, IFrontGrain
+{
+    public async Task<string> CallBackend(string backendId)
+    {
+        // Grain-to-grain call: front → backend. This tests node trust propagation
+        // and CCap flow across silos.
+        var backend = GrainFactory.GetGrain<IBackendGrain>(backendId);
+        return await backend.GetValue();
+    }
+}
+
+public class BackendGrain : Grain, IBackendGrain
+{
+    public Task<string> GetValue() => Task.FromResult("backend-response");
+}
+
+// ────────────────────────────────────────────────────────
+// Cross-silo integration tests
+// ────────────────────────────────────────────────────────
+
+[Trait("Category", "BVT")]
+public class ScynapseSecurityCrossSiloTests
+{
+    /// <summary>
+    /// Cross-silo grain-to-grain call with CCap propagation.
+    /// Client → FrontGrain (silo-1) → BackendGrain (silo-2).
+    /// Tests that node trust allows the grain-to-grain hop and
+    /// the client's CCap is verified on the first hop.
+    /// </summary>
+    [Fact]
+    public async Task CrossSilo_GrainToGrain_WithNodeTrust_Succeeds()
+    {
+        TestCluster? testCluster = null;
+        try
+        {
+            var props = TestSecuritySetup.CreateTestHierarchy();
+            var builder = new TestClusterBuilder(2)
+                .AddSiloBuilderConfigurator<SecuredSiloConfigurator>()
+                .AddClientBuilderConfigurator<SecuredClientConfigurator>();
+
+            foreach (var kv in props)
+                builder.Properties[kv.Key] = kv.Value;
+
+            testCluster = builder.Build();
+            await testCluster.DeployAsync();
+
+            // Call front grain which calls backend grain (potentially on another silo)
+            var grain = testCluster.Client.GetGrain<IFrontGrain>("front-1");
+            var result = await grain.CallBackend("backend-1");
+            Assert.Equal("backend-response", result);
+        }
+        finally
+        {
+            if (testCluster != null)
+            {
+                await testCluster.StopAllSilosAsync();
+                testCluster.Dispose();
+            }
+        }
+    }
+
+    /// <summary>
+    /// Multiple cross-silo calls to different backend grains succeed.
+    /// </summary>
+    [Fact]
+    public async Task CrossSilo_MultipleCalls_AllSucceed()
+    {
+        TestCluster? testCluster = null;
+        try
+        {
+            var props = TestSecuritySetup.CreateTestHierarchy();
+            var builder = new TestClusterBuilder(2)
+                .AddSiloBuilderConfigurator<SecuredSiloConfigurator>()
+                .AddClientBuilderConfigurator<SecuredClientConfigurator>();
+
+            foreach (var kv in props)
+                builder.Properties[kv.Key] = kv.Value;
+
+            testCluster = builder.Build();
+            await testCluster.DeployAsync();
+
+            // Call multiple grains — some will land on silo 1, some on silo 2
+            var tasks = new List<Task<string>>();
+            for (int i = 0; i < 10; i++)
+            {
+                var grain = testCluster.Client.GetGrain<IFrontGrain>($"front-{i}");
+                tasks.Add(grain.CallBackend($"backend-{i}"));
+            }
+
+            var results = await Task.WhenAll(tasks);
+            Assert.All(results, r => Assert.Equal("backend-response", r));
+        }
+        finally
+        {
+            if (testCluster != null)
+            {
+                await testCluster.StopAllSilosAsync();
+                testCluster.Dispose();
+            }
+        }
+    }
+
+    /// <summary>
+    /// Cross-silo anonymous grain call works without CCap.
+    /// </summary>
+    [Fact]
+    public async Task CrossSilo_AnonymousGrain_WorksWithoutCCap()
+    {
+        TestCluster? testCluster = null;
+        try
+        {
+            var props = TestSecuritySetup.CreateTestHierarchy();
+            var builder = new TestClusterBuilder(2)
+                .AddSiloBuilderConfigurator<SecuredSiloConfigurator>()
+                .AddClientBuilderConfigurator<SecuredClientConfigurator>();
+
+            foreach (var kv in props)
+                builder.Properties[kv.Key] = kv.Value;
+
+            testCluster = builder.Build();
+            await testCluster.DeployAsync();
+
+            // Multiple open grain calls to distribute across silos
+            var tasks = new List<Task<string>>();
+            for (int i = 0; i < 10; i++)
+            {
+                var grain = testCluster.Client.GetGrain<IOpenGrain>($"open-{i}");
+                tasks.Add(grain.Hello());
+            }
+
+            var results = await Task.WhenAll(tasks);
+            Assert.All(results, r => Assert.Equal("hello", r));
+        }
+        finally
+        {
+            if (testCluster != null)
+            {
+                await testCluster.StopAllSilosAsync();
+                testCluster.Dispose();
+            }
+        }
+    }
+}
+
+// ────────────────────────────────────────────────────────
 // Client-only configurator (no security) for negative tests
 // ────────────────────────────────────────────────────────
 
