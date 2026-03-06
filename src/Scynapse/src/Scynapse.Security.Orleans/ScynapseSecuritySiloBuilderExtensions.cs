@@ -70,8 +70,10 @@ public static class ScynapseSecuritySiloBuilderExtensions
         builder.Services.AddSingleton<IAttenuationChecker, DefaultAttenuationChecker>();
         builder.Services.AddSingleton<ICCapWallet, InMemoryCCapWallet>();
 
-        // Register grain security policy provider
-        builder.Services.AddSingleton<IGrainSecurityPolicyProvider, AttributeBasedPolicyProvider>();
+        // Register grain security policy provider with system grain protections
+        var policyProvider = new AttributeBasedPolicyProvider();
+        RegisterSystemGrainPolicies(policyProvider);
+        builder.Services.AddSingleton<IGrainSecurityPolicyProvider>(policyProvider);
 
         // Build trusted node keys set: this node + all peer assertion subjects
         var trustedNodeKeys = new HashSet<ReadOnlyMemory<byte>>(ByteMemoryEqualityComparer.Instance)
@@ -140,5 +142,24 @@ public static class ScynapseSecuritySiloBuilderExtensions
         }
 
         return builder;
+    }
+
+    /// <summary>
+    /// Registers security policies for system grains that cannot carry [SecurityPolicy]
+    /// attributes because they live in projects that don't reference Scynapse.Security.Orleans.
+    /// </summary>
+    private static void RegisterSystemGrainPolicies(AttributeBasedPolicyProvider provider)
+    {
+        // IGrainTypeDirectoryGrain — exposes deployment topology.
+        // Require authentication for read operations; admin CCap for writes.
+        var gtdType = Type.GetType("Scynapse.DynamicGrains.IGrainTypeDirectoryGrain, Scynapse.Core.Abstractions");
+        if (gtdType is not null)
+        {
+            provider.RegisterPolicy(gtdType, new GrainSecurityPolicy
+            {
+                RequiresAuthentication = true,
+                RequiresCallerCapability = false, // node trust sufficient for silo-to-silo
+            });
+        }
     }
 }
