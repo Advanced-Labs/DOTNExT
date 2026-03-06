@@ -873,4 +873,134 @@ When two independent Scynapse domains federate, what are the mutual obligations?
 
 ---
 
+## Part XII: Phase 1 Orleans Paradigm -- Gap Analysis and Design Decisions
+
+**Added:** 2026-03-06 (v0.2.1)
+**Context:** After implementation of Layers 0-4 and the Phase 1 review, this section documents the gaps identified when simulating all Orleans-paradigm workflows against the security model, the design options considered, and the decisions made.
+
+### 12.1 The Grain-to-Grain Call Security Problem
+
+**The problem:** When grain A calls grain B during processing of a client request, what identity and capability does grain A present to grain B?
+
+This is the most architecturally significant gap in Phase 1. The existing outgoing call filter attaches whatever CCap is in the wallet, which for intra-silo grain calls means the node's broad delegation. This is **ambient authority** -- exactly what capability-based security is designed to prevent.
+
+**Options considered:**
+
+| Option | Description | Pros | Cons |
+|--------|-------------|------|------|
+| **E1: Forward original CCap** | Grain B sees the end-user's CCap | True capability model | User must hold CCaps for all transitive grains |
+| **E2: Node ambient authority** | Grain B sees the node identity | Simple, works today | Violates capability principle |
+| **E3: Dual-Identity** | Both original caller AND node identity propagated | Flexible, per-grain policy | More complex policy model |
+| **E4: Explicit CCap acquisition** | Grain A requests scoped CCap from coordinator | Minimum privilege, auditable | Extra round trip, hot singleton |
+
+**Decision: E3 (Dual-Identity Model).** Grain calls carry two identities via `RequestContext`:
+- `Scynapse.OriginalCallerKey` -- the end-user who initiated the call chain
+- `Scynapse.ActingNodeKey` -- the silo processing the current hop
+
+The receiving grain's `[SecurityPolicy]` determines which to verify:
+- `EnforceOriginalCaller = false` (default): trust the node identity (suitable for infrastructure grains)
+- `EnforceOriginalCaller = true`: verify the original caller's CCap covers this grain (suitable for user-facing sensitive grains)
+
+**Why this preserves the architecture's invariants:**
+- Invariant 3 (Component trust boundary): The grain type controls its own verification policy
+- Invariant 7 (CCaps are challengeable): Both identities are verifiable
+- Plasticity: Phase 2 Components can define richer policies using the same two-identity mechanism
+
+### 12.2 TLS Transport Verification Resolution
+
+**The problem:** The TLS `RemoteCertificateValidation` callback is async-hostile. The assertion store lookup is async. Using `AllowAnyRemoteCertificate()` bypasses transport-level identity verification.
+
+**Decision: Pre-validated peer cache.** During silo startup (`ScynapseSecurityLifecycleParticipant`), validate all peer assertions from `PeerAssertions` and `PeerAssertionDirectory` config. Cache validated public keys in a `HashSet<byte[]>`. The TLS callback performs a synchronous hash set lookup -- no async needed.
+
+**Security properties preserved:**
+- Rogue nodes without valid delegation chains are rejected at TLS level
+- Legitimate peer identity is verified against the org trust root
+- The call filter remains the capability enforcement point (TLS provides identity + confidentiality, call filter provides authorization)
+
+### 12.3 Operational Tooling: Scy.exe
+
+**Decision:** A standalone CLI tool named `Scy` (published as `dotnet tool install Scy`) handles all operational security tasks: key generation, assertion issuance, inspection, verification, configuration bundling, interactive setup, and key rotation.
+
+**Technology:** `Spectre.Console` for TUI rendering, `Spectre.Console.Cli` or `System.CommandLine` for command routing. References `Scynapse.Security` core (no Orleans dependency).
+
+**Command tree:**
+```
+scy keygen       -- Generate Ed25519 keypairs
+scy identity     -- Create self-signed identity assertions
+scy delegate     -- Create delegation assertions
+scy issue-ccap   -- Issue capability assertions
+scy revoke       -- Create revocation assertions
+scy inspect      -- Human-readable dump of assertions/keys
+scy verify       -- Verify assertion chains
+scy bundle       -- Create deployment bundles
+scy init         -- Interactive setup wizard (org, silo, client, dev)
+scy rotate       -- Key rotation workflow
+scy status       -- Query running silo security status
+```
+
+**File formats:**
+- `.seed` files: Base32-encoded Ed25519 seeds with key-type prefix
+- `.assertion` files: CBOR-encoded `SignedAssertion` objects (binary, same as wire format)
+- Both inspectable via `scy inspect`
+
+This tool fills the gap between the cryptographic primitives (Layer 0-2) and the runtime integration (Layer 4). Without it, the security system requires C# code for every operational task.
+
+### 12.4 Configuration Loading
+
+**Decision:** `IConfiguration` integration allowing `UseScynapseSecurity()` to accept a configuration section:
+
+```csharp
+builder.UseScynapseSecurity(config.GetSection("Scynapse:Security"));
+```
+
+Configuration keys: `NodeSeedFile`, `NodeSeedEnvironmentVariable`, `TrustedRoots[]`, `BootstrapAssertionFiles[]`, `PeerAssertionFiles[]`, `PeerAssertionDirectory`, `BootstrapCapabilityFiles[]`, `EnableTls`, `RequireMutualTls`, `DevelopmentMode`.
+
+Seeds can be loaded from files or environment variables. Assertion files are CBOR-encoded `.assertion` files (created by Scy.exe). This bridges the gap between Scy.exe's output and the runtime's input.
+
+### 12.5 Development Mode
+
+**Decision:** A `DevelopmentMode` flag that auto-generates all security infrastructure with broad permissions. Essential for developer adoption. Must log prominent warnings and must never be used in production.
+
+When `DevelopmentMode = true`:
+- Auto-generates org key, node key, delegation chain
+- Creates broad CCap (all resources, all actions)
+- Trusts all cluster members automatically
+- Disables TLS requirement
+- Logs: `WARNING: Scynapse Security running in DEVELOPMENT MODE. All keys are auto-generated and ephemeral. Do NOT use in production.`
+
+### 12.6 Scynapse Feature Integration Assessment
+
+| Feature | Call Filter Coverage | Phase 1 Action |
+|---------|---------------------|----------------|
+| Standard grain calls | Full | Already working |
+| StateTask properties | Full (generated Get/Set methods are grain calls) | No action needed |
+| Dynamic Grain Access | Full (uses IGrainFactory internally) | Extend GrainResourceInference for dynamic types |
+| Plugin grain loading | Full for grain calls; no package integrity verification | Document; package signing is Phase 2 |
+| Orleans Streams (SMS) | Partial (subscriptions bypass call filters) | Document as Phase 2; streams are intra-cluster infrastructure |
+| Grain Observers | Partial (observer registrations are grain calls; callbacks bypass filters) | Document as Phase 2 |
+| Grain Timers/Reminders | Not applicable (silo-internal scheduling) | No action needed |
+
+### 12.7 Error Reporting
+
+**Decision:** Add structured `SecurityFailureCode` enum to `ScynapseSecurityException` and `ILogger` injection to call filters. Security failures must be diagnosable by operators without source code access.
+
+Error codes: MissingAuthentication, InvalidSignature, ExpiredAssertion, RevokedAssertion, InsufficientCapability, WrongAction, WrongResource, BearerProofFailed, ChainVerificationFailed, UntrustedRoot, ReplayDetected, MaxDepthExceeded.
+
+### 12.8 Workflow Validation Summary
+
+All Orleans-paradigm workflows were simulated against the security design (detailed simulations in `scynapse-security-implementation-guide-v2_1.md`):
+
+| Workflow | Status | Key Dependencies |
+|----------|--------|-----------------|
+| Organization bootstrap | Complete | Scy.exe `init --org` + `init --silo` |
+| Grain developer (writing secured grains) | Complete | `[SecurityPolicy]` + `[RequireCapability]` attributes |
+| Grain developer (Scynapse features) | Complete | StateTask, Dynamic Grains go through call filters |
+| External client application | Complete | `UseScynapseSecurity()` + config loading + wallet |
+| Silo-to-silo communication | Complete | Peer assertions + pre-validated cache + Dual-Identity |
+| Development mode (quick start) | Complete | DevelopmentMode flag |
+| Key rotation | Complete (requires rolling restart) | Scy.exe `rotate` |
+| Runtime CCap issuance/revocation | Complete | `IssueCCapToCaller()` + assertion store |
+
+---
+
 *Living document. Revisions expected as Component Model, CNS, and federation story evolve.*
