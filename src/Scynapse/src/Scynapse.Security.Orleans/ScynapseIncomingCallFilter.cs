@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Logging;
 using Scynapse.Runtime;
 using Scynapse.Security;
 using Scynapse.Security.Assertions;
@@ -23,6 +24,7 @@ public sealed class ScynapseIncomingCallFilter : IIncomingGrainCallFilter
     private readonly IGrainSecurityPolicyProvider _policyProvider;
     private readonly IAttenuationChecker _attenuationChecker;
     private readonly IReadOnlySet<ReadOnlyMemory<byte>> _trustedNodeKeys;
+    private readonly ILogger? _logger;
 
     public ScynapseIncomingCallFilter(
         IAssertionStore store,
@@ -30,7 +32,8 @@ public sealed class ScynapseIncomingCallFilter : IIncomingGrainCallFilter
         IReadOnlySet<ReadOnlyMemory<byte>> trustedRoots,
         IGrainSecurityPolicyProvider policyProvider,
         IAttenuationChecker? attenuationChecker = null,
-        IReadOnlySet<ReadOnlyMemory<byte>>? trustedNodeKeys = null)
+        IReadOnlySet<ReadOnlyMemory<byte>>? trustedNodeKeys = null,
+        ILogger<ScynapseIncomingCallFilter>? logger = null)
     {
         _store = store;
         _nonceStore = nonceStore;
@@ -39,6 +42,7 @@ public sealed class ScynapseIncomingCallFilter : IIncomingGrainCallFilter
         _attenuationChecker = attenuationChecker ?? new DefaultAttenuationChecker();
         _trustedNodeKeys = trustedNodeKeys
             ?? new HashSet<ReadOnlyMemory<byte>>(ByteMemoryEqualityComparer.Instance);
+        _logger = logger;
     }
 
     public async Task Invoke(IIncomingGrainCallContext context)
@@ -65,7 +69,13 @@ public sealed class ScynapseIncomingCallFilter : IIncomingGrainCallFilter
         var bearerProof = RequestContext.Get(ScynapseSecurityConstants.BearerProofKey) as byte[];
 
         if (callerKey is null)
-            throw new ScynapseSecurityException("Authentication required");
+        {
+            _logger?.LogWarning("Security: {FailureCode} on {GrainType}.{Method} — no caller key",
+                SecurityFailureCode.MissingAuthentication,
+                grainInterfaceType.Name, context.InterfaceMethod.Name);
+            throw new ScynapseSecurityException("Authentication required",
+                SecurityFailureCode.MissingAuthentication);
+        }
 
         // HYBRID MODEL: Check if caller is a trusted node (valid delegation chain).
         // If yes, and grain doesn't require caller capability (strict mode), allow.
@@ -80,7 +90,13 @@ public sealed class ScynapseIncomingCallFilter : IIncomingGrainCallFilter
 
         // Not a trusted node, or grain requires caller capability — full CCap verification.
         if (ccapBytes is null)
-            throw new ScynapseSecurityException("Authentication required");
+        {
+            _logger?.LogWarning("Security: {FailureCode} on {GrainType}.{Method} — no CCap presented",
+                SecurityFailureCode.MissingCapability,
+                grainInterfaceType.Name, context.InterfaceMethod.Name);
+            throw new ScynapseSecurityException("Authentication required",
+                SecurityFailureCode.MissingCapability);
+        }
 
         // Deserialize and verify the CCap
         var ccap = SignedAssertion.Deserialize(ccapBytes);
@@ -88,11 +104,23 @@ public sealed class ScynapseIncomingCallFilter : IIncomingGrainCallFilter
         var verifier = new AssertionVerifier(_store, _nonceStore, _trustedRoots, _attenuationChecker);
         var result = await verifier.VerifyAsync(ccap);
         if (!result.IsValid)
-            throw new ScynapseSecurityException($"Invalid CCap: {result.FailureReason}");
+        {
+            _logger?.LogWarning("Security: {FailureCode} on {GrainType}.{Method} — {Reason}",
+                SecurityFailureCode.ChainVerificationFailed,
+                grainInterfaceType.Name, context.InterfaceMethod.Name, result.FailureReason);
+            throw new ScynapseSecurityException($"Invalid CCap: {result.FailureReason}",
+                SecurityFailureCode.ChainVerificationFailed);
+        }
 
         // Verify bearer proof: caller must prove they own the CCap's subject key
         if (bearerProof is null || !VerifyBearerProof(ccap, callerKey, bearerProof))
-            throw new ScynapseSecurityException("Bearer verification failed");
+        {
+            _logger?.LogWarning("Security: {FailureCode} on {GrainType}.{Method}",
+                SecurityFailureCode.BearerVerificationFailed,
+                grainInterfaceType.Name, context.InterfaceMethod.Name);
+            throw new ScynapseSecurityException("Bearer verification failed",
+                SecurityFailureCode.BearerVerificationFailed);
+        }
 
         // Check action/resource match if the method requires a specific capability
         var requiredAction = _policyProvider.GetRequiredAction(context.InterfaceMethod);
@@ -105,7 +133,12 @@ public sealed class ScynapseIncomingCallFilter : IIncomingGrainCallFilter
             if (!ActionMatches(claim.Action, requiredAction) ||
                 !ResourceMatches(claim.Resource, requiredResource))
             {
-                throw new ScynapseSecurityException("Insufficient capability");
+                _logger?.LogWarning("Security: {FailureCode} on {GrainType}.{Method} — needed {RequiredAction}:{RequiredResource}, had {GrantedAction}:{GrantedResource}",
+                    SecurityFailureCode.InsufficientCapability,
+                    grainInterfaceType.Name, context.InterfaceMethod.Name,
+                    requiredAction, requiredResource, claim.Action, claim.Resource);
+                throw new ScynapseSecurityException("Insufficient capability",
+                    SecurityFailureCode.InsufficientCapability);
             }
         }
 

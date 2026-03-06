@@ -92,9 +92,10 @@ public static class ScynapseSecuritySiloBuilderExtensions
             var nonceStore = sp.GetRequiredService<INonceStore>();
             var policyProvider = sp.GetRequiredService<IGrainSecurityPolicyProvider>();
             var attenuationChecker = sp.GetRequiredService<IAttenuationChecker>();
+            var logger = sp.GetService<Microsoft.Extensions.Logging.ILogger<ScynapseIncomingCallFilter>>();
             return new ScynapseIncomingCallFilter(
                 store, nonceStore, options.TrustedRoots, policyProvider,
-                attenuationChecker, trustedNodeKeys);
+                attenuationChecker, trustedNodeKeys, logger);
         });
 
         builder.Services.AddSingleton<IOutgoingGrainCallFilter>(sp =>
