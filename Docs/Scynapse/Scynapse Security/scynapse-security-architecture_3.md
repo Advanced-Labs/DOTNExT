@@ -975,8 +975,10 @@ When `DevelopmentMode = true`:
 | Standard grain calls | Full | Already working |
 | StateTask properties | Full (generated Get/Set methods are grain calls) | No action needed |
 | Dynamic Grain Access | Full (uses IGrainFactory internally) | Extend GrainResourceInference for dynamic types |
-| Plugin grain loading | Full for grain calls; no package integrity verification | Document; package signing is Phase 2 |
-| Orleans Streams (SMS) | Partial (subscriptions bypass call filters) | Document as Phase 2; streams are intra-cluster infrastructure |
+| Plugin grain loading | Full for grain calls; **NO access control on loader itself** | **PHASE 1 REQUIRED:** Protect `IPluginGrainLoader` with `[SecurityPolicy]` |
+| GTD enumeration | Full (grain calls) but **open by default** | **PHASE 1 REQUIRED:** Add auth to `IGrainTypeDirectoryGrain` |
+| Async+ persistence | State serialized via reflection, no encryption at rest | Document as Phase 2; intra-cluster infrastructure |
+| Orleans Streams (SMS) | Partial (subscriptions bypass call filters) | Document as Phase 2; intra-cluster infrastructure |
 | Grain Observers | Partial (observer registrations are grain calls; callbacks bypass filters) | Document as Phase 2 |
 | Grain Timers/Reminders | Not applicable (silo-internal scheduling) | No action needed |
 

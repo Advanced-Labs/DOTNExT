@@ -446,9 +446,23 @@ Pros: Minimum privilege, fully auditable. Cons: Extra round trip per call chain.
 - Stream subscriptions create implicit grain observers. These go through the normal Orleans messaging pipeline but bypass grain call filters (they're handled by the stream infrastructure)
 - **Action for Phase 1:** Document that stream security is a Phase 2 concern. Streams in Phase 1 are intra-cluster infrastructure (same trust domain as node identity)
 
-**Plugin Grain Loading:**
-- Dynamically loaded assemblies can contain any grain types with any security attributes
-- **Action for Phase 1:** Document that plugin grain security follows the same attribute-based model. Dynamically loaded grains with `[SecurityPolicy]` are enforced identically to statically loaded grains. Package signing/verification is a Phase 2 concern.
+**Plugin Grain Loading -- CRITICAL FINDING:**
+- `IPluginGrainLoader.LoadGrainAssemblyAsync()` is registered in default silo services with **NO access control**. Any code running in the silo can load arbitrary assemblies. This is a major attack surface.
+- The `AssemblyValidator` only checks that Orleans codegen exists -- no assembly signature or content validation.
+- Plugin serializers are registered via reflection into `CodecProvider.ConsumeMetadata` (internal API). Malicious serializers could manipulate deserialization.
+- Once loaded, plugin grains with `[SecurityPolicy]` ARE enforced identically to static grains (call filters work).
+- **Action for Phase 1:** Protect `IPluginGrainLoader` behind `[SecurityPolicy(RequiresAuthentication = true)]` + `[RequireCapability(Action = "admin")]`. This is a Phase 1 requirement because the loader is an attack vector even without external network access. Package signing/content verification is Phase 2.
+
+**Grain Type Directory (GTD) Enumeration:**
+- The GTD singleton (`IGrainTypeDirectoryGrain`) exposes `GetAllGrainTypesAsync()`, `FindGrainTypesAsync()` etc. with no access control
+- This leaks deployment topology (hosting silos), method signatures, type names
+- **Action for Phase 1:** Annotate `IGrainTypeDirectoryGrain` with `[SecurityPolicy(RequiresAuthentication = true)]` to prevent anonymous enumeration. Read access can use a low-privilege CCap; write access (RegisterPackage) requires admin CCap.
+
+**Async+ Persistence Security:**
+- Persisted checkpoints include full async state machine serialization (all local variables via reflection)
+- State is keyed by WorkflowId only -- no access control prevents cross-workflow state reads
+- State stored unencrypted in persistence store (RavenDB)
+- **Action for Phase 1:** Document as known limitation. Encryption at rest and workflow isolation are Phase 2 concerns. For Phase 1, Async+ persistence is intra-cluster infrastructure (same trust domain).
 
 ### Gap G Options: Assertion Persistence
 
