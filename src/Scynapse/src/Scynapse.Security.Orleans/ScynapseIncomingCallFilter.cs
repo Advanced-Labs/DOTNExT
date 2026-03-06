@@ -22,19 +22,23 @@ public sealed class ScynapseIncomingCallFilter : IIncomingGrainCallFilter
     private readonly IReadOnlySet<ReadOnlyMemory<byte>> _trustedRoots;
     private readonly IGrainSecurityPolicyProvider _policyProvider;
     private readonly IAttenuationChecker _attenuationChecker;
+    private readonly IReadOnlySet<ReadOnlyMemory<byte>> _trustedNodeKeys;
 
     public ScynapseIncomingCallFilter(
         IAssertionStore store,
         INonceStore nonceStore,
         IReadOnlySet<ReadOnlyMemory<byte>> trustedRoots,
         IGrainSecurityPolicyProvider policyProvider,
-        IAttenuationChecker? attenuationChecker = null)
+        IAttenuationChecker? attenuationChecker = null,
+        IReadOnlySet<ReadOnlyMemory<byte>>? trustedNodeKeys = null)
     {
         _store = store;
         _nonceStore = nonceStore;
         _trustedRoots = trustedRoots;
         _policyProvider = policyProvider;
         _attenuationChecker = attenuationChecker ?? new DefaultAttenuationChecker();
+        _trustedNodeKeys = trustedNodeKeys
+            ?? new HashSet<ReadOnlyMemory<byte>>(ByteMemoryEqualityComparer.Instance);
     }
 
     public async Task Invoke(IIncomingGrainCallContext context)
@@ -60,7 +64,22 @@ public sealed class ScynapseIncomingCallFilter : IIncomingGrainCallFilter
         var ccapBytes = RequestContext.Get(ScynapseSecurityConstants.CCapKey) as byte[];
         var bearerProof = RequestContext.Get(ScynapseSecurityConstants.BearerProofKey) as byte[];
 
-        if (callerKey is null || ccapBytes is null)
+        if (callerKey is null)
+            throw new ScynapseSecurityException("Authentication required");
+
+        // HYBRID MODEL: Check if caller is a trusted node (valid delegation chain).
+        // If yes, and grain doesn't require caller capability (strict mode), allow.
+        if (!policy.RequiresCallerCapability && IsTrustedNode(callerKey))
+        {
+            // Node-trusted call — allowed without CCap verification.
+            // Set verified identity for grain code.
+            RequestContext.Set(ScynapseSecurityConstants.VerifiedCallerKeyKey, callerKey);
+            await context.Invoke();
+            return;
+        }
+
+        // Not a trusted node, or grain requires caller capability — full CCap verification.
+        if (ccapBytes is null)
             throw new ScynapseSecurityException("Authentication required");
 
         // Deserialize and verify the CCap
@@ -95,6 +114,11 @@ public sealed class ScynapseIncomingCallFilter : IIncomingGrainCallFilter
         RequestContext.Set(ScynapseSecurityConstants.VerifiedCCapKey, ccap);
 
         await context.Invoke();
+    }
+
+    private bool IsTrustedNode(byte[] callerKey)
+    {
+        return _trustedNodeKeys.Contains(callerKey);
     }
 
     private static bool VerifyBearerProof(SignedAssertion ccap, byte[] callerKey, byte[] proof)

@@ -23,6 +23,7 @@ public sealed class AttributeBasedPolicyProvider : IGrainSecurityPolicyProvider
             {
                 RequiresAuthentication = attr.RequiresAuthentication,
                 AllowAnonymous = attr.AllowAnonymous,
+                RequiresCallerCapability = attr.RequiresCallerCapability,
             };
         });
     }

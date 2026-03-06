@@ -12,4 +12,5 @@ public sealed class GrainSecurityPolicy
 
     public bool RequiresAuthentication { get; init; }
     public bool AllowAnonymous { get; init; }
+    public bool RequiresCallerCapability { get; init; }
 }

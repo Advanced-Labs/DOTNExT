@@ -37,6 +37,18 @@ public static class ScynapseSecuritySiloBuilderExtensions
         // Register grain security policy provider
         builder.Services.AddSingleton<IGrainSecurityPolicyProvider, AttributeBasedPolicyProvider>();
 
+        // Build trusted node keys set: this node + all peer assertion subjects
+        var trustedNodeKeys = new HashSet<ReadOnlyMemory<byte>>(ByteMemoryEqualityComparer.Instance)
+        {
+            options.NodeKeyPair.PublicKeyBytes.ToArray()
+        };
+        foreach (var peer in options.PeerAssertions)
+        {
+            // Peer delegation assertions have the node key as subject
+            if (peer.ClaimType == ClaimType.Delegation)
+                trustedNodeKeys.Add(peer.Subject.ToArray());
+        }
+
         // Register grain call filters
         builder.Services.AddSingleton<IIncomingGrainCallFilter>(sp =>
         {
@@ -44,7 +56,9 @@ public static class ScynapseSecuritySiloBuilderExtensions
             var nonceStore = sp.GetRequiredService<INonceStore>();
             var policyProvider = sp.GetRequiredService<IGrainSecurityPolicyProvider>();
             var attenuationChecker = sp.GetRequiredService<IAttenuationChecker>();
-            return new ScynapseIncomingCallFilter(store, nonceStore, options.TrustedRoots, policyProvider, attenuationChecker);
+            return new ScynapseIncomingCallFilter(
+                store, nonceStore, options.TrustedRoots, policyProvider,
+                attenuationChecker, trustedNodeKeys);
         });
 
         builder.Services.AddSingleton<IOutgoingGrainCallFilter>(sp =>

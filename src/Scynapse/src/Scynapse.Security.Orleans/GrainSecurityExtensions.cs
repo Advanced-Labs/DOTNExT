@@ -22,10 +22,18 @@ public static class GrainSecurityExtensions
 
     /// <summary>
     /// Get the verified CCap that authorized this call.
-    /// Returns null if the call was unauthenticated.
+    /// Returns null if the call was unauthenticated or node-trusted.
     /// </summary>
     public static SignedAssertion? GetCallerCapability()
         => RequestContext.Get(ScynapseSecurityConstants.VerifiedCCapKey) as SignedAssertion;
+
+    /// <summary>
+    /// Get the original end-user's public key that initiated the call chain.
+    /// Propagated through grain-to-grain calls via RequestContext.
+    /// Returns null if no original caller was set (e.g., direct silo call).
+    /// </summary>
+    public static byte[]? GetOriginalCallerPublicKey()
+        => RequestContext.Get(ScynapseSecurityConstants.OriginalCallerKeyKey) as byte[];
 
     /// <summary>
     /// Issue a CCap to the authenticated caller, granting them a specific action
