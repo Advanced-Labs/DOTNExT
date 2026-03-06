@@ -33,6 +33,18 @@ public static class ScynapseSecurityClientBuilderExtensions
         return builder.UseScynapseSecurity(options, configureServices);
     }
     /// <summary>
+    /// Configure the client with auto-generated development mode security.
+    /// WARNING: Not for production use.
+    /// </summary>
+    public static IClientBuilder UseScynapseSecurityDevelopmentMode(
+        this IClientBuilder builder,
+        Action<IServiceCollection>? configureServices = null)
+    {
+        var options = DevelopmentModeHelper.CreateDevelopmentOptions();
+        return builder.UseScynapseSecurity(options, configureServices);
+    }
+
+    /// <summary>
     /// Configure the client for Scynapse capability-based security.
     /// Sets up TLS to silo gateway, CCap wallet, and outgoing call filter.
     /// </summary>

@@ -32,6 +32,25 @@ public static class ScynapseSecuritySiloBuilderExtensions
         return builder.UseScynapseSecurity(options, configureServices);
     }
     /// <summary>
+    /// Configure the silo with auto-generated development mode security.
+    /// Generates org key, node key, delegation, and wildcard CCap automatically.
+    /// WARNING: Not for production use. Logs a warning on every startup.
+    /// </summary>
+    public static ISiloBuilder UseScynapseSecurityDevelopmentMode(
+        this ISiloBuilder builder,
+        Action<IServiceCollection>? configureServices = null)
+    {
+        var options = DevelopmentModeHelper.CreateDevelopmentOptions();
+
+        builder.Services.AddSingleton<ILifecycleParticipant<Scynapse.Runtime.ISiloLifecycle>>(sp =>
+        {
+            return new DevelopmentModeWarningParticipant();
+        });
+
+        return builder.UseScynapseSecurity(options, configureServices);
+    }
+
+    /// <summary>
     /// Configure the silo for Scynapse capability-based security.
     /// Sets up mTLS with Ed25519 identities, assertion verification,
     /// grain call filters, and security policy enforcement.
