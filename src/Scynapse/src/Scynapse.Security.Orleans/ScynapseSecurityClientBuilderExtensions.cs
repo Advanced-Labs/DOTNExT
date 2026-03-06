@@ -1,8 +1,10 @@
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Scynapse.Connections.Security;
 using Scynapse.Hosting;
 using Scynapse.Runtime;
 using Scynapse.Security.Assertions;
+using Scynapse.Security.Configuration;
 using Scynapse.Security.Crypto;
 using Scynapse.Security.Transport;
 using Scynapse.Security.Verification;
@@ -15,6 +17,21 @@ namespace Scynapse.Security.Orleans;
 /// </summary>
 public static class ScynapseSecurityClientBuilderExtensions
 {
+    /// <summary>
+    /// Configure the client for Scynapse security from an IConfigurationSection.
+    /// Binds the section to SecurityConfigurationSection and loads keys/assertions from disk.
+    /// </summary>
+    public static IClientBuilder UseScynapseSecurity(
+        this IClientBuilder builder,
+        IConfigurationSection configSection,
+        string? basePath = null,
+        Action<IServiceCollection>? configureServices = null)
+    {
+        var config = new SecurityConfigurationSection();
+        configSection.Bind(config);
+        var options = SecurityConfigurationLoader.Load(config, basePath);
+        return builder.UseScynapseSecurity(options, configureServices);
+    }
     /// <summary>
     /// Configure the client for Scynapse capability-based security.
     /// Sets up TLS to silo gateway, CCap wallet, and outgoing call filter.
