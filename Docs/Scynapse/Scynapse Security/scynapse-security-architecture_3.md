@@ -873,4 +873,140 @@ When two independent Scynapse domains federate, what are the mutual obligations?
 
 ---
 
-*Living document. Revisions expected as Component Model, CNS, and federation story evolve.*
+## Part XII: Phase 1 Completion -- Orleans Paradigm Security Analysis
+
+**Added:** 2026-03-06
+**Context:** After the initial Phase 1 implementation and review, a comprehensive workflow analysis was performed to verify that the security design covers all Orleans paradigm workflows end-to-end. This section documents the findings, identified gaps, and the design decisions made to fill them.
+
+**Companion document:** `scynapse-security-implementation-guide-v2_1.md` (v3.0) contains the full workflow simulations, design option evaluations, and implementation plan.
+
+### 12.1 Orleans Workflow Actors
+
+The security system must serve five distinct actors:
+
+| Actor | Role | Key Security Needs |
+|-------|------|-------------------|
+| Organization Administrator | Creates trust root, delegates authority | Key generation, assertion creation, distribution |
+| Silo Operator | Deploys/configures silos | Key loading, config-based setup, peer discovery |
+| Grain Developer | Writes secure grains | Declarative policy, caller identity access, grain-to-grain calls |
+| Client Developer | Writes external client apps | Authentication, CCap acquisition, wallet management |
+| Orleans Runtime | System grains, directory, membership | Must function without security attributes |
+
+### 12.2 Critical Gaps Identified
+
+Eight workflow holes were identified. The three most architecturally significant:
+
+#### Gap: Grain-to-Grain Delegation
+
+When Client calls GrainA, and GrainA calls GrainB, the original caller's identity and CCap are lost. The outgoing call filter on GrainA's silo attaches the silo's node identity, not the client's.
+
+**Architectural Decision: Hybrid Trust Model**
+
+Two trust levels operate simultaneously:
+
+1. **Node-Level Trust (default for silo-to-silo):** If the calling silo's node key has a valid delegation chain from a trusted root, intra-cluster grain calls are allowed. This matches Orleans's inherent trust model where silos trust each other.
+
+2. **Capability-Level Trust (required for client-to-silo):** External clients must present a CCap matching the target grain's `[RequireCapability]` attribute.
+
+3. **Original Caller Propagation:** The original client's identity flows through `RequestContext` for the entire call chain. Grains can inspect it for audit/authorization via `GetOriginalCallerPublicKey()`.
+
+4. **Opt-In Strict Mode:** Grains annotated with `[SecurityPolicy(RequiresCallerCapability = true)]` require per-call capability verification even from trusted silos.
+
+This design preserves the principle that security should be transparent to grain developers while providing strict mode for high-security grains. It avoids breaking Orleans's fundamental silo-trust model while layering capability-based security on top.
+
+#### Gap: No Provisioning Tooling
+
+The entire provisioning workflow (key generation, assertion creation, inspection, distribution) is code-only. No operational tooling exists.
+
+**Architectural Decision: Scy.exe CLI Tool**
+
+A CLI tool (`Scy.exe`) using Spectre.Console (TUI) and System.CommandLine (routing) provides the operational backbone. Commands cover the full key/assertion lifecycle:
+
+- `scy key gen/show/export-pub` -- Key management
+- `scy assertion identity/delegate/ccap/revoke/inspect/verify` -- Assertion lifecycle
+- `scy config generate` -- Configuration file generation
+- `scy dev quickstart` -- Interactive development setup
+
+**File formats defined:**
+- `.key` (binary: 1 byte type prefix + 32 bytes seed)
+- `.pub` (text: encoded public key)
+- `.assertion`/`.ccap` (binary: CBOR-encoded SignedAssertion)
+- `silo-security.json`/`client-security.json` (JSON configuration for UseScynapseSecurity)
+
+#### Gap: Client Authentication Flow
+
+Clients must pre-have all CCaps. No "login" flow exists.
+
+**Architectural Decision: SecurityGatewayGrain**
+
+A well-known grain type (`ISecurityGatewayGrain`) serves as the authentication entry point. Clients present their identity + delegation chain; the gateway verifies and issues CCaps dynamically.
+
+The gateway requires authentication (caller must have a verified identity chain) but does NOT require a specific CCap -- this breaks the bootstrap paradox where you need a CCap to get a CCap.
+
+Application developers implement the gateway's policy logic (which identities get which CCaps). Scynapse provides a default implementation that issues CCaps based on the delegation chain's scope.
+
+### 12.3 Silo-to-Silo Peer Assertion Discovery
+
+**Problem:** For N silos, each needs O(N) peer assertion chains. Pre-provisioning doesn't scale.
+
+**Architectural Decision: IClusterAssertionDirectoryGrain**
+
+A system grain stores all silo assertion chains:
+- Silos register their chains on startup
+- TLS validator queries the directory for peer chains on connection
+- Directory grain is `AllowAnonymous` (bootstrap paradox: security infrastructure must be reachable before security is fully established)
+- Fallback: if directory unavailable, TLS allows connection (call filter remains the enforcement point, preserving the current defense model)
+
+### 12.4 Stream and Event Security
+
+**Analysis:** Orleans streams operate outside the grain call filter pipeline. Stream publications are local operations; stream event delivery bypasses `IIncomingGrainCallFilter`.
+
+**Architectural Decision:** For Phase 1, this is documented as a known limitation. Security-sensitive operations should use grain method calls, not streams. Phase 2 may introduce `IStreamSecurityFilter` or secure stream wrappers.
+
+### 12.5 StateTask Property Security
+
+**Analysis:** Code-generated `GetX()`/`SetX()` methods from `StateTask<T>` properties ARE standard grain interface methods and DO go through the call filter pipeline. They inherit the grain-level `[SecurityPolicy]` but don't have method-level `[RequireCapability]`.
+
+**Architectural Decision:** Sufficient for Phase 1. Properties are secured at the grain level. A future `[State(ReadAction="...", WriteAction="...")]` extension can add method-level capability requirements through codegen.
+
+### 12.6 Development Mode
+
+**Architectural Decision:** A `DevelopmentMode` flag in `ScynapseSecurityOptions` auto-generates all security artifacts:
+- Self-signed organization key
+- Node key + delegation
+- Wildcard CCap for all clients
+- WARNING logged on every startup
+- Intended for development only
+
+### 12.7 Phase 1 Completion Criteria
+
+Phase 1 is considered complete when all of the following are satisfied:
+
+1. Scy.exe CLI can generate keys, create assertions, generate configs -- without writing C# code
+2. Silos can be configured from JSON files generated by Scy.exe
+3. Clients can authenticate via SecurityGatewayGrain and acquire CCaps dynamically
+4. Grain-to-grain calls work with node-level trust (hybrid model)
+5. Cross-silo CCap flow tested in integration tests
+6. DevelopmentMode provides zero-friction setup
+7. All Orleans system grains function without security interference
+
+These criteria ensure that a developer can build, deploy, and operate a Scynapse application with security enabled through the full lifecycle: provisioning, development, deployment, and runtime operation.
+
+### 12.8 Design Options Summary Table
+
+For each identified gap, multiple design options were evaluated. The full analysis with pros/cons is in the implementation guide. Summary of chosen approaches:
+
+| Gap | Chosen Approach | Alternatives Considered |
+|-----|----------------|------------------------|
+| Provisioning tooling | Scy.exe CLI (Spectre.Console + System.CommandLine) | PowerShell module, dotnet tool only |
+| Configuration loading | IConfiguration binding + fluent API | Fluent-only |
+| Grain-to-grain delegation | Hybrid (node trust default + CCap propagation + strict opt-in) | Transparent propagation, explicit impersonation, node-trust-only |
+| Client authentication | SecurityGatewayGrain + bootstrap CCaps | CCap request protocol, bootstrap-only |
+| Peer assertion discovery | IClusterAssertionDirectoryGrain | Gossip protocol, pre-shared config only |
+| StateTask security | Grain-level policy (existing) | State attribute security extension |
+| Stream security | Document as limitation | Stream security filter, secure wrapper |
+| Development experience | DevelopmentMode auto-generation + `scy dev quickstart` | Manual-only |
+
+---
+
+*Living document. Revisions expected as Component Model, CNS, and federation story evolve. Part XII added 2026-03-06 during Phase 1 completion analysis.*
