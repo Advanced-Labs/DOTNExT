@@ -35,6 +35,16 @@ public static class ScynapseCertificateFactory
         var subject = new X500DistinguishedName("CN=Scynapse Node, O=Scynapse");
         var request = new CertificateRequest(subject, ecdsa, HashAlgorithmName.SHA256);
 
+        // Add Server + Client Authentication EKU so SslStream accepts this cert for both roles
+        request.CertificateExtensions.Add(
+            new X509EnhancedKeyUsageExtension(
+                new OidCollection
+                {
+                    new Oid("1.3.6.1.5.5.7.3.1"), // Server Authentication
+                    new Oid("1.3.6.1.5.5.7.3.2"), // Client Authentication
+                },
+                critical: false));
+
         // Embed Ed25519 public key + key type in a critical custom extension.
         // Critical because any peer MUST understand this to authenticate.
         var extensionData = new byte[33];

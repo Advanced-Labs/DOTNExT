@@ -47,4 +47,11 @@ public sealed class ScynapseSecurityOptions
     /// When false, only server-side TLS is enforced (peers are not required to present certificates).
     /// </summary>
     public bool RequireMutualTls { get; init; } = true;
+
+    /// <summary>
+    /// Whether to enable TLS transport encryption (default: true).
+    /// Set to false for TestCluster environments where TLS is not needed or
+    /// when TLS is managed separately. Call filter security still applies.
+    /// </summary>
+    public bool EnableTls { get; init; } = true;
 }

@@ -56,11 +56,12 @@ public class AttributeBasedPolicyProviderTests
     }
 
     [Fact]
-    public void DefaultPolicy_RequiresAuthentication()
+    public void DefaultPolicy_AllowsAnonymous()
     {
-        // No SecurityPolicy attribute defaults to secure
+        // No SecurityPolicy attribute defaults to anonymous (so internal system grains work)
         var policy = _provider.GetPolicy(typeof(IDefaultPolicyTestGrain));
-        Assert.True(policy.RequiresAuthentication);
+        Assert.False(policy.RequiresAuthentication);
+        Assert.True(policy.AllowAnonymous);
     }
 
     [Fact]

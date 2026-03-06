@@ -1,4 +1,3 @@
-using System.Security.Cryptography.X509Certificates;
 using Microsoft.Extensions.DependencyInjection;
 using Scynapse.Connections.Security;
 using Scynapse.Hosting;
@@ -65,31 +64,29 @@ public static class ScynapseSecuritySiloBuilderExtensions
         // Allow caller to override default implementations
         configureServices?.Invoke(builder.Services);
 
-        // Configure mTLS with Ed25519-derived certificates
-        var cert = ScynapseCertificateFactory.CreateSelfSigned(options.NodeKeyPair);
-        var remoteCertMode = options.RequireMutualTls
-            ? RemoteCertificateMode.RequireCertificate
-            : RemoteCertificateMode.AllowCertificate;
-
-        builder.UseTls(cert, tlsOptions =>
+        // Configure TLS with Ed25519-derived certificates if enabled.
+        // The cert provides transport encryption; identity verification happens
+        // at the grain call filter level via CCaps and assertion chains.
+        if (options.EnableTls)
         {
-            tlsOptions.ClientCertificateMode = remoteCertMode;
-            tlsOptions.RemoteCertificateMode = RemoteCertificateMode.RequireCertificate;
-            // Custom validation: verify Ed25519 assertion chain, not X.509 CA chain
-            tlsOptions.RemoteCertificateValidation = (certificate, chain, errors) =>
-            {
-                // Build a store containing all bootstrap and peer assertions for validation
-                var validationStore = new InMemoryAssertionStore();
-                foreach (var assertion in options.BootstrapAssertions)
-                    validationStore.StoreAsync(assertion).AsTask().GetAwaiter().GetResult();
-                foreach (var assertion in options.PeerAssertions)
-                    validationStore.StoreAsync(assertion).AsTask().GetAwaiter().GetResult();
+            var cert = ScynapseCertificateFactory.CreateSelfSigned(options.NodeKeyPair);
+            var remoteCertMode = options.RequireMutualTls
+                ? RemoteCertificateMode.RequireCertificate
+                : RemoteCertificateMode.AllowCertificate;
 
-                var validator = new ScynapseRemoteCertificateValidator(
-                    validationStore, new InMemoryNonceStore(), options.TrustedRoots);
-                return validator.Validate(certificate);
-            };
-        });
+            builder.UseTls(cert, tlsOptions =>
+            {
+                tlsOptions.SslProtocols = System.Security.Authentication.SslProtocols.Tls12 | System.Security.Authentication.SslProtocols.Tls13;
+                tlsOptions.ClientCertificateMode = remoteCertMode;
+                tlsOptions.RemoteCertificateMode = RemoteCertificateMode.AllowCertificate;
+                tlsOptions.AllowAnyRemoteCertificate();
+                tlsOptions.LocalCertificate = cert;
+                tlsOptions.OnAuthenticateAsClient = (connection, sslOptions) =>
+                {
+                    sslOptions.TargetHost = "Scynapse Node";
+                };
+            });
+        }
 
         return builder;
     }

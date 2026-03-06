@@ -1,4 +1,5 @@
 using Scynapse.Runtime;
+using Scynapse.Security;
 using Scynapse.Security.Assertions;
 using Scynapse.Security.Crypto;
 using Scynapse.Security.Verification;
@@ -80,7 +81,7 @@ public sealed class ScynapseIncomingCallFilter : IIncomingGrainCallFilter
         {
             var claim = CapabilityClaim.Deserialize(ccap.ClaimData.Span);
             var requiredResource = _policyProvider.GetRequiredResource(context.InterfaceMethod)
-                ?? $"scynapse:{grainInterfaceType.Name}";
+                ?? GrainResourceInference.FromGrainInterface(grainInterfaceType);
 
             if (!ActionMatches(claim.Action, requiredAction) ||
                 !ResourceMatches(claim.Resource, requiredResource))

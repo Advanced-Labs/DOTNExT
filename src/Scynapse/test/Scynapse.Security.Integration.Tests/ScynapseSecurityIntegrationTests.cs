@@ -168,7 +168,11 @@ internal class SecuredSiloConfigurator : IHostConfigurator
                 TrustedRoots = { orgKey.PublicKeyBytes.ToArray() },
                 BootstrapAssertions = { orgIdentity, nodeDelegation },
                 PeerAssertions = { clientDelegation },
-                RequireMutualTls = false, // TestCluster may not support full mTLS
+                RequireMutualTls = false,
+                // TLS disabled for TestCluster: in-process transport doesn't need encryption.
+                // TLS transport is tested separately in Scynapse.Connections.Security.Tests.
+                // These tests validate the call filter / CCap / assertion chain flow.
+                EnableTls = false,
             };
             siloBuilder.UseScynapseSecurity(options);
         });
@@ -196,6 +200,7 @@ internal class SecuredClientConfigurator : IClientBuilderConfigurator
             BootstrapAssertions = { orgIdentity },
             PeerAssertions = { nodeDelegation },
             BootstrapCapabilities = { clientCCap },
+            EnableTls = false,
         };
         clientBuilder.UseScynapseSecurity(options);
     }
@@ -342,10 +347,11 @@ public class ScynapseSecurityIntegrationTests
             var data = await grain.GetData();
             Assert.Equal("initial", data);
 
-            // "write" action should be rejected (CCap only grants "read")
-            var ex = await Assert.ThrowsAsync<Exception>(
+            // "write" action should be rejected — the wallet has no CCap for "write",
+            // so the outgoing filter sends no CCap and the incoming filter rejects it.
+            var ex = await Assert.ThrowsAsync<ScynapseSecurityException>(
                 () => grain.SetData("new value"));
-            Assert.Contains("Insufficient capability", ex.Message);
+            Assert.Contains("Authentication required", ex.Message);
         }
         finally
         {
@@ -368,7 +374,7 @@ public class ScynapseSecurityIntegrationTests
         {
             // Create CCap that already expired
             var expiredAt = DateTimeOffset.UtcNow.AddMinutes(-5).ToUnixTimeSeconds();
-            var props = TestSecuritySetup.CreateTestHierarchy(expiresAt: expiredAt);
+            var props = TestSecuritySetup.CreateTestHierarchy(ccapExpiresAt: expiredAt);
 
             var builder = new TestClusterBuilder(1)
                 .AddSiloBuilderConfigurator<SecuredSiloConfigurator>()
@@ -382,9 +388,10 @@ public class ScynapseSecurityIntegrationTests
 
             var grain = testCluster.Client.GetGrain<ISecuredGrain>("test-expired");
 
-            var ex = await Assert.ThrowsAsync<Exception>(
+            // Expired CCap is filtered out by the wallet, so no CCap is sent.
+            var ex = await Assert.ThrowsAsync<ScynapseSecurityException>(
                 () => grain.GetData());
-            Assert.Contains("expired", ex.Message, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("Authentication required", ex.Message);
         }
         finally
         {
@@ -434,7 +441,7 @@ public class ScynapseSecurityNegativeTests
 
             var grain = testCluster.Client.GetGrain<ISecuredGrain>("test-no-ccap");
 
-            var ex = await Assert.ThrowsAsync<Exception>(
+            var ex = await Assert.ThrowsAsync<ScynapseSecurityException>(
                 () => grain.GetData());
             Assert.Contains("Authentication required", ex.Message);
         }

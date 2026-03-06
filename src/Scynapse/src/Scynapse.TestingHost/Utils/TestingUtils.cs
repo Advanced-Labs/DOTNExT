@@ -127,9 +127,11 @@ namespace Scynapse.TestingHost.Utils
         public static void ConfigureThreadPoolSettingsForStorageTests(int numDotNetPoolThreads = 200)
         {
             ThreadPool.SetMinThreads(numDotNetPoolThreads, numDotNetPoolThreads);
+#pragma warning disable SYSLIB0014 // ServicePointManager is obsolete
             ServicePointManager.Expect100Continue = false;
             ServicePointManager.DefaultConnectionLimit = numDotNetPoolThreads; // 1000;
             ServicePointManager.UseNagleAlgorithm = false;
+#pragma warning restore SYSLIB0014
         }
     }
 }

@@ -110,6 +110,7 @@
     <Project Path="test/Scynapse.Connections.Security.Tests/Scynapse.Connections.Security.Tests.csproj" />
     <Project Path="test/Scynapse.Security.Tests/Scynapse.Security.Tests.csproj" />
     <Project Path="test/Scynapse.Security.Orleans.Tests/Scynapse.Security.Orleans.Tests.csproj" />
+    <Project Path="test/Scynapse.Security.Integration.Tests/Scynapse.Security.Integration.Tests.csproj" />
     <Project Path="test/Scynapse.Journaling.Tests/Scynapse.Journaling.Tests.csproj" />
     <Project Path="test/Scynapse.Serialization.FSharp.Tests/Scynapse.Serialization.FSharp.Tests.fsproj" />
     <Project Path="test/Scynapse.Serialization.UnitTests/Scynapse.Serialization.UnitTests.csproj" />

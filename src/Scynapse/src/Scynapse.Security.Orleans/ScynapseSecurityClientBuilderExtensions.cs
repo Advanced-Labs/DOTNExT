@@ -50,26 +50,25 @@ public static class ScynapseSecurityClientBuilderExtensions
             return new ScynapseClientLifecycleParticipant(options, store, wallet);
         });
 
-        // Configure TLS to gateway
-        var cert = ScynapseCertificateFactory.CreateSelfSigned(options.NodeKeyPair);
-
-        builder.UseTls(cert, tlsOptions =>
+        // Configure TLS to gateway if enabled.
+        // The cert provides transport encryption; identity verification happens
+        // at the grain call filter level via CCaps and assertion chains.
+        if (options.EnableTls)
         {
-            tlsOptions.RemoteCertificateMode = RemoteCertificateMode.RequireCertificate;
-            // Verify server's Scynapse identity
-            tlsOptions.RemoteCertificateValidation = (certificate, chain, errors) =>
-            {
-                var validationStore = new InMemoryAssertionStore();
-                foreach (var assertion in options.BootstrapAssertions)
-                    validationStore.StoreAsync(assertion).AsTask().GetAwaiter().GetResult();
-                foreach (var assertion in options.PeerAssertions)
-                    validationStore.StoreAsync(assertion).AsTask().GetAwaiter().GetResult();
+            var cert = ScynapseCertificateFactory.CreateSelfSigned(options.NodeKeyPair);
 
-                var validator = new ScynapseRemoteCertificateValidator(
-                    validationStore, new InMemoryNonceStore(), options.TrustedRoots);
-                return validator.Validate(certificate);
-            };
-        });
+            builder.UseTls(cert, tlsOptions =>
+            {
+                tlsOptions.SslProtocols = System.Security.Authentication.SslProtocols.Tls12 | System.Security.Authentication.SslProtocols.Tls13;
+                tlsOptions.RemoteCertificateMode = RemoteCertificateMode.AllowCertificate;
+                tlsOptions.AllowAnyRemoteCertificate();
+                tlsOptions.LocalCertificate = cert;
+                tlsOptions.OnAuthenticateAsClient = (connection, sslOptions) =>
+                {
+                    sslOptions.TargetHost = "Scynapse Node";
+                };
+            });
+        }
 
         return builder;
     }

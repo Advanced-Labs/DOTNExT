@@ -86,7 +86,7 @@ public class IncomingCallFilterTests
     [Fact]
     public async Task ValidCCap_Succeeds()
     {
-        var ccap = CreateCallerCCap("scynapse:ISecureTestGrain", "read");
+        var ccap = CreateCallerCCap("scynapse:grain/ISecureTestGrain", "read");
         await _store.StoreAsync(ccap);
 
         var filter = CreateFilter();
@@ -128,7 +128,7 @@ public class IncomingCallFilterTests
             .SetIssuer(_caller)
             .SetSubject(_caller.PublicKeyBytes)
             .SetClaim(ClaimType.Capability,
-                new CapabilityClaim("scynapse:ISecureTestGrain", "read").Serialize())
+                new CapabilityClaim("scynapse:grain/ISecureTestGrain", "read").Serialize())
             .SetScope(expiresAt: DateTimeOffset.UtcNow.AddHours(-1).ToUnixTimeSeconds())
             .AddProof(_delegation.Id.Span)
             .Build();
@@ -149,7 +149,7 @@ public class IncomingCallFilterTests
     public async Task WrongAction_Rejected()
     {
         // CCap grants "write" but method requires "read"
-        var ccap = CreateCallerCCap("scynapse:ISecureTestGrain", "write");
+        var ccap = CreateCallerCCap("scynapse:grain/ISecureTestGrain", "write");
         await _store.StoreAsync(ccap);
 
         var filter = CreateFilter();
@@ -181,7 +181,7 @@ public class IncomingCallFilterTests
     [Fact]
     public async Task BearerProofFailure_Rejected()
     {
-        var ccap = CreateCallerCCap("scynapse:ISecureTestGrain", "read");
+        var ccap = CreateCallerCCap("scynapse:grain/ISecureTestGrain", "read");
         await _store.StoreAsync(ccap);
 
         // Use a different key to sign the bearer proof (wrong key)
@@ -206,16 +206,17 @@ public class IncomingCallFilterTests
     }
 
     [Fact]
-    public async Task DefaultPolicyGrain_RequiresAuth()
+    public async Task DefaultPolicyGrain_AllowsAnonymous()
     {
+        // Grains without [SecurityPolicy] attribute default to anonymous
+        // (so internal Orleans system grains work without security context)
         var filter = CreateFilter();
         var ctx = CreateContext(typeof(IDefaultPolicyTestGrain), nameof(IDefaultPolicyTestGrain.DoSomethingAsync));
 
         RequestContext.Clear();
 
-        var ex = await Assert.ThrowsAsync<ScynapseSecurityException>(
-            () => filter.Invoke(ctx));
-        Assert.False(ctx.Invoked);
+        await filter.Invoke(ctx);
+        Assert.True(ctx.Invoked);
 
         RequestContext.Clear();
     }
@@ -224,7 +225,7 @@ public class IncomingCallFilterTests
     public async Task MethodWithNoCapabilityAttr_AuthenticatedCallSucceeds()
     {
         // BasicActionAsync has no [RequireCapability] — any authenticated caller can call it
-        var ccap = CreateCallerCCap("scynapse:IPartiallySecuredGrain", "anything");
+        var ccap = CreateCallerCCap("scynapse:grain/IPartiallySecuredGrain", "anything");
         await _store.StoreAsync(ccap);
 
         var filter = CreateFilter();
