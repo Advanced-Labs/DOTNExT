@@ -10,4 +10,6 @@ public static class ScynapseSecurityConstants
     public const string BearerProofKey = "Scynapse.CCap.BearerProof";
     public const string VerifiedCallerKeyKey = "Scynapse.Verified.CallerKey";
     public const string VerifiedCCapKey = "Scynapse.Verified.CCap";
+    public const string OriginalCallerKeyKey = "Scynapse.OriginalCallerKey";
+    public const string OriginalCallerCCapKey = "Scynapse.OriginalCallerCCap";
 }

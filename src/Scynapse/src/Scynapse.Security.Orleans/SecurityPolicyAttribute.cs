@@ -17,4 +17,12 @@ public sealed class SecurityPolicyAttribute : Attribute
     /// When true, overrides RequiresAuthentication for this grain.
     /// </summary>
     public bool AllowAnonymous { get; set; }
+
+    /// <summary>
+    /// Whether to require end-user CCap verification even for silo-originated (node-trusted) calls.
+    /// Default: false. When false, calls from trusted nodes are allowed without CCap verification.
+    /// When true, forces CCap verification for ALL callers including other silos.
+    /// Use for high-security grains that must verify the end-user regardless of call origin.
+    /// </summary>
+    public bool RequiresCallerCapability { get; set; }
 }

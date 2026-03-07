@@ -22,10 +22,10 @@ public class CCapWalletTests
 
         var ccap = AssertionBuilder.CreateCapability(
             issuer, subject.PublicKeyBytes,
-            "scynapse:grain/IMyGrain", "read");
+            "scynapse.app.IMyGrain", "read");
 
         wallet.Store(ccap);
-        var found = wallet.FindCapability("scynapse:grain/IMyGrain", "read");
+        var found = wallet.FindCapability("scynapse.app.IMyGrain", "read");
         Assert.NotNull(found);
         Assert.True(found!.Id.Span.SequenceEqual(ccap.Id.Span));
     }
@@ -38,10 +38,10 @@ public class CCapWalletTests
 
         var ccap = AssertionBuilder.CreateCapability(
             issuer, subject.PublicKeyBytes,
-            "scynapse:grain/IMyGrain", "read");
+            "scynapse.app.IMyGrain", "read");
 
         wallet.Store(ccap);
-        var found = wallet.FindCapability("scynapse:grain/IOtherGrain", "write");
+        var found = wallet.FindCapability("scynapse.app.IOtherGrain", "write");
         Assert.Null(found);
     }
 
@@ -53,12 +53,12 @@ public class CCapWalletTests
 
         var ccap = AssertionBuilder.CreateCapability(
             issuer, subject.PublicKeyBytes,
-            "scynapse:grain/IMyGrain", "*");
+            "scynapse.app.IMyGrain", "*");
 
         wallet.Store(ccap);
-        Assert.NotNull(wallet.FindCapability("scynapse:grain/IMyGrain", "read"));
-        Assert.NotNull(wallet.FindCapability("scynapse:grain/IMyGrain", "write"));
-        Assert.NotNull(wallet.FindCapability("scynapse:grain/IMyGrain", "admin"));
+        Assert.NotNull(wallet.FindCapability("scynapse.app.IMyGrain", "read"));
+        Assert.NotNull(wallet.FindCapability("scynapse.app.IMyGrain", "write"));
+        Assert.NotNull(wallet.FindCapability("scynapse.app.IMyGrain", "admin"));
     }
 
     [Fact]
@@ -69,12 +69,12 @@ public class CCapWalletTests
 
         var ccap = AssertionBuilder.CreateCapability(
             issuer, subject.PublicKeyBytes,
-            "scynapse:grain/*", "read");
+            "scynapse.app.>", "read");
 
         wallet.Store(ccap);
-        Assert.NotNull(wallet.FindCapability("scynapse:grain/IMyGrain", "read"));
-        Assert.NotNull(wallet.FindCapability("scynapse:grain/IOtherGrain", "read"));
-        Assert.Null(wallet.FindCapability("scynapse:grain/IMyGrain", "write")); // wrong action
+        Assert.NotNull(wallet.FindCapability("scynapse.app.IMyGrain", "read"));
+        Assert.NotNull(wallet.FindCapability("scynapse.app.IOtherGrain", "read"));
+        Assert.Null(wallet.FindCapability("scynapse.app.IMyGrain", "write")); // wrong action
     }
 
     [Fact]
@@ -86,11 +86,11 @@ public class CCapWalletTests
         var expired = DateTimeOffset.UtcNow.AddMinutes(-5).ToUnixTimeSeconds();
         var ccap = AssertionBuilder.CreateCapability(
             issuer, subject.PublicKeyBytes,
-            "scynapse:grain/IMyGrain", "read",
+            "scynapse.app.IMyGrain", "read",
             expiresAt: expired);
 
         wallet.Store(ccap);
-        Assert.Null(wallet.FindCapability("scynapse:grain/IMyGrain", "read"));
+        Assert.Null(wallet.FindCapability("scynapse.app.IMyGrain", "read"));
     }
 
     [Fact]
@@ -101,12 +101,12 @@ public class CCapWalletTests
 
         var ccap = AssertionBuilder.CreateCapability(
             issuer, subject.PublicKeyBytes,
-            "scynapse:grain/IMyGrain", "read");
+            "scynapse.app.IMyGrain", "read");
 
         wallet.Store(ccap);
         wallet.Store(ccap);
         // Should not throw or double-store
-        Assert.NotNull(wallet.FindCapability("scynapse:grain/IMyGrain", "read"));
+        Assert.NotNull(wallet.FindCapability("scynapse.app.IMyGrain", "read"));
     }
 
     [Fact]
@@ -120,20 +120,20 @@ public class CCapWalletTests
 
         var expiredCCap = AssertionBuilder.CreateCapability(
             issuer, subject.PublicKeyBytes,
-            "scynapse:grain/IExpired", "read",
+            "scynapse.app.IExpired", "read",
             expiresAt: expired);
 
         var validCCap = AssertionBuilder.CreateCapability(
             issuer, subject.PublicKeyBytes,
-            "scynapse:grain/IValid", "read",
+            "scynapse.app.IValid", "read",
             expiresAt: valid);
 
         wallet.Store(expiredCCap);
         wallet.Store(validCCap);
         wallet.Cleanup();
 
-        Assert.Null(wallet.FindCapability("scynapse:grain/IExpired", "read"));
-        Assert.NotNull(wallet.FindCapability("scynapse:grain/IValid", "read"));
+        Assert.Null(wallet.FindCapability("scynapse.app.IExpired", "read"));
+        Assert.NotNull(wallet.FindCapability("scynapse.app.IValid", "read"));
     }
 
     [Fact]
@@ -144,17 +144,17 @@ public class CCapWalletTests
 
         var readCCap = AssertionBuilder.CreateCapability(
             issuer, subject.PublicKeyBytes,
-            "scynapse:grain/IMyGrain", "read");
+            "scynapse.app.IMyGrain", "read");
 
         var writeCCap = AssertionBuilder.CreateCapability(
             issuer, subject.PublicKeyBytes,
-            "scynapse:grain/IMyGrain", "write");
+            "scynapse.app.IMyGrain", "write");
 
         wallet.Store(readCCap);
         wallet.Store(writeCCap);
 
-        var readResult = wallet.FindCapability("scynapse:grain/IMyGrain", "read");
-        var writeResult = wallet.FindCapability("scynapse:grain/IMyGrain", "write");
+        var readResult = wallet.FindCapability("scynapse.app.IMyGrain", "read");
+        var writeResult = wallet.FindCapability("scynapse.app.IMyGrain", "write");
         Assert.NotNull(readResult);
         Assert.NotNull(writeResult);
         Assert.True(readResult!.Id.Span.SequenceEqual(readCCap.Id.Span));

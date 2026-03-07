@@ -69,7 +69,7 @@ public class ChainVerificationTests
 
         var rootIdentity = AssertionBuilder.CreateIdentity(root);
         var capability = AssertionBuilder.CreateCapability(
-            root, node.PublicKeyBytes, "scynapse:grain/MyGrain", "invoke",
+            root, node.PublicKeyBytes, "scynapse.app.MyGrain", "invoke",
             proofs: new[] { rootIdentity.Id.ToArray() });
 
         var (verifier, store) = CreateVerifier(TrustedRoots(root));
@@ -94,20 +94,20 @@ public class ChainVerificationTests
             root, domain.PublicKeyBytes,
             new[] { ClaimType.Capability, ClaimType.Delegation },
             proofs: new[] { rootIdentity.Id.ToArray() },
-            resourcePattern: "scynapse:grain/*",
+            resourcePattern: "scynapse.app.>",
             actionPattern: "*");
 
         var delegationToNode = AssertionBuilder.CreateDelegation(
             domain, node.PublicKeyBytes,
             new[] { ClaimType.Capability },
             proofs: new[] { delegationToDomain.Id.ToArray() },
-            resourcePattern: "scynapse:grain/*",
+            resourcePattern: "scynapse.app.>",
             actionPattern: "invoke",
             maxDepth: 1);
 
         var capability = AssertionBuilder.CreateCapability(
             node, instance.PublicKeyBytes,
-            "scynapse:grain/MyGrain", "invoke",
+            "scynapse.app.MyGrain", "invoke",
             proofs: new[] { delegationToNode.Id.ToArray() });
 
         var (verifier, store) = CreateVerifier(TrustedRoots(root));
@@ -139,7 +139,7 @@ public class ChainVerificationTests
         // Impostor issues capability but claims delegation as proof
         var capability = AssertionBuilder.CreateCapability(
             impostor, target.PublicKeyBytes,
-            "scynapse:grain/X", "invoke",
+            "scynapse.app.X", "invoke",
             proofs: new[] { delegation.Id.ToArray() });
 
         var (verifier, store) = CreateVerifier(TrustedRoots(root));
@@ -202,13 +202,13 @@ public class ChainVerificationTests
             root, node.PublicKeyBytes,
             new[] { ClaimType.Capability },
             proofs: new[] { rootIdentity.Id.ToArray() },
-            resourcePattern: "scynapse:grain/Safe*",
+            resourcePattern: "scynapse.app.Safe.>",
             actionPattern: "read");
 
         // Node tries to grant "invoke" on "Dangerous" — outside scope
         var capability = AssertionBuilder.CreateCapability(
             node, target.PublicKeyBytes,
-            "scynapse:grain/Dangerous", "invoke",
+            "scynapse.app.Dangerous", "invoke",
             proofs: new[] { delegation.Id.ToArray() });
 
         var (verifier, store) = CreateVerifier(TrustedRoots(root));
@@ -233,12 +233,12 @@ public class ChainVerificationTests
             root, node.PublicKeyBytes,
             new[] { ClaimType.Capability },
             proofs: new[] { rootIdentity.Id.ToArray() },
-            resourcePattern: "scynapse:grain/*",
+            resourcePattern: "scynapse.app.>",
             actionPattern: "*");
 
         var capability = AssertionBuilder.CreateCapability(
             node, target.PublicKeyBytes,
-            "scynapse:grain/MyGrain", "invoke",
+            "scynapse.app.MyGrain", "invoke",
             proofs: new[] { delegation.Id.ToArray() });
 
         var (verifier, store) = CreateVerifier(TrustedRoots(root));
@@ -262,7 +262,7 @@ public class ChainVerificationTests
             root, domain.PublicKeyBytes,
             new[] { ClaimType.Capability },
             proofs: new[] { rootIdentity.Id.ToArray() },
-            resourcePattern: "scynapse:grain/Safe*",
+            resourcePattern: "scynapse.app.Safe.>",
             actionPattern: "read",
             maxDepth: 2);
 
@@ -271,7 +271,7 @@ public class ChainVerificationTests
             domain, node.PublicKeyBytes,
             new[] { ClaimType.Capability },
             proofs: new[] { delegation.Id.ToArray() },
-            resourcePattern: "scynapse:grain/*", // wider
+            resourcePattern: "scynapse.app.>", // wider
             actionPattern: "read");
 
         var (verifier, store) = CreateVerifier(TrustedRoots(root));
@@ -304,7 +304,7 @@ public class ChainVerificationTests
             .SetIssuer(node)
             .SetSubject(target.PublicKeyBytes)
             .SetClaim(ClaimType.Capability,
-                new CapabilityClaim("scynapse:grain/X", "invoke").Serialize())
+                new CapabilityClaim("scynapse.app.X", "invoke").Serialize())
             .SetScope(expiresAt: now + 7200)
             .AddProof(delegation.Id.Span)
             .Build();
@@ -376,7 +376,7 @@ public class ChainVerificationTests
         // Node tries to issue a capability using the delegated identity as proof
         var capability = AssertionBuilder.CreateCapability(
             node, target.PublicKeyBytes,
-            "scynapse:grain/X", "invoke",
+            "scynapse.app.X", "invoke",
             proofs: new[] { nodeIdentity.Id.ToArray() });
 
         var (verifier, store) = CreateVerifier(TrustedRoots(root));
@@ -401,7 +401,7 @@ public class ChainVerificationTests
         Random.Shared.NextBytes(fakeProofId);
         var capability = AssertionBuilder.CreateCapability(
             root, node.PublicKeyBytes,
-            "scynapse:grain/X", "invoke",
+            "scynapse.app.X", "invoke",
             proofs: new[] { fakeProofId });
 
         var (verifier, store) = CreateVerifier(TrustedRoots(root));
@@ -440,7 +440,7 @@ public class ChainVerificationTests
         var target = ScynapseKeyPair.Generate(ScynapseKeyType.Instance);
         var cap = AssertionBuilder.CreateCapability(
             currentIssuer, target.PublicKeyBytes,
-            "scynapse:grain/X", "invoke",
+            "scynapse.app.X", "invoke",
             proofs: new[] { previousId });
         await store.StoreAsync(cap);
 
@@ -460,7 +460,7 @@ public class ChainVerificationTests
         var rootIdentity = AssertionBuilder.CreateIdentity(root);
         var capability = AssertionBuilder.CreateCapability(
             root, node.PublicKeyBytes,
-            "scynapse:grain/X", "invoke",
+            "scynapse.app.X", "invoke",
             proofs: new[] { rootIdentity.Id.ToArray() });
 
         var store = new InMemoryAssertionStore();
@@ -535,7 +535,7 @@ public class ChainVerificationTests
         var node = ScynapseKeyPair.Generate(ScynapseKeyType.Node);
         var capability = AssertionBuilder.CreateCapability(
             root, node.PublicKeyBytes,
-            "scynapse:grain/X", "invoke");
+            "scynapse.app.X", "invoke");
 
         var (verifier, store) = CreateVerifier(TrustedRoots(root));
         await store.StoreAsync(capability);
@@ -598,7 +598,7 @@ public class ChainVerificationTests
             new[] { ClaimType.Capability, ClaimType.Delegation },
             proofs: new[] { operatorId.Id.ToArray() },
             expiresAt: now + 86400,
-            resourcePattern: "scynapse:grain/*",
+            resourcePattern: "scynapse.app.>",
             actionPattern: "*");
 
         var sessionDelegation = AssertionBuilder.CreateDelegation(
@@ -606,13 +606,13 @@ public class ChainVerificationTests
             new[] { ClaimType.Capability },
             proofs: new[] { nodeDelegation.Id.ToArray() },
             expiresAt: now + 3600,
-            resourcePattern: "scynapse:grain/MyGrain",
+            resourcePattern: "scynapse.app.MyGrain",
             actionPattern: "invoke",
             maxDepth: 1);
 
         var ccap = AssertionBuilder.CreateCapability(
             session, grain.PublicKeyBytes,
-            "scynapse:grain/MyGrain", "invoke",
+            "scynapse.app.MyGrain", "invoke",
             proofs: new[] { sessionDelegation.Id.ToArray() },
             expiresAt: now + 3600);
 

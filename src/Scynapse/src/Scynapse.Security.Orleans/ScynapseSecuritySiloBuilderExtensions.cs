@@ -1,7 +1,9 @@
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Scynapse.Connections.Security;
 using Scynapse.Hosting;
 using Scynapse.Security.Assertions;
+using Scynapse.Security.Configuration;
 using Scynapse.Security.Crypto;
 using Scynapse.Security.Transport;
 using Scynapse.Security.Verification;
@@ -14,6 +16,40 @@ namespace Scynapse.Security.Orleans;
 /// </summary>
 public static class ScynapseSecuritySiloBuilderExtensions
 {
+    /// <summary>
+    /// Configure the silo for Scynapse security from an IConfigurationSection.
+    /// Binds the section to SecurityConfigurationSection and loads keys/assertions from disk.
+    /// </summary>
+    public static ISiloBuilder UseScynapseSecurity(
+        this ISiloBuilder builder,
+        IConfigurationSection configSection,
+        string? basePath = null,
+        Action<IServiceCollection>? configureServices = null)
+    {
+        var config = new SecurityConfigurationSection();
+        configSection.Bind(config);
+        var options = SecurityConfigurationLoader.Load(config, basePath);
+        return builder.UseScynapseSecurity(options, configureServices);
+    }
+    /// <summary>
+    /// Configure the silo with auto-generated development mode security.
+    /// Generates org key, node key, delegation, and wildcard CCap automatically.
+    /// WARNING: Not for production use. Logs a warning on every startup.
+    /// </summary>
+    public static ISiloBuilder UseScynapseSecurityDevelopmentMode(
+        this ISiloBuilder builder,
+        Action<IServiceCollection>? configureServices = null)
+    {
+        var options = DevelopmentModeHelper.CreateDevelopmentOptions();
+
+        builder.Services.AddSingleton<ILifecycleParticipant<Scynapse.Runtime.ISiloLifecycle>>(sp =>
+        {
+            return new DevelopmentModeWarningParticipant();
+        });
+
+        return builder.UseScynapseSecurity(options, configureServices);
+    }
+
     /// <summary>
     /// Configure the silo for Scynapse capability-based security.
     /// Sets up mTLS with Ed25519 identities, assertion verification,
@@ -34,8 +70,22 @@ public static class ScynapseSecuritySiloBuilderExtensions
         builder.Services.AddSingleton<IAttenuationChecker, DefaultAttenuationChecker>();
         builder.Services.AddSingleton<ICCapWallet, InMemoryCCapWallet>();
 
-        // Register grain security policy provider
-        builder.Services.AddSingleton<IGrainSecurityPolicyProvider, AttributeBasedPolicyProvider>();
+        // Register grain security policy provider with system grain protections
+        var policyProvider = new AttributeBasedPolicyProvider();
+        RegisterSystemGrainPolicies(policyProvider);
+        builder.Services.AddSingleton<IGrainSecurityPolicyProvider>(policyProvider);
+
+        // Build trusted node keys set: this node + all peer assertion subjects
+        var trustedNodeKeys = new HashSet<ReadOnlyMemory<byte>>(ByteMemoryEqualityComparer.Instance)
+        {
+            options.NodeKeyPair.PublicKeyBytes.ToArray()
+        };
+        foreach (var peer in options.PeerAssertions)
+        {
+            // Peer delegation assertions have the node key as subject
+            if (peer.ClaimType == ClaimType.Delegation)
+                trustedNodeKeys.Add(peer.Subject.ToArray());
+        }
 
         // Register grain call filters
         builder.Services.AddSingleton<IIncomingGrainCallFilter>(sp =>
@@ -44,7 +94,10 @@ public static class ScynapseSecuritySiloBuilderExtensions
             var nonceStore = sp.GetRequiredService<INonceStore>();
             var policyProvider = sp.GetRequiredService<IGrainSecurityPolicyProvider>();
             var attenuationChecker = sp.GetRequiredService<IAttenuationChecker>();
-            return new ScynapseIncomingCallFilter(store, nonceStore, options.TrustedRoots, policyProvider, attenuationChecker);
+            var logger = sp.GetService<Microsoft.Extensions.Logging.ILogger<ScynapseIncomingCallFilter>>();
+            return new ScynapseIncomingCallFilter(
+                store, nonceStore, options.TrustedRoots, policyProvider,
+                attenuationChecker, trustedNodeKeys, logger);
         });
 
         builder.Services.AddSingleton<IOutgoingGrainCallFilter>(sp =>
@@ -89,5 +142,24 @@ public static class ScynapseSecuritySiloBuilderExtensions
         }
 
         return builder;
+    }
+
+    /// <summary>
+    /// Registers security policies for system grains that cannot carry [SecurityPolicy]
+    /// attributes because they live in projects that don't reference Scynapse.Security.Orleans.
+    /// </summary>
+    private static void RegisterSystemGrainPolicies(AttributeBasedPolicyProvider provider)
+    {
+        // IGrainTypeDirectoryGrain — exposes deployment topology.
+        // Require authentication for read operations; admin CCap for writes.
+        var gtdType = Type.GetType("Scynapse.DynamicGrains.IGrainTypeDirectoryGrain, Scynapse.Core.Abstractions");
+        if (gtdType is not null)
+        {
+            provider.RegisterPolicy(gtdType, new GrainSecurityPolicy
+            {
+                RequiresAuthentication = true,
+                RequiresCallerCapability = false, // node trust sufficient for silo-to-silo
+            });
+        }
     }
 }

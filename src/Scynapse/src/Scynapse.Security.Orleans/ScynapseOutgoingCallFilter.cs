@@ -24,11 +24,22 @@ public sealed class ScynapseOutgoingCallFilter : IOutgoingGrainCallFilter
 
     public async Task Invoke(IOutgoingGrainCallContext context)
     {
+        // Preserve OriginalCallerKey if already present (grain-to-grain call).
+        // If not present, this is a client-originated call — the caller key becomes the original caller.
+        var existingOriginalCaller = RequestContext.Get(ScynapseSecurityConstants.OriginalCallerKeyKey);
+        if (existingOriginalCaller is null)
+        {
+            // First hop — set the original caller to our identity
+            RequestContext.Set(ScynapseSecurityConstants.OriginalCallerKeyKey,
+                _nodeKeyPair.PublicKeyBytes.ToArray());
+        }
+        // If already present, don't overwrite — preserve the end-user's identity through the call chain
+
         // Derive resource from target grain interface
         var grainInterfaceType = context.InterfaceMethod.DeclaringType;
         var resource = grainInterfaceType != null
             ? GrainResourceInference.FromGrainInterface(grainInterfaceType)
-            : "scynapse:grain/*";
+            : GrainResourceInference.WildcardAll;
 
         // Derive action from [RequireCapability] attribute or default to method name
         var reqCapAttr = context.InterfaceMethod
@@ -50,7 +61,7 @@ public sealed class ScynapseOutgoingCallFilter : IOutgoingGrainCallFilter
         }
         else
         {
-            // Attach identity even without a CCap (for anonymous-allowed grains)
+            // Attach identity even without a CCap (for node-trusted or anonymous grains)
             RequestContext.Set(ScynapseSecurityConstants.CallerPublicKeyKey,
                 _nodeKeyPair.PublicKeyBytes.ToArray());
         }

@@ -28,7 +28,7 @@ public class IncomingCallFilterTests
             _root, _caller.PublicKeyBytes,
             new[] { ClaimType.Capability },
             proofs: new[] { _rootIdentity.Id.ToArray() },
-            resourcePattern: "scynapse:*",
+            resourcePattern: "scynapse.>",
             actionPattern: "*");
 
         _store = new InMemoryAssertionStore();
@@ -86,7 +86,7 @@ public class IncomingCallFilterTests
     [Fact]
     public async Task ValidCCap_Succeeds()
     {
-        var ccap = CreateCallerCCap("scynapse:grain/ISecureTestGrain", "read");
+        var ccap = CreateCallerCCap("scynapse.app.ISecureTestGrain", "read");
         await _store.StoreAsync(ccap);
 
         var filter = CreateFilter();
@@ -128,7 +128,7 @@ public class IncomingCallFilterTests
             .SetIssuer(_caller)
             .SetSubject(_caller.PublicKeyBytes)
             .SetClaim(ClaimType.Capability,
-                new CapabilityClaim("scynapse:grain/ISecureTestGrain", "read").Serialize())
+                new CapabilityClaim("scynapse.app.ISecureTestGrain", "read").Serialize())
             .SetScope(expiresAt: DateTimeOffset.UtcNow.AddHours(-1).ToUnixTimeSeconds())
             .AddProof(_delegation.Id.Span)
             .Build();
@@ -149,7 +149,7 @@ public class IncomingCallFilterTests
     public async Task WrongAction_Rejected()
     {
         // CCap grants "write" but method requires "read"
-        var ccap = CreateCallerCCap("scynapse:grain/ISecureTestGrain", "write");
+        var ccap = CreateCallerCCap("scynapse.app.ISecureTestGrain", "write");
         await _store.StoreAsync(ccap);
 
         var filter = CreateFilter();
@@ -181,7 +181,7 @@ public class IncomingCallFilterTests
     [Fact]
     public async Task BearerProofFailure_Rejected()
     {
-        var ccap = CreateCallerCCap("scynapse:grain/ISecureTestGrain", "read");
+        var ccap = CreateCallerCCap("scynapse.app.ISecureTestGrain", "read");
         await _store.StoreAsync(ccap);
 
         // Use a different key to sign the bearer proof (wrong key)
@@ -225,7 +225,7 @@ public class IncomingCallFilterTests
     public async Task MethodWithNoCapabilityAttr_AuthenticatedCallSucceeds()
     {
         // BasicActionAsync has no [RequireCapability] — any authenticated caller can call it
-        var ccap = CreateCallerCCap("scynapse:grain/IPartiallySecuredGrain", "anything");
+        var ccap = CreateCallerCCap("scynapse.app.IPartiallySecuredGrain", "anything");
         await _store.StoreAsync(ccap);
 
         var filter = CreateFilter();
@@ -237,4 +237,83 @@ public class IncomingCallFilterTests
 
         RequestContext.Clear();
     }
+
+    // ---- Hybrid model tests: Node trust ----
+
+    private ScynapseIncomingCallFilter CreateFilterWithTrustedNodes(params byte[][] nodeKeys)
+    {
+        var trustedNodes = new HashSet<ReadOnlyMemory<byte>>(ByteMemoryEqualityComparer.Instance);
+        foreach (var key in nodeKeys)
+            trustedNodes.Add(key);
+
+        return new ScynapseIncomingCallFilter(
+            _store, _nonceStore, _trustedRoots, _policyProvider,
+            trustedNodeKeys: trustedNodes);
+    }
+
+    [Fact]
+    public async Task TrustedNode_AllowedWithoutCCap()
+    {
+        // A trusted node calling a secured grain should pass without CCap
+        var nodeKey = ScynapseKeyPair.Generate(ScynapseKeyType.Node);
+        var filter = CreateFilterWithTrustedNodes(nodeKey.PublicKeyBytes.ToArray());
+        var ctx = CreateContext(typeof(ISecureTestGrain), nameof(ISecureTestGrain.GetDataAsync));
+        ctx.KeysToCapture.Add(ScynapseSecurityConstants.VerifiedCallerKeyKey);
+
+        RequestContext.Set(ScynapseSecurityConstants.CallerPublicKeyKey, nodeKey.PublicKeyBytes.ToArray());
+        // No CCap, no bearer proof
+
+        await filter.Invoke(ctx);
+        Assert.True(ctx.Invoked);
+
+        var verifiedKey = ctx.CapturedRequestContext[ScynapseSecurityConstants.VerifiedCallerKeyKey] as byte[];
+        Assert.NotNull(verifiedKey);
+        Assert.True(verifiedKey.AsSpan().SequenceEqual(nodeKey.PublicKeyBytes));
+
+        RequestContext.Clear();
+    }
+
+    [Fact]
+    public async Task UntrustedNode_RequiresCCap()
+    {
+        // An untrusted caller (not in trusted nodes) with no CCap should be rejected
+        var unknownKey = ScynapseKeyPair.Generate(ScynapseKeyType.Instance);
+        var filter = CreateFilterWithTrustedNodes(); // no trusted nodes
+
+        var ctx = CreateContext(typeof(ISecureTestGrain), nameof(ISecureTestGrain.GetDataAsync));
+        RequestContext.Set(ScynapseSecurityConstants.CallerPublicKeyKey, unknownKey.PublicKeyBytes.ToArray());
+        // No CCap
+
+        var ex = await Assert.ThrowsAsync<ScynapseSecurityException>(
+            () => filter.Invoke(ctx));
+        Assert.Contains("Authentication required", ex.Message);
+
+        RequestContext.Clear();
+    }
+
+    [Fact]
+    public async Task StrictGrain_RejectsTrustedNodeWithoutCCap()
+    {
+        // A grain with RequiresCallerCapability=true should require CCap even from trusted nodes
+        var nodeKey = ScynapseKeyPair.Generate(ScynapseKeyType.Node);
+        var filter = CreateFilterWithTrustedNodes(nodeKey.PublicKeyBytes.ToArray());
+        var ctx = CreateContext(typeof(IStrictSecureTestGrain), nameof(IStrictSecureTestGrain.TransferAsync));
+
+        RequestContext.Set(ScynapseSecurityConstants.CallerPublicKeyKey, nodeKey.PublicKeyBytes.ToArray());
+        // No CCap
+
+        var ex = await Assert.ThrowsAsync<ScynapseSecurityException>(
+            () => filter.Invoke(ctx));
+        Assert.Contains("Authentication required", ex.Message);
+
+        RequestContext.Clear();
+    }
+}
+
+// Grain with RequiresCallerCapability = true (strict mode)
+[SecurityPolicy(RequiresAuthentication = true, RequiresCallerCapability = true)]
+public interface IStrictSecureTestGrain : IGrainWithStringKey
+{
+    [RequireCapability(Action = "transfer")]
+    Task TransferAsync();
 }
