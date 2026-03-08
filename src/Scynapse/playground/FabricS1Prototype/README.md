@@ -39,6 +39,12 @@ Run S2 fixture pack:
 dotnet run --project playground/FabricS1Prototype/FabricS1Prototype.csproj -- D:\Dev\dotnext\Docs\Scynapse\Design\Fixtures\S2
 ```
 
+Run S3 fixture pack:
+
+```powershell
+dotnet run --project playground/FabricS1Prototype/FabricS1Prototype.csproj -- D:\Dev\dotnext\Docs\Scynapse\Design\Fixtures\S3
+```
+
 Expected-fail fixture semantics:
 
 1. `expected_error_ids` is the preferred exact failure oracle.
@@ -52,3 +58,8 @@ Slice profile semantics:
    - `disclosure_allowed`
    - `grant_status`
    - `trust_sufficient`
+3. `slice_profile: "S3"` enables encrypted endpoint disclosure grant validation:
+   - `endpoint_directory_mode`
+   - `endpoint_grant_status`
+   - `endpoint_disclosure_allowed`
+   - `GrantPresent` proof-path checks before `ResolveResponse`

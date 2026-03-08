@@ -1,0 +1,37 @@
+{
+  "id": "TV-006",
+  "title": "Encrypted Endpoint Resolve Denied (Missing Grant)",
+  "slice_profile": "S3",
+  "preconditions": [
+    "endpoint directory mode is encrypted",
+    "requester lacks required endpoint grant"
+  ],
+  "messages": [
+    {
+      "type": "ResolveRequest",
+      "role": "requester",
+      "body": {
+        "operation_class": "endpoint",
+        "expr_raw": ".Adult.Games.RedX.Endpoint",
+        "endpoint_directory_mode": "encrypted",
+        "endpoint_grant_status": "missing",
+        "endpoint_disclosure_allowed": true
+      }
+    },
+    { "type": "ResolveDeny", "role": "authority", "body": { "deny_code": "GrantMissing" } }
+  ],
+  "expected_state_trace": [
+    "ResolveIntent",
+    "DiscoverPath",
+    "Deny"
+  ],
+  "expected_outcome": {
+    "success": false,
+    "deny_code": "GrantMissing",
+    "retryable": true
+  },
+  "assertions": [
+    { "id": "A1", "kind": "state", "check": "final_state_equals", "value": "Deny" },
+    { "id": "A2", "kind": "error", "check": "deny_code_equals", "value": "GrantMissing" }
+  ]
+}

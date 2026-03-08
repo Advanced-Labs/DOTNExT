@@ -214,3 +214,24 @@ Use this structure for each new entry:
    - push S2 branch and start bounded S3 planning (`TV-005`, `TV-006`) if approved.
 5. Risks/blockers:
    - none immediate; preserve error ID stability and avoid deferred wire-decision scope creep.
+
+### 2026-03-08 (S3 Endpoint-Grant Slice Implementation)
+
+1. Scope:
+   - implement bounded S3 encrypted endpoint disclosure grant slice on top of S2 baseline.
+2. Key outputs:
+   - created `codex/s3-endpoint-grants` from S2 baseline.
+   - extended harness to `slice_profile: "S3"` and added endpoint grant/disclosure fields for endpoint resolves.
+   - added `GrantPresent` message handling and deterministic S3 error IDs for grant-path failures.
+   - added isolated S3 fixture pack: `TV-005`, `TV-006`, `TV-301`, `TV-302`.
+   - added `M0-S3-Task-Board.md` and synchronized protocol/harness/compatibility docs.
+   - validation runs:
+     - S1: 14/14 effective pass
+     - S2: 8/8 effective pass
+     - S3: 4/4 effective pass (repeated S3 run stable)
+3. Current doing:
+   - final continuity synchronization and commit preparation on `codex/s3-endpoint-grants`.
+4. Next:
+   - push S3 branch and open bounded S4 planning (`TV-007`..`TV-010`) if approved.
+5. Risks/blockers:
+   - none immediate; keep deferred wire decisions (`D3`, `D5`, `D7`, `D8`) untouched.

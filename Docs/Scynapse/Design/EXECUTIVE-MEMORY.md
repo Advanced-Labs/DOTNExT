@@ -4,11 +4,11 @@ Last updated: 2026-03-08
 
 ## 1. Mission Snapshot
 
-Current mission: finish M0 foundation without drift by carrying a closed S1 baseline into bounded S2 direct-upgrade validation.
+Current mission: finish M0 foundation without drift by carrying stable S1/S2/S3 conformance baselines into bounded S4 planning.
 
 Pre-compaction checkpoint status (2026-03-08):
 
-1. active branch: `codex/s2-direct-upgrade`
+1. active branch: `codex/s3-endpoint-grants`
 2. continuity files synchronized
 3. no in-scope uncommitted changes at checkpoint handoff
 
@@ -18,6 +18,7 @@ Current active path:
 2. M0-B structured draft with wire-lock decisions
 3. S1 prototype closed with deterministic message-driven conformance baseline
 4. S2 direct-upgrade slice implemented (profile-gated, fallback-preserving)
+5. S3 endpoint-grant slice implemented (encrypted endpoint disclosure gate semantics)
 
 ---
 
@@ -58,15 +59,21 @@ Current active path:
 31. deterministic S2 error IDs added for reject-code mismatch and invalid-accept paths
 32. isolated S2 fixture pack added (`Docs/Scynapse/Design/Fixtures/S2`): TV-004, TV-014, TV-201..TV-206
 33. regression results stable: S1 14/14 effective pass, S2 8/8 effective pass, repeated runs reproducible
+34. S2 implementation commit pushed on `codex/s2-direct-upgrade` (`7bfa560428`)
+35. S3 implementation branch created: `codex/s3-endpoint-grants`
+36. S3 profile support added for encrypted endpoint disclosure grant validation (`slice_profile: S3`)
+37. S3 endpoint fixtures added (`Docs/Scynapse/Design/Fixtures/S3`): TV-005, TV-006, TV-301, TV-302
+38. deterministic S3 error IDs added for grant-path ordering and proof-path failures
+39. regression results stable: S1 14/14 effective pass, S2 8/8 effective pass, S3 4/4 effective pass with repeated S3 run reproducibility
 
 ### Doing
 
-1. final S2 continuity synchronization and branch push preparation
+1. final S3 continuity synchronization and branch push preparation
 
 ### Next
 
-1. preserve S1/S2 fixture and error-ID stability as new slices are added
-2. open bounded S3 planning for encrypted endpoint disclosure grants (TV-005/TV-006)
+1. preserve S1/S2/S3 fixture and error-ID stability as new slices are added
+2. open bounded S4 planning for observation/replay vectors (`TV-007`..`TV-010`)
 3. continue holding deferred wire decisions (`D3`, `D5`, `D7`, `D8`) outside current scope
 
 ---
@@ -112,7 +119,8 @@ Authority file:
 3. `M0-B-Protocol-Skeleton.md`
 4. `M0-S1-Task-Board.md`
 5. `M0-S2-Task-Board.md`
-6. latest entry in `SESSION-LOG.md`
+6. `M0-S3-Task-Board.md`
+7. latest entry in `SESSION-LOG.md`
 
 ---
 
@@ -131,6 +139,8 @@ Authority file:
    - `M0-S1-Closure.md`
    - `M0-S2-Task-Board.md`
    - `Fixtures/S2/README.md`
+   - `M0-S3-Task-Board.md`
+   - `Fixtures/S3/README.md`
 5. Wire lock:
    - `M0-B-Wire-Lock-Open-Decisions.md`
    - `M0-B-Wire-Examples.md`

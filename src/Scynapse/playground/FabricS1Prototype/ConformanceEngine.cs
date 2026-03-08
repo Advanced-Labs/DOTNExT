@@ -6,11 +6,13 @@ internal sealed class ConformanceEngine
 {
     private const string SliceProfileS1 = "S1";
     private const string SliceProfileS2 = "S2";
+    private const string SliceProfileS3 = "S3";
 
     private static readonly HashSet<string> KnownSliceProfiles = new(StringComparer.Ordinal)
     {
         SliceProfileS1,
-        SliceProfileS2
+        SliceProfileS2,
+        SliceProfileS3
     };
 
     private static readonly HashSet<string> KnownGrantStatuses = new(StringComparer.Ordinal)
@@ -19,6 +21,12 @@ internal sealed class ConformanceEngine
         "missing",
         "expired",
         "not_required"
+    };
+
+    private static readonly HashSet<string> KnownEndpointDirectoryModes = new(StringComparer.Ordinal)
+    {
+        "plaintext",
+        "encrypted"
     };
 
     private static readonly HashSet<string> KnownMessageTypes = new(StringComparer.Ordinal)
@@ -32,6 +40,7 @@ internal sealed class ConformanceEngine
         "HandshakeProof",
         "HandshakeAccept",
         "HandshakeDeny",
+        "GrantPresent",
         "RouteUpgradeProbe",
         "RouteUpgradeAccept",
         "RouteUpgradeReject"
@@ -43,6 +52,7 @@ internal sealed class ConformanceEngine
         ["ResolveDeny"] = new(StringComparer.Ordinal) { "deny_code" },
         ["HandshakeAccept"] = new(StringComparer.Ordinal) { "route_mode", "disclosure_level" },
         ["HandshakeDeny"] = new(StringComparer.Ordinal) { "deny_code" },
+        ["GrantPresent"] = new(StringComparer.Ordinal) { "grant_scope" },
         ["RouteUpgradeReject"] = new(StringComparer.Ordinal) { "decision_code" }
     };
 
@@ -55,7 +65,9 @@ internal sealed class ConformanceEngine
             "DisclosureDenied",
             "AmbiguousResolution",
             "MediatorUnavailable",
-            "TrustInsufficient"
+            "TrustInsufficient",
+            "GrantMissing",
+            "GrantExpired"
         },
         ["HandshakeDeny"] = new(StringComparer.Ordinal)
         {
@@ -241,6 +253,12 @@ internal sealed class ConformanceEngine
             {
                 ValidateS2RouteUpgradeProbeFields(fixture, message, errors);
             }
+
+            if (string.Equals(sliceProfile, SliceProfileS3, StringComparison.Ordinal) &&
+                string.Equals(message.Type, "ResolveRequest", StringComparison.Ordinal))
+            {
+                ValidateS3ResolveRequestFields(fixture, message, errors);
+            }
         }
     }
 
@@ -335,6 +353,56 @@ internal sealed class ConformanceEngine
         return null;
     }
 
+    private static void ValidateS3ResolveRequestFields(FixtureCase fixture, FixtureMessage message, List<ConformanceError> errors)
+    {
+        var operationClass = GetBodyString(message, "operation_class");
+        if (!string.Equals(operationClass, "endpoint", StringComparison.Ordinal))
+        {
+            return;
+        }
+
+        if (message.Body is null || message.Body.Value.ValueKind != JsonValueKind.Object)
+        {
+            AddError(errors, "L2", "E2001_MISSING_REQUIRED_BODY", $"{fixture.Id}/{message.Type} missing required body.");
+            return;
+        }
+
+        if (!message.Body.Value.TryGetProperty("endpoint_directory_mode", out var directoryModeElement))
+        {
+            AddError(errors, "L2", "E2002_MISSING_REQUIRED_FIELD", $"{fixture.Id}/{message.Type} missing required field 'endpoint_directory_mode'.");
+        }
+        else if (directoryModeElement.ValueKind != JsonValueKind.String)
+        {
+            AddError(errors, "L2", "E2003_INVALID_FIELD_TYPE", $"{fixture.Id}/{message.Type} field 'endpoint_directory_mode' must be a string.");
+        }
+        else if (!KnownEndpointDirectoryModes.Contains(directoryModeElement.GetString() ?? string.Empty))
+        {
+            AddError(errors, "L2", "E2004_INVALID_FIELD_VALUE", $"{fixture.Id}/{message.Type} field 'endpoint_directory_mode' value '{directoryModeElement.GetString() ?? "null"}' is invalid.");
+        }
+
+        if (!message.Body.Value.TryGetProperty("endpoint_grant_status", out var grantStatusElement))
+        {
+            AddError(errors, "L2", "E2002_MISSING_REQUIRED_FIELD", $"{fixture.Id}/{message.Type} missing required field 'endpoint_grant_status'.");
+        }
+        else if (grantStatusElement.ValueKind != JsonValueKind.String)
+        {
+            AddError(errors, "L2", "E2003_INVALID_FIELD_TYPE", $"{fixture.Id}/{message.Type} field 'endpoint_grant_status' must be a string.");
+        }
+        else if (!KnownGrantStatuses.Contains(grantStatusElement.GetString() ?? string.Empty))
+        {
+            AddError(errors, "L2", "E2004_INVALID_FIELD_VALUE", $"{fixture.Id}/{message.Type} field 'endpoint_grant_status' value '{grantStatusElement.GetString() ?? "null"}' is invalid.");
+        }
+
+        if (!message.Body.Value.TryGetProperty("endpoint_disclosure_allowed", out var disclosureElement))
+        {
+            AddError(errors, "L2", "E2002_MISSING_REQUIRED_FIELD", $"{fixture.Id}/{message.Type} missing required field 'endpoint_disclosure_allowed'.");
+        }
+        else if (disclosureElement.ValueKind is not (JsonValueKind.True or JsonValueKind.False))
+        {
+            AddError(errors, "L2", "E2003_INVALID_FIELD_TYPE", $"{fixture.Id}/{message.Type} field 'endpoint_disclosure_allowed' must be a boolean.");
+        }
+    }
+
     private static OperationContext ExecuteMessageFlow(FixtureCase fixture, string sliceProfile, List<ConformanceError> errors)
     {
         var context = new OperationContext
@@ -416,6 +484,18 @@ internal sealed class ConformanceEngine
                 context.RequiresSelectorHints = GetBodyBoolean(message, "requires_selector_hints") ?? false;
                 context.HasSelectorHints = HasNonEmptyStringArray(message, "selector_hints");
 
+                if (string.Equals(context.SliceProfile, SliceProfileS3, StringComparison.Ordinal))
+                {
+                    var operationClass = GetBodyString(message, "operation_class");
+                    context.EndpointOperationActive = string.Equals(operationClass, "endpoint", StringComparison.Ordinal);
+                    if (context.EndpointOperationActive)
+                    {
+                        context.EndpointDirectoryMode = GetBodyString(message, "endpoint_directory_mode") ?? "plaintext";
+                        context.EndpointGrantStatus = GetBodyString(message, "endpoint_grant_status") ?? "not_required";
+                        context.EndpointDisclosureAllowed = GetBodyBoolean(message, "endpoint_disclosure_allowed") ?? true;
+                    }
+                }
+
                 if (context.CurrentState is null)
                 {
                     SetState(context, "ResolveIntent");
@@ -458,6 +538,14 @@ internal sealed class ConformanceEngine
                 {
                     RejectWithDeterministicDeny(fixtureId, context, errors, "E3017_AMBIGUOUS_SELECTOR_HINTS_REQUIRED", "AmbiguousResolution", $"{fixtureId}/{message.Type} is invalid when selector hints are required but missing or empty.");
                     break;
+                }
+
+                if (string.Equals(context.SliceProfile, SliceProfileS3, StringComparison.Ordinal) && context.EndpointOperationActive)
+                {
+                    if (TryEvaluateS3EndpointGateFailure(fixtureId, context, errors))
+                    {
+                        break;
+                    }
                 }
 
                 if (string.Equals(context.CurrentState, "DiscoverPath", StringComparison.Ordinal))
@@ -594,6 +682,29 @@ internal sealed class ConformanceEngine
                 ForceTerminalDeny(context);
                 break;
             }
+            case "GrantPresent":
+            {
+                if (!context.ResolveStarted)
+                {
+                    RejectWithDeterministicDeny(fixtureId, context, errors, "E3031_GRANT_MESSAGE_BEFORE_REQUEST", "TrustInsufficient", $"{fixtureId}/{message.Type} appears before ResolveRequest.");
+                    break;
+                }
+
+                if (!string.Equals(context.SliceProfile, SliceProfileS3, StringComparison.Ordinal))
+                {
+                    RejectWithDeterministicDeny(fixtureId, context, errors, "E3032_GRANT_MESSAGE_OUTSIDE_S3", "TrustInsufficient", $"{fixtureId}/{message.Type} is only supported in S3 endpoint-grant flow.");
+                    break;
+                }
+
+                if (!context.EndpointOperationActive)
+                {
+                    RejectWithDeterministicDeny(fixtureId, context, errors, "E3037_GRANT_MESSAGE_NON_ENDPOINT_OPERATION", "TrustInsufficient", $"{fixtureId}/{message.Type} is invalid when operation_class is not 'endpoint'.");
+                    break;
+                }
+
+                context.GrantPresentSeen = true;
+                break;
+            }
             case "RouteUpgradeProbe":
             {
                 if (!StateIs(context, "RelayedSession"))
@@ -700,6 +811,40 @@ internal sealed class ConformanceEngine
                 break;
             }
         }
+    }
+
+    private static bool TryEvaluateS3EndpointGateFailure(string fixtureId, OperationContext context, List<ConformanceError> errors)
+    {
+        if (!context.EndpointDisclosureAllowed)
+        {
+            RejectWithDeterministicDeny(fixtureId, context, errors, "E3033_S3_ENDPOINT_DISCLOSURE_DENIED", "DisclosureDenied", $"{fixtureId}/ResolveResponse endpoint disclosure is blocked by policy.");
+            return true;
+        }
+
+        if (!string.Equals(context.EndpointDirectoryMode, "encrypted", StringComparison.Ordinal))
+        {
+            return false;
+        }
+
+        if (string.Equals(context.EndpointGrantStatus, "missing", StringComparison.Ordinal))
+        {
+            RejectWithDeterministicDeny(fixtureId, context, errors, "E3034_S3_ENDPOINT_GRANT_MISSING", "GrantMissing", $"{fixtureId}/ResolveResponse requires active endpoint grant.");
+            return true;
+        }
+
+        if (string.Equals(context.EndpointGrantStatus, "expired", StringComparison.Ordinal))
+        {
+            RejectWithDeterministicDeny(fixtureId, context, errors, "E3035_S3_ENDPOINT_GRANT_EXPIRED", "GrantExpired", $"{fixtureId}/ResolveResponse uses an expired endpoint grant.");
+            return true;
+        }
+
+        if (string.Equals(context.EndpointGrantStatus, "active", StringComparison.Ordinal) && !context.GrantPresentSeen)
+        {
+            RejectWithDeterministicDeny(fixtureId, context, errors, "E3036_S3_ENDPOINT_GRANT_PROOF_MISSING", "GrantMissing", $"{fixtureId}/ResolveResponse requires GrantPresent proof path before endpoint disclosure.");
+            return true;
+        }
+
+        return false;
     }
     private static void ValidateStateTrace(FixtureCase fixture, IReadOnlyList<string> observedStateTrace, List<ConformanceError> errors)
     {
@@ -1132,8 +1277,13 @@ internal sealed class OperationContext
     public bool UpgradeProbePending { get; set; }
     public bool UpgradeRejectSeen { get; set; }
     public bool UpgradeFallbackRestored { get; set; }
+    public bool EndpointOperationActive { get; set; }
+    public bool EndpointDisclosureAllowed { get; set; } = true;
+    public bool GrantPresentSeen { get; set; }
     public bool RequiresSelectorHints { get; set; }
     public bool HasSelectorHints { get; set; }
+    public string EndpointDirectoryMode { get; set; } = "plaintext";
+    public string EndpointGrantStatus { get; set; } = "not_required";
     public string? ExpectedUpgradeRejectCode { get; set; }
     public string? ObservedDenyCode { get; set; }
     public string? ObservedUpgradeDecisionCode { get; set; }

@@ -1,0 +1,42 @@
+{
+  "id": "TV-005",
+  "title": "Encrypted Endpoint Resolve with Valid Grant",
+  "slice_profile": "S3",
+  "preconditions": [
+    "endpoint directory mode is encrypted",
+    "requester has active endpoint grant",
+    "grant proof path is presented before endpoint response"
+  ],
+  "messages": [
+    {
+      "type": "ResolveRequest",
+      "role": "requester",
+      "body": {
+        "operation_class": "endpoint",
+        "expr_raw": ".Adult.Games.RedX.Endpoint",
+        "endpoint_directory_mode": "encrypted",
+        "endpoint_grant_status": "active",
+        "endpoint_disclosure_allowed": true
+      }
+    },
+    { "type": "GrantPresent", "role": "requester", "body": { "grant_scope": "resolve.endpoint" } },
+    { "type": "ResolveResponse", "role": "authority" }
+  ],
+  "expected_state_trace": [
+    "ResolveIntent",
+    "DiscoverPath",
+    "PolicyEvaluate",
+    "DisclosurePlan",
+    "MediatedHandshake",
+    "RelayedSession",
+    "Completed"
+  ],
+  "expected_outcome": {
+    "success": true,
+    "deny_code": null
+  },
+  "assertions": [
+    { "id": "A1", "kind": "state", "check": "contains_state", "value": "RelayedSession" },
+    { "id": "A2", "kind": "error", "check": "deny_code_absent", "value": true }
+  ]
+}

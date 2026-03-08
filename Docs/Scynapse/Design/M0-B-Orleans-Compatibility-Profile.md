@@ -131,7 +131,18 @@ This profile maps M0-B protocol fields to their Orleans lineage, with explicit c
 
 ---
 
-## 11. Review Checklist
+## 11. S3 Endpoint-Grant Behavior Classification
+
+| Hardened Behavior | Tag | Notes |
+|---|---|---|
+| Endpoint resolve profile (`operation_class=endpoint`) with encrypted-directory gates | `N` | Scynapse-native disclosure/grant model over CNS endpoint semantics |
+| `GrantPresent` proof-path requirement before encrypted endpoint disclosure | `N` | no Orleans equivalent in grain directory semantics |
+| Deterministic endpoint deny mapping (`GrantMissing`, `GrantExpired`, `DisclosureDenied`) | `N` | protocol-level conformance surface for endpoint disclosure safety |
+| Endpoint grant handling via silo/client locator shortcuts | `D` | explicitly blocked; remains node-unified and policy-gated |
+
+---
+
+## 12. Review Checklist
 
 1. Are any fields tagged `A` but still carrying hidden silo/cluster assumptions?
 2. Are all `N` fields tied to M0-A invariants?

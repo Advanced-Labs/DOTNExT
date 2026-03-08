@@ -369,6 +369,11 @@ Expected outcome:
    - TV-204 (grant expired gate deny path)
    - TV-205 (trust insufficient gate deny path)
    - TV-206 (invalid accept with failed gates; expected fail by exact error ID)
+3. S3 owned vectors:
+   - TV-005 (encrypted endpoint resolve with valid grant)
+   - TV-006 (encrypted endpoint resolve deny with missing grant)
+   - TV-301 (grant proof message before resolve context; expected fail by exact error ID)
+   - TV-302 (endpoint response without required grant proof path; expected fail by exact error ID)
 
 ---
 
@@ -378,9 +383,11 @@ Completed:
 
 1. runnable harness checklist and fixture contract (`M0-B-Conformance-Harness-Checklist.md`)
 2. S1 fixture pack execution complete with deterministic baseline (`Docs/Scynapse/Design/Fixtures/S1`)
+3. S2 fixture pack execution complete with deterministic baseline (`Docs/Scynapse/Design/Fixtures/S2`)
+4. S3 fixture pack execution complete with deterministic baseline (`Docs/Scynapse/Design/Fixtures/S3`)
 
 Current next step:
 
-1. execute S2 direct-upgrade fixture pack (`Docs/Scynapse/Design/Fixtures/S2`)
-2. enforce profile-aware gate ordering and fallback continuity semantics
-3. preserve S1 baseline behavior and error ID stability during S2 expansion
+1. open bounded S4 planning for observation/replay vectors (`TV-007`..`TV-010`)
+2. preserve S1/S2/S3 baseline behavior and machine-checkable error ID stability
+3. keep deferred wire decisions (`D3`, `D5`, `D7`, `D8`) untouched until explicitly unlocked

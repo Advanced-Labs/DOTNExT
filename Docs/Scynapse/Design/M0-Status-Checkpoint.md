@@ -57,6 +57,8 @@ Artifacts:
 2. `Docs/Scynapse/Design/M0-B-Orleans-Compatibility-Profile.md`
 3. `Docs/Scynapse/Design/M0-Orleans-Reuse-Matrix.md`
 4. `Docs/Scynapse/Design/M0-S1-Closure.md`
+5. `Docs/Scynapse/Design/M0-S2-Task-Board.md`
+6. `Docs/Scynapse/Design/M0-S3-Task-Board.md`
 
 Status:
 
@@ -80,8 +82,8 @@ Yes. We are still on the same track:
 
 ## 5. Immediate Next Work (Ordered)
 
-1. preserve S1 and S2 conformance stability as baseline for next slice
-2. open bounded S3 planning (`TV-005`, `TV-006`) without scope creep into deferred wire decisions
+1. preserve S1/S2/S3 conformance stability as baseline for next slice
+2. open bounded S4 planning for observation/replay (`TV-007`..`TV-010`) without scope creep into deferred wire decisions
 3. maintain deterministic machine-checkable error ID discipline for all new fail vectors
 4. keep deferred wire decisions (`D3`, `D5`, `D7`, `D8`) untouched until explicitly unlocked
 
@@ -89,6 +91,6 @@ Yes. We are still on the same track:
 
 ## 6. Done/Doing/Next Snapshot
 
-1. `Done`: M0-A contract baseline and M0-B skeleton + compatibility profiles + field matrix + error mapping + state transitions + protocol test vectors + conformance harness checklist + wire examples + cross-doc consistency report + implementation-slice plan + S1 task board + S1 fixture pack + wire-lock decisions list + continuity layer (`METHODOLOGY`, `EXECUTIVE-MEMORY`, `SESSION-LOG`) + pre-compaction continuity protocol + `codex/s1-prototype` branch creation + S1 prototype harness scaffold (`src/Scynapse/playground/FabricS1Prototype`) + first fixture run pass (5/5) + S1 wire-lock decisions (`D1`, `D2`, `D4`, `D6`) locked and propagated + expected-fail fixture mode with extended S1 pack (8/8 effective pass) + expected error-token checks + explicit message-driven operation state machine + structured error ID surface + fixture schema `expected_error_ids` + transition-edge negatives `TV-104`..`TV-109` + reproducible harness run pass (14/14 effective pass) + S1 closure artifact/commit (`M0-S1-Closure.md`, `04e297587d`) + S2 branch kickoff (`codex/s2-direct-upgrade`) + S2 task board and fixture pack (`Fixtures/S2`) + profile-aware direct-upgrade conformance with deterministic gate ordering and fallback continuity + S2 pass set (8/8 effective pass) with stable repeated runs.
-2. `Doing`: final S2 continuity sync and branch push.
-3. `Next`: bounded S3 planning for encrypted endpoint disclosure grants (`TV-005`, `TV-006`).
+1. `Done`: M0-A contract baseline and M0-B skeleton + compatibility profiles + field matrix + error mapping + state transitions + protocol test vectors + conformance harness checklist + wire examples + cross-doc consistency report + implementation-slice plan + S1 task board + S1 fixture pack + wire-lock decisions list + continuity layer (`METHODOLOGY`, `EXECUTIVE-MEMORY`, `SESSION-LOG`) + pre-compaction continuity protocol + `codex/s1-prototype` branch creation + S1 prototype harness scaffold (`src/Scynapse/playground/FabricS1Prototype`) + first fixture run pass (5/5) + S1 wire-lock decisions (`D1`, `D2`, `D4`, `D6`) locked and propagated + expected-fail fixture mode with extended S1 pack (8/8 effective pass) + expected error-token checks + explicit message-driven operation state machine + structured error ID surface + fixture schema `expected_error_ids` + transition-edge negatives `TV-104`..`TV-109` + reproducible harness run pass (14/14 effective pass) + S1 closure artifact/commit (`M0-S1-Closure.md`, `04e297587d`) + S2 branch kickoff (`codex/s2-direct-upgrade`) + S2 task board and fixture pack (`Fixtures/S2`) + profile-aware direct-upgrade conformance with deterministic gate ordering and fallback continuity + S2 pass set (8/8 effective pass) with stable repeated runs + S2 commit push (`7bfa560428`) + S3 branch kickoff (`codex/s3-endpoint-grants`) + S3 task board and fixture pack (`Fixtures/S3`) + endpoint grant/disclosure conformance with deterministic proof-path checks + S3 pass set (4/4 effective pass) with repeated stable run.
+2. `Doing`: final S3 continuity sync and branch push.
+3. `Next`: bounded S4 planning for observation/replay vectors (`TV-007`..`TV-010`).

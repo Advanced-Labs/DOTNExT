@@ -1,0 +1,30 @@
+{
+  "id": "TV-301",
+  "title": "Invalid Grant Flow: GrantPresent Before ResolveRequest",
+  "slice_profile": "S3",
+  "expect_conformance": "fail",
+  "expected_error_ids": [
+    "E3031_GRANT_MESSAGE_BEFORE_REQUEST"
+  ],
+  "expected_error_contains": [
+    "appears before ResolveRequest"
+  ],
+  "preconditions": [
+    "grant message arrives without active resolve context"
+  ],
+  "messages": [
+    { "type": "GrantPresent", "role": "requester", "body": { "grant_scope": "resolve.endpoint" } }
+  ],
+  "expected_state_trace": [
+    "Deny"
+  ],
+  "expected_outcome": {
+    "success": false,
+    "deny_code": "TrustInsufficient",
+    "retryable": false
+  },
+  "assertions": [
+    { "id": "A1", "kind": "state", "check": "final_state_equals", "value": "Deny" },
+    { "id": "A2", "kind": "error", "check": "deny_code_equals", "value": "TrustInsufficient" }
+  ]
+}

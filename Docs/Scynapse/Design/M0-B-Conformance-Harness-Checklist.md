@@ -132,6 +132,15 @@ S2 extension note:
    - `grant_status` (`active|missing|expired|not_required`)
    - `trust_sufficient` (bool)
 
+S3 extension note:
+
+1. `slice_profile: "S3"` enables encrypted endpoint grant/disclosure validation.
+2. S3 `ResolveRequest` fixtures with `operation_class=endpoint` must include:
+   - `endpoint_directory_mode` (`plaintext|encrypted`)
+   - `endpoint_grant_status` (`active|missing|expired|not_required`)
+   - `endpoint_disclosure_allowed` (bool)
+3. encrypted endpoint disclosure with active grant requires `GrantPresent` proof path before `ResolveResponse`.
+
 ---
 
 ## 5. Conformance Gates (Pass/Fail)
@@ -167,6 +176,7 @@ Pass criteria:
 4. S1 profile rejects direct-upgrade accept path deterministically
 5. S2 profile applies gate order deterministically:
    - `PolicyDenied -> DisclosureDenied -> GrantMissing/GrantExpired -> TrustInsufficient -> UpgradeRejected`
+6. S3 profile denies encrypted endpoint disclosure deterministically when grant/disclosure gates are unmet.
 
 ### 5.5 Gate G5: Observation Conformance
 

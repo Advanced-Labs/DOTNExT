@@ -128,8 +128,10 @@ Completed:
 
 1. S1 implementation task board: `M0-S1-Task-Board.md`
 2. S1 closure baseline: `M0-S1-Closure.md` (14/14 effective pass)
+3. S2 implementation task board: `M0-S2-Task-Board.md` (8/8 effective pass)
+4. S3 implementation task board: `M0-S3-Task-Board.md` (4/4 effective pass)
 
 Current next action:
 
-1. execute S2 task board: `M0-S2-Task-Board.md`
-2. add and run isolated `Fixtures/S2` pack for TV-004/TV-014 and S2 gate vectors
+1. start bounded S4 planning for observation/replay vectors (`TV-007`..`TV-010`)
+2. maintain baseline stability across S1/S2/S3 while adding S4 scope
