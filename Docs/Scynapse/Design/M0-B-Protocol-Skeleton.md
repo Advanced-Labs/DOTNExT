@@ -12,7 +12,7 @@ Scope:
 4. deterministic failure classes
 5. scenario checklist for implementation and tests
 
-This is a design skeleton, not a locked wire format.
+This is a design skeleton with S1 wire-lock decisions applied (`D1`, `D2`, `D4`, `D6`).
 
 ---
 
@@ -91,31 +91,38 @@ Reference:
 
 ---
 
-## 4. Common Envelope (conceptual)
+## 4. Common Envelope (conceptual debug rendering)
 
 ```json
 {
   "msg_type": "ResolveRequest|HandshakeInit|...",
   "msg_id": "unique",
   "trace_id": "correlation id",
-  "timestamp": "utc",
+  "timestamp": 1736092800000,
   "from": {
     "node_id": "public key or node id",
     "name_anchor": "<root>.A.B"
   },
-  "intent": "resolve|invoke|observe|policy",
+  "intent": 0,
   "target_scope": "<root>.Path",
   "relation_id": "optional",
-  "route_mode": "parent_mediated|relay_mediated|anonymous_relay|direct_upgraded",
-  "disclosure_level": "hidden|mediator_visible|mutual_visible",
+  "route_mode": 0,
+  "disclosure_level": 1,
   "proofs": {
-    "capability_refs": [],
+    "capability_refs": [[1, "0x..."]],
     "bearer_proof": "optional",
-    "attestation_refs": []
+    "attestation_refs": [[1, "0x..."]]
   },
   "ttl_ms": 30000
 }
 ```
+
+Wire-lock notes:
+
+1. enum fields in the envelope/body use compact unsigned integer codes on wire (`D1`).
+2. `timestamp` and other temporal fields use Unix epoch milliseconds (`int64`, UTC) on wire (`D2`).
+3. proof refs use digest tuples (`[alg_code, digest]`) on wire (`D4`).
+4. this JSON block is readability-oriented debug rendering, not canonical wire bytes.
 
 ---
 
@@ -153,12 +160,12 @@ Reference:
 {
   "relation_id": "unique",
   "participants": ["nodeA", "nodeB"],
-  "route_mode": "parent_mediated|relay_mediated|direct_upgraded",
+  "route_mode": 0,
   "scope": "<root>.Path or subtree",
   "ops": ["invoke", "observe.meta", "resolve.endpoint"],
-  "disclosure_level": "hidden|mediator_visible|mutual_visible",
-  "issued_at": "utc",
-  "expires_at": "utc",
+  "disclosure_level": 1,
+  "issued_at": 1736092800000,
+  "expires_at": 1736093700000,
   "issuer_chain_refs": []
 }
 ```
@@ -253,7 +260,7 @@ Failure responses should include:
 
 ---
 
-## 11. M0-B Locked Defaults (Current Draft)
+## 11. M0-B Locked Defaults (S1 Lock Pass)
 
 1. Canonical serialization profile:
    - Wire canonical format is CBOR (deterministic/canonical profile).
@@ -278,3 +285,17 @@ Failure responses should include:
    - grant/capability references used
    - route mode and disclosure level
    - payload reference hash (not raw sensitive payload by default)
+6. Enum wire representation (`D1`):
+   - operational enums are encoded as compact unsigned integer codes on wire.
+   - canonical text labels remain mandatory for debug/tooling rendering.
+   - unknown enum code is a schema/protocol failure.
+7. Timestamp wire representation (`D2`):
+   - temporal fields use Unix epoch milliseconds (`int64`, UTC) on wire.
+   - RFC3339 text is debug/tooling-only.
+8. Proof reference wire representation (`D4`):
+   - `capability_refs` and `attestation_refs` use digest tuples (`[alg_code, digest_bstr]`) on wire.
+   - `bearer_proof` remains opaque proof payload when present.
+9. Key dictionary stability (`D6`):
+   - dictionary `v1` is frozen for S1 field set.
+   - family key ranges are reserved for forward-compatible growth.
+   - field-level key assignments are canonicalized in `M0-B-Message-Field-Matrix.md`.

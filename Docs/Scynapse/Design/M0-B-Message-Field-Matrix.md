@@ -26,18 +26,159 @@ Envelope fields that apply to all messages:
 | `msg_type` | R | A | Must match family/type exactly |
 | `msg_id` | R | A | Unique within sender replay window |
 | `trace_id` | R | A | Stable across a relation flow |
-| `timestamp` | R | A | UTC |
+| `timestamp` | R | A | Unix epoch milliseconds (`int64`, UTC) on wire |
 | `from.node_id` | R | A | Node identity key or equivalent id |
 | `from.name_anchor` | C | N | Required when CNS policy/path context is relevant |
-| `intent` | R | N | `resolve|invoke|observe|policy` |
+| `intent` | R | N | enum code on wire; text label in debug rendering |
 | `target_scope` | C | N | Required for scope-addressed operations |
 | `relation_id` | C | N | Required after relation establishment |
-| `route_mode` | C | N | Required for route/handshake/observe data path |
-| `disclosure_level` | C | N | Required when endpoint visibility matters |
-| `proofs.capability_refs` | C | N | Required for capability-gated actions |
+| `route_mode` | C | N | enum code on wire; text label in debug rendering |
+| `disclosure_level` | C | N | enum code on wire; text label in debug rendering |
+| `proofs.capability_refs` | C | N | array of digest tuples (`[alg_code, digest_bstr]`) |
 | `proofs.bearer_proof` | C | N | Required when bearer ownership proof is required |
-| `proofs.attestation_refs` | O | N | Trust evidence references |
+| `proofs.attestation_refs` | O | N | array of digest tuples (`[alg_code, digest_bstr]`) |
 | `ttl_ms` | R | A | Operation expiry bound |
+
+### 2.1 S1 Wire-Lock Profile (`D1`, `D2`, `D4`, `D6`)
+
+Locked enum codebooks for S1:
+
+1. `intent`
+   - `0=resolve`
+   - `1=invoke`
+   - `2=observe`
+   - `3=policy`
+2. `operation_class`
+   - `0=meta`
+   - `1=value`
+   - `2=endpoint`
+   - `3=invoke`
+   - `4=observe`
+3. `route_mode`
+   - `0=parent_mediated`
+   - `1=relay_mediated`
+   - `2=anonymous_relay`
+   - `3=direct_upgraded`
+4. `disclosure_level`
+   - `0=hidden`
+   - `1=mediator_visible`
+   - `2=mutual_visible`
+5. `deny_code`
+   - `1=PathNotFound`
+   - `2=PolicyDenied`
+   - `3=DisclosureDenied`
+   - `4=TrustInsufficient`
+   - `5=UpgradeRejected`
+   - `6=MediatorUnavailable`
+   - `7=GrantMissing`
+   - `8=GrantExpired`
+   - `9=ReplayWindowExpired`
+   - `10=AmbiguousResolution`
+
+Locked proof digest algorithm codes for S1:
+
+1. `1=sha256`
+2. `2=sha384`
+3. `3=sha512`
+
+---
+
+### 2.2 Key Dictionary `v1` (Frozen for S1 Field Set)
+
+Family ranges:
+
+1. `1-31` envelope/common
+2. `32-63` resolve
+3. `64-95` handshake
+4. `96-127` route/upgrade
+5. `128-159` observe (reserved in S1)
+6. `160-191` policy/grant (reserved in S1)
+
+Envelope/common keys:
+
+| Key | Field |
+|---|---|
+| `1` | `msg_type` |
+| `2` | `msg_id` |
+| `3` | `trace_id` |
+| `4` | `timestamp` |
+| `5` | `from` |
+| `6` | `intent` |
+| `7` | `target_scope` |
+| `8` | `relation_id` |
+| `9` | `route_mode` |
+| `10` | `disclosure_level` |
+| `11` | `proofs` |
+| `12` | `ttl_ms` |
+
+Nested envelope keys:
+
+1. `from`: `1=node_id`, `2=name_anchor`
+2. `proofs`: `1=capability_refs`, `2=bearer_proof`, `3=attestation_refs`
+
+Resolve keys (S1-assigned):
+
+| Key | Field |
+|---|---|
+| `33` | `expr_raw` |
+| `34` | `expr_norm` |
+| `35` | `operation_class` |
+| `36` | `preferred_route_mode` |
+| `37` | `selector_hints` |
+| `38` | `cursor_or_revision` |
+| `39` | `resolved_scope` |
+| `40` | `candidate_bindings` |
+| `41` | `effective_policy_ref` |
+| `42` | `disclosure_constraints` |
+| `43` | `referral_hints` |
+| `44` | `decision_code` |
+| `45` | `referral_scope` |
+| `46` | `referral_expiry` |
+| `47` | `relay_requirements` |
+| `48` | `policy_proof_refs` |
+| `49` | `deny_code` |
+| `50` | `reason` |
+| `51` | `retryable` |
+| `52` | `remediation` |
+
+Handshake keys (S1-assigned):
+
+| Key | Field |
+|---|---|
+| `65` | `requested_ops` |
+| `66` | `requested_scope` |
+| `67` | `requested_disclosure_level` |
+| `68` | `proposed_route_mode` |
+| `69` | `challenge_nonce` |
+| `70` | `required_proofs` |
+| `71` | `expires_at` |
+| `72` | `bearer_proof` |
+| `73` | `capability_refs` |
+| `74` | `attestation_refs` |
+| `75` | `relation_token` |
+| `76` | `route_mode` |
+| `77` | `disclosure_level` |
+| `78` | `fallback_route_ref` |
+| `79` | `deny_code` |
+| `80` | `policy_ref` |
+| `81` | `retryable` |
+
+Route/upgrade keys (S1-assigned):
+
+| Key | Field |
+|---|---|
+| `97` | `relation_id` |
+| `98` | `route_mode` |
+| `99` | `relay_path` |
+| `100` | `keepalive_ms` |
+| `101` | `upgrade_target_mode` |
+| `102` | `endpoint_disclosure_grant_ref` |
+| `103` | `consent_proof` |
+| `104` | `fallback_route_ref` |
+| `105` | `decision_code` |
+| `106` | `reason` |
+| `107` | `active_route_ref` |
+| `108` | `close_reason` |
 
 ---
 
@@ -264,8 +405,9 @@ Envelope fields that apply to all messages:
 Completed:
 
 1. deterministic error mapping by message type (`M0-B-Error-Mapping.md`)
+2. S1 wire-lock profile for enum/timestamp/proof/dictionary (`D1`, `D2`, `D4`, `D6`)
 
 Current next step:
 
 1. keep this matrix synchronized with wire examples and conformance harness fixtures
-2. mark each field with wire-lock status when CBOR key dictionary is finalized
+2. extend dictionary assignments for observe/policy families when S2 scope opens
