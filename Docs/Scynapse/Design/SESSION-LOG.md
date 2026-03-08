@@ -115,3 +115,20 @@ Use this structure for each new entry:
    - add invalid-order/missing-field fixtures and wire-example lock profile refresh.
 5. Risks/blockers:
    - message-to-state mapping is still S1 heuristic and should be tightened as protocol execution logic deepens.
+
+### 2026-03-08 (Negative Fixture Mode + Wire Example Sync)
+
+1. Scope:
+   - add expected-fail conformance mode and extend fixture pack with negative vectors.
+2. Key outputs:
+   - added fixture field `expect_conformance` (`pass`/`fail`) and runner logic for effective pass semantics.
+   - added negative fixtures: `TV-101` (invalid order), `TV-102` (missing required field), `TV-103` (invalid deny code).
+   - extended conformance engine with explicit message-order checks.
+   - synchronized `M0-B-Wire-Examples.md` with locked S1 profile (`D1`, `D2`, `D4`, `D6`).
+   - run result: 8 vectors, 8 effective pass.
+3. Current doing:
+   - preparing deeper negative and edge-case vectors.
+4. Next:
+   - tighten expected-fail assertions to specific expected validation categories/codes.
+5. Risks/blockers:
+   - expected-fail mode currently validates rejection presence, not exact expected rejection set.

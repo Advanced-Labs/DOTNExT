@@ -1,28 +1,34 @@
-# M0-B Wire Examples (Draft)
+# M0-B Wire Examples (S1 Lock Profile)
 
 ## 1. Purpose
 
-Provide minimal wire examples for M0-B in two views:
+Provide minimal wire examples for M0-B using the S1 locked wire profile:
 
-1. JSON debug view (human-readable)
+1. JSON debug view (human-readable labels)
 2. CBOR diagnostic view (wire-oriented, canonical intent)
 
-These examples are design aids, not final golden vectors.
+These are semantic examples, not golden byte fixtures.
 
 ---
 
-## 2. Scope and Assumptions
+## 2. Locked Assumptions
 
-1. Canonical wire format remains CBOR.
-2. JSON debug rendering is non-authoritative.
-3. Examples use a compact integer-key map profile to illustrate canonical wire friendliness.
-4. Key dictionary in this document is `proposed` for M0-B, pending wire lock.
+1. Canonical wire format is deterministic CBOR.
+2. Enums are compact unsigned integer codes on wire (`D1`).
+3. Timestamps are Unix epoch milliseconds (`int64`, UTC) on wire (`D2`).
+4. Proof refs are digest tuples (`[alg_code, digest_bstr]`) on wire (`D4`).
+5. Key dictionary `v1` is frozen for S1 field set (`D6`).
+
+Authority references:
+
+1. `M0-B-Wire-Lock-Open-Decisions.md`
+2. `M0-B-Message-Field-Matrix.md`
 
 ---
 
-## 3. Proposed Compact Key Dictionary (v0 examples)
+## 3. Locked Key Dictionary `v1` (S1)
 
-### 3.1 Envelope Keys
+Envelope/common keys:
 
 | Key | Field |
 |---|---|
@@ -40,93 +46,49 @@ These examples are design aids, not final golden vectors.
 | `12` | `ttl_ms` |
 | `13` | `body` |
 
-### 3.2 Nested Map Keys
+Nested map keys:
 
-`from`:
+1. `from`: `1=node_id`, `2=name_anchor`
+2. `proofs`: `1=capability_refs`, `2=bearer_proof`, `3=attestation_refs`
 
-1. `1` -> `node_id`
-2. `2` -> `name_anchor`
+Example S1 body keys used below:
 
-`proofs`:
-
-1. `1` -> `capability_refs`
-2. `2` -> `bearer_proof`
-3. `3` -> `attestation_refs`
-
-### 3.3 Body Keys by Message
-
-`ResolveRequest.body`:
-
-1. `1` -> `expr_raw`
-2. `2` -> `expr_norm`
-3. `3` -> `operation_class`
-4. `4` -> `preferred_route_mode`
-5. `5` -> `selector_hints`
-6. `6` -> `cursor_or_revision`
-
-`ResolveDeny.body`:
-
-1. `1` -> `deny_code`
-2. `2` -> `reason`
-3. `3` -> `retryable`
-4. `4` -> `remediation`
-5. `5` -> `policy_ref`
-
-`HandshakeAccept.body`:
-
-1. `1` -> `relation_token_ref`
-2. `2` -> `route_mode`
-3. `3` -> `disclosure_level`
-4. `4` -> `expires_at`
-5. `5` -> `fallback_route_ref`
-
-`RouteUpgradeProbe.body`:
-
-1. `1` -> `upgrade_target_mode`
-2. `2` -> `endpoint_disclosure_grant_ref`
-3. `3` -> `consent_proof`
-4. `4` -> `fallback_route_ref`
-
-`ObserveOpen.body`:
-
-1. `1` -> `scope`
-2. `2` -> `subscription_mode`
-3. `3` -> `profile`
-4. `4` -> `follow_moves`
-5. `5` -> `filters`
-6. `6` -> `replay_cursor`
-
-`ObserveEvent.body`:
-
-1. `1` -> `subscription_id`
-2. `2` -> `event_id`
-3. `3` -> `revision`
-4. `4` -> `event_type`
-5. `5` -> `delivery_class`
-6. `6` -> `payload_ref_or_inline`
-
-`ObserveGap.body`:
-
-1. `1` -> `subscription_id`
-2. `2` -> `missing_revision_range`
-3. `3` -> `cause`
-4. `4` -> `recovery_hints`
+1. resolve: `33=expr_raw`, `35=operation_class`, `49=deny_code`, `50=reason`, `51=retryable`, `52=remediation`
+2. handshake: `75=relation_token`, `76=route_mode`, `77=disclosure_level`, `71=expires_at`
+3. route/upgrade: `101=upgrade_target_mode`, `102=endpoint_disclosure_grant_ref`, `103=consent_proof`, `104=fallback_route_ref`
 
 ---
 
-## 4. Canonical CBOR Rules for Examples
+## 4. Enum and Digest Codebooks (S1)
 
-1. Use definite-length maps and arrays.
-2. Use shortest integer encoding for keys and integer values.
-3. Keep key ordering canonical for the chosen CBOR deterministic profile.
-4. Use UTF-8 text for identifiers and symbolic enums.
-5. Treat these examples as semantic references, not byte-golden fixtures.
+Enum codes:
+
+1. `intent`: `0=resolve`, `1=invoke`, `2=observe`, `3=policy`
+2. `operation_class`: `0=meta`, `1=value`, `2=endpoint`, `3=invoke`, `4=observe`
+3. `route_mode`: `0=parent_mediated`, `1=relay_mediated`, `2=anonymous_relay`, `3=direct_upgraded`
+4. `disclosure_level`: `0=hidden`, `1=mediator_visible`, `2=mutual_visible`
+5. `deny_code`: `1=PathNotFound`, `2=PolicyDenied`, `3=DisclosureDenied`, `4=TrustInsufficient`, `5=UpgradeRejected`, `6=MediatorUnavailable`, `7=GrantMissing`, `8=GrantExpired`, `9=ReplayWindowExpired`, `10=AmbiguousResolution`
+
+Digest algorithm codes:
+
+1. `1=sha256`
+2. `2=sha384`
+3. `3=sha512`
 
 ---
 
-## 5. Message Examples
+## 5. Canonical CBOR Rules Used Here
 
-### 5.1 ResolveRequest (metadata resolve)
+1. Definite-length maps/arrays.
+2. Shortest integer encoding for keys and integers.
+3. Canonical deterministic key ordering.
+4. JSON view is for readability only and may show text aliases for enum meanings.
+
+---
+
+## 6. Example Messages
+
+### 6.1 ResolveRequest (metadata resolve)
 
 JSON debug:
 
@@ -135,7 +97,7 @@ JSON debug:
   "msg_type": "ResolveRequest",
   "msg_id": "msg-0001",
   "trace_id": "tr-1001",
-  "timestamp": "2026-03-08T10:00:00Z",
+  "timestamp": 1772964000000,
   "from": {
     "node_id": "N1PUB",
     "name_anchor": ".Users.Alice"
@@ -145,8 +107,7 @@ JSON debug:
   "ttl_ms": 30000,
   "body": {
     "expr_raw": ".Adult.Games.RedX",
-    "operation_class": "meta",
-    "preferred_route_mode": "parent_mediated"
+    "operation_class": "meta"
   }
 }
 ```
@@ -158,20 +119,19 @@ CBOR diagnostic:
   1: "ResolveRequest",
   2: "msg-0001",
   3: "tr-1001",
-  4: "2026-03-08T10:00:00Z",
+  4: 1772964000000,
   5: {1: "N1PUB", 2: ".Users.Alice"},
-  6: "resolve",
+  6: 0,
   7: ".Adult.Games.RedX",
   12: 30000,
   13: {
-    1: ".Adult.Games.RedX",
-    3: "meta",
-    4: "parent_mediated"
+    33: ".Adult.Games.RedX",
+    35: 0
   }
 }
 ```
 
-### 5.2 ResolveDeny (ambiguous resolution)
+### 6.2 ResolveDeny (ambiguous resolution)
 
 JSON debug:
 
@@ -180,7 +140,7 @@ JSON debug:
   "msg_type": "ResolveDeny",
   "msg_id": "msg-0002",
   "trace_id": "tr-1001",
-  "timestamp": "2026-03-08T10:00:01Z",
+  "timestamp": 1772964001000,
   "from": {
     "node_id": "PARENTPUB",
     "name_anchor": ".Adult"
@@ -204,21 +164,21 @@ CBOR diagnostic:
   1: "ResolveDeny",
   2: "msg-0002",
   3: "tr-1001",
-  4: "2026-03-08T10:00:01Z",
+  4: 1772964001000,
   5: {1: "PARENTPUB", 2: ".Adult"},
-  6: "resolve",
+  6: 0,
   7: ".Adult.Games.RedX",
   12: 30000,
   13: {
-    1: "AmbiguousResolution",
-    2: "Multiple candidate bindings; selector required",
-    3: true,
-    4: "Provide selector_hints"
+    49: 10,
+    50: "Multiple candidate bindings; selector required",
+    51: true,
+    52: "Provide selector_hints"
   }
 }
 ```
 
-### 5.3 HandshakeAccept (parent-mediated relation)
+### 6.3 HandshakeAccept (parent-mediated relation)
 
 JSON debug:
 
@@ -227,7 +187,7 @@ JSON debug:
   "msg_type": "HandshakeAccept",
   "msg_id": "msg-0010",
   "trace_id": "tr-2001",
-  "timestamp": "2026-03-08T10:02:00Z",
+  "timestamp": 1772964120000,
   "from": {
     "node_id": "PARENTPUB",
     "name_anchor": ".Adult"
@@ -239,10 +199,10 @@ JSON debug:
   "disclosure_level": "mediator_visible",
   "ttl_ms": 30000,
   "body": {
-    "relation_token_ref": "tok-rel-777-v1",
+    "relation_token": "tok-rel-777-v1",
     "route_mode": "parent_mediated",
     "disclosure_level": "mediator_visible",
-    "expires_at": "2026-03-08T10:17:00Z"
+    "expires_at": 1772965020000
   }
 }
 ```
@@ -254,24 +214,24 @@ CBOR diagnostic:
   1: "HandshakeAccept",
   2: "msg-0010",
   3: "tr-2001",
-  4: "2026-03-08T10:02:00Z",
+  4: 1772964120000,
   5: {1: "PARENTPUB", 2: ".Adult"},
-  6: "invoke",
+  6: 1,
   7: ".Adult.Games.RedX",
   8: "rel-777",
-  9: "parent_mediated",
-  10: "mediator_visible",
+  9: 0,
+  10: 1,
   12: 30000,
   13: {
-    1: "tok-rel-777-v1",
-    2: "parent_mediated",
-    3: "mediator_visible",
-    4: "2026-03-08T10:17:00Z"
+    75: "tok-rel-777-v1",
+    76: 0,
+    77: 1,
+    71: 1772965020000
   }
 }
 ```
 
-### 5.4 RouteUpgradeProbe (encrypted endpoint grant provided)
+### 6.4 RouteUpgradeProbe (grant proof path)
 
 JSON debug:
 
@@ -280,7 +240,7 @@ JSON debug:
   "msg_type": "RouteUpgradeProbe",
   "msg_id": "msg-0011",
   "trace_id": "tr-2001",
-  "timestamp": "2026-03-08T10:03:00Z",
+  "timestamp": 1772964180000,
   "from": {
     "node_id": "N1PUB",
     "name_anchor": ".Users.Alice"
@@ -292,7 +252,7 @@ JSON debug:
   "disclosure_level": "mediator_visible",
   "ttl_ms": 30000,
   "proofs": {
-    "capability_refs": ["ccap-resolve-endpoint-1"],
+    "capability_refs": ["sha256:5d7c..."],
     "bearer_proof": "sig-bearer-1"
   },
   "body": {
@@ -311,184 +271,22 @@ CBOR diagnostic:
   1: "RouteUpgradeProbe",
   2: "msg-0011",
   3: "tr-2001",
-  4: "2026-03-08T10:03:00Z",
+  4: 1772964180000,
   5: {1: "N1PUB", 2: ".Users.Alice"},
-  6: "invoke",
+  6: 1,
   7: ".Adult.Games.RedX",
   8: "rel-777",
-  9: "parent_mediated",
-  10: "mediator_visible",
-  11: {1: ["ccap-resolve-endpoint-1"], 2: "sig-bearer-1"},
+  9: 0,
+  10: 1,
+  11: {1: [[1, h'5D7C01']], 2: h'7369672D6265617265722D31'},
   12: 30000,
   13: {
-    1: "direct_upgraded",
-    2: "grant-ep-123",
-    3: "consent-n1-n2-v1",
-    4: "route-parent-relay-7"
+    101: 3,
+    102: "grant-ep-123",
+    103: "consent-n1-n2-v1",
+    104: "route-parent-relay-7"
   }
 }
 ```
 
-### 5.5 ObserveOpen and ObserveEvent
-
-JSON debug (`ObserveOpen`):
-
-```json
-{
-  "msg_type": "ObserveOpen",
-  "msg_id": "msg-0100",
-  "trace_id": "tr-3001",
-  "timestamp": "2026-03-08T10:05:00Z",
-  "from": {
-    "node_id": "N1PUB",
-    "name_anchor": ".Users.Alice"
-  },
-  "intent": "observe",
-  "target_scope": ".Adult.Games.RedX",
-  "ttl_ms": 30000,
-  "body": {
-    "scope": ".Adult.Games.RedX.>",
-    "subscription_mode": "OnChange",
-    "profile": "Standard",
-    "follow_moves": true
-  }
-}
-```
-
-CBOR diagnostic (`ObserveOpen`):
-
-```cbor-diag
-{
-  1: "ObserveOpen",
-  2: "msg-0100",
-  3: "tr-3001",
-  4: "2026-03-08T10:05:00Z",
-  5: {1: "N1PUB", 2: ".Users.Alice"},
-  6: "observe",
-  7: ".Adult.Games.RedX",
-  12: 30000,
-  13: {
-    1: ".Adult.Games.RedX.>",
-    2: "OnChange",
-    3: "Standard",
-    4: true
-  }
-}
-```
-
-JSON debug (`ObserveEvent`):
-
-```json
-{
-  "msg_type": "ObserveEvent",
-  "msg_id": "msg-0101",
-  "trace_id": "tr-3001",
-  "timestamp": "2026-03-08T10:05:03Z",
-  "from": {
-    "node_id": "PARENTPUB",
-    "name_anchor": ".Adult"
-  },
-  "intent": "observe",
-  "target_scope": ".Adult.Games.RedX.>",
-  "relation_id": "rel-obs-22",
-  "route_mode": "parent_mediated",
-  "disclosure_level": "hidden",
-  "ttl_ms": 30000,
-  "body": {
-    "subscription_id": "sub-22",
-    "event_id": "evt-9001",
-    "revision": 441,
-    "event_type": "NameMoved",
-    "delivery_class": "meta",
-    "payload_ref_or_inline": "hash:blake2b:abcd1234"
-  }
-}
-```
-
-CBOR diagnostic (`ObserveEvent`):
-
-```cbor-diag
-{
-  1: "ObserveEvent",
-  2: "msg-0101",
-  3: "tr-3001",
-  4: "2026-03-08T10:05:03Z",
-  5: {1: "PARENTPUB", 2: ".Adult"},
-  6: "observe",
-  7: ".Adult.Games.RedX.>",
-  8: "rel-obs-22",
-  9: "parent_mediated",
-  10: "hidden",
-  12: 30000,
-  13: {
-    1: "sub-22",
-    2: "evt-9001",
-    3: 441,
-    4: "NameMoved",
-    5: "meta",
-    6: "hash:blake2b:abcd1234"
-  }
-}
-```
-
-### 5.6 ObserveGap (replay window expired)
-
-JSON debug:
-
-```json
-{
-  "msg_type": "ObserveGap",
-  "msg_id": "msg-0102",
-  "trace_id": "tr-3001",
-  "timestamp": "2026-03-08T10:06:00Z",
-  "from": {
-    "node_id": "PARENTPUB",
-    "name_anchor": ".Adult"
-  },
-  "intent": "observe",
-  "target_scope": ".Adult.Games.RedX.>",
-  "relation_id": "rel-obs-22",
-  "route_mode": "parent_mediated",
-  "disclosure_level": "hidden",
-  "ttl_ms": 30000,
-  "body": {
-    "subscription_id": "sub-22",
-    "missing_revision_range": "390-440",
-    "cause": "ReplayWindowExpired",
-    "recovery_hints": "Re-open from head cursor"
-  }
-}
-```
-
-CBOR diagnostic:
-
-```cbor-diag
-{
-  1: "ObserveGap",
-  2: "msg-0102",
-  3: "tr-3001",
-  4: "2026-03-08T10:06:00Z",
-  5: {1: "PARENTPUB", 2: ".Adult"},
-  6: "observe",
-  7: ".Adult.Games.RedX.>",
-  8: "rel-obs-22",
-  9: "parent_mediated",
-  10: "hidden",
-  12: 30000,
-  13: {
-    1: "sub-22",
-    2: "390-440",
-    3: "ReplayWindowExpired",
-    4: "Re-open from head cursor"
-  }
-}
-```
-
----
-
-## 6. Usage Guidance
-
-1. Use JSON examples for docs, tooling previews, and debugging.
-2. Use CBOR diagnostic examples as semantic references for encoder/decoder tests.
-3. Generate byte-level golden vectors only after key dictionary and field ordering are wire-locked.
-4. Keep wire examples aligned with message field matrix and deterministic error/state specs.
+Observe-family wire examples are intentionally deferred to S2 when observe key assignments are locked.

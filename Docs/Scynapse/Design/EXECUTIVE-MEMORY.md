@@ -33,17 +33,20 @@ Current active path:
 12. first S1 harness run executed against `TV-001/002/003/012/013` with 5/5 pass
 13. S1 wire-lock decisions `D1`, `D2`, `D4`, `D6` locked and propagated to protocol/field/decision docs
 14. S1 harness upgraded to derive observed state traces from message flow and compare against expected traces
+15. S1 fixture pack extended with expected-fail negative vectors (`TV-101`, `TV-102`, `TV-103`)
+16. S1 harness supports `expect_conformance` mode (`pass`/`fail`) with 8/8 effective pass
+17. wire examples synchronized to locked S1 profile (`M0-B-Wire-Examples.md`)
 
 ### Doing
 
-1. add negative-order and missing-field vectors for stronger L1-L4 conformance coverage
-2. keep prototype and design docs synchronized as W4/W5 hardening starts
+1. keep prototype and design docs synchronized as W4/W5 hardening starts
+2. prepare next strict message-order and transition edge cases beyond current negatives
 
 ### Next
 
 1. expand W4/W5 implementation to map actual message flow transitions and relation path behavior
-2. add negative-order and missing-field vectors for stronger L1-L4 coverage
-3. update wire examples to canonicalized locked S1 profile
+2. add deeper negative-order and transition edge vectors for stronger L1-L4 coverage
+3. lock/implement structured assert format for expected-fail vectors (error-code-level expectations)
 
 ---
 
