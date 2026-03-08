@@ -1,0 +1,25 @@
+{
+  "id": "TV-103",
+  "title": "Invalid Deny Code: ResolveDeny Uses Unknown Code",
+  "expect_conformance": "fail",
+  "preconditions": [
+    "authority emits deny code outside deterministic mapping"
+  ],
+  "messages": [
+    { "type": "ResolveRequest", "role": "requester", "body": { "operation_class": "meta", "expr_raw": ".Unknown.Path" } },
+    { "type": "ResolveDeny", "role": "authority", "body": { "deny_code": "NotARealCode", "reason": "invalid mapping" } }
+  ],
+  "expected_state_trace": [
+    "ResolveIntent",
+    "DiscoverPath",
+    "Deny"
+  ],
+  "expected_outcome": {
+    "success": false,
+    "deny_code": "NotARealCode"
+  },
+  "assertions": [
+    { "id": "A1", "kind": "error", "check": "deny_code_equals", "value": "NotARealCode" }
+  ]
+}
+

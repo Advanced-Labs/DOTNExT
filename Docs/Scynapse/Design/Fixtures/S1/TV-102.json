@@ -1,0 +1,26 @@
+{
+  "id": "TV-102",
+  "title": "Invalid Payload: ResolveRequest Missing expr_raw",
+  "expect_conformance": "fail",
+  "preconditions": [
+    "required field omitted in resolve request body"
+  ],
+  "messages": [
+    { "type": "ResolveRequest", "role": "requester", "body": { "operation_class": "meta" } },
+    { "type": "ResolveDeny", "role": "authority", "body": { "deny_code": "PathNotFound" } }
+  ],
+  "expected_state_trace": [
+    "ResolveIntent",
+    "DiscoverPath",
+    "Deny"
+  ],
+  "expected_outcome": {
+    "success": false,
+    "deny_code": "PathNotFound",
+    "retryable": false
+  },
+  "assertions": [
+    { "id": "A1", "kind": "error", "check": "deny_code_equals", "value": "PathNotFound" }
+  ]
+}
+

@@ -1,0 +1,29 @@
+{
+  "id": "TV-101",
+  "title": "Invalid Order: ResolveResponse Before ResolveRequest",
+  "expect_conformance": "fail",
+  "preconditions": [
+    "response arrives before request context exists"
+  ],
+  "messages": [
+    { "type": "ResolveResponse", "role": "authority", "body": { "decision_code": "Resolved", "resolved_scope": ".Adult.Games.RedX" } },
+    { "type": "ResolveRequest", "role": "requester", "body": { "operation_class": "meta", "expr_raw": ".Adult.Games.RedX" } }
+  ],
+  "expected_state_trace": [
+    "ResolveIntent",
+    "DiscoverPath",
+    "PolicyEvaluate",
+    "DisclosurePlan",
+    "MediatedHandshake",
+    "RelayedSession",
+    "Completed"
+  ],
+  "expected_outcome": {
+    "success": false,
+    "deny_code": null
+  },
+  "assertions": [
+    { "id": "A1", "kind": "state", "check": "contains_state", "value": "ResolveIntent" }
+  ]
+}
+

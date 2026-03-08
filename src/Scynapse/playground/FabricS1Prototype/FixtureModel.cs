@@ -11,6 +11,9 @@ internal sealed class FixtureCase
     [JsonPropertyName("title")]
     public string Title { get; set; } = string.Empty;
 
+    [JsonPropertyName("expect_conformance")]
+    public string ExpectConformance { get; set; } = "pass";
+
     [JsonPropertyName("preconditions")]
     public List<string> Preconditions { get; set; } = new();
 
@@ -96,5 +99,5 @@ internal sealed class VectorResult
     public required IReadOnlyList<string> ObservedStateTrace { get; init; }
     public string? ObservedDenyCode { get; init; }
     public bool? ObservedRetryable { get; init; }
+    public bool EffectivePassed { get; set; }
 }
-

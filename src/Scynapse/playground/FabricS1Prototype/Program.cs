@@ -49,13 +49,28 @@ internal static class Program
             }
 
             var result = engine.Evaluate(fixture);
+
+            var expectsFailure = string.Equals(fixture.ExpectConformance, "fail", StringComparison.OrdinalIgnoreCase);
+            if (expectsFailure)
+            {
+                result.EffectivePassed = !result.Passed;
+                if (result.Passed)
+                {
+                    result.Errors.Add("[EXPECT] Expected conformance failure but vector passed.");
+                }
+            }
+            else
+            {
+                result.EffectivePassed = result.Passed;
+            }
+
             results.Add(result);
 
-            Console.WriteLine(result.Passed
-                ? $"PASS {result.Id} - {fixture.Title}"
-                : $"FAIL {result.Id} - {fixture.Title}");
+            var status = result.EffectivePassed ? "PASS" : "FAIL";
+            var expectationNote = expectsFailure ? " [expected fail]" : string.Empty;
+            Console.WriteLine($"{status} {result.Id} - {fixture.Title}{expectationNote}");
 
-            if (!result.Passed)
+            if (!result.EffectivePassed || expectsFailure)
             {
                 foreach (var error in result.Errors)
                 {
@@ -65,7 +80,7 @@ internal static class Program
         }
 
         PrintSummary(results);
-        return results.All(r => r.Passed) ? 0 : 1;
+        return results.All(r => r.EffectivePassed) ? 0 : 1;
     }
 
     private static FixtureCase? LoadFixture(string fixturePath)
@@ -99,7 +114,7 @@ internal static class Program
 
     private static void PrintSummary(IReadOnlyList<VectorResult> results)
     {
-        var passed = results.Count(r => r.Passed);
+        var passed = results.Count(r => r.EffectivePassed);
         var failed = results.Count - passed;
 
         Console.WriteLine();
@@ -143,4 +158,3 @@ internal static class Program
         return error[1..end];
     }
 }
-

@@ -82,6 +82,7 @@ internal sealed class ConformanceEngine
 
         ValidateEnvelopeAndSchema(fixture, envelopeMessages, errors);
         ValidateMessageFieldRules(fixture, errors);
+        ValidateMessageOrder(fixture, errors);
         var observedStateTrace = BuildObservedStateTrace(fixture, errors);
         ValidateStateTrace(fixture, observedStateTrace, errors);
 
@@ -110,7 +111,8 @@ internal sealed class ConformanceEngine
             Errors = errors,
             ObservedStateTrace = observedStateTrace.AsReadOnly(),
             ObservedDenyCode = observedDenyCode,
-            ObservedRetryable = observedRetryable
+            ObservedRetryable = observedRetryable,
+            EffectivePassed = errors.Count == 0
         };
     }
 
@@ -210,6 +212,67 @@ internal sealed class ConformanceEngine
                 {
                     errors.Add($"[L4] {fixture.Id}/{message.Type} deny code '{denyCode}' is not allowed.");
                 }
+            }
+        }
+    }
+
+    private static void ValidateMessageOrder(FixtureCase fixture, List<string> errors)
+    {
+        var seenResolveRequest = false;
+        var seenHandshakeInit = false;
+        var seenHandshakeChallenge = false;
+        var seenHandshakeProof = false;
+        var seenRouteUpgradeProbe = false;
+
+        foreach (var message in fixture.Messages)
+        {
+            switch (message.Type)
+            {
+                case "ResolveRequest":
+                    seenResolveRequest = true;
+                    break;
+                case "ResolveReferral":
+                case "ResolveResponse":
+                case "ResolveDeny":
+                    if (!seenResolveRequest)
+                    {
+                        errors.Add($"[L3] {fixture.Id}/{message.Type} appears before ResolveRequest.");
+                    }
+                    break;
+                case "HandshakeInit":
+                    seenHandshakeInit = true;
+                    break;
+                case "HandshakeChallenge":
+                    if (!seenHandshakeInit)
+                    {
+                        errors.Add($"[L3] {fixture.Id}/HandshakeChallenge appears before HandshakeInit.");
+                    }
+                    seenHandshakeChallenge = true;
+                    break;
+                case "HandshakeProof":
+                    if (!seenHandshakeChallenge)
+                    {
+                        errors.Add($"[L3] {fixture.Id}/HandshakeProof appears before HandshakeChallenge.");
+                    }
+                    seenHandshakeProof = true;
+                    break;
+                case "HandshakeAccept":
+                case "HandshakeDeny":
+                    if (!seenHandshakeProof)
+                    {
+                        errors.Add($"[L3] {fixture.Id}/{message.Type} appears before HandshakeProof.");
+                    }
+                    break;
+                case "RouteUpgradeProbe":
+                    seenRouteUpgradeProbe = true;
+                    break;
+                case "RouteUpgradeAccept":
+                case "RouteUpgradeReject":
+                    if (!seenRouteUpgradeProbe)
+                    {
+                        errors.Add($"[L3] {fixture.Id}/{message.Type} appears before RouteUpgradeProbe.");
+                    }
+                    break;
             }
         }
     }
