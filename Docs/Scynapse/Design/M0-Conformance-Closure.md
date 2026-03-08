@@ -49,3 +49,9 @@ Deferred:
 
 1. formal M0 exit review over unresolved deferred decisions and risk profile
 2. define M1 entry scope and acceptance criteria before widening runtime/protocol surface
+
+## 6. Exit Review Status
+
+1. M0 exit review completed on 2026-03-08: `M0-Exit-Review.md`
+2. M1 entry plan established: `M1-Entry-Plan.md`
+3. first M1 execution board established: `M1-S1-Task-Board.md`

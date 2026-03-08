@@ -48,6 +48,9 @@ Reference:
 - `Docs/Scynapse/Design/M0-S4-Task-Board.md`
 - `Docs/Scynapse/Design/M0-S5-Task-Board.md`
 - `Docs/Scynapse/Design/M0-Conformance-Closure.md`
+- `Docs/Scynapse/Design/M0-Exit-Review.md`
+- `Docs/Scynapse/Design/M1-Entry-Plan.md`
+- `Docs/Scynapse/Design/M1-S1-Task-Board.md`
 - `Docs/Scynapse/Design/M0-B-Wire-Lock-Open-Decisions.md`
 - `Docs/Scynapse/Design/M0-Status-Checkpoint.md`
 

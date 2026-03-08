@@ -399,6 +399,6 @@ Completed:
 
 Current next step:
 
-1. package M0 cross-slice conformance closure and review unresolved design decisions
+1. M0 closure and exit review completed (`M0-Conformance-Closure.md`, `M0-Exit-Review.md`)
 2. preserve S1/S2/S3/S4/S5 baseline behavior and machine-checkable error ID stability
-3. keep deferred wire decisions (`D3`, `D5`, `D7`, `D8`) untouched until explicitly unlocked
+3. execute M1-S1 deferred wire closure vectors for `D3`, `D5`, `D7`, `D8` (`M1-S1-Task-Board.md`)

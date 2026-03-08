@@ -284,3 +284,25 @@ Use this structure for each new entry:
    - push S5 branch and run M0 exit review / M1 entry planning if approved.
 5. Risks/blockers:
    - none immediate; deferred wire decisions (`D3`, `D5`, `D7`, `D8`) intentionally remain unchanged.
+
+### 2026-03-08 (M0 Exit Review + M1 Entry Planning)
+
+1. Scope:
+   - complete formal M0 exit review and establish actionable M1 entry path after compaction re-entry.
+2. Key outputs:
+   - reran baseline conformance on planning branch:
+     - S1: 14/14
+     - S2: 8/8
+     - S3: 4/4
+     - S4: 4/4
+     - S5: 3/3
+   - added `M0-Exit-Review.md` with explicit exit criteria, risks, and verdict.
+   - added `M1-Entry-Plan.md` defining bounded M1 scope and guardrails.
+   - added `M1-S1-Task-Board.md` for deferred wire closure (`D3`, `D5`, `D7`, `D8`).
+   - synchronized checkpoint/continuity/index docs for deterministic re-entry.
+3. Current doing:
+   - final verification and scoped commit preparation on `codex/m0-exit-m1-entry`.
+4. Next:
+   - create `codex/m1-s1-wire-closure` and execute M1-S1 with strict S1..S5 regression gates.
+5. Risks/blockers:
+   - none immediate; maintain strict scope boundary to avoid premature runtime-surface expansion.

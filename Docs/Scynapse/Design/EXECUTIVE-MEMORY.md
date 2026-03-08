@@ -4,13 +4,13 @@ Last updated: 2026-03-08
 
 ## 1. Mission Snapshot
 
-Current mission: finish M0 foundation without drift by carrying stable S1/S2/S3/S4/S5 conformance baselines into M0 exit review.
+Current mission: carry stable M0 baseline into M1 by executing deferred wire closure first (`M1-S1`), without regressing S1..S5 behavior.
 
-Pre-compaction checkpoint status (2026-03-08):
+Latest checkpoint status (2026-03-08):
 
-1. active branch: `codex/s5-policy-inheritance`
+1. active branch: `codex/m0-exit-m1-entry`
 2. continuity files synchronized
-3. no in-scope uncommitted changes at checkpoint handoff
+3. S1..S5 rerun on this branch confirmed 33/33 effective pass
 
 Current active path:
 
@@ -79,16 +79,20 @@ Current active path:
 49. deterministic S5 error IDs added for policy deny ordering and deny-code mismatch paths
 50. regression results stable: S1 14/14, S2 8/8, S3 4/4, S4 4/4, S5 3/3 with repeated S5 run reproducibility
 51. M0 closure summary artifact added (`M0-Conformance-Closure.md`)
+52. M0 exit review completed (`M0-Exit-Review.md`)
+53. M1 entry plan completed (`M1-Entry-Plan.md`)
+54. M1-S1 first execution board completed (`M1-S1-Task-Board.md`)
+55. baseline rerun on planning branch confirmed stable: S1 14/14, S2 8/8, S3 4/4, S4 4/4, S5 3/3
 
 ### Doing
 
-1. final S5 continuity synchronization and branch push preparation
+1. continuity synchronization for M0-exit to M1-entry handoff
 
 ### Next
 
-1. preserve S1/S2/S3/S4/S5 fixture and error-ID stability as new work begins
-2. perform M0 exit review using `M0-Conformance-Closure.md`
-3. continue holding deferred wire decisions (`D3`, `D5`, `D7`, `D8`) outside current scope
+1. execute M1-S1 deferred wire closure (`D3`, `D5`, `D7`, `D8`)
+2. preserve S1/S2/S3/S4/S5 fixture and error-ID stability during M1-S1
+3. start M1 runtime-bridge slice only after M1-S1 closure
 
 ---
 
@@ -137,7 +141,10 @@ Authority file:
 7. `M0-S4-Task-Board.md`
 8. `M0-S5-Task-Board.md`
 9. `M0-Conformance-Closure.md`
-10. latest entry in `SESSION-LOG.md`
+10. `M0-Exit-Review.md`
+11. `M1-Entry-Plan.md`
+12. `M1-S1-Task-Board.md`
+13. latest entry in `SESSION-LOG.md`
 
 ---
 
@@ -163,6 +170,9 @@ Authority file:
    - `M0-S5-Task-Board.md`
    - `Fixtures/S5/README.md`
    - `M0-Conformance-Closure.md`
+   - `M0-Exit-Review.md`
+   - `M1-Entry-Plan.md`
+   - `M1-S1-Task-Board.md`
 5. Wire lock:
    - `M0-B-Wire-Lock-Open-Decisions.md`
    - `M0-B-Wire-Examples.md`

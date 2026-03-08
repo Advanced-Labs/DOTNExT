@@ -135,5 +135,6 @@ Completed:
 
 Current next action:
 
-1. package M0 conformance closure artifact from S1..S5 baseline
-2. decide M0 exit and M1 entry criteria based on deferred wire/security decisions
+1. package M0 conformance closure artifact from S1..S5 baseline (`M0-Conformance-Closure.md`)
+2. complete M0 exit review (`M0-Exit-Review.md`)
+3. start M1 using bounded wire-closure slice board (`M1-Entry-Plan.md`, `M1-S1-Task-Board.md`)
