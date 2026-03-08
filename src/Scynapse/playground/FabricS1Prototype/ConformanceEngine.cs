@@ -7,12 +7,14 @@ internal sealed class ConformanceEngine
     private const string SliceProfileS1 = "S1";
     private const string SliceProfileS2 = "S2";
     private const string SliceProfileS3 = "S3";
+    private const string SliceProfileS4 = "S4";
 
     private static readonly HashSet<string> KnownSliceProfiles = new(StringComparer.Ordinal)
     {
         SliceProfileS1,
         SliceProfileS2,
-        SliceProfileS3
+        SliceProfileS3,
+        SliceProfileS4
     };
 
     private static readonly HashSet<string> KnownGrantStatuses = new(StringComparer.Ordinal)
@@ -29,6 +31,19 @@ internal sealed class ConformanceEngine
         "encrypted"
     };
 
+    private static readonly HashSet<string> KnownObserveScopeModes = new(StringComparer.Ordinal)
+    {
+        "exact",
+        "subtree"
+    };
+
+    private static readonly HashSet<string> KnownObserveGapCauses = new(StringComparer.Ordinal)
+    {
+        "RetentionExpired",
+        "PolicyDenied",
+        "TransportLoss"
+    };
+
     private static readonly HashSet<string> KnownMessageTypes = new(StringComparer.Ordinal)
     {
         "ResolveRequest",
@@ -43,7 +58,13 @@ internal sealed class ConformanceEngine
         "GrantPresent",
         "RouteUpgradeProbe",
         "RouteUpgradeAccept",
-        "RouteUpgradeReject"
+        "RouteUpgradeReject",
+        "ObserveOpen",
+        "ObserveAck",
+        "ObserveEvent",
+        "ObserveGap",
+        "ObserveResume",
+        "ObserveClose"
     };
 
     private static readonly Dictionary<string, HashSet<string>> RequiredBodyFieldsByType = new(StringComparer.Ordinal)
@@ -53,7 +74,10 @@ internal sealed class ConformanceEngine
         ["HandshakeAccept"] = new(StringComparer.Ordinal) { "route_mode", "disclosure_level" },
         ["HandshakeDeny"] = new(StringComparer.Ordinal) { "deny_code" },
         ["GrantPresent"] = new(StringComparer.Ordinal) { "grant_scope" },
-        ["RouteUpgradeReject"] = new(StringComparer.Ordinal) { "decision_code" }
+        ["RouteUpgradeReject"] = new(StringComparer.Ordinal) { "decision_code" },
+        ["ObserveOpen"] = new(StringComparer.Ordinal) { "scope_mode" },
+        ["ObserveGap"] = new(StringComparer.Ordinal) { "cause" },
+        ["ObserveResume"] = new(StringComparer.Ordinal) { "replay_available" }
     };
 
     private static readonly Dictionary<string, HashSet<string>> AllowedDenyCodesByMessageType = new(StringComparer.Ordinal)
@@ -89,7 +113,12 @@ internal sealed class ConformanceEngine
         ["MediatedHandshake"] = new(StringComparer.Ordinal) { "RelayedSession", "Deny" },
         ["RelayedSession"] = new(StringComparer.Ordinal) { "DirectUpgradeProbe", "Completed" },
         ["DirectUpgradeProbe"] = new(StringComparer.Ordinal) { "DirectSession", "RelayedSession", "Deny" },
-        ["DirectSession"] = new(StringComparer.Ordinal) { "RelayedSession", "Completed" }
+        ["DirectSession"] = new(StringComparer.Ordinal) { "RelayedSession", "Completed" },
+        ["ObserveIdle"] = new(StringComparer.Ordinal) { "ObservePendingAck" },
+        ["ObservePendingAck"] = new(StringComparer.Ordinal) { "ObserveActive", "ObserveDenied" },
+        ["ObserveActive"] = new(StringComparer.Ordinal) { "ObserveActive", "ObserveGap", "ObserveClosed" },
+        ["ObserveGap"] = new(StringComparer.Ordinal) { "ObserveResuming", "ObserveGap", "ObserveClosed" },
+        ["ObserveResuming"] = new(StringComparer.Ordinal) { "ObserveActive", "ObserveGap" }
     };
 
     private static readonly Dictionary<string, DenyProfile> DenyProfiles = new(StringComparer.Ordinal)
@@ -259,6 +288,11 @@ internal sealed class ConformanceEngine
             {
                 ValidateS3ResolveRequestFields(fixture, message, errors);
             }
+
+            if (string.Equals(sliceProfile, SliceProfileS4, StringComparison.Ordinal))
+            {
+                ValidateS4ObserveFields(fixture, message, errors);
+            }
         }
     }
 
@@ -400,6 +434,42 @@ internal sealed class ConformanceEngine
         else if (disclosureElement.ValueKind is not (JsonValueKind.True or JsonValueKind.False))
         {
             AddError(errors, "L2", "E2003_INVALID_FIELD_TYPE", $"{fixture.Id}/{message.Type} field 'endpoint_disclosure_allowed' must be a boolean.");
+        }
+    }
+
+    private static void ValidateS4ObserveFields(FixtureCase fixture, FixtureMessage message, List<ConformanceError> errors)
+    {
+        if (string.Equals(message.Type, "ObserveOpen", StringComparison.Ordinal))
+        {
+            var scopeMode = GetBodyString(message, "scope_mode");
+            if (scopeMode is not null && !KnownObserveScopeModes.Contains(scopeMode))
+            {
+                AddError(errors, "L2", "E2004_INVALID_FIELD_VALUE", $"{fixture.Id}/{message.Type} field 'scope_mode' value '{scopeMode}' is invalid.");
+            }
+
+            var followMoves = GetBodyBoolean(message, "follow_moves");
+            if (followMoves is null && HasBodyProperty(message, "follow_moves"))
+            {
+                AddError(errors, "L2", "E2003_INVALID_FIELD_TYPE", $"{fixture.Id}/{message.Type} field 'follow_moves' must be a boolean.");
+            }
+        }
+
+        if (string.Equals(message.Type, "ObserveGap", StringComparison.Ordinal))
+        {
+            var cause = GetBodyString(message, "cause");
+            if (cause is not null && !KnownObserveGapCauses.Contains(cause))
+            {
+                AddError(errors, "L2", "E2004_INVALID_FIELD_VALUE", $"{fixture.Id}/{message.Type} field 'cause' value '{cause}' is invalid.");
+            }
+        }
+
+        if (string.Equals(message.Type, "ObserveResume", StringComparison.Ordinal))
+        {
+            var replayAvailable = GetBodyBoolean(message, "replay_available");
+            if (replayAvailable is null)
+            {
+                AddError(errors, "L2", "E2003_INVALID_FIELD_TYPE", $"{fixture.Id}/{message.Type} field 'replay_available' must be a boolean.");
+            }
         }
     }
 
@@ -705,6 +775,135 @@ internal sealed class ConformanceEngine
                 context.GrantPresentSeen = true;
                 break;
             }
+            case "ObserveOpen":
+            {
+                if (context.ObserveSessionStarted)
+                {
+                    RejectWithDeterministicDeny(fixtureId, context, errors, "E3040_OBSERVE_ALREADY_OPEN", "TrustInsufficient", $"{fixtureId}/{message.Type} repeats an active observe session.");
+                    break;
+                }
+
+                if (context.ResolveStarted || context.HandshakeStarted)
+                {
+                    RejectWithDeterministicDeny(fixtureId, context, errors, "E3046_OBSERVE_MIXED_WITH_OTHER_OPERATION", "TrustInsufficient", $"{fixtureId}/{message.Type} cannot be mixed with resolve/handshake operation context.");
+                    break;
+                }
+
+                context.ObserveSessionStarted = true;
+                context.ObserveScopeMode = GetBodyString(message, "scope_mode") ?? "subtree";
+                context.ObserveFollowMoves = GetBodyBoolean(message, "follow_moves") ?? GetDefaultFollowMoves(context.ObserveScopeMode);
+
+                if (context.CurrentState is null)
+                {
+                    SetState(context, "ObserveIdle");
+                }
+                else
+                {
+                    RejectWithDeterministicDeny(fixtureId, context, errors, "E3007_INVALID_STATE_TRANSITION", "TrustInsufficient", $"{fixtureId}/{message.Type} invalid from state '{context.CurrentState}'.");
+                    break;
+                }
+
+                TryTransition(fixtureId, context, "ObservePendingAck", errors);
+                break;
+            }
+            case "ObserveAck":
+            {
+                if (!context.ObserveSessionStarted)
+                {
+                    RejectWithDeterministicDeny(fixtureId, context, errors, "E3041_OBSERVE_ACK_BEFORE_OPEN", "TrustInsufficient", $"{fixtureId}/{message.Type} appears before ObserveOpen.");
+                    break;
+                }
+
+                if (StateIs(context, "ObservePendingAck", "ObserveResuming"))
+                {
+                    TryTransition(fixtureId, context, "ObserveActive", errors);
+                    break;
+                }
+
+                RejectWithDeterministicDeny(fixtureId, context, errors, "E3007_INVALID_STATE_TRANSITION", "TrustInsufficient", $"{fixtureId}/{message.Type} invalid from state '{context.CurrentState}'.");
+                break;
+            }
+            case "ObserveEvent":
+            {
+                if (!context.ObserveSessionStarted)
+                {
+                    RejectWithDeterministicDeny(fixtureId, context, errors, "E3043_OBSERVE_EVENT_BEFORE_ACTIVE", "TrustInsufficient", $"{fixtureId}/{message.Type} appears before ObserveOpen.");
+                    break;
+                }
+
+                if (!StateIs(context, "ObserveActive"))
+                {
+                    RejectWithDeterministicDeny(fixtureId, context, errors, "E3043_OBSERVE_EVENT_BEFORE_ACTIVE", "TrustInsufficient", $"{fixtureId}/{message.Type} appears before ObserveActive.");
+                    break;
+                }
+
+                break;
+            }
+            case "ObserveGap":
+            {
+                if (!context.ObserveSessionStarted)
+                {
+                    RejectWithDeterministicDeny(fixtureId, context, errors, "E3047_OBSERVE_GAP_BEFORE_OPEN", "TrustInsufficient", $"{fixtureId}/{message.Type} appears before ObserveOpen.");
+                    break;
+                }
+
+                if (!StateIs(context, "ObserveActive", "ObserveResuming"))
+                {
+                    RejectWithDeterministicDeny(fixtureId, context, errors, "E3007_INVALID_STATE_TRANSITION", "TrustInsufficient", $"{fixtureId}/{message.Type} invalid from state '{context.CurrentState}'.");
+                    break;
+                }
+
+                TryTransition(fixtureId, context, "ObserveGap", errors);
+
+                var cause = GetBodyString(message, "cause");
+                if (string.Equals(cause, "RetentionExpired", StringComparison.Ordinal))
+                {
+                    context.ObservedDenyCode = "ReplayWindowExpired";
+                }
+
+                break;
+            }
+            case "ObserveResume":
+            {
+                if (!context.ObserveSessionStarted)
+                {
+                    RejectWithDeterministicDeny(fixtureId, context, errors, "E3044_OBSERVE_RESUME_BEFORE_GAP", "ReplayWindowExpired", $"{fixtureId}/{message.Type} appears before ObserveGap.");
+                    break;
+                }
+
+                if (!StateIs(context, "ObserveGap"))
+                {
+                    RejectWithDeterministicDeny(fixtureId, context, errors, "E3044_OBSERVE_RESUME_BEFORE_GAP", "ReplayWindowExpired", $"{fixtureId}/{message.Type} appears before ObserveGap.");
+                    break;
+                }
+
+                var replayAvailable = GetBodyBoolean(message, "replay_available");
+                if (replayAvailable is false)
+                {
+                    context.ObservedDenyCode = "ReplayWindowExpired";
+                    break;
+                }
+
+                TryTransition(fixtureId, context, "ObserveResuming", errors);
+                break;
+            }
+            case "ObserveClose":
+            {
+                if (!context.ObserveSessionStarted)
+                {
+                    RejectWithDeterministicDeny(fixtureId, context, errors, "E3048_OBSERVE_CLOSE_BEFORE_OPEN", "TrustInsufficient", $"{fixtureId}/{message.Type} appears before ObserveOpen.");
+                    break;
+                }
+
+                if (!StateIs(context, "ObserveActive", "ObserveGap"))
+                {
+                    RejectWithDeterministicDeny(fixtureId, context, errors, "E3007_INVALID_STATE_TRANSITION", "TrustInsufficient", $"{fixtureId}/{message.Type} invalid from state '{context.CurrentState}'.");
+                    break;
+                }
+
+                TryTransition(fixtureId, context, "ObserveClosed", errors);
+                break;
+            }
             case "RouteUpgradeProbe":
             {
                 if (!StateIs(context, "RelayedSession"))
@@ -878,12 +1077,17 @@ internal sealed class ConformanceEngine
         }
 
         var finalState = observedStateTrace[^1];
-        if (fixture.ExpectedOutcome.Success && !string.Equals(finalState, "Completed", StringComparison.Ordinal))
+        if (fixture.ExpectedOutcome.Success &&
+            (string.Equals(finalState, "Deny", StringComparison.Ordinal) ||
+             string.Equals(finalState, "ObserveDenied", StringComparison.Ordinal)))
         {
             AddError(errors, "L3", "E3009_FINAL_STATE_MISMATCH", $"{fixture.Id} expected success but final state is '{finalState}'.");
         }
 
-        if (!fixture.ExpectedOutcome.Success && !string.Equals(finalState, "Deny", StringComparison.Ordinal))
+        if (!fixture.ExpectedOutcome.Success &&
+            !(string.Equals(finalState, "Deny", StringComparison.Ordinal) ||
+              string.Equals(finalState, "ObserveDenied", StringComparison.Ordinal) ||
+              string.Equals(finalState, "ObserveGap", StringComparison.Ordinal)))
         {
             AddError(errors, "L3", "E3009_FINAL_STATE_MISMATCH", $"{fixture.Id} expected deny but final state is '{finalState}'.");
         }
@@ -1145,7 +1349,9 @@ internal sealed class ConformanceEngine
     private static bool IsTerminal(string? state)
     {
         return string.Equals(state, "Completed", StringComparison.Ordinal)
-            || string.Equals(state, "Deny", StringComparison.Ordinal);
+            || string.Equals(state, "Deny", StringComparison.Ordinal)
+            || string.Equals(state, "ObserveClosed", StringComparison.Ordinal)
+            || string.Equals(state, "ObserveDenied", StringComparison.Ordinal);
     }
 
     private static void RejectWithDeterministicDeny(
@@ -1263,6 +1469,21 @@ internal sealed class ConformanceEngine
             .EnumerateArray()
             .Any(item => item.ValueKind == JsonValueKind.String && !string.IsNullOrWhiteSpace(item.GetString()));
     }
+
+    private static bool HasBodyProperty(FixtureMessage message, string propertyName)
+    {
+        if (message.Body is null || message.Body.Value.ValueKind != JsonValueKind.Object)
+        {
+            return false;
+        }
+
+        return message.Body.Value.TryGetProperty(propertyName, out _);
+    }
+
+    private static bool GetDefaultFollowMoves(string scopeMode)
+    {
+        return !string.Equals(scopeMode, "exact", StringComparison.Ordinal);
+    }
 }
 
 internal sealed class OperationContext
@@ -1280,10 +1501,13 @@ internal sealed class OperationContext
     public bool EndpointOperationActive { get; set; }
     public bool EndpointDisclosureAllowed { get; set; } = true;
     public bool GrantPresentSeen { get; set; }
+    public bool ObserveSessionStarted { get; set; }
+    public bool ObserveFollowMoves { get; set; } = true;
     public bool RequiresSelectorHints { get; set; }
     public bool HasSelectorHints { get; set; }
     public string EndpointDirectoryMode { get; set; } = "plaintext";
     public string EndpointGrantStatus { get; set; } = "not_required";
+    public string ObserveScopeMode { get; set; } = "subtree";
     public string? ExpectedUpgradeRejectCode { get; set; }
     public string? ObservedDenyCode { get; set; }
     public string? ObservedUpgradeDecisionCode { get; set; }

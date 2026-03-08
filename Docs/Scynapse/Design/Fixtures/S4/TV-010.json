@@ -1,0 +1,31 @@
+{
+  "id": "TV-010",
+  "title": "Replay Resume Outside Retention Window",
+  "slice_profile": "S4",
+  "preconditions": [
+    "subscription is active",
+    "replay window is expired"
+  ],
+  "messages": [
+    { "type": "ObserveOpen", "role": "requester", "body": { "scope_mode": "subtree", "follow_moves": true } },
+    { "type": "ObserveAck", "role": "authority" },
+    { "type": "ObserveGap", "role": "authority", "body": { "cause": "TransportLoss" } },
+    { "type": "ObserveResume", "role": "requester", "body": { "replay_available": false } }
+  ],
+  "expected_state_trace": [
+    "ObserveIdle",
+    "ObservePendingAck",
+    "ObserveActive",
+    "ObserveGap"
+  ],
+  "expected_outcome": {
+    "success": false,
+    "deny_code": "ReplayWindowExpired",
+    "retryable": true
+  },
+  "assertions": [
+    { "id": "A1", "kind": "state", "check": "final_state_equals", "value": "ObserveGap" },
+    { "id": "A2", "kind": "error", "check": "deny_code_equals", "value": "ReplayWindowExpired" },
+    { "id": "A3", "kind": "error", "check": "retryable_equals", "value": true }
+  ]
+}

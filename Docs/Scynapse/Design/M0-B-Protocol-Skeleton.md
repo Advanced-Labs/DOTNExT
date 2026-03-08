@@ -45,6 +45,7 @@ Reference:
 - `Docs/Scynapse/Design/M0-S1-Closure.md`
 - `Docs/Scynapse/Design/M0-S2-Task-Board.md`
 - `Docs/Scynapse/Design/M0-S3-Task-Board.md`
+- `Docs/Scynapse/Design/M0-S4-Task-Board.md`
 - `Docs/Scynapse/Design/M0-B-Wire-Lock-Open-Decisions.md`
 - `Docs/Scynapse/Design/M0-Status-Checkpoint.md`
 

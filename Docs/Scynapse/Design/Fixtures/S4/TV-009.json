@@ -1,0 +1,34 @@
+{
+  "id": "TV-009",
+  "title": "Replay Resume Within Retention Window",
+  "slice_profile": "S4",
+  "preconditions": [
+    "subscription is active",
+    "transport break occurred",
+    "replay window is available"
+  ],
+  "messages": [
+    { "type": "ObserveOpen", "role": "requester", "body": { "scope_mode": "subtree", "follow_moves": true } },
+    { "type": "ObserveAck", "role": "authority" },
+    { "type": "ObserveGap", "role": "authority", "body": { "cause": "TransportLoss" } },
+    { "type": "ObserveResume", "role": "requester", "body": { "replay_available": true } },
+    { "type": "ObserveAck", "role": "authority" },
+    { "type": "ObserveEvent", "role": "authority", "body": { "event_type": "ValueChanged" } }
+  ],
+  "expected_state_trace": [
+    "ObserveIdle",
+    "ObservePendingAck",
+    "ObserveActive",
+    "ObserveGap",
+    "ObserveResuming",
+    "ObserveActive"
+  ],
+  "expected_outcome": {
+    "success": true,
+    "deny_code": null
+  },
+  "assertions": [
+    { "id": "A1", "kind": "state", "check": "final_state_equals", "value": "ObserveActive" },
+    { "id": "A2", "kind": "error", "check": "deny_code_absent", "value": true }
+  ]
+}

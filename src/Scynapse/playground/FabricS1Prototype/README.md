@@ -45,6 +45,12 @@ Run S3 fixture pack:
 dotnet run --project playground/FabricS1Prototype/FabricS1Prototype.csproj -- D:\Dev\dotnext\Docs\Scynapse\Design\Fixtures\S3
 ```
 
+Run S4 fixture pack:
+
+```powershell
+dotnet run --project playground/FabricS1Prototype/FabricS1Prototype.csproj -- D:\Dev\dotnext\Docs\Scynapse\Design\Fixtures\S4
+```
+
 Expected-fail fixture semantics:
 
 1. `expected_error_ids` is the preferred exact failure oracle.
@@ -63,3 +69,8 @@ Slice profile semantics:
    - `endpoint_grant_status`
    - `endpoint_disclosure_allowed`
    - `GrantPresent` proof-path checks before `ResolveResponse`
+4. `slice_profile: "S4"` enables observation/replay lifecycle validation:
+   - `ObserveOpen.scope_mode`
+   - `ObserveOpen.follow_moves`
+   - `ObserveGap.cause`
+   - `ObserveResume.replay_available`

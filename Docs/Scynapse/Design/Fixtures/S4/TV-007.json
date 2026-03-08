@@ -1,0 +1,28 @@
+{
+  "id": "TV-007",
+  "title": "Observe Subtree with follow_moves=true",
+  "slice_profile": "S4",
+  "preconditions": [
+    "subscription scope is subtree",
+    "follow_moves is true"
+  ],
+  "messages": [
+    { "type": "ObserveOpen", "role": "requester", "body": { "scope_mode": "subtree", "follow_moves": true } },
+    { "type": "ObserveAck", "role": "authority" },
+    { "type": "ObserveEvent", "role": "authority", "body": { "event_type": "NameMoved" } },
+    { "type": "ObserveEvent", "role": "authority", "body": { "event_type": "ValueChanged" } }
+  ],
+  "expected_state_trace": [
+    "ObserveIdle",
+    "ObservePendingAck",
+    "ObserveActive"
+  ],
+  "expected_outcome": {
+    "success": true,
+    "deny_code": null
+  },
+  "assertions": [
+    { "id": "A1", "kind": "state", "check": "final_state_equals", "value": "ObserveActive" },
+    { "id": "A2", "kind": "error", "check": "deny_code_absent", "value": true }
+  ]
+}

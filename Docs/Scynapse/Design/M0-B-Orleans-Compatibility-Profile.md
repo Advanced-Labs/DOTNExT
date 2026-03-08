@@ -142,7 +142,18 @@ This profile maps M0-B protocol fields to their Orleans lineage, with explicit c
 
 ---
 
-## 12. Review Checklist
+## 12. S4 Observation/Replay Behavior Classification
+
+| Hardened Behavior | Tag | Notes |
+|---|---|---|
+| Observe lifecycle context (`ObserveOpen/Ack/Event/Gap/Resume/Close`) | `A` | adapts stream/subscription lifecycle discipline while binding to CNS semantics |
+| `follow_moves` scope-aware behavior modeling | `N` | Scynapse-native dynamic namespace observation semantics |
+| Replay-expiry deterministic mapping (`ReplayWindowExpired`) | `A` | conceptually aligned with stream replay window behavior, tightened for deterministic protocol conformance |
+| Subscription semantics requiring silo/client gateway assumptions | `D` | explicitly blocked; remains node-unified routing and policy model |
+
+---
+
+## 13. Review Checklist
 
 1. Are any fields tagged `A` but still carrying hidden silo/cluster assumptions?
 2. Are all `N` fields tied to M0-A invariants?

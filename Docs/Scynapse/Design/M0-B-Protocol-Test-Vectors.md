@@ -374,6 +374,11 @@ Expected outcome:
    - TV-006 (encrypted endpoint resolve deny with missing grant)
    - TV-301 (grant proof message before resolve context; expected fail by exact error ID)
    - TV-302 (endpoint response without required grant proof path; expected fail by exact error ID)
+4. S4 owned vectors:
+   - TV-007 (observe subtree follow-moves semantics)
+   - TV-008 (observe exact-path no-follow semantics)
+   - TV-009 (replay resume success in retention window)
+   - TV-010 (replay resume expiry behavior with deterministic deny semantics)
 
 ---
 
@@ -385,9 +390,10 @@ Completed:
 2. S1 fixture pack execution complete with deterministic baseline (`Docs/Scynapse/Design/Fixtures/S1`)
 3. S2 fixture pack execution complete with deterministic baseline (`Docs/Scynapse/Design/Fixtures/S2`)
 4. S3 fixture pack execution complete with deterministic baseline (`Docs/Scynapse/Design/Fixtures/S3`)
+5. S4 fixture pack execution complete with deterministic baseline (`Docs/Scynapse/Design/Fixtures/S4`)
 
 Current next step:
 
-1. open bounded S4 planning for observation/replay vectors (`TV-007`..`TV-010`)
-2. preserve S1/S2/S3 baseline behavior and machine-checkable error ID stability
+1. open bounded S5 planning for policy inheritance hard-lock vector (`TV-011`)
+2. preserve S1/S2/S3/S4 baseline behavior and machine-checkable error ID stability
 3. keep deferred wire decisions (`D3`, `D5`, `D7`, `D8`) untouched until explicitly unlocked

@@ -141,6 +141,15 @@ S3 extension note:
    - `endpoint_disclosure_allowed` (bool)
 3. encrypted endpoint disclosure with active grant requires `GrantPresent` proof path before `ResolveResponse`.
 
+S4 extension note:
+
+1. `slice_profile: "S4"` enables observation/replay lifecycle validation.
+2. S4 observe fixtures use:
+   - `ObserveOpen.scope_mode` (`exact|subtree`)
+   - `ObserveOpen.follow_moves` (optional bool; default by scope mode)
+   - `ObserveGap.cause` (`RetentionExpired|PolicyDenied|TransportLoss`)
+   - `ObserveResume.replay_available` (bool)
+
 ---
 
 ## 5. Conformance Gates (Pass/Fail)

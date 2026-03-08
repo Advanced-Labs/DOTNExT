@@ -235,3 +235,27 @@ Use this structure for each new entry:
    - push S3 branch and open bounded S4 planning (`TV-007`..`TV-010`) if approved.
 5. Risks/blockers:
    - none immediate; keep deferred wire decisions (`D3`, `D5`, `D7`, `D8`) untouched.
+
+### 2026-03-08 (S4 Observation/Replay Slice Implementation)
+
+1. Scope:
+   - implement bounded S4 observation/replay slice from S3 baseline.
+2. Key outputs:
+   - created `codex/s4-observe-replay` from S3 baseline.
+   - extended harness with S4 observe message family handling:
+     - `ObserveOpen`, `ObserveAck`, `ObserveEvent`
+     - `ObserveGap`, `ObserveResume`, `ObserveClose`
+   - added deterministic replay-expiry semantics (`ReplayWindowExpired`) for out-of-window resume.
+   - added isolated S4 fixtures: `TV-007`, `TV-008`, `TV-009`, `TV-010`.
+   - added `M0-S4-Task-Board.md` and synchronized protocol/harness/compatibility docs.
+   - validation runs:
+     - S1: 14/14 effective pass
+     - S2: 8/8 effective pass
+     - S3: 4/4 effective pass
+     - S4: 4/4 effective pass (repeated S4 run stable)
+3. Current doing:
+   - final continuity synchronization and commit preparation on `codex/s4-observe-replay`.
+4. Next:
+   - push S4 branch and open bounded S5 planning (`TV-011`) if approved.
+5. Risks/blockers:
+   - none immediate; continue preserving deferred wire decisions (`D3`, `D5`, `D7`, `D8`) as-is.
