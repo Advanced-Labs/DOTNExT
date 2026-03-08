@@ -1,0 +1,43 @@
+{
+  "id": "TV-004",
+  "title": "Relayed to Direct Upgrade Success",
+  "slice_profile": "S2",
+  "preconditions": [
+    "relation already active in relayed mode",
+    "policy allows direct upgrade",
+    "disclosure, grant, and trust gates all pass"
+  ],
+  "messages": [
+    { "type": "HandshakeInit", "role": "requester" },
+    { "type": "HandshakeChallenge", "role": "mediator" },
+    { "type": "HandshakeProof", "role": "requester" },
+    { "type": "HandshakeAccept", "role": "mediator", "body": { "route_mode": "parent_mediated", "disclosure_level": "mediator_visible" } },
+    {
+      "type": "RouteUpgradeProbe",
+      "role": "requester",
+      "body": {
+        "policy_allowed": true,
+        "disclosure_allowed": true,
+        "grant_status": "active",
+        "trust_sufficient": true
+      }
+    },
+    { "type": "RouteUpgradeAccept", "role": "target" }
+  ],
+  "expected_state_trace": [
+    "MediatedHandshake",
+    "RelayedSession",
+    "DirectUpgradeProbe",
+    "DirectSession",
+    "Completed"
+  ],
+  "expected_outcome": {
+    "success": true,
+    "deny_code": null,
+    "upgrade_attempt_code": "UpgradeAccepted"
+  },
+  "assertions": [
+    { "id": "A1", "kind": "state", "check": "contains_state", "value": "DirectSession" },
+    { "id": "A2", "kind": "security", "check": "upgrade_decision_code_equals", "value": "UpgradeAccepted" }
+  ]
+}

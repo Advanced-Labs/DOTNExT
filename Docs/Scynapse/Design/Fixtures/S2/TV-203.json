@@ -1,0 +1,42 @@
+{
+  "id": "TV-203",
+  "title": "S2 Gate Deny: GrantMissing with Relayed Fallback",
+  "slice_profile": "S2",
+  "preconditions": [
+    "relayed session is active",
+    "required grant is missing for direct upgrade"
+  ],
+  "messages": [
+    { "type": "HandshakeInit", "role": "requester" },
+    { "type": "HandshakeChallenge", "role": "mediator" },
+    { "type": "HandshakeProof", "role": "requester" },
+    { "type": "HandshakeAccept", "role": "mediator", "body": { "route_mode": "parent_mediated", "disclosure_level": "mediator_visible" } },
+    {
+      "type": "RouteUpgradeProbe",
+      "role": "requester",
+      "body": {
+        "policy_allowed": true,
+        "disclosure_allowed": true,
+        "grant_status": "missing",
+        "trust_sufficient": true
+      }
+    },
+    { "type": "RouteUpgradeReject", "role": "mediator", "body": { "decision_code": "GrantMissing" } }
+  ],
+  "expected_state_trace": [
+    "MediatedHandshake",
+    "RelayedSession",
+    "DirectUpgradeProbe",
+    "RelayedSession",
+    "Completed"
+  ],
+  "expected_outcome": {
+    "success": true,
+    "deny_code": null,
+    "upgrade_attempt_code": "GrantMissing"
+  },
+  "assertions": [
+    { "id": "A1", "kind": "security", "check": "upgrade_decision_code_equals", "value": "GrantMissing" },
+    { "id": "A2", "kind": "state", "check": "contains_state", "value": "RelayedSession" }
+  ]
+}

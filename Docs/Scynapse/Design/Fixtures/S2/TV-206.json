@@ -1,0 +1,49 @@
+{
+  "id": "TV-206",
+  "title": "S2 Invalid Accept: Gate Failure Cannot Accept Upgrade",
+  "slice_profile": "S2",
+  "expect_conformance": "fail",
+  "expected_error_ids": [
+    "E3023_S2_UPGRADE_ACCEPT_WITH_FAILED_GATES"
+  ],
+  "expected_error_contains": [
+    "cannot accept upgrade when gate outcome is"
+  ],
+  "preconditions": [
+    "policy gate fails direct-upgrade probe",
+    "peer incorrectly emits RouteUpgradeAccept"
+  ],
+  "messages": [
+    { "type": "HandshakeInit", "role": "requester" },
+    { "type": "HandshakeChallenge", "role": "mediator" },
+    { "type": "HandshakeProof", "role": "requester" },
+    { "type": "HandshakeAccept", "role": "mediator", "body": { "route_mode": "parent_mediated", "disclosure_level": "mediator_visible" } },
+    {
+      "type": "RouteUpgradeProbe",
+      "role": "requester",
+      "body": {
+        "policy_allowed": false,
+        "disclosure_allowed": true,
+        "grant_status": "active",
+        "trust_sufficient": true
+      }
+    },
+    { "type": "RouteUpgradeAccept", "role": "target" }
+  ],
+  "expected_state_trace": [
+    "MediatedHandshake",
+    "RelayedSession",
+    "DirectUpgradeProbe",
+    "Deny"
+  ],
+  "expected_outcome": {
+    "success": false,
+    "deny_code": "PolicyDenied",
+    "retryable": false,
+    "upgrade_attempt_code": "UpgradeAccepted"
+  },
+  "assertions": [
+    { "id": "A1", "kind": "state", "check": "final_state_equals", "value": "Deny" },
+    { "id": "A2", "kind": "error", "check": "deny_code_equals", "value": "PolicyDenied" }
+  ]
+}

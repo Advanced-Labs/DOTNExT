@@ -52,6 +52,7 @@ internal static class Program
                     Errors = new List<string> { "Failed to deserialize fixture JSON." },
                     ObservedStateTrace = Array.Empty<string>(),
                     ObservedDenyCode = null,
+                    ObservedUpgradeDecisionCode = null,
                     ObservedRetryable = null
                 });
                 continue;
@@ -158,7 +159,7 @@ internal static class Program
         var failed = results.Count - passed;
 
         Console.WriteLine();
-        Console.WriteLine("=== S1 Conformance Summary ===");
+        Console.WriteLine("=== Conformance Summary ===");
         Console.WriteLine($"Vectors: {results.Count}");
         Console.WriteLine($"Pass:    {passed}");
         Console.WriteLine($"Fail:    {failed}");

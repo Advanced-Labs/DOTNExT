@@ -95,6 +95,7 @@ Each harness case should include:
 ```json
 {
   "id": "TV-001",
+  "slice_profile": "S1",
   "expect_conformance": "pass",
   "expected_error_ids": [],
   "expected_error_contains": [],
@@ -121,6 +122,15 @@ Failure oracle preference:
 
 1. `expected_error_ids` is preferred for deterministic machine-checkable fail vectors.
 2. `expected_error_contains` is compatibility fallback for legacy token matching.
+
+S2 extension note:
+
+1. `slice_profile: "S2"` enables direct-upgrade gate evaluation semantics.
+2. S2 `RouteUpgradeProbe` fixtures must include:
+   - `policy_allowed` (bool)
+   - `disclosure_allowed` (bool)
+   - `grant_status` (`active|missing|expired|not_required`)
+   - `trust_sufficient` (bool)
 
 ---
 
@@ -152,8 +162,11 @@ Pass criteria:
 Pass criteria:
 
 1. no endpoint disclosure while `disclosure_level=hidden`
-2. no direct upgrade without all gates
+2. no direct upgrade without all gates in S2 profile
 3. no gated operation accepted without required grants/proofs
+4. S1 profile rejects direct-upgrade accept path deterministically
+5. S2 profile applies gate order deterministically:
+   - `PolicyDenied -> DisclosureDenied -> GrantMissing/GrantExpired -> TrustInsufficient -> UpgradeRejected`
 
 ### 5.5 Gate G5: Observation Conformance
 

@@ -8,7 +8,7 @@ Current mission: finish M0 foundation without drift by carrying a closed S1 base
 
 Pre-compaction checkpoint status (2026-03-08):
 
-1. active branch: `codex/s1-prototype`
+1. active branch: `codex/s2-direct-upgrade`
 2. continuity files synchronized
 3. no in-scope uncommitted changes at checkpoint handoff
 
@@ -17,7 +17,7 @@ Current active path:
 1. M0-A complete draft
 2. M0-B structured draft with wire-lock decisions
 3. S1 prototype closed with deterministic message-driven conformance baseline
-4. S2 direct-upgrade slice kickoff (profile-gated, fallback-preserving)
+4. S2 direct-upgrade slice implemented (profile-gated, fallback-preserving)
 
 ---
 
@@ -50,16 +50,24 @@ Current active path:
 23. repeated harness execution confirms deterministic/reproducible 14/14 effective pass
 24. Orleans compatibility profile updated with S1 hardening behavior `A/N/D` classification notes
 25. S1 closure artifact added (`M0-S1-Closure.md`) with lock/defer register and handoff boundaries
+26. S1 closure commit pushed on `codex/s1-prototype` (`04e297587d`)
+27. S2 implementation branch created: `codex/s2-direct-upgrade`
+28. fixture profile contract extended with `slice_profile` (`S1` default, explicit `S2`)
+29. `RouteUpgradeProbe` S2 gate fields added (`policy_allowed`, `disclosure_allowed`, `grant_status`, `trust_sufficient`)
+30. profile-aware conformance execution implemented (`S1` mediated-only posture, `S2` gate-evaluated direct-upgrade)
+31. deterministic S2 error IDs added for reject-code mismatch and invalid-accept paths
+32. isolated S2 fixture pack added (`Docs/Scynapse/Design/Fixtures/S2`): TV-004, TV-014, TV-201..TV-206
+33. regression results stable: S1 14/14 effective pass, S2 8/8 effective pass, repeated runs reproducible
 
 ### Doing
 
-1. freeze S1 baseline in a focused commit and cut implementation branch `codex/s2-direct-upgrade`
+1. final S2 continuity synchronization and branch push preparation
 
 ### Next
 
-1. add S2 fixture profile support (`S1` default, explicit `S2`)
-2. implement S2 direct-upgrade gate ordering and deterministic deny IDs
-3. validate fallback continuity (`RelayedSession`) on all S2 reject paths
+1. preserve S1/S2 fixture and error-ID stability as new slices are added
+2. open bounded S3 planning for encrypted endpoint disclosure grants (TV-005/TV-006)
+3. continue holding deferred wire decisions (`D3`, `D5`, `D7`, `D8`) outside current scope
 
 ---
 
@@ -103,7 +111,8 @@ Authority file:
 2. `M0-Status-Checkpoint.md`
 3. `M0-B-Protocol-Skeleton.md`
 4. `M0-S1-Task-Board.md`
-5. latest entry in `SESSION-LOG.md`
+5. `M0-S2-Task-Board.md`
+6. latest entry in `SESSION-LOG.md`
 
 ---
 
@@ -120,6 +129,8 @@ Authority file:
    - `M0-Implementation-Slice-Plan.md`
    - `M0-S1-Task-Board.md`
    - `M0-S1-Closure.md`
+   - `M0-S2-Task-Board.md`
+   - `Fixtures/S2/README.md`
 5. Wire lock:
    - `M0-B-Wire-Lock-Open-Decisions.md`
    - `M0-B-Wire-Examples.md`

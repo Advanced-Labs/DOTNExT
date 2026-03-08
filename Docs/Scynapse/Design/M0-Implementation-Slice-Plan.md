@@ -127,8 +127,9 @@ Vectors:
 Completed:
 
 1. S1 implementation task board: `M0-S1-Task-Board.md`
+2. S1 closure baseline: `M0-S1-Closure.md` (14/14 effective pass)
 
 Current next action:
 
-1. start W1-W3 foundation tasks
-2. generate concrete fixtures for TV-001/002/003/012/013
+1. execute S2 task board: `M0-S2-Task-Board.md`
+2. add and run isolated `Fixtures/S2` pack for TV-004/TV-014 and S2 gate vectors

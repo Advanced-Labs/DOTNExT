@@ -42,6 +42,8 @@ Reference:
 - `Docs/Scynapse/Design/M0-Cross-Doc-Consistency-Report.md`
 - `Docs/Scynapse/Design/M0-Implementation-Slice-Plan.md`
 - `Docs/Scynapse/Design/M0-S1-Task-Board.md`
+- `Docs/Scynapse/Design/M0-S1-Closure.md`
+- `Docs/Scynapse/Design/M0-S2-Task-Board.md`
 - `Docs/Scynapse/Design/M0-B-Wire-Lock-Open-Decisions.md`
 - `Docs/Scynapse/Design/M0-Status-Checkpoint.md`
 

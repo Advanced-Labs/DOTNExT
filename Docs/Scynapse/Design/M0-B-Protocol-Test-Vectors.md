@@ -356,6 +356,20 @@ Expected outcome:
 8. TV-108: ambiguous resolve path with empty selector hints but success response
 9. TV-109: mediated handshake rejection must remain terminal
 
+### 4.2 Slice Ownership Map
+
+1. S1 owned vectors:
+   - TV-001, TV-002, TV-003, TV-012, TV-013
+   - TV-101, TV-102, TV-103, TV-104, TV-105, TV-106, TV-107, TV-108, TV-109
+2. S2 owned vectors:
+   - TV-004, TV-014
+   - TV-201 (policy gate deny path)
+   - TV-202 (disclosure gate deny path)
+   - TV-203 (grant missing gate deny path)
+   - TV-204 (grant expired gate deny path)
+   - TV-205 (trust insufficient gate deny path)
+   - TV-206 (invalid accept with failed gates; expected fail by exact error ID)
+
 ---
 
 ## 5. Next Step
@@ -363,9 +377,10 @@ Expected outcome:
 Completed:
 
 1. runnable harness checklist and fixture contract (`M0-B-Conformance-Harness-Checklist.md`)
+2. S1 fixture pack execution complete with deterministic baseline (`Docs/Scynapse/Design/Fixtures/S1`)
 
 Current next step:
 
-1. transform these vectors into concrete harness fixtures (one file per TV id)
-2. add machine-checkable expected state traces and deny assertions
-3. tag each vector with implementation-slice ownership
+1. execute S2 direct-upgrade fixture pack (`Docs/Scynapse/Design/Fixtures/S2`)
+2. enforce profile-aware gate ordering and fallback continuity semantics
+3. preserve S1 baseline behavior and error ID stability during S2 expansion

@@ -14,6 +14,9 @@ internal sealed class FixtureCase
     [JsonPropertyName("expect_conformance")]
     public string ExpectConformance { get; set; } = "pass";
 
+    [JsonPropertyName("slice_profile")]
+    public string SliceProfile { get; set; } = "S1";
+
     [JsonPropertyName("expected_error_contains")]
     public List<string> ExpectedErrorContains { get; set; } = new();
 
@@ -105,6 +108,7 @@ internal sealed class VectorResult
     public required List<string> Errors { get; init; }
     public required IReadOnlyList<string> ObservedStateTrace { get; init; }
     public string? ObservedDenyCode { get; init; }
+    public string? ObservedUpgradeDecisionCode { get; init; }
     public bool? ObservedRetryable { get; init; }
     public bool EffectivePassed { get; set; }
 }

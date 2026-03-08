@@ -194,3 +194,23 @@ Use this structure for each new entry:
    - create `codex/s2-direct-upgrade` from the frozen S1 baseline and begin S2 implementation.
 5. Risks/blockers:
    - large unrelated workspace untracked files require strict scoped staging.
+
+### 2026-03-08 (S2 Direct-Upgrade Slice Implementation)
+
+1. Scope:
+   - implement M0 S2 direct-upgrade slice after S1 closure baseline.
+2. Key outputs:
+   - froze and pushed S1 closure commit on `codex/s1-prototype` (`04e297587d`), then created `codex/s2-direct-upgrade`.
+   - extended fixture contract with `slice_profile` (`S1` default, explicit `S2`) and S2 probe gate inputs.
+   - updated conformance engine to profile-aware behavior:
+     - `S1`: mediated-only posture preserved
+     - `S2`: deterministic gate-order evaluation and accept/reject handling
+   - added deterministic S2 error IDs for invalid accept and reject-code mismatch paths.
+   - added isolated S2 fixtures: `TV-004`, `TV-014`, `TV-201`, `TV-202`, `TV-203`, `TV-204`, `TV-205`, `TV-206`.
+   - updated design docs/task boards/coverage map for S2 ownership and Orleans A/N/D notes.
+3. Current doing:
+   - final continuity synchronization and commit preparation on `codex/s2-direct-upgrade`.
+4. Next:
+   - push S2 branch and start bounded S3 planning (`TV-005`, `TV-006`) if approved.
+5. Risks/blockers:
+   - none immediate; preserve error ID stability and avoid deferred wire-decision scope creep.

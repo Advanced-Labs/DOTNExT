@@ -4,6 +4,23 @@ namespace FabricS1Prototype;
 
 internal sealed class ConformanceEngine
 {
+    private const string SliceProfileS1 = "S1";
+    private const string SliceProfileS2 = "S2";
+
+    private static readonly HashSet<string> KnownSliceProfiles = new(StringComparer.Ordinal)
+    {
+        SliceProfileS1,
+        SliceProfileS2
+    };
+
+    private static readonly HashSet<string> KnownGrantStatuses = new(StringComparer.Ordinal)
+    {
+        "active",
+        "missing",
+        "expired",
+        "not_required"
+    };
+
     private static readonly HashSet<string> KnownMessageTypes = new(StringComparer.Ordinal)
     {
         "ResolveRequest",
@@ -81,13 +98,15 @@ internal sealed class ConformanceEngine
     {
         var errors = new List<ConformanceError>();
         var envelopeMessages = BuildEnvelopeMessages(fixture, errors);
+        var sliceProfile = NormalizeSliceProfile(fixture, errors);
 
         ValidateEnvelopeAndSchema(fixture, envelopeMessages, errors);
-        ValidateMessageFieldRules(fixture, errors);
+        ValidateMessageFieldRules(fixture, sliceProfile, errors);
 
-        var context = ExecuteMessageFlow(fixture, errors);
+        var context = ExecuteMessageFlow(fixture, sliceProfile, errors);
         var observedStateTrace = context.ObservedStateTrace.AsReadOnly();
         var observedDenyCode = context.ObservedDenyCode;
+        var observedUpgradeDecisionCode = context.ObservedUpgradeDecisionCode;
         bool? observedRetryable = null;
 
         if (observedDenyCode is not null)
@@ -103,8 +122,8 @@ internal sealed class ConformanceEngine
         }
 
         ValidateStateTrace(fixture, observedStateTrace, errors);
-        ValidateExpectedOutcome(fixture, observedDenyCode, observedRetryable, errors);
-        ValidateAssertions(fixture, envelopeMessages, observedStateTrace, observedDenyCode, observedRetryable, errors);
+        ValidateExpectedOutcome(fixture, observedDenyCode, observedUpgradeDecisionCode, observedRetryable, errors);
+        ValidateAssertions(fixture, envelopeMessages, observedStateTrace, observedDenyCode, observedUpgradeDecisionCode, observedRetryable, errors);
 
         var errorMessages = errors.Select(FormatError).ToList();
         return new VectorResult
@@ -115,6 +134,7 @@ internal sealed class ConformanceEngine
             Errors = errorMessages,
             ObservedStateTrace = observedStateTrace,
             ObservedDenyCode = observedDenyCode,
+            ObservedUpgradeDecisionCode = observedUpgradeDecisionCode,
             ObservedRetryable = observedRetryable,
             EffectivePassed = errors.Count == 0
         };
@@ -180,7 +200,7 @@ internal sealed class ConformanceEngine
         }
     }
 
-    private static void ValidateMessageFieldRules(FixtureCase fixture, List<ConformanceError> errors)
+    private static void ValidateMessageFieldRules(FixtureCase fixture, string sliceProfile, List<ConformanceError> errors)
     {
         foreach (var message in fixture.Messages)
         {
@@ -215,11 +235,112 @@ internal sealed class ConformanceEngine
                     AddError(errors, "L4", "E4001_DENY_CODE_NOT_ALLOWED", $"{fixture.Id}/{message.Type} deny code '{denyCode}' is not allowed.");
                 }
             }
+
+            if (string.Equals(sliceProfile, SliceProfileS2, StringComparison.Ordinal) &&
+                string.Equals(message.Type, "RouteUpgradeProbe", StringComparison.Ordinal))
+            {
+                ValidateS2RouteUpgradeProbeFields(fixture, message, errors);
+            }
         }
     }
-    private static OperationContext ExecuteMessageFlow(FixtureCase fixture, List<ConformanceError> errors)
+
+    private static string NormalizeSliceProfile(FixtureCase fixture, List<ConformanceError> errors)
     {
-        var context = new OperationContext();
+        var rawProfile = string.IsNullOrWhiteSpace(fixture.SliceProfile) ? SliceProfileS1 : fixture.SliceProfile.Trim();
+        if (KnownSliceProfiles.Contains(rawProfile))
+        {
+            return rawProfile;
+        }
+
+        AddError(errors, "L1", "E1006_UNKNOWN_SLICE_PROFILE", $"{fixture.Id} uses unsupported slice_profile '{rawProfile}'. Falling back to '{SliceProfileS1}'.");
+        return SliceProfileS1;
+    }
+
+    private static void ValidateS2RouteUpgradeProbeFields(FixtureCase fixture, FixtureMessage message, List<ConformanceError> errors)
+    {
+        if (message.Body is null || message.Body.Value.ValueKind != JsonValueKind.Object)
+        {
+            AddError(errors, "L2", "E2001_MISSING_REQUIRED_BODY", $"{fixture.Id}/{message.Type} missing required body.");
+            return;
+        }
+
+        ValidateRequiredBooleanField(fixture, message, "policy_allowed", errors);
+        ValidateRequiredBooleanField(fixture, message, "disclosure_allowed", errors);
+        ValidateRequiredBooleanField(fixture, message, "trust_sufficient", errors);
+
+        if (!message.Body.Value.TryGetProperty("grant_status", out var grantStatusElement))
+        {
+            AddError(errors, "L2", "E2002_MISSING_REQUIRED_FIELD", $"{fixture.Id}/{message.Type} missing required field 'grant_status'.");
+            return;
+        }
+
+        if (grantStatusElement.ValueKind != JsonValueKind.String)
+        {
+            AddError(errors, "L2", "E2003_INVALID_FIELD_TYPE", $"{fixture.Id}/{message.Type} field 'grant_status' must be a string.");
+            return;
+        }
+
+        var grantStatus = grantStatusElement.GetString();
+        if (string.IsNullOrWhiteSpace(grantStatus) || !KnownGrantStatuses.Contains(grantStatus))
+        {
+            AddError(errors, "L2", "E2004_INVALID_FIELD_VALUE", $"{fixture.Id}/{message.Type} field 'grant_status' value '{grantStatus ?? "null"}' is invalid.");
+        }
+    }
+
+    private static void ValidateRequiredBooleanField(FixtureCase fixture, FixtureMessage message, string fieldName, List<ConformanceError> errors)
+    {
+        if (!message.Body!.Value.TryGetProperty(fieldName, out var property))
+        {
+            AddError(errors, "L2", "E2002_MISSING_REQUIRED_FIELD", $"{fixture.Id}/{message.Type} missing required field '{fieldName}'.");
+            return;
+        }
+
+        if (property.ValueKind is not (JsonValueKind.True or JsonValueKind.False))
+        {
+            AddError(errors, "L2", "E2003_INVALID_FIELD_TYPE", $"{fixture.Id}/{message.Type} field '{fieldName}' must be a boolean.");
+        }
+    }
+
+    private static string? DetermineS2UpgradeRejectCode(FixtureMessage message)
+    {
+        var policyAllowed = GetBodyBoolean(message, "policy_allowed") ?? true;
+        if (!policyAllowed)
+        {
+            return "PolicyDenied";
+        }
+
+        var disclosureAllowed = GetBodyBoolean(message, "disclosure_allowed") ?? true;
+        if (!disclosureAllowed)
+        {
+            return "DisclosureDenied";
+        }
+
+        var grantStatus = GetBodyString(message, "grant_status") ?? "not_required";
+        if (string.Equals(grantStatus, "missing", StringComparison.Ordinal))
+        {
+            return "GrantMissing";
+        }
+
+        if (string.Equals(grantStatus, "expired", StringComparison.Ordinal))
+        {
+            return "GrantExpired";
+        }
+
+        var trustSufficient = GetBodyBoolean(message, "trust_sufficient") ?? true;
+        if (!trustSufficient)
+        {
+            return "TrustInsufficient";
+        }
+
+        return null;
+    }
+
+    private static OperationContext ExecuteMessageFlow(FixtureCase fixture, string sliceProfile, List<ConformanceError> errors)
+    {
+        var context = new OperationContext
+        {
+            SliceProfile = sliceProfile
+        };
 
         foreach (var message in fixture.Messages)
         {
@@ -228,9 +349,28 @@ internal sealed class ConformanceEngine
 
         if (context.UpgradeProbePending)
         {
-            AddError(errors, "L3", "E3014_UPGRADE_PROBE_NOT_REJECTED", $"{fixture.Id} requires RouteUpgradeReject after RouteUpgradeProbe in S1 mediated-only mode.");
-            context.ObservedDenyCode ??= "UpgradeRejected";
-            ForceTerminalDeny(context);
+            if (string.Equals(sliceProfile, SliceProfileS1, StringComparison.Ordinal))
+            {
+                AddError(errors, "L3", "E3014_UPGRADE_PROBE_NOT_REJECTED", $"{fixture.Id} requires RouteUpgradeReject after RouteUpgradeProbe in S1 mediated-only mode.");
+                context.ObservedDenyCode ??= "UpgradeRejected";
+                context.ObservedUpgradeDecisionCode ??= "UpgradeRejected";
+                ForceTerminalDeny(context);
+            }
+            else
+            {
+                AddError(errors, "L3", "E3028_S2_UPGRADE_PROBE_UNRESOLVED", $"{fixture.Id} requires RouteUpgradeAccept or RouteUpgradeReject after RouteUpgradeProbe in S2.");
+                context.ObservedDenyCode ??= "UpgradeRejected";
+                context.ObservedUpgradeDecisionCode ??= "UpgradeRejected";
+                ForceTerminalDeny(context);
+            }
+        }
+
+        if (string.Equals(sliceProfile, SliceProfileS2, StringComparison.Ordinal) && context.UpgradeRejectSeen)
+        {
+            if (!context.UpgradeFallbackRestored)
+            {
+                AddError(errors, "L3", "E3026_S2_FALLBACK_NOT_RESTORED", $"{fixture.Id} rejected direct upgrade but did not restore RelayedSession.");
+            }
         }
 
         if (!IsTerminal(context.CurrentState))
@@ -458,8 +598,25 @@ internal sealed class ConformanceEngine
             {
                 if (!StateIs(context, "RelayedSession"))
                 {
-                    RejectWithDeterministicDeny(fixtureId, context, errors, "E3012_DIRECT_UPGRADE_FORBIDDEN", "UpgradeRejected", $"{fixtureId}/{message.Type} is only valid from RelayedSession and is denied in S1 mediated-only mode.");
+                    var reason = string.Equals(context.SliceProfile, SliceProfileS2, StringComparison.Ordinal)
+                        ? $"{fixtureId}/{message.Type} is only valid from RelayedSession in S2 direct-upgrade flow."
+                        : $"{fixtureId}/{message.Type} is only valid from RelayedSession and is denied in S1 mediated-only mode.";
+                    RejectWithDeterministicDeny(fixtureId, context, errors, "E3012_DIRECT_UPGRADE_FORBIDDEN", "UpgradeRejected", reason);
                     break;
+                }
+
+                if (string.Equals(context.SliceProfile, SliceProfileS2, StringComparison.Ordinal))
+                {
+                    if (!TryTransition(fixtureId, context, "DirectUpgradeProbe", errors))
+                    {
+                        break;
+                    }
+
+                    context.ExpectedUpgradeRejectCode = DetermineS2UpgradeRejectCode(message);
+                }
+                else
+                {
+                    context.ExpectedUpgradeRejectCode = "UpgradeRejected";
                 }
 
                 context.UpgradeProbePending = true;
@@ -475,13 +632,37 @@ internal sealed class ConformanceEngine
 
                 context.UpgradeProbePending = false;
                 var decisionCode = GetBodyString(message, "decision_code");
+
+                if (string.Equals(context.SliceProfile, SliceProfileS2, StringComparison.Ordinal))
+                {
+                    var expectedRejectCode = context.ExpectedUpgradeRejectCode ?? "UpgradeRejected";
+                    if (!string.Equals(decisionCode, expectedRejectCode, StringComparison.Ordinal))
+                    {
+                        AddError(errors, "L3", "E3024_S2_UPGRADE_REJECT_CODE_MISMATCH", $"{fixtureId}/{message.Type} expected decision_code '{expectedRejectCode}' but observed '{decisionCode ?? "null"}'.");
+                        context.ObservedDenyCode ??= expectedRejectCode;
+                        context.ObservedUpgradeDecisionCode ??= decisionCode ?? expectedRejectCode;
+                        ForceTerminalDeny(context);
+                        break;
+                    }
+
+                    context.ObservedUpgradeDecisionCode = decisionCode;
+                    context.ExpectedUpgradeRejectCode = null;
+                    context.UpgradeRejectSeen = true;
+                    context.UpgradeFallbackRestored = TryTransition(fixtureId, context, "RelayedSession", errors);
+                    break;
+                }
+
                 if (!string.Equals(decisionCode, "UpgradeRejected", StringComparison.Ordinal))
                 {
                     AddError(errors, "L3", "E3013_UPGRADE_REJECT_CODE_REQUIRED", $"{fixtureId}/{message.Type} must use decision_code 'UpgradeRejected' in S1.");
                     context.ObservedDenyCode ??= "UpgradeRejected";
+                    context.ObservedUpgradeDecisionCode ??= "UpgradeRejected";
                     ForceTerminalDeny(context);
+                    break;
                 }
 
+                context.ObservedUpgradeDecisionCode = decisionCode;
+                context.ExpectedUpgradeRejectCode = null;
                 break;
             }
             case "RouteUpgradeAccept":
@@ -493,6 +674,28 @@ internal sealed class ConformanceEngine
                 }
 
                 context.UpgradeProbePending = false;
+
+                if (string.Equals(context.SliceProfile, SliceProfileS2, StringComparison.Ordinal))
+                {
+                    if (context.ExpectedUpgradeRejectCode is not null)
+                    {
+                        RejectWithDeterministicDeny(
+                            fixtureId,
+                            context,
+                            errors,
+                            "E3023_S2_UPGRADE_ACCEPT_WITH_FAILED_GATES",
+                            context.ExpectedUpgradeRejectCode,
+                            $"{fixtureId}/{message.Type} cannot accept upgrade when gate outcome is '{context.ExpectedUpgradeRejectCode}'.");
+                        context.ObservedUpgradeDecisionCode ??= "UpgradeAccepted";
+                        break;
+                    }
+
+                    context.ObservedUpgradeDecisionCode = "UpgradeAccepted";
+                    context.ExpectedUpgradeRejectCode = null;
+                    TryTransition(fixtureId, context, "DirectSession", errors);
+                    break;
+                }
+
                 RejectWithDeterministicDeny(fixtureId, context, errors, "E3012_DIRECT_UPGRADE_FORBIDDEN", "UpgradeRejected", $"{fixtureId}/{message.Type} is forbidden in S1 mediated-only mode.");
                 break;
             }
@@ -544,6 +747,7 @@ internal sealed class ConformanceEngine
     private static void ValidateExpectedOutcome(
         FixtureCase fixture,
         string? observedDenyCode,
+        string? observedUpgradeDecisionCode,
         bool? observedRetryable,
         List<ConformanceError> errors)
     {
@@ -567,6 +771,15 @@ internal sealed class ConformanceEngine
                 AddError(errors, "L4", "E4004_EXPECTED_RETRYABLE_MISMATCH", $"{fixture.Id} expected retryable='{expectedRetryable}' but observed '{observedRetryable.Value}'.");
             }
         }
+
+        var expectedUpgradeCode = fixture.ExpectedOutcome.UpgradeAttemptCode;
+        if (!string.Equals(expectedUpgradeCode, observedUpgradeDecisionCode, StringComparison.Ordinal))
+        {
+            if (!(expectedUpgradeCode is null && observedUpgradeDecisionCode is null))
+            {
+                AddError(errors, "L3", "E3030_UPGRADE_ATTEMPT_CODE_MISMATCH", $"{fixture.Id} expected upgrade attempt code '{expectedUpgradeCode ?? "null"}' but observed '{observedUpgradeDecisionCode ?? "null"}'.");
+            }
+        }
     }
 
     private static void ValidateAssertions(
@@ -574,6 +787,7 @@ internal sealed class ConformanceEngine
         IReadOnlyList<EnvelopeMessage> envelopeMessages,
         IReadOnlyList<string> observedStateTrace,
         string? observedDenyCode,
+        string? observedUpgradeDecisionCode,
         bool? observedRetryable,
         List<ConformanceError> errors)
     {
@@ -710,6 +924,16 @@ internal sealed class ConformanceEngine
                     if (expected is null || observedRetryable is null || expected.Value != observedRetryable.Value)
                     {
                         AddAssertionError(errors, assertion.Id, $"expected retryable '{expected?.ToString() ?? "null"}', observed '{observedRetryable?.ToString() ?? "null"}'.");
+                    }
+
+                    break;
+                }
+                case "upgrade_decision_code_equals":
+                {
+                    var expected = assertion.Value?.GetStringOrNull();
+                    if (!string.Equals(expected, observedUpgradeDecisionCode, StringComparison.Ordinal))
+                    {
+                        AddAssertionError(errors, assertion.Id, $"expected upgrade decision code '{expected ?? "null"}', observed '{observedUpgradeDecisionCode ?? "null"}'.");
                     }
 
                     break;
@@ -898,6 +1122,7 @@ internal sealed class ConformanceEngine
 
 internal sealed class OperationContext
 {
+    public string SliceProfile { get; set; } = "S1";
     public string? CurrentState { get; set; }
     public bool ResolveStarted { get; set; }
     public bool HandshakeStarted { get; set; }
@@ -905,9 +1130,13 @@ internal sealed class OperationContext
     public bool HandshakeChallengeSeen { get; set; }
     public bool HandshakeProofSeen { get; set; }
     public bool UpgradeProbePending { get; set; }
+    public bool UpgradeRejectSeen { get; set; }
+    public bool UpgradeFallbackRestored { get; set; }
     public bool RequiresSelectorHints { get; set; }
     public bool HasSelectorHints { get; set; }
+    public string? ExpectedUpgradeRejectCode { get; set; }
     public string? ObservedDenyCode { get; set; }
+    public string? ObservedUpgradeDecisionCode { get; set; }
     public List<string> ObservedStateTrace { get; } = new();
 }
 

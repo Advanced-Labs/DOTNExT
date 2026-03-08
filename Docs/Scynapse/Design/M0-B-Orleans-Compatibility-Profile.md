@@ -119,7 +119,19 @@ This profile maps M0-B protocol fields to their Orleans lineage, with explicit c
 
 ---
 
-## 10. Review Checklist
+## 10. S2 Direct-Upgrade Behavior Classification
+
+| Hardened Behavior | Tag | Notes |
+|---|---|---|
+| Profile-aware direct-upgrade handling (`S1` forbid posture, `S2` evaluate gates) | `N` | Scynapse-native multi-slice protocol profile model |
+| Deterministic S2 gate-order evaluation (`Policy -> Disclosure -> Grant -> Trust -> UpgradeRejected`) | `N` | no Orleans equivalent at protocol route-upgrade layer |
+| Reject-path fallback restoration to `RelayedSession` | `A` | adapts Orleans-style resilience/fallback intent, but implemented in Scynapse relation-route semantics |
+| Invalid accept with failed gates blocked by stable machine error ID | `N` | Scynapse conformance determinism requirement |
+| Route behavior requiring silo/client topology hints | `D` | remains explicitly blocked in S2, same as S1 |
+
+---
+
+## 11. Review Checklist
 
 1. Are any fields tagged `A` but still carrying hidden silo/cluster assumptions?
 2. Are all `N` fields tied to M0-A invariants?
