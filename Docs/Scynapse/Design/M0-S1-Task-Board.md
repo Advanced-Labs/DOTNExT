@@ -15,6 +15,15 @@ Reference vectors:
 3. TV-003
 4. TV-012
 5. TV-013
+6. TV-101
+7. TV-102
+8. TV-103
+9. TV-104
+10. TV-105
+11. TV-106
+12. TV-107
+13. TV-108
+14. TV-109
 
 ---
 
@@ -121,8 +130,16 @@ Exit criteria:
 
 ## 6. Progress Snapshot (2026-03-08)
 
-1. W1 baseline: in progress (prototype schema/field validation implemented in `src/Scynapse/playground/FabricS1Prototype`)
-2. W2 baseline: in progress (observed message-flow state-trace derivation + transition validator implemented)
-3. W3 baseline: in progress (deterministic deny mapper baseline implemented)
-4. W4-W5: pending (message-driven relation/resolve engine behavior still to harden)
-5. W6 baseline: in progress (fixture loader and run summary implemented; expected-fail mode + expected error-token checks added; current run 8/8 effective pass on TV-001/002/003/012/013/101/102/103)
+1. W1 baseline: complete (schema/field validation implemented; structured error IDs added for machine-checkable failures)
+2. W2 baseline: complete (message-driven operation state execution with terminal behavior enforcement)
+3. W3 baseline: complete (deny mapping integrated with deterministic transition rejection paths)
+4. W4-W5: complete for S1 scope (mediated relation path and resolve path enforce S1 no-direct-upgrade semantics)
+5. W6 baseline: complete (fixture loader/reporting supports `expected_error_ids`; transition-edge negative vectors TV-104..TV-109 added; stable run 14/14 effective pass on TV-001/002/003/012/013/101/102/103/104/105/106/107/108/109)
+
+---
+
+## 7. Closure Marker
+
+1. S1 closure record: `Docs/Scynapse/Design/M0-S1-Closure.md`
+2. closure baseline run: 14 vectors, 14 effective pass
+3. handoff target: bounded S2 direct-upgrade slice (`codex/s2-direct-upgrade`)

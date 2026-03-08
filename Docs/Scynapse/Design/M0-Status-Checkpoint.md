@@ -56,6 +56,7 @@ Artifacts:
 1. `Docs/Scynapse/Design/M0-B-Protocol-Skeleton.md`
 2. `Docs/Scynapse/Design/M0-B-Orleans-Compatibility-Profile.md`
 3. `Docs/Scynapse/Design/M0-Orleans-Reuse-Matrix.md`
+4. `Docs/Scynapse/Design/M0-S1-Closure.md`
 
 Status:
 
@@ -79,15 +80,15 @@ Yes. We are still on the same track:
 
 ## 5. Immediate Next Work (Ordered)
 
-1. start first prototype execution for S1 flow
-2. run first red/green conformance cycle on TV-002 then TV-001
-3. extend W4/W5 flow enforcement toward message-driven transition checks
-4. expand negative fixtures for L1-L4 coverage and then extend fixture set to S2
+1. freeze S1 baseline and preserve current error IDs and fixture behavior
+2. create `codex/s2-direct-upgrade` from S1 closure commit
+3. add S2 profile-aware direct-upgrade handling with deterministic gate-order denials
+4. verify S2 fallback continuity while keeping deferred wire decisions (`D3`, `D5`, `D7`, `D8`) untouched
 
 ---
 
 ## 6. Done/Doing/Next Snapshot
 
-1. `Done`: M0-A contract baseline and M0-B skeleton + compatibility profiles + field matrix + error mapping + state transitions + protocol test vectors + conformance harness checklist + wire examples + cross-doc consistency report + implementation-slice plan + S1 task board + S1 fixture pack + wire-lock decisions list + continuity layer (`METHODOLOGY`, `EXECUTIVE-MEMORY`, `SESSION-LOG`) + pre-compaction continuity protocol + `codex/s1-prototype` branch creation + S1 prototype harness scaffold (`src/Scynapse/playground/FabricS1Prototype`) + first fixture run pass (5/5) + S1 wire-lock decisions (`D1`, `D2`, `D4`, `D6`) locked and propagated + expected-fail fixture mode with extended S1 pack (8/8 effective pass) + expected error-token checks for negative vectors.
-2. `Doing`: S1 hardening pass from fixture-trace checks toward message-driven transition execution.
-3. `Next`: extend W4/W5 flow enforcement plus deeper negative vectors and stricter expected-fail assertion semantics.
+1. `Done`: M0-A contract baseline and M0-B skeleton + compatibility profiles + field matrix + error mapping + state transitions + protocol test vectors + conformance harness checklist + wire examples + cross-doc consistency report + implementation-slice plan + S1 task board + S1 fixture pack + wire-lock decisions list + continuity layer (`METHODOLOGY`, `EXECUTIVE-MEMORY`, `SESSION-LOG`) + pre-compaction continuity protocol + `codex/s1-prototype` branch creation + S1 prototype harness scaffold (`src/Scynapse/playground/FabricS1Prototype`) + first fixture run pass (5/5) + S1 wire-lock decisions (`D1`, `D2`, `D4`, `D6`) locked and propagated + expected-fail fixture mode with extended S1 pack (8/8 effective pass) + expected error-token checks + explicit message-driven operation state machine + structured error ID surface + fixture schema `expected_error_ids` + transition-edge negatives `TV-104`..`TV-109` + reproducible harness run pass (14/14 effective pass).
+2. `Doing`: S1 closure freeze (doc sync + commit/push) and S2 branch handoff.
+3. `Next`: implement S2 direct-upgrade slice with profile-gated behavior and deterministic fail mapping.

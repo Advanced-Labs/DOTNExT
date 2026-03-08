@@ -95,6 +95,9 @@ Each harness case should include:
 ```json
 {
   "id": "TV-001",
+  "expect_conformance": "pass",
+  "expected_error_ids": [],
+  "expected_error_contains": [],
   "preconditions": [],
   "messages": [],
   "expected_state_trace": [],
@@ -113,6 +116,11 @@ Required assertion categories:
 3. error assertions
 4. disclosure/security assertions
 5. audit assertions (when profile requires)
+
+Failure oracle preference:
+
+1. `expected_error_ids` is preferred for deterministic machine-checkable fail vectors.
+2. `expected_error_contains` is compatibility fallback for legacy token matching.
 
 ---
 
@@ -179,7 +187,7 @@ Must run at least:
 Each run should produce:
 
 1. per-vector status (`PASS/FAIL`)
-2. failing assertion id and reason
+2. failing error IDs/categories and human-readable reason
 3. observed vs expected state trace
 4. observed vs expected deny code
 5. coverage summary by harness layer (L1-L7)

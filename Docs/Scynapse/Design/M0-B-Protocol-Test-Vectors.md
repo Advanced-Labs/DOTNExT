@@ -344,6 +344,18 @@ Expected outcome:
 4. Observation/replay: TV-007, TV-008, TV-009, TV-010
 5. Policy inheritance: TV-011
 
+### 4.1 S1 Transition-Edge Negative Extension Set
+
+1. TV-101: `ResolveResponse` before `ResolveRequest` context
+2. TV-102: required field omission (`ResolveRequest.expr_raw`)
+3. TV-103: invalid deny-code mapping
+4. TV-104: handshake terminal message (`HandshakeAccept`) before proof
+5. TV-105: route-upgrade response before probe
+6. TV-106: message after terminal state
+7. TV-107: ambiguous resolve path without selector hints but success response
+8. TV-108: ambiguous resolve path with empty selector hints but success response
+9. TV-109: mediated handshake rejection must remain terminal
+
 ---
 
 ## 5. Next Step

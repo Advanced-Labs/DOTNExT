@@ -4,7 +4,7 @@ Last updated: 2026-03-08
 
 ## 1. Mission Snapshot
 
-Current mission: finish M0 foundation without drift, then start S1 prototype from a locked M0-B baseline.
+Current mission: finish M0 foundation without drift by carrying a closed S1 baseline into bounded S2 direct-upgrade validation.
 
 Pre-compaction checkpoint status (2026-03-08):
 
@@ -16,8 +16,8 @@ Current active path:
 
 1. M0-A complete draft
 2. M0-B structured draft with wire-lock decisions
-3. S1 implementation planning complete
-4. next practical move is S1 prototype kickoff on dedicated branch
+3. S1 prototype closed with deterministic message-driven conformance baseline
+4. S2 direct-upgrade slice kickoff (profile-gated, fallback-preserving)
 
 ---
 
@@ -43,17 +43,23 @@ Current active path:
 16. S1 harness supports `expect_conformance` mode (`pass`/`fail`) with 8/8 effective pass
 17. wire examples synchronized to locked S1 profile (`M0-B-Wire-Examples.md`)
 18. expected-fail vectors now support `expected_error_contains` for reason-level rejection checks
+19. S1 harness replaced heuristic trace derivation with explicit message-driven operation context execution
+20. structured machine-checkable error IDs added to harness output (`[Layer:ErrorId]`)
+21. fixture contract extended with `expected_error_ids` (preferred expected-fail oracle)
+22. transition-edge negative vectors added (`TV-104`..`TV-109`)
+23. repeated harness execution confirms deterministic/reproducible 14/14 effective pass
+24. Orleans compatibility profile updated with S1 hardening behavior `A/N/D` classification notes
+25. S1 closure artifact added (`M0-S1-Closure.md`) with lock/defer register and handoff boundaries
 
 ### Doing
 
-1. pre-compaction checkpoint finalized and ready for safe re-entry
-2. preserve deterministic handoff state for post-compaction continuation
+1. freeze S1 baseline in a focused commit and cut implementation branch `codex/s2-direct-upgrade`
 
 ### Next
 
-1. re-enter using mandatory read order (`METHODOLOGY` -> `M0-Status-Checkpoint` -> `M0-B-Protocol-Skeleton` -> `M0-S1-Task-Board` -> latest `SESSION-LOG`)
-2. expand W4/W5 implementation to map actual message flow transitions and relation path behavior
-3. add deeper negative-order and transition edge vectors for stronger L1-L4 coverage
+1. add S2 fixture profile support (`S1` default, explicit `S2`)
+2. implement S2 direct-upgrade gate ordering and deterministic deny IDs
+3. validate fallback continuity (`RelayedSession`) on all S2 reject paths
 
 ---
 
@@ -113,6 +119,7 @@ Authority file:
    - `M0-B-Conformance-Harness-Checklist.md`
    - `M0-Implementation-Slice-Plan.md`
    - `M0-S1-Task-Board.md`
+   - `M0-S1-Closure.md`
 5. Wire lock:
    - `M0-B-Wire-Lock-Open-Decisions.md`
    - `M0-B-Wire-Examples.md`

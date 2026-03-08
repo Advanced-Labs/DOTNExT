@@ -16,6 +16,7 @@ internal sealed class ConformanceEngine
         "HandshakeAccept",
         "HandshakeDeny",
         "RouteUpgradeProbe",
+        "RouteUpgradeAccept",
         "RouteUpgradeReject"
     };
 
@@ -24,6 +25,7 @@ internal sealed class ConformanceEngine
         ["ResolveRequest"] = new(StringComparer.Ordinal) { "expr_raw", "operation_class" },
         ["ResolveDeny"] = new(StringComparer.Ordinal) { "deny_code" },
         ["HandshakeAccept"] = new(StringComparer.Ordinal) { "route_mode", "disclosure_level" },
+        ["HandshakeDeny"] = new(StringComparer.Ordinal) { "deny_code" },
         ["RouteUpgradeReject"] = new(StringComparer.Ordinal) { "decision_code" }
     };
 
@@ -77,23 +79,22 @@ internal sealed class ConformanceEngine
 
     public VectorResult Evaluate(FixtureCase fixture)
     {
-        var errors = new List<string>();
+        var errors = new List<ConformanceError>();
         var envelopeMessages = BuildEnvelopeMessages(fixture, errors);
 
         ValidateEnvelopeAndSchema(fixture, envelopeMessages, errors);
         ValidateMessageFieldRules(fixture, errors);
-        ValidateMessageOrder(fixture, errors);
-        var observedStateTrace = BuildObservedStateTrace(fixture, errors);
-        ValidateStateTrace(fixture, observedStateTrace, errors);
 
-        var observedDenyCode = GetObservedDenyCode(fixture);
+        var context = ExecuteMessageFlow(fixture, errors);
+        var observedStateTrace = context.ObservedStateTrace.AsReadOnly();
+        var observedDenyCode = context.ObservedDenyCode;
         bool? observedRetryable = null;
 
         if (observedDenyCode is not null)
         {
             if (!DenyProfiles.TryGetValue(observedDenyCode, out var profile))
             {
-                errors.Add($"[L4] Unknown deny code '{observedDenyCode}'.");
+                AddError(errors, "L4", "E4002_UNKNOWN_DENY_CODE", $"Unknown deny code '{observedDenyCode}'.");
             }
             else
             {
@@ -101,22 +102,25 @@ internal sealed class ConformanceEngine
             }
         }
 
+        ValidateStateTrace(fixture, observedStateTrace, errors);
         ValidateExpectedOutcome(fixture, observedDenyCode, observedRetryable, errors);
         ValidateAssertions(fixture, envelopeMessages, observedStateTrace, observedDenyCode, observedRetryable, errors);
 
+        var errorMessages = errors.Select(FormatError).ToList();
         return new VectorResult
         {
             Id = fixture.Id,
             Passed = errors.Count == 0,
-            Errors = errors,
-            ObservedStateTrace = observedStateTrace.AsReadOnly(),
+            ErrorDetails = errors,
+            Errors = errorMessages,
+            ObservedStateTrace = observedStateTrace,
             ObservedDenyCode = observedDenyCode,
             ObservedRetryable = observedRetryable,
             EffectivePassed = errors.Count == 0
         };
     }
 
-    private static List<EnvelopeMessage> BuildEnvelopeMessages(FixtureCase fixture, List<string> errors)
+    private static List<EnvelopeMessage> BuildEnvelopeMessages(FixtureCase fixture, List<ConformanceError> errors)
     {
         var result = new List<EnvelopeMessage>(fixture.Messages.Count);
         for (var i = 0; i < fixture.Messages.Count; i++)
@@ -124,7 +128,7 @@ internal sealed class ConformanceEngine
             var message = fixture.Messages[i];
             if (string.IsNullOrWhiteSpace(message.Type))
             {
-                errors.Add($"[L1] Fixture {fixture.Id} message index {i} has empty type.");
+                AddError(errors, "L1", "E1001_EMPTY_MESSAGE_TYPE", $"Fixture {fixture.Id} message index {i} has empty type.");
                 continue;
             }
 
@@ -145,57 +149,55 @@ internal sealed class ConformanceEngine
     private static void ValidateEnvelopeAndSchema(
         FixtureCase fixture,
         IReadOnlyList<EnvelopeMessage> envelopeMessages,
-        List<string> errors)
+        List<ConformanceError> errors)
     {
         foreach (var envelope in envelopeMessages)
         {
             if (string.IsNullOrWhiteSpace(envelope.MsgType))
             {
-                errors.Add($"[L1] {fixture.Id} contains empty msg_type.");
+                AddError(errors, "L1", "E1001_EMPTY_MESSAGE_TYPE", $"{fixture.Id} contains empty msg_type.");
             }
 
             if (string.IsNullOrWhiteSpace(envelope.MsgId))
             {
-                errors.Add($"[L1] {fixture.Id}/{envelope.MsgType} missing msg_id.");
+                AddError(errors, "L1", "E1003_MISSING_MSG_ID", $"{fixture.Id}/{envelope.MsgType} missing msg_id.");
             }
 
             if (string.IsNullOrWhiteSpace(envelope.TraceId))
             {
-                errors.Add($"[L1] {fixture.Id}/{envelope.MsgType} missing trace_id.");
+                AddError(errors, "L1", "E1004_MISSING_TRACE_ID", $"{fixture.Id}/{envelope.MsgType} missing trace_id.");
             }
 
             if (envelope.TtlMs <= 0)
             {
-                errors.Add($"[L1] {fixture.Id}/{envelope.MsgType} has invalid ttl_ms.");
+                AddError(errors, "L1", "E1005_INVALID_TTL_MS", $"{fixture.Id}/{envelope.MsgType} has invalid ttl_ms.");
             }
 
             if (!KnownMessageTypes.Contains(envelope.MsgType))
             {
-                errors.Add($"[L1] {fixture.Id}/{envelope.MsgType} is unknown.");
+                AddError(errors, "L1", "E1002_UNKNOWN_MESSAGE_TYPE", $"{fixture.Id}/{envelope.MsgType} is unknown.");
             }
         }
     }
 
-    private static void ValidateMessageFieldRules(FixtureCase fixture, List<string> errors)
+    private static void ValidateMessageFieldRules(FixtureCase fixture, List<ConformanceError> errors)
     {
         foreach (var message in fixture.Messages)
         {
-            if (!RequiredBodyFieldsByType.TryGetValue(message.Type, out var requiredFields))
+            if (RequiredBodyFieldsByType.TryGetValue(message.Type, out var requiredFields))
             {
-                continue;
-            }
-
-            if (message.Body is null || message.Body.Value.ValueKind != JsonValueKind.Object)
-            {
-                errors.Add($"[L2] {fixture.Id}/{message.Type} missing required body.");
-                continue;
-            }
-
-            foreach (var field in requiredFields)
-            {
-                if (!message.Body.Value.TryGetProperty(field, out _))
+                if (message.Body is null || message.Body.Value.ValueKind != JsonValueKind.Object)
                 {
-                    errors.Add($"[L2] {fixture.Id}/{message.Type} missing required field '{field}'.");
+                    AddError(errors, "L2", "E2001_MISSING_REQUIRED_BODY", $"{fixture.Id}/{message.Type} missing required body.");
+                    continue;
+                }
+
+                foreach (var field in requiredFields)
+                {
+                    if (!message.Body.Value.TryGetProperty(field, out _))
+                    {
+                        AddError(errors, "L2", "E2002_MISSING_REQUIRED_FIELD", $"{fixture.Id}/{message.Type} missing required field '{field}'.");
+                    }
                 }
             }
 
@@ -210,159 +212,297 @@ internal sealed class ConformanceEngine
                 if (AllowedDenyCodesByMessageType.TryGetValue(message.Type, out var allowedCodes) &&
                     !allowedCodes.Contains(denyCode))
                 {
-                    errors.Add($"[L4] {fixture.Id}/{message.Type} deny code '{denyCode}' is not allowed.");
+                    AddError(errors, "L4", "E4001_DENY_CODE_NOT_ALLOWED", $"{fixture.Id}/{message.Type} deny code '{denyCode}' is not allowed.");
                 }
             }
         }
     }
-
-    private static void ValidateMessageOrder(FixtureCase fixture, List<string> errors)
+    private static OperationContext ExecuteMessageFlow(FixtureCase fixture, List<ConformanceError> errors)
     {
-        var seenResolveRequest = false;
-        var seenHandshakeInit = false;
-        var seenHandshakeChallenge = false;
-        var seenHandshakeProof = false;
-        var seenRouteUpgradeProbe = false;
+        var context = new OperationContext();
 
         foreach (var message in fixture.Messages)
         {
-            switch (message.Type)
+            ProcessMessage(fixture.Id, message, context, errors);
+        }
+
+        if (context.UpgradeProbePending)
+        {
+            AddError(errors, "L3", "E3014_UPGRADE_PROBE_NOT_REJECTED", $"{fixture.Id} requires RouteUpgradeReject after RouteUpgradeProbe in S1 mediated-only mode.");
+            context.ObservedDenyCode ??= "UpgradeRejected";
+            ForceTerminalDeny(context);
+        }
+
+        if (!IsTerminal(context.CurrentState))
+        {
+            if (string.Equals(context.CurrentState, "RelayedSession", StringComparison.Ordinal) ||
+                string.Equals(context.CurrentState, "DirectSession", StringComparison.Ordinal))
             {
-                case "ResolveRequest":
-                    seenResolveRequest = true;
-                    break;
-                case "ResolveReferral":
-                case "ResolveResponse":
-                case "ResolveDeny":
-                    if (!seenResolveRequest)
-                    {
-                        errors.Add($"[L3] {fixture.Id}/{message.Type} appears before ResolveRequest.");
-                    }
-                    break;
-                case "HandshakeInit":
-                    seenHandshakeInit = true;
-                    break;
-                case "HandshakeChallenge":
-                    if (!seenHandshakeInit)
-                    {
-                        errors.Add($"[L3] {fixture.Id}/HandshakeChallenge appears before HandshakeInit.");
-                    }
-                    seenHandshakeChallenge = true;
-                    break;
-                case "HandshakeProof":
-                    if (!seenHandshakeChallenge)
-                    {
-                        errors.Add($"[L3] {fixture.Id}/HandshakeProof appears before HandshakeChallenge.");
-                    }
-                    seenHandshakeProof = true;
-                    break;
-                case "HandshakeAccept":
-                case "HandshakeDeny":
-                    if (!seenHandshakeProof)
-                    {
-                        errors.Add($"[L3] {fixture.Id}/{message.Type} appears before HandshakeProof.");
-                    }
-                    break;
-                case "RouteUpgradeProbe":
-                    seenRouteUpgradeProbe = true;
-                    break;
-                case "RouteUpgradeAccept":
-                case "RouteUpgradeReject":
-                    if (!seenRouteUpgradeProbe)
-                    {
-                        errors.Add($"[L3] {fixture.Id}/{message.Type} appears before RouteUpgradeProbe.");
-                    }
-                    break;
+                TryTransition(fixture.Id, context, "Completed", errors);
             }
         }
+
+        if (context.ObservedStateTrace.Count == 0)
+        {
+            AddError(errors, "L3", "E3011_EMPTY_OBSERVED_TRACE", $"{fixture.Id} could not derive observed state trace from message flow.");
+        }
+
+        return context;
     }
 
-    private static List<string> BuildObservedStateTrace(FixtureCase fixture, List<string> errors)
+    private static void ProcessMessage(
+        string fixtureId,
+        FixtureMessage message,
+        OperationContext context,
+        List<ConformanceError> errors)
     {
-        var observed = new List<string>();
-        if (fixture.Messages.Count == 0)
+        if (IsTerminal(context.CurrentState))
         {
-            return observed;
+            AddError(errors, "L3", "E3006_POST_TERMINAL_MESSAGE", $"{fixtureId}/{message.Type} appears after terminal state '{context.CurrentState}'.");
+            return;
         }
 
-        var firstType = fixture.Messages[0].Type;
-        if (firstType.StartsWith("Resolve", StringComparison.Ordinal))
+        switch (message.Type)
         {
-            AppendState(observed, "ResolveIntent");
-            AppendState(observed, "DiscoverPath");
-        }
-        else if (firstType.StartsWith("Handshake", StringComparison.Ordinal))
-        {
-            AppendState(observed, "MediatedHandshake");
-        }
-
-        foreach (var message in fixture.Messages)
-        {
-            switch (message.Type)
+            case "ResolveRequest":
             {
-                case "ResolveReferral":
-                    AppendState(observed, "PolicyEvaluate");
+                if (context.ResolveStarted || context.HandshakeStarted)
+                {
+                    RejectWithDeterministicDeny(fixtureId, context, errors, "E3015_OPERATION_ALREADY_STARTED", "TrustInsufficient", $"{fixtureId}/{message.Type} starts a new operation while another operation context is active.");
                     break;
-                case "ResolveResponse":
-                    AppendState(observed, "PolicyEvaluate");
-                    AppendState(observed, "DisclosurePlan");
-                    AppendState(observed, "MediatedHandshake");
-                    AppendState(observed, "RelayedSession");
-                    AppendState(observed, "Completed");
+                }
+
+                context.ResolveStarted = true;
+                context.RequiresSelectorHints = GetBodyBoolean(message, "requires_selector_hints") ?? false;
+                context.HasSelectorHints = HasNonEmptyStringArray(message, "selector_hints");
+
+                if (context.CurrentState is null)
+                {
+                    SetState(context, "ResolveIntent");
+                }
+                else
+                {
+                    RejectWithDeterministicDeny(fixtureId, context, errors, "E3007_INVALID_STATE_TRANSITION", "TrustInsufficient", $"{fixtureId}/{message.Type} cannot start from state '{context.CurrentState}'.");
                     break;
-                case "ResolveDeny":
-                case "HandshakeDeny":
-                    AppendState(observed, "Deny");
+                }
+
+                TryTransition(fixtureId, context, "DiscoverPath", errors);
+                break;
+            }
+            case "ResolveReferral":
+            {
+                if (!context.ResolveStarted)
+                {
+                    RejectWithDeterministicDeny(fixtureId, context, errors, "E3001_RESOLVE_MESSAGE_BEFORE_REQUEST", "TrustInsufficient", $"{fixtureId}/{message.Type} appears before ResolveRequest.");
                     break;
-                case "HandshakeInit":
-                case "HandshakeChallenge":
-                case "HandshakeProof":
-                    AppendState(observed, "MediatedHandshake");
+                }
+
+                if (!StateIs(context, "DiscoverPath", "PolicyEvaluate"))
+                {
+                    RejectWithDeterministicDeny(fixtureId, context, errors, "E3007_INVALID_STATE_TRANSITION", "TrustInsufficient", $"{fixtureId}/{message.Type} invalid from state '{context.CurrentState}'.");
                     break;
-                case "HandshakeAccept":
-                    AppendState(observed, "RelayedSession");
+                }
+
+                TryTransition(fixtureId, context, "PolicyEvaluate", errors);
+                break;
+            }
+            case "ResolveResponse":
+            {
+                if (!context.ResolveStarted)
+                {
+                    RejectWithDeterministicDeny(fixtureId, context, errors, "E3001_RESOLVE_MESSAGE_BEFORE_REQUEST", "TrustInsufficient", $"{fixtureId}/{message.Type} appears before ResolveRequest.");
                     break;
-                case "RouteUpgradeProbe":
-                    if (!message.Negative)
-                    {
-                        AppendState(observed, "DirectUpgradeProbe");
-                    }
+                }
+
+                if (context.RequiresSelectorHints && !context.HasSelectorHints)
+                {
+                    RejectWithDeterministicDeny(fixtureId, context, errors, "E3017_AMBIGUOUS_SELECTOR_HINTS_REQUIRED", "AmbiguousResolution", $"{fixtureId}/{message.Type} is invalid when selector hints are required but missing or empty.");
                     break;
-                case "RouteUpgradeAccept":
-                    AppendState(observed, "DirectSession");
+                }
+
+                if (string.Equals(context.CurrentState, "DiscoverPath", StringComparison.Ordinal))
+                {
+                    TryTransition(fixtureId, context, "PolicyEvaluate", errors);
+                }
+                else if (!string.Equals(context.CurrentState, "PolicyEvaluate", StringComparison.Ordinal))
+                {
+                    RejectWithDeterministicDeny(fixtureId, context, errors, "E3007_INVALID_STATE_TRANSITION", "TrustInsufficient", $"{fixtureId}/{message.Type} invalid from state '{context.CurrentState}'.");
                     break;
-                case "RouteUpgradeReject":
-                    AppendState(observed, "RelayedSession");
+                }
+
+                TryTransition(fixtureId, context, "DisclosurePlan", errors);
+                TryTransition(fixtureId, context, "MediatedHandshake", errors);
+                TryTransition(fixtureId, context, "RelayedSession", errors);
+                TryTransition(fixtureId, context, "Completed", errors);
+                break;
+            }
+            case "ResolveDeny":
+            {
+                if (!context.ResolveStarted)
+                {
+                    RejectWithDeterministicDeny(fixtureId, context, errors, "E3001_RESOLVE_MESSAGE_BEFORE_REQUEST", "TrustInsufficient", $"{fixtureId}/{message.Type} appears before ResolveRequest.");
                     break;
+                }
+
+                var denyCode = GetBodyString(message, "deny_code");
+                if (denyCode is not null)
+                {
+                    context.ObservedDenyCode = denyCode;
+                }
+
+                ForceTerminalDeny(context);
+                break;
+            }
+            case "HandshakeInit":
+            {
+                if (context.HandshakeStarted)
+                {
+                    RejectWithDeterministicDeny(fixtureId, context, errors, "E3015_OPERATION_ALREADY_STARTED", "TrustInsufficient", $"{fixtureId}/{message.Type} repeats an already-started handshake operation.");
+                    break;
+                }
+
+                if (context.ResolveStarted && !string.Equals(context.CurrentState, "DisclosurePlan", StringComparison.Ordinal))
+                {
+                    RejectWithDeterministicDeny(fixtureId, context, errors, "E3007_INVALID_STATE_TRANSITION", "TrustInsufficient", $"{fixtureId}/{message.Type} invalid from state '{context.CurrentState}'.");
+                    break;
+                }
+
+                context.HandshakeStarted = true;
+                context.HandshakeInitSeen = true;
+                if (context.CurrentState is null)
+                {
+                    SetState(context, "MediatedHandshake");
+                }
+                else
+                {
+                    TryTransition(fixtureId, context, "MediatedHandshake", errors);
+                }
+
+                break;
+            }
+            case "HandshakeChallenge":
+            {
+                if (!context.HandshakeInitSeen)
+                {
+                    RejectWithDeterministicDeny(fixtureId, context, errors, "E3002_HANDSHAKE_CHALLENGE_BEFORE_INIT", "TrustInsufficient", $"{fixtureId}/{message.Type} appears before HandshakeInit.");
+                    break;
+                }
+
+                if (!StateIs(context, "MediatedHandshake"))
+                {
+                    RejectWithDeterministicDeny(fixtureId, context, errors, "E3007_INVALID_STATE_TRANSITION", "TrustInsufficient", $"{fixtureId}/{message.Type} invalid from state '{context.CurrentState}'.");
+                    break;
+                }
+
+                context.HandshakeChallengeSeen = true;
+                break;
+            }
+            case "HandshakeProof":
+            {
+                if (!context.HandshakeChallengeSeen)
+                {
+                    RejectWithDeterministicDeny(fixtureId, context, errors, "E3003_HANDSHAKE_PROOF_BEFORE_CHALLENGE", "TrustInsufficient", $"{fixtureId}/{message.Type} appears before HandshakeChallenge.");
+                    break;
+                }
+
+                if (!StateIs(context, "MediatedHandshake"))
+                {
+                    RejectWithDeterministicDeny(fixtureId, context, errors, "E3007_INVALID_STATE_TRANSITION", "TrustInsufficient", $"{fixtureId}/{message.Type} invalid from state '{context.CurrentState}'.");
+                    break;
+                }
+
+                context.HandshakeProofSeen = true;
+                break;
+            }
+            case "HandshakeAccept":
+            {
+                if (!context.HandshakeProofSeen)
+                {
+                    RejectWithDeterministicDeny(fixtureId, context, errors, "E3004_HANDSHAKE_TERMINAL_BEFORE_PROOF", "TrustInsufficient", $"{fixtureId}/{message.Type} appears before HandshakeProof.");
+                    break;
+                }
+
+                if (!StateIs(context, "MediatedHandshake"))
+                {
+                    RejectWithDeterministicDeny(fixtureId, context, errors, "E3007_INVALID_STATE_TRANSITION", "TrustInsufficient", $"{fixtureId}/{message.Type} invalid from state '{context.CurrentState}'.");
+                    break;
+                }
+
+                TryTransition(fixtureId, context, "RelayedSession", errors);
+                break;
+            }
+            case "HandshakeDeny":
+            {
+                if (!context.HandshakeProofSeen)
+                {
+                    RejectWithDeterministicDeny(fixtureId, context, errors, "E3004_HANDSHAKE_TERMINAL_BEFORE_PROOF", "TrustInsufficient", $"{fixtureId}/{message.Type} appears before HandshakeProof.");
+                    break;
+                }
+
+                if (!StateIs(context, "MediatedHandshake"))
+                {
+                    RejectWithDeterministicDeny(fixtureId, context, errors, "E3007_INVALID_STATE_TRANSITION", "TrustInsufficient", $"{fixtureId}/{message.Type} invalid from state '{context.CurrentState}'.");
+                    break;
+                }
+
+                var denyCode = GetBodyString(message, "deny_code");
+                if (denyCode is not null)
+                {
+                    context.ObservedDenyCode = denyCode;
+                }
+
+                ForceTerminalDeny(context);
+                break;
+            }
+            case "RouteUpgradeProbe":
+            {
+                if (!StateIs(context, "RelayedSession"))
+                {
+                    RejectWithDeterministicDeny(fixtureId, context, errors, "E3012_DIRECT_UPGRADE_FORBIDDEN", "UpgradeRejected", $"{fixtureId}/{message.Type} is only valid from RelayedSession and is denied in S1 mediated-only mode.");
+                    break;
+                }
+
+                context.UpgradeProbePending = true;
+                break;
+            }
+            case "RouteUpgradeReject":
+            {
+                if (!context.UpgradeProbePending)
+                {
+                    RejectWithDeterministicDeny(fixtureId, context, errors, "E3005_ROUTE_UPGRADE_RESPONSE_BEFORE_PROBE", "TrustInsufficient", $"{fixtureId}/{message.Type} appears before RouteUpgradeProbe.");
+                    break;
+                }
+
+                context.UpgradeProbePending = false;
+                var decisionCode = GetBodyString(message, "decision_code");
+                if (!string.Equals(decisionCode, "UpgradeRejected", StringComparison.Ordinal))
+                {
+                    AddError(errors, "L3", "E3013_UPGRADE_REJECT_CODE_REQUIRED", $"{fixtureId}/{message.Type} must use decision_code 'UpgradeRejected' in S1.");
+                    context.ObservedDenyCode ??= "UpgradeRejected";
+                    ForceTerminalDeny(context);
+                }
+
+                break;
+            }
+            case "RouteUpgradeAccept":
+            {
+                if (!context.UpgradeProbePending)
+                {
+                    RejectWithDeterministicDeny(fixtureId, context, errors, "E3005_ROUTE_UPGRADE_RESPONSE_BEFORE_PROBE", "TrustInsufficient", $"{fixtureId}/{message.Type} appears before RouteUpgradeProbe.");
+                    break;
+                }
+
+                context.UpgradeProbePending = false;
+                RejectWithDeterministicDeny(fixtureId, context, errors, "E3012_DIRECT_UPGRADE_FORBIDDEN", "UpgradeRejected", $"{fixtureId}/{message.Type} is forbidden in S1 mediated-only mode.");
+                break;
             }
         }
-
-        if (observed.Count > 0 && !IsTerminal(observed[^1]))
-        {
-            if (string.Equals(observed[^1], "RelayedSession", StringComparison.Ordinal) ||
-                string.Equals(observed[^1], "DirectSession", StringComparison.Ordinal))
-            {
-                AppendState(observed, "Completed");
-            }
-            else if (!fixture.ExpectedOutcome.Success)
-            {
-                AppendState(observed, "Deny");
-            }
-        }
-
-        if (observed.Count == 0)
-        {
-            errors.Add($"[L3] {fixture.Id} could not derive observed state trace from message flow.");
-        }
-
-        return observed;
     }
-
-    private static void ValidateStateTrace(FixtureCase fixture, IReadOnlyList<string> observedStateTrace, List<string> errors)
+    private static void ValidateStateTrace(FixtureCase fixture, IReadOnlyList<string> observedStateTrace, List<ConformanceError> errors)
     {
         if (fixture.ExpectedStateTrace.Count == 0)
         {
-            errors.Add($"[L3] {fixture.Id} has empty expected_state_trace.");
+            AddError(errors, "L3", "E3010_EMPTY_EXPECTED_TRACE", $"{fixture.Id} has empty expected_state_trace.");
             return;
         }
 
@@ -372,7 +512,7 @@ internal sealed class ConformanceEngine
             var next = observedStateTrace[i];
             if (!AllowedStateTransitions.TryGetValue(current, out var allowedNext) || !allowedNext.Contains(next))
             {
-                errors.Add($"[L3] {fixture.Id} invalid transition '{current}' -> '{next}'.");
+                AddError(errors, "L3", "E3007_INVALID_STATE_TRANSITION", $"{fixture.Id} invalid transition '{current}' -> '{next}'.");
             }
         }
 
@@ -380,24 +520,24 @@ internal sealed class ConformanceEngine
         var observedTrace = string.Join(" -> ", observedStateTrace);
         if (!TraceEquals(fixture.ExpectedStateTrace, observedStateTrace))
         {
-            errors.Add($"[L3] {fixture.Id} expected trace '{expectedTrace}' but observed '{observedTrace}'.");
+            AddError(errors, "L3", "E3008_TRACE_MISMATCH", $"{fixture.Id} expected trace '{expectedTrace}' but observed '{observedTrace}'.");
         }
 
         if (observedStateTrace.Count == 0)
         {
-            errors.Add($"[L3] {fixture.Id} observed state trace is empty.");
+            AddError(errors, "L3", "E3011_EMPTY_OBSERVED_TRACE", $"{fixture.Id} observed state trace is empty.");
             return;
         }
 
         var finalState = observedStateTrace[^1];
         if (fixture.ExpectedOutcome.Success && !string.Equals(finalState, "Completed", StringComparison.Ordinal))
         {
-            errors.Add($"[L3] {fixture.Id} expected success but final state is '{finalState}'.");
+            AddError(errors, "L3", "E3009_FINAL_STATE_MISMATCH", $"{fixture.Id} expected success but final state is '{finalState}'.");
         }
 
         if (!fixture.ExpectedOutcome.Success && !string.Equals(finalState, "Deny", StringComparison.Ordinal))
         {
-            errors.Add($"[L3] {fixture.Id} expected deny but final state is '{finalState}'.");
+            AddError(errors, "L3", "E3009_FINAL_STATE_MISMATCH", $"{fixture.Id} expected deny but final state is '{finalState}'.");
         }
     }
 
@@ -405,14 +545,14 @@ internal sealed class ConformanceEngine
         FixtureCase fixture,
         string? observedDenyCode,
         bool? observedRetryable,
-        List<string> errors)
+        List<ConformanceError> errors)
     {
         var expectedCode = fixture.ExpectedOutcome.DenyCode;
         if (!string.Equals(expectedCode, observedDenyCode, StringComparison.Ordinal))
         {
             if (!(expectedCode is null && observedDenyCode is null))
             {
-                errors.Add($"[L4] {fixture.Id} expected deny code '{expectedCode ?? "null"}' but observed '{observedDenyCode ?? "null"}'.");
+                AddError(errors, "L4", "E4003_EXPECTED_DENY_MISMATCH", $"{fixture.Id} expected deny code '{expectedCode ?? "null"}' but observed '{observedDenyCode ?? "null"}'.");
             }
         }
 
@@ -420,11 +560,11 @@ internal sealed class ConformanceEngine
         {
             if (observedRetryable is null)
             {
-                errors.Add($"[L4] {fixture.Id} expected retryable='{expectedRetryable}', but no deny profile was observed.");
+                AddError(errors, "L4", "E4005_MISSING_DENY_PROFILE_FOR_RETRYABLE", $"{fixture.Id} expected retryable='{expectedRetryable}', but no deny profile was observed.");
             }
             else if (observedRetryable.Value != expectedRetryable)
             {
-                errors.Add($"[L4] {fixture.Id} expected retryable='{expectedRetryable}' but observed '{observedRetryable.Value}'.");
+                AddError(errors, "L4", "E4004_EXPECTED_RETRYABLE_MISMATCH", $"{fixture.Id} expected retryable='{expectedRetryable}' but observed '{observedRetryable.Value}'.");
             }
         }
     }
@@ -435,7 +575,7 @@ internal sealed class ConformanceEngine
         IReadOnlyList<string> observedStateTrace,
         string? observedDenyCode,
         bool? observedRetryable,
-        List<string> errors)
+        List<ConformanceError> errors)
     {
         foreach (var assertion in fixture.Assertions)
         {
@@ -447,7 +587,7 @@ internal sealed class ConformanceEngine
                     var actual = observedStateTrace.Count == 0 ? null : observedStateTrace[^1];
                     if (!string.Equals(expected, actual, StringComparison.Ordinal))
                     {
-                        errors.Add($"[A:{assertion.Id}] expected final state '{expected}', observed '{actual ?? "null"}'.");
+                        AddAssertionError(errors, assertion.Id, $"expected final state '{expected}', observed '{actual ?? "null"}'.");
                     }
 
                     break;
@@ -457,7 +597,7 @@ internal sealed class ConformanceEngine
                     var expected = assertion.Value?.GetStringOrNull();
                     if (expected is null || !observedStateTrace.Contains(expected, StringComparer.Ordinal))
                     {
-                        errors.Add($"[A:{assertion.Id}] expected state trace to contain '{expected ?? "null"}'.");
+                        AddAssertionError(errors, assertion.Id, $"expected state trace to contain '{expected ?? "null"}'.");
                     }
 
                     break;
@@ -466,7 +606,7 @@ internal sealed class ConformanceEngine
                 {
                     if (observedDenyCode is not null)
                     {
-                        errors.Add($"[A:{assertion.Id}] expected no deny code but observed '{observedDenyCode}'.");
+                        AddAssertionError(errors, assertion.Id, $"expected no deny code but observed '{observedDenyCode}'.");
                     }
 
                     break;
@@ -476,7 +616,7 @@ internal sealed class ConformanceEngine
                     var expected = assertion.Value?.GetStringOrNull();
                     if (!string.Equals(expected, observedDenyCode, StringComparison.Ordinal))
                     {
-                        errors.Add($"[A:{assertion.Id}] expected deny code '{expected}', observed '{observedDenyCode ?? "null"}'.");
+                        AddAssertionError(errors, assertion.Id, $"expected deny code '{expected}', observed '{observedDenyCode ?? "null"}'.");
                     }
 
                     break;
@@ -497,7 +637,7 @@ internal sealed class ConformanceEngine
 
                         if (!allHaveField)
                         {
-                            errors.Add($"[A:{assertion.Id}] required envelope field '{field}' missing.");
+                            AddAssertionError(errors, assertion.Id, $"required envelope field '{field}' missing.");
                         }
                     }
 
@@ -510,7 +650,7 @@ internal sealed class ConformanceEngine
                         && !string.IsNullOrWhiteSpace(profile.Remediation);
                     if (!hasRemediation)
                     {
-                        errors.Add($"[A:{assertion.Id}] expected remediation hint for deny code.");
+                        AddAssertionError(errors, assertion.Id, "expected remediation hint for deny code.");
                     }
 
                     break;
@@ -520,14 +660,13 @@ internal sealed class ConformanceEngine
                     var expectedToken = assertion.Value?.GetStringOrNull();
                     if (observedDenyCode is null || !DenyProfiles.TryGetValue(observedDenyCode, out var profile))
                     {
-                        errors.Add($"[A:{assertion.Id}] no deny profile to validate remediation token.");
+                        AddAssertionError(errors, assertion.Id, "no deny profile to validate remediation token.");
                         break;
                     }
 
-                    if (expectedToken is null ||
-                        profile.Remediation.IndexOf(expectedToken, StringComparison.OrdinalIgnoreCase) < 0)
+                    if (expectedToken is null || profile.Remediation.IndexOf(expectedToken, StringComparison.OrdinalIgnoreCase) < 0)
                     {
-                        errors.Add($"[A:{assertion.Id}] remediation does not contain '{expectedToken ?? "null"}'.");
+                        AddAssertionError(errors, assertion.Id, $"remediation does not contain '{expectedToken ?? "null"}'.");
                     }
 
                     break;
@@ -535,14 +674,9 @@ internal sealed class ConformanceEngine
                 case "selector_hints_present":
                 {
                     var request = fixture.Messages.FirstOrDefault(m => string.Equals(m.Type, "ResolveRequest", StringComparison.Ordinal));
-                    if (request is null ||
-                        request.Body is null ||
-                        request.Body.Value.ValueKind != JsonValueKind.Object ||
-                        !request.Body.Value.TryGetProperty("selector_hints", out var hints) ||
-                        hints.ValueKind != JsonValueKind.Array ||
-                        hints.GetArrayLength() == 0)
+                    if (request is null || !HasNonEmptyStringArray(request, "selector_hints"))
                     {
-                        errors.Add($"[A:{assertion.Id}] expected non-empty selector_hints in ResolveRequest.");
+                        AddAssertionError(errors, assertion.Id, "expected non-empty selector_hints in ResolveRequest.");
                     }
 
                     break;
@@ -554,7 +688,7 @@ internal sealed class ConformanceEngine
                     var actual = accept is null ? null : GetBodyString(accept, "route_mode");
                     if (!string.Equals(expected, actual, StringComparison.Ordinal))
                     {
-                        errors.Add($"[A:{assertion.Id}] expected HandshakeAccept route_mode '{expected}', observed '{actual ?? "null"}'.");
+                        AddAssertionError(errors, assertion.Id, $"expected HandshakeAccept route_mode '{expected}', observed '{actual ?? "null"}'.");
                     }
 
                     break;
@@ -565,7 +699,7 @@ internal sealed class ConformanceEngine
                     var decision = reject is null ? null : GetBodyString(reject, "decision_code");
                     if (!string.Equals(decision, "UpgradeRejected", StringComparison.Ordinal))
                     {
-                        errors.Add($"[A:{assertion.Id}] expected RouteUpgradeReject decision_code 'UpgradeRejected', observed '{decision ?? "null"}'.");
+                        AddAssertionError(errors, assertion.Id, $"expected RouteUpgradeReject decision_code 'UpgradeRejected', observed '{decision ?? "null"}'.");
                     }
 
                     break;
@@ -575,16 +709,107 @@ internal sealed class ConformanceEngine
                     var expected = assertion.Value?.GetBooleanOrNull();
                     if (expected is null || observedRetryable is null || expected.Value != observedRetryable.Value)
                     {
-                        errors.Add($"[A:{assertion.Id}] expected retryable '{expected?.ToString() ?? "null"}', observed '{observedRetryable?.ToString() ?? "null"}'.");
+                        AddAssertionError(errors, assertion.Id, $"expected retryable '{expected?.ToString() ?? "null"}', observed '{observedRetryable?.ToString() ?? "null"}'.");
                     }
 
                     break;
                 }
                 default:
-                    errors.Add($"[A:{assertion.Id}] unsupported assertion check '{assertion.Check}'.");
+                    AddAssertionError(errors, assertion.Id, $"unsupported assertion check '{assertion.Check}'.");
                     break;
             }
         }
+    }
+
+    private static bool TryTransition(string fixtureId, OperationContext context, string nextState, List<ConformanceError> errors)
+    {
+        if (context.CurrentState is null)
+        {
+            SetState(context, nextState);
+            return true;
+        }
+
+        if (string.Equals(context.CurrentState, nextState, StringComparison.Ordinal))
+        {
+            return true;
+        }
+
+        if (AllowedStateTransitions.TryGetValue(context.CurrentState, out var allowedNext) && allowedNext.Contains(nextState))
+        {
+            SetState(context, nextState);
+            return true;
+        }
+
+        AddError(errors, "L3", "E3007_INVALID_STATE_TRANSITION", $"{fixtureId} invalid transition '{context.CurrentState}' -> '{nextState}'.");
+        return false;
+    }
+
+    private static bool StateIs(OperationContext context, params string[] expectedStates)
+    {
+        if (context.CurrentState is null)
+        {
+            return false;
+        }
+
+        return expectedStates.Any(state => string.Equals(context.CurrentState, state, StringComparison.Ordinal));
+    }
+
+    private static void SetState(OperationContext context, string state)
+    {
+        context.CurrentState = state;
+        AppendState(context.ObservedStateTrace, state);
+    }
+
+    private static void ForceTerminalDeny(OperationContext context)
+    {
+        if (string.Equals(context.CurrentState, "Completed", StringComparison.Ordinal))
+        {
+            return;
+        }
+
+        if (!string.Equals(context.CurrentState, "Deny", StringComparison.Ordinal))
+        {
+            SetState(context, "Deny");
+        }
+    }
+
+    private static bool IsTerminal(string? state)
+    {
+        return string.Equals(state, "Completed", StringComparison.Ordinal)
+            || string.Equals(state, "Deny", StringComparison.Ordinal);
+    }
+
+    private static void RejectWithDeterministicDeny(
+        string fixtureId,
+        OperationContext context,
+        List<ConformanceError> errors,
+        string errorId,
+        string deterministicDenyCode,
+        string message)
+    {
+        AddError(errors, "L3", errorId, $"{message} Deterministic deny: '{deterministicDenyCode}'.");
+        context.ObservedDenyCode ??= deterministicDenyCode;
+        ForceTerminalDeny(context);
+    }
+
+    private static void AddAssertionError(List<ConformanceError> errors, string assertionId, string message)
+    {
+        AddError(errors, "A", $"A_{assertionId}", message);
+    }
+
+    private static void AddError(List<ConformanceError> errors, string layer, string id, string message)
+    {
+        errors.Add(new ConformanceError
+        {
+            Layer = layer,
+            Id = id,
+            Message = message
+        });
+    }
+
+    private static string FormatError(ConformanceError error)
+    {
+        return $"[{error.Layer}:{error.Id}] {error.Message}";
     }
 
     private static bool TraceEquals(IReadOnlyList<string> expected, IReadOnlyList<string> observed)
@@ -613,29 +838,6 @@ internal sealed class ConformanceEngine
         }
     }
 
-    private static bool IsTerminal(string state)
-    {
-        return string.Equals(state, "Completed", StringComparison.Ordinal)
-            || string.Equals(state, "Deny", StringComparison.Ordinal);
-    }
-
-    private static string? GetObservedDenyCode(FixtureCase fixture)
-    {
-        foreach (var message in fixture.Messages)
-        {
-            if (message.Type is "ResolveDeny" or "HandshakeDeny")
-            {
-                var code = GetBodyString(message, "deny_code");
-                if (code is not null)
-                {
-                    return code;
-                }
-            }
-        }
-
-        return null;
-    }
-
     private static string? GetBodyString(FixtureMessage message, string propertyName)
     {
         if (message.Body is null || message.Body.Value.ValueKind != JsonValueKind.Object)
@@ -655,6 +857,58 @@ internal sealed class ConformanceEngine
 
         return property.GetString();
     }
+
+    private static bool? GetBodyBoolean(FixtureMessage message, string propertyName)
+    {
+        if (message.Body is null || message.Body.Value.ValueKind != JsonValueKind.Object)
+        {
+            return null;
+        }
+
+        if (!message.Body.Value.TryGetProperty(propertyName, out var property))
+        {
+            return null;
+        }
+
+        return property.ValueKind switch
+        {
+            JsonValueKind.True => true,
+            JsonValueKind.False => false,
+            _ => null
+        };
+    }
+
+    private static bool HasNonEmptyStringArray(FixtureMessage message, string propertyName)
+    {
+        if (message.Body is null || message.Body.Value.ValueKind != JsonValueKind.Object)
+        {
+            return false;
+        }
+
+        if (!message.Body.Value.TryGetProperty(propertyName, out var property) || property.ValueKind != JsonValueKind.Array)
+        {
+            return false;
+        }
+
+        return property
+            .EnumerateArray()
+            .Any(item => item.ValueKind == JsonValueKind.String && !string.IsNullOrWhiteSpace(item.GetString()));
+    }
+}
+
+internal sealed class OperationContext
+{
+    public string? CurrentState { get; set; }
+    public bool ResolveStarted { get; set; }
+    public bool HandshakeStarted { get; set; }
+    public bool HandshakeInitSeen { get; set; }
+    public bool HandshakeChallengeSeen { get; set; }
+    public bool HandshakeProofSeen { get; set; }
+    public bool UpgradeProbePending { get; set; }
+    public bool RequiresSelectorHints { get; set; }
+    public bool HasSelectorHints { get; set; }
+    public string? ObservedDenyCode { get; set; }
+    public List<string> ObservedStateTrace { get; } = new();
 }
 
 internal static class JsonElementExtensions

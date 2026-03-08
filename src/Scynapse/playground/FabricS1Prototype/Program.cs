@@ -40,6 +40,15 @@ internal static class Program
                 {
                     Id = Path.GetFileNameWithoutExtension(fixtureFile),
                     Passed = false,
+                    ErrorDetails = new List<ConformanceError>
+                    {
+                        new()
+                        {
+                            Layer = "L0",
+                            Id = "E0001_FIXTURE_DESERIALIZE_FAILED",
+                            Message = "Failed to deserialize fixture JSON."
+                        }
+                    },
                     Errors = new List<string> { "Failed to deserialize fixture JSON." },
                     ObservedStateTrace = Array.Empty<string>(),
                     ObservedDenyCode = null,
@@ -57,6 +66,19 @@ internal static class Program
                 if (result.Passed)
                 {
                     result.Errors.Add("[EXPECT] Expected conformance failure but vector passed.");
+                }
+
+                if (fixture.ExpectedErrorIds.Count > 0)
+                {
+                    foreach (var expectedId in fixture.ExpectedErrorIds)
+                    {
+                        var found = result.ErrorDetails.Any(error =>
+                            string.Equals(error.Id, expectedId, StringComparison.OrdinalIgnoreCase));
+                        if (!found)
+                        {
+                            result.Errors.Add($"[EXPECT] Missing expected error id: '{expectedId}'.");
+                        }
+                    }
                 }
 
                 if (fixture.ExpectedErrorContains.Count > 0)
@@ -142,10 +164,8 @@ internal static class Program
         Console.WriteLine($"Fail:    {failed}");
 
         var layerFailures = results
-            .SelectMany(r => r.Errors)
-            .Select(error => ExtractLayer(error))
-            .Where(layer => layer is not null)
-            .GroupBy(layer => layer!, StringComparer.Ordinal)
+            .SelectMany(r => r.ErrorDetails)
+            .GroupBy(error => error.Layer, StringComparer.Ordinal)
             .OrderBy(group => group.Key, StringComparer.Ordinal)
             .Select(group => $"{group.Key}={group.Count()}")
             .ToArray();
@@ -160,19 +180,4 @@ internal static class Program
         }
     }
 
-    private static string? ExtractLayer(string error)
-    {
-        if (!error.StartsWith("[", StringComparison.Ordinal))
-        {
-            return null;
-        }
-
-        var end = error.IndexOf(']');
-        if (end <= 1)
-        {
-            return null;
-        }
-
-        return error[1..end];
-    }
 }

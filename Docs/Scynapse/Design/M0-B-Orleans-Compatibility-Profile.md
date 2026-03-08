@@ -106,7 +106,20 @@ This profile maps M0-B protocol fields to their Orleans lineage, with explicit c
 
 ---
 
-## 9. Review Checklist
+## 9. S1 Hardening Behavior Classification
+
+| Hardened Behavior | Tag | Notes |
+|---|---|---|
+| Explicit message-driven operation context state machine | `A` | adapts Orleans request-pipeline/state discipline into protocol-level transition handling |
+| Resolve/handshake transition validation by state matrix | `N` | Scynapse-native CNS and mediated-flow semantics; no Orleans equivalent |
+| Terminal-state rejection (`Deny`/`Completed`) | `A` | conceptually aligned with Orleans terminal operation handling but tightened for protocol determinism |
+| S1 mediated-only direct-upgrade rejection | `N` | Scynapse-native policy posture; Orleans has no mediated/direct route contract at this layer |
+| Structured error IDs and deterministic deny mapping | `N` | Scynapse conformance surface for machine-checkable protocol correctness |
+| Silo/client split assumptions in ordering/validation paths | `D` | explicitly blocked; all flows are Node-to-Node with unified semantics |
+
+---
+
+## 10. Review Checklist
 
 1. Are any fields tagged `A` but still carrying hidden silo/cluster assumptions?
 2. Are all `N` fields tied to M0-A invariants?

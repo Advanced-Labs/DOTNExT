@@ -1,0 +1,30 @@
+{
+  "id": "TV-104",
+  "title": "Invalid Handshake: Accept Before Proof",
+  "expect_conformance": "fail",
+  "expected_error_ids": [
+    "E3004_HANDSHAKE_TERMINAL_BEFORE_PROOF"
+  ],
+  "preconditions": [
+    "mediated handshake started",
+    "proof phase was skipped"
+  ],
+  "messages": [
+    { "type": "HandshakeInit", "role": "requester" },
+    { "type": "HandshakeChallenge", "role": "mediator" },
+    { "type": "HandshakeAccept", "role": "mediator", "body": { "route_mode": "parent_mediated", "disclosure_level": "mediator_visible" } }
+  ],
+  "expected_state_trace": [
+    "MediatedHandshake",
+    "Deny"
+  ],
+  "expected_outcome": {
+    "success": false,
+    "deny_code": "TrustInsufficient",
+    "retryable": false
+  },
+  "assertions": [
+    { "id": "A1", "kind": "state", "check": "final_state_equals", "value": "Deny" },
+    { "id": "A2", "kind": "error", "check": "deny_code_equals", "value": "TrustInsufficient" }
+  ]
+}

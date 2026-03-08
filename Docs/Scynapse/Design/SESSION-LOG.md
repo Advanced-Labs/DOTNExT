@@ -161,3 +161,36 @@ Use this structure for each new entry:
    - resume W4/W5 hardening and deeper negative transition vectors after re-entry.
 5. Risks/blockers:
    - none immediate; re-entry quality depends on strict adherence to read-order protocol.
+
+### 2026-03-08 (S1 Message-Driven Hardening Pass)
+
+1. Scope:
+   - implement approved S1 hardening plan from heuristic trace checks to deterministic message-driven conformance.
+2. Key outputs:
+   - refactored `FabricS1Prototype` engine to explicit operation-context state execution (`Resolve`/`Handshake`).
+   - enforced S1 mediated-only direct-upgrade behavior and terminal-state post-message rejection.
+   - introduced structured machine-checkable error IDs and fixture contract support for `expected_error_ids`.
+   - extended fixture pack with transition-edge negatives `TV-104`..`TV-109`.
+   - updated compatibility/task/harness docs including `A/N/D` behavior classification notes.
+   - repeated harness runs successful and stable: 14 vectors, 14 effective pass.
+3. Current doing:
+   - continuity and checkpoint synchronization for safe handoff.
+4. Next:
+   - preserve S1 lock profile and open bounded S2 planning entry.
+5. Risks/blockers:
+   - none immediate; keep error ID names stable to avoid fixture churn.
+
+### 2026-03-08 (S1 Closure Freeze Preparation)
+
+1. Scope:
+   - close S1 as a stable baseline before S2 branch cut.
+2. Key outputs:
+   - added `M0-S1-Closure.md` with closure status, lock/defer decisions, and handoff guardrails.
+   - synchronized `EXECUTIVE-MEMORY.md`, `M0-Status-Checkpoint.md`, and `M0-S1-Task-Board.md` to reflect closure.
+   - re-ran S1 harness with stable result: 14 vectors, 14 effective pass.
+3. Current doing:
+   - preparing focused S1 freeze commit and push on `codex/s1-prototype`.
+4. Next:
+   - create `codex/s2-direct-upgrade` from the frozen S1 baseline and begin S2 implementation.
+5. Risks/blockers:
+   - large unrelated workspace untracked files require strict scoped staging.

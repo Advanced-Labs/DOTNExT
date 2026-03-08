@@ -1,0 +1,31 @@
+{
+  "id": "TV-109",
+  "title": "Mediated Handshake Rejection Is Terminal",
+  "expect_conformance": "fail",
+  "expected_error_ids": [
+    "E3006_POST_TERMINAL_MESSAGE"
+  ],
+  "preconditions": [
+    "handshake gate rejection already emitted"
+  ],
+  "messages": [
+    { "type": "HandshakeInit", "role": "requester" },
+    { "type": "HandshakeChallenge", "role": "mediator" },
+    { "type": "HandshakeProof", "role": "requester" },
+    { "type": "HandshakeDeny", "role": "mediator", "body": { "deny_code": "PolicyDenied" } },
+    { "type": "HandshakeAccept", "role": "mediator", "body": { "route_mode": "parent_mediated", "disclosure_level": "mediator_visible" } }
+  ],
+  "expected_state_trace": [
+    "MediatedHandshake",
+    "Deny"
+  ],
+  "expected_outcome": {
+    "success": false,
+    "deny_code": "PolicyDenied",
+    "retryable": false
+  },
+  "assertions": [
+    { "id": "A1", "kind": "state", "check": "final_state_equals", "value": "Deny" },
+    { "id": "A2", "kind": "error", "check": "deny_code_equals", "value": "PolicyDenied" }
+  ]
+}

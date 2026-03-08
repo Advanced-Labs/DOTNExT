@@ -2,6 +2,10 @@
   "id": "TV-103",
   "title": "Invalid Deny Code: ResolveDeny Uses Unknown Code",
   "expect_conformance": "fail",
+  "expected_error_ids": [
+    "E4001_DENY_CODE_NOT_ALLOWED",
+    "E4002_UNKNOWN_DENY_CODE"
+  ],
   "expected_error_contains": [
     "deny code 'NotARealCode' is not allowed",
     "Unknown deny code 'NotARealCode'"

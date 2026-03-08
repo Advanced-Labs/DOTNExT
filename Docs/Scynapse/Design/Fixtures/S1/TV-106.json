@@ -1,0 +1,30 @@
+{
+  "id": "TV-106",
+  "title": "Invalid Flow: Message After Terminal Deny",
+  "expect_conformance": "fail",
+  "expected_error_ids": [
+    "E3006_POST_TERMINAL_MESSAGE"
+  ],
+  "preconditions": [
+    "resolve operation already reached terminal deny"
+  ],
+  "messages": [
+    { "type": "ResolveRequest", "role": "requester", "body": { "operation_class": "meta", "expr_raw": ".Unknown.Path" } },
+    { "type": "ResolveDeny", "role": "authority", "body": { "deny_code": "PathNotFound" } },
+    { "type": "ResolveResponse", "role": "authority", "body": { "decision_code": "Resolved", "resolved_scope": ".Unknown.Path" } }
+  ],
+  "expected_state_trace": [
+    "ResolveIntent",
+    "DiscoverPath",
+    "Deny"
+  ],
+  "expected_outcome": {
+    "success": false,
+    "deny_code": "PathNotFound",
+    "retryable": false
+  },
+  "assertions": [
+    { "id": "A1", "kind": "state", "check": "final_state_equals", "value": "Deny" },
+    { "id": "A2", "kind": "error", "check": "deny_code_equals", "value": "PathNotFound" }
+  ]
+}

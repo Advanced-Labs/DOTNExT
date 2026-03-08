@@ -17,6 +17,9 @@ internal sealed class FixtureCase
     [JsonPropertyName("expected_error_contains")]
     public List<string> ExpectedErrorContains { get; set; } = new();
 
+    [JsonPropertyName("expected_error_ids")]
+    public List<string> ExpectedErrorIds { get; set; } = new();
+
     [JsonPropertyName("preconditions")]
     public List<string> Preconditions { get; set; } = new();
 
@@ -98,9 +101,17 @@ internal sealed class VectorResult
 {
     public required string Id { get; init; }
     public required bool Passed { get; init; }
+    public required List<ConformanceError> ErrorDetails { get; init; }
     public required List<string> Errors { get; init; }
     public required IReadOnlyList<string> ObservedStateTrace { get; init; }
     public string? ObservedDenyCode { get; init; }
     public bool? ObservedRetryable { get; init; }
     public bool EffectivePassed { get; set; }
+}
+
+internal sealed class ConformanceError
+{
+    public required string Layer { get; init; }
+    public required string Id { get; init; }
+    public required string Message { get; init; }
 }
