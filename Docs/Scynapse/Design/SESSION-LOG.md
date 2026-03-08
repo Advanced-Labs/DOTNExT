@@ -45,10 +45,11 @@ Use this structure for each new entry:
    - created `METHODOLOGY.md`.
    - created `EXECUTIVE-MEMORY.md`.
    - created `SESSION-LOG.md` (this file).
+   - linked continuity docs into active M0 artifacts.
+   - committed/pushed continuity pass on `codex/m0-design-foundation` (`6b9b472793`).
 3. Current doing:
-   - linking methodology files into active M0 docs.
+   - preparing sourced answer on inter-thread memory behavior.
 4. Next:
-   - provide sourced answer on inter-thread memory behavior (official + user evidence).
+   - lock S1 wire decisions and branch for implementation kickoff.
 5. Risks/blockers:
    - none technical; requires disciplined file updates each session.
-

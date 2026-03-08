@@ -26,11 +26,12 @@ Current active path:
 5. branch baseline commit pushed: `9f6a66743a` on `codex/m0-design-foundation`
 6. root `AGENTS.md` created with mandatory orientation protocol
 7. methodology continuity layer established (`METHODOLOGY.md`, this file, `SESSION-LOG.md`)
+8. continuity layer commit pushed: `6b9b472793` on `codex/m0-design-foundation`
 
 ### Doing
 
-1. continuity hardening so new/post-compaction threads can re-enter deterministically
-2. maintain M0 directional integrity while preparing coding kickoff
+1. maintain M0 directional integrity while preparing coding kickoff
+2. prepare S1 wire-lock closure inputs (`D1`, `D2`, `D4`, `D6`)
 
 ### Next
 
@@ -108,4 +109,3 @@ Authority file:
 2. update milestone checkpoint if plan-level status changed
 3. append concise session entry in `SESSION-LOG.md`
 4. link new design artifacts from the relevant skeleton/index docs
-
