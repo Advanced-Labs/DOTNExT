@@ -60,6 +60,8 @@ Artifacts:
 5. `Docs/Scynapse/Design/M0-S2-Task-Board.md`
 6. `Docs/Scynapse/Design/M0-S3-Task-Board.md`
 7. `Docs/Scynapse/Design/M0-S4-Task-Board.md`
+8. `Docs/Scynapse/Design/M0-S5-Task-Board.md`
+9. `Docs/Scynapse/Design/M0-Conformance-Closure.md`
 
 Status:
 
@@ -83,8 +85,8 @@ Yes. We are still on the same track:
 
 ## 5. Immediate Next Work (Ordered)
 
-1. preserve S1/S2/S3/S4 conformance stability as baseline for next slice
-2. open bounded S5 planning for policy inheritance hard-lock (`TV-011`) without scope creep into deferred wire decisions
+1. preserve S1/S2/S3/S4/S5 conformance stability as baseline for M0 exit review
+2. run M0 exit review and decide M1 entry plan without scope creep into deferred wire decisions
 3. maintain deterministic machine-checkable error ID discipline for all new fail vectors
 4. keep deferred wire decisions (`D3`, `D5`, `D7`, `D8`) untouched until explicitly unlocked
 
@@ -92,6 +94,6 @@ Yes. We are still on the same track:
 
 ## 6. Done/Doing/Next Snapshot
 
-1. `Done`: M0-A contract baseline and M0-B skeleton + compatibility profiles + field matrix + error mapping + state transitions + protocol test vectors + conformance harness checklist + wire examples + cross-doc consistency report + implementation-slice plan + S1 task board + S1 fixture pack + wire-lock decisions list + continuity layer (`METHODOLOGY`, `EXECUTIVE-MEMORY`, `SESSION-LOG`) + pre-compaction continuity protocol + `codex/s1-prototype` branch creation + S1 prototype harness scaffold (`src/Scynapse/playground/FabricS1Prototype`) + first fixture run pass (5/5) + S1 wire-lock decisions (`D1`, `D2`, `D4`, `D6`) locked and propagated + expected-fail fixture mode with extended S1 pack (8/8 effective pass) + expected error-token checks + explicit message-driven operation state machine + structured error ID surface + fixture schema `expected_error_ids` + transition-edge negatives `TV-104`..`TV-109` + reproducible harness run pass (14/14 effective pass) + S1 closure artifact/commit (`M0-S1-Closure.md`, `04e297587d`) + S2 branch kickoff (`codex/s2-direct-upgrade`) + S2 task board and fixture pack (`Fixtures/S2`) + profile-aware direct-upgrade conformance with deterministic gate ordering and fallback continuity + S2 pass set (8/8 effective pass) with stable repeated runs + S2 commit push (`7bfa560428`) + S3 branch kickoff (`codex/s3-endpoint-grants`) + S3 task board and fixture pack (`Fixtures/S3`) + endpoint grant/disclosure conformance with deterministic proof-path checks + S3 pass set (4/4 effective pass) with repeated stable run + S3 commit push (`107ba3c9ce`) + S4 branch kickoff (`codex/s4-observe-replay`) + S4 task board and fixture pack (`Fixtures/S4`) + observe/replay lifecycle conformance with replay-expiry deterministic behavior + S4 pass set (4/4 effective pass) with repeated stable run + cross-slice regression stability (S1/S2/S3/S4 all green).
-2. `Doing`: final S4 continuity sync and branch push.
-3. `Next`: bounded S5 planning for policy inheritance hard-lock vector (`TV-011`).
+1. `Done`: M0-A contract baseline and M0-B skeleton + compatibility profiles + field matrix + error mapping + state transitions + protocol test vectors + conformance harness checklist + wire examples + cross-doc consistency report + implementation-slice plan + S1 task board + S1 fixture pack + wire-lock decisions list + continuity layer (`METHODOLOGY`, `EXECUTIVE-MEMORY`, `SESSION-LOG`) + pre-compaction continuity protocol + `codex/s1-prototype` branch creation + S1 prototype harness scaffold (`src/Scynapse/playground/FabricS1Prototype`) + first fixture run pass (5/5) + S1 wire-lock decisions (`D1`, `D2`, `D4`, `D6`) locked and propagated + expected-fail fixture mode with extended S1 pack (8/8 effective pass) + expected error-token checks + explicit message-driven operation state machine + structured error ID surface + fixture schema `expected_error_ids` + transition-edge negatives `TV-104`..`TV-109` + reproducible harness run pass (14/14 effective pass) + S1 closure artifact/commit (`M0-S1-Closure.md`, `04e297587d`) + S2 branch kickoff (`codex/s2-direct-upgrade`) + S2 task board and fixture pack (`Fixtures/S2`) + profile-aware direct-upgrade conformance with deterministic gate ordering and fallback continuity + S2 pass set (8/8 effective pass) with stable repeated runs + S2 commit push (`7bfa560428`) + S3 branch kickoff (`codex/s3-endpoint-grants`) + S3 task board and fixture pack (`Fixtures/S3`) + endpoint grant/disclosure conformance with deterministic proof-path checks + S3 pass set (4/4 effective pass) with repeated stable run + S3 commit push (`107ba3c9ce`) + S4 branch kickoff (`codex/s4-observe-replay`) + S4 task board and fixture pack (`Fixtures/S4`) + observe/replay lifecycle conformance with replay-expiry deterministic behavior + S4 pass set (4/4 effective pass) with repeated stable run + S4 commit push (`dfa863e3ce`) + S5 branch kickoff (`codex/s5-policy-inheritance`) + S5 task board and fixture pack (`Fixtures/S5`) + policy inheritance hard-lock conformance and deterministic deny validation + S5 pass set (3/3 effective pass) with repeated stable run + M0 conformance closure artifact (`M0-Conformance-Closure.md`) + cross-slice regression stability (S1/S2/S3/S4/S5 all green).
+2. `Doing`: final S5 continuity sync and branch push.
+3. `Next`: M0 exit review and M1 entry planning.

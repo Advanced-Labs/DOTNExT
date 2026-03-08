@@ -4,11 +4,11 @@ Last updated: 2026-03-08
 
 ## 1. Mission Snapshot
 
-Current mission: finish M0 foundation without drift by carrying stable S1/S2/S3/S4 conformance baselines into bounded S5 planning.
+Current mission: finish M0 foundation without drift by carrying stable S1/S2/S3/S4/S5 conformance baselines into M0 exit review.
 
 Pre-compaction checkpoint status (2026-03-08):
 
-1. active branch: `codex/s4-observe-replay`
+1. active branch: `codex/s5-policy-inheritance`
 2. continuity files synchronized
 3. no in-scope uncommitted changes at checkpoint handoff
 
@@ -20,6 +20,7 @@ Current active path:
 4. S2 direct-upgrade slice implemented (profile-gated, fallback-preserving)
 5. S3 endpoint-grant slice implemented (encrypted endpoint disclosure gate semantics)
 6. S4 observation/replay slice implemented (observe lifecycle and replay-expiry semantics)
+7. S5 policy hard-lock slice implemented (policy inheritance deterministic deny semantics)
 
 ---
 
@@ -71,15 +72,22 @@ Current active path:
 42. S4 fixture pack added (`Docs/Scynapse/Design/Fixtures/S4`): TV-007..TV-010
 43. observe/replay lifecycle transitions implemented in harness (`ObserveOpen/Ack/Event/Gap/Resume/Close`)
 44. S4 regression results stable: S1 14/14, S2 8/8, S3 4/4, S4 4/4 with repeated S4 run reproducibility
+45. S4 implementation commit pushed on `codex/s4-observe-replay` (`dfa863e3ce`)
+46. S5 implementation branch created: `codex/s5-policy-inheritance`
+47. S5 profile support added for policy inheritance hard-lock conformance (`slice_profile: S5`)
+48. S5 fixture pack added (`Docs/Scynapse/Design/Fixtures/S5`): TV-011, TV-501, TV-502
+49. deterministic S5 error IDs added for policy deny ordering and deny-code mismatch paths
+50. regression results stable: S1 14/14, S2 8/8, S3 4/4, S4 4/4, S5 3/3 with repeated S5 run reproducibility
+51. M0 closure summary artifact added (`M0-Conformance-Closure.md`)
 
 ### Doing
 
-1. final S4 continuity synchronization and branch push preparation
+1. final S5 continuity synchronization and branch push preparation
 
 ### Next
 
-1. preserve S1/S2/S3/S4 fixture and error-ID stability as new slices are added
-2. open bounded S5 planning for policy inheritance hard-lock vector (`TV-011`)
+1. preserve S1/S2/S3/S4/S5 fixture and error-ID stability as new work begins
+2. perform M0 exit review using `M0-Conformance-Closure.md`
 3. continue holding deferred wire decisions (`D3`, `D5`, `D7`, `D8`) outside current scope
 
 ---
@@ -127,7 +135,9 @@ Authority file:
 5. `M0-S2-Task-Board.md`
 6. `M0-S3-Task-Board.md`
 7. `M0-S4-Task-Board.md`
-8. latest entry in `SESSION-LOG.md`
+8. `M0-S5-Task-Board.md`
+9. `M0-Conformance-Closure.md`
+10. latest entry in `SESSION-LOG.md`
 
 ---
 
@@ -150,6 +160,9 @@ Authority file:
    - `Fixtures/S3/README.md`
    - `M0-S4-Task-Board.md`
    - `Fixtures/S4/README.md`
+   - `M0-S5-Task-Board.md`
+   - `Fixtures/S5/README.md`
+   - `M0-Conformance-Closure.md`
 5. Wire lock:
    - `M0-B-Wire-Lock-Open-Decisions.md`
    - `M0-B-Wire-Examples.md`

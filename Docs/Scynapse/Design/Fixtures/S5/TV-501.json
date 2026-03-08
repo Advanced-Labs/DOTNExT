@@ -1,0 +1,30 @@
+{
+  "id": "TV-501",
+  "title": "Invalid Policy Flow: PolicyDeny Before PolicyDelta",
+  "slice_profile": "S5",
+  "expect_conformance": "fail",
+  "expected_error_ids": [
+    "E3051_S5_POLICY_DENY_BEFORE_DELTA"
+  ],
+  "expected_error_contains": [
+    "appears before PolicyDelta"
+  ],
+  "preconditions": [
+    "deny message is emitted without policy operation context"
+  ],
+  "messages": [
+    { "type": "PolicyDeny", "role": "ancestor_authority", "body": { "deny_code": "PolicyDenied" } }
+  ],
+  "expected_state_trace": [
+    "Deny"
+  ],
+  "expected_outcome": {
+    "success": false,
+    "deny_code": "TrustInsufficient",
+    "retryable": false
+  },
+  "assertions": [
+    { "id": "A1", "kind": "state", "check": "final_state_equals", "value": "Deny" },
+    { "id": "A2", "kind": "error", "check": "deny_code_equals", "value": "TrustInsufficient" }
+  ]
+}

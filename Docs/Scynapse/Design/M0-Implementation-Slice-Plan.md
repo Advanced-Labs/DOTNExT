@@ -131,8 +131,9 @@ Completed:
 3. S2 implementation task board: `M0-S2-Task-Board.md` (8/8 effective pass)
 4. S3 implementation task board: `M0-S3-Task-Board.md` (4/4 effective pass)
 5. S4 implementation task board: `M0-S4-Task-Board.md` (4/4 effective pass)
+6. S5 implementation task board: `M0-S5-Task-Board.md` (3/3 effective pass)
 
 Current next action:
 
-1. start bounded S5 planning for policy inheritance hard-lock vector (`TV-011`)
-2. maintain baseline stability across S1/S2/S3/S4 while adding S5 scope
+1. package M0 conformance closure artifact from S1..S5 baseline
+2. decide M0 exit and M1 entry criteria based on deferred wire/security decisions

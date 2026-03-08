@@ -259,3 +259,28 @@ Use this structure for each new entry:
    - push S4 branch and open bounded S5 planning (`TV-011`) if approved.
 5. Risks/blockers:
    - none immediate; continue preserving deferred wire decisions (`D3`, `D5`, `D7`, `D8`) as-is.
+
+### 2026-03-08 (S5 Policy Inheritance Hard-Lock Slice Implementation)
+
+1. Scope:
+   - implement bounded S5 policy inheritance hard-lock slice from S4 baseline.
+2. Key outputs:
+   - created `codex/s5-policy-inheritance` from S4 baseline.
+   - extended harness with S5 policy message handling:
+     - `PolicyDelta` operation context
+     - `PolicyDeny` deterministic ordering and deny-code validation
+   - added deterministic S5 error IDs (`E3051`, `E3052`, `E3053`, `E3054`) for policy flows.
+   - added isolated S5 fixtures: `TV-011`, `TV-501`, `TV-502`.
+   - added `M0-S5-Task-Board.md` and `M0-Conformance-Closure.md`; synchronized protocol/harness/compatibility docs.
+   - validation runs:
+     - S1: 14/14 effective pass
+     - S2: 8/8 effective pass
+     - S3: 4/4 effective pass
+     - S4: 4/4 effective pass
+     - S5: 3/3 effective pass (repeated S5 run stable)
+3. Current doing:
+   - final continuity synchronization and commit preparation on `codex/s5-policy-inheritance`.
+4. Next:
+   - push S5 branch and run M0 exit review / M1 entry planning if approved.
+5. Risks/blockers:
+   - none immediate; deferred wire decisions (`D3`, `D5`, `D7`, `D8`) intentionally remain unchanged.

@@ -8,13 +8,15 @@ internal sealed class ConformanceEngine
     private const string SliceProfileS2 = "S2";
     private const string SliceProfileS3 = "S3";
     private const string SliceProfileS4 = "S4";
+    private const string SliceProfileS5 = "S5";
 
     private static readonly HashSet<string> KnownSliceProfiles = new(StringComparer.Ordinal)
     {
         SliceProfileS1,
         SliceProfileS2,
         SliceProfileS3,
-        SliceProfileS4
+        SliceProfileS4,
+        SliceProfileS5
     };
 
     private static readonly HashSet<string> KnownGrantStatuses = new(StringComparer.Ordinal)
@@ -56,6 +58,8 @@ internal sealed class ConformanceEngine
         "HandshakeAccept",
         "HandshakeDeny",
         "GrantPresent",
+        "PolicyDelta",
+        "PolicyDeny",
         "RouteUpgradeProbe",
         "RouteUpgradeAccept",
         "RouteUpgradeReject",
@@ -74,6 +78,8 @@ internal sealed class ConformanceEngine
         ["HandshakeAccept"] = new(StringComparer.Ordinal) { "route_mode", "disclosure_level" },
         ["HandshakeDeny"] = new(StringComparer.Ordinal) { "deny_code" },
         ["GrantPresent"] = new(StringComparer.Ordinal) { "grant_scope" },
+        ["PolicyDelta"] = new(StringComparer.Ordinal) { "parent_hard_lock", "child_weaken_attempt", "override_granted" },
+        ["PolicyDeny"] = new(StringComparer.Ordinal) { "deny_code" },
         ["RouteUpgradeReject"] = new(StringComparer.Ordinal) { "decision_code" },
         ["ObserveOpen"] = new(StringComparer.Ordinal) { "scope_mode" },
         ["ObserveGap"] = new(StringComparer.Ordinal) { "cause" },
@@ -101,6 +107,12 @@ internal sealed class ConformanceEngine
             "GrantExpired",
             "DisclosureDenied",
             "MediatorUnavailable"
+        },
+        ["PolicyDeny"] = new(StringComparer.Ordinal)
+        {
+            "PolicyDenied",
+            "TrustInsufficient",
+            "MediatorUnavailable"
         }
     };
 
@@ -108,7 +120,7 @@ internal sealed class ConformanceEngine
     {
         ["ResolveIntent"] = new(StringComparer.Ordinal) { "DiscoverPath" },
         ["DiscoverPath"] = new(StringComparer.Ordinal) { "PolicyEvaluate", "Deny" },
-        ["PolicyEvaluate"] = new(StringComparer.Ordinal) { "DisclosurePlan", "Deny" },
+        ["PolicyEvaluate"] = new(StringComparer.Ordinal) { "DisclosurePlan", "Deny", "Completed" },
         ["DisclosurePlan"] = new(StringComparer.Ordinal) { "MediatedHandshake", "Deny" },
         ["MediatedHandshake"] = new(StringComparer.Ordinal) { "RelayedSession", "Deny" },
         ["RelayedSession"] = new(StringComparer.Ordinal) { "DirectUpgradeProbe", "Completed" },
@@ -262,7 +274,7 @@ internal sealed class ConformanceEngine
                 }
             }
 
-            if (message.Type is "ResolveDeny" or "HandshakeDeny")
+            if (message.Type is "ResolveDeny" or "HandshakeDeny" or "PolicyDeny")
             {
                 var denyCode = GetBodyString(message, "deny_code");
                 if (denyCode is null)
@@ -292,6 +304,11 @@ internal sealed class ConformanceEngine
             if (string.Equals(sliceProfile, SliceProfileS4, StringComparison.Ordinal))
             {
                 ValidateS4ObserveFields(fixture, message, errors);
+            }
+
+            if (string.Equals(sliceProfile, SliceProfileS5, StringComparison.Ordinal))
+            {
+                ValidateS5PolicyFields(fixture, message, errors);
             }
         }
     }
@@ -473,6 +490,24 @@ internal sealed class ConformanceEngine
         }
     }
 
+    private static void ValidateS5PolicyFields(FixtureCase fixture, FixtureMessage message, List<ConformanceError> errors)
+    {
+        if (!string.Equals(message.Type, "PolicyDelta", StringComparison.Ordinal))
+        {
+            return;
+        }
+
+        if (message.Body is null || message.Body.Value.ValueKind != JsonValueKind.Object)
+        {
+            AddError(errors, "L2", "E2001_MISSING_REQUIRED_BODY", $"{fixture.Id}/{message.Type} missing required body.");
+            return;
+        }
+
+        ValidateRequiredBooleanField(fixture, message, "parent_hard_lock", errors);
+        ValidateRequiredBooleanField(fixture, message, "child_weaken_attempt", errors);
+        ValidateRequiredBooleanField(fixture, message, "override_granted", errors);
+    }
+
     private static OperationContext ExecuteMessageFlow(FixtureCase fixture, string sliceProfile, List<ConformanceError> errors)
     {
         var context = new OperationContext
@@ -511,6 +546,13 @@ internal sealed class ConformanceEngine
             }
         }
 
+        if (string.Equals(sliceProfile, SliceProfileS5, StringComparison.Ordinal) && context.PolicyDenyRequired)
+        {
+            AddError(errors, "L3", "E3053_S5_POLICY_DENY_MISSING", $"{fixture.Id} requires PolicyDeny after PolicyDelta hard-lock violation.");
+            context.ObservedDenyCode ??= "PolicyDenied";
+            ForceTerminalDeny(context);
+        }
+
         if (!IsTerminal(context.CurrentState))
         {
             if (string.Equals(context.CurrentState, "RelayedSession", StringComparison.Ordinal) ||
@@ -544,7 +586,7 @@ internal sealed class ConformanceEngine
         {
             case "ResolveRequest":
             {
-                if (context.ResolveStarted || context.HandshakeStarted)
+                if (context.ResolveStarted || context.HandshakeStarted || context.PolicyOperationStarted)
                 {
                     RejectWithDeterministicDeny(fixtureId, context, errors, "E3015_OPERATION_ALREADY_STARTED", "TrustInsufficient", $"{fixtureId}/{message.Type} starts a new operation while another operation context is active.");
                     break;
@@ -773,6 +815,87 @@ internal sealed class ConformanceEngine
                 }
 
                 context.GrantPresentSeen = true;
+                break;
+            }
+            case "PolicyDelta":
+            {
+                if (!string.Equals(context.SliceProfile, SliceProfileS5, StringComparison.Ordinal))
+                {
+                    RejectWithDeterministicDeny(fixtureId, context, errors, "E3054_S5_POLICY_MESSAGE_OUTSIDE_PROFILE", "TrustInsufficient", $"{fixtureId}/{message.Type} is only supported in S5 policy-inheritance flow.");
+                    break;
+                }
+
+                if (context.ResolveStarted || context.HandshakeStarted || context.ObserveSessionStarted || context.PolicyOperationStarted)
+                {
+                    RejectWithDeterministicDeny(fixtureId, context, errors, "E3015_OPERATION_ALREADY_STARTED", "TrustInsufficient", $"{fixtureId}/{message.Type} starts a new operation while another operation context is active.");
+                    break;
+                }
+
+                context.PolicyOperationStarted = true;
+                if (context.CurrentState is null)
+                {
+                    SetState(context, "PolicyEvaluate");
+                }
+                else
+                {
+                    RejectWithDeterministicDeny(fixtureId, context, errors, "E3007_INVALID_STATE_TRANSITION", "TrustInsufficient", $"{fixtureId}/{message.Type} invalid from state '{context.CurrentState}'.");
+                    break;
+                }
+
+                var parentHardLock = GetBodyBoolean(message, "parent_hard_lock") ?? false;
+                var childWeakenAttempt = GetBodyBoolean(message, "child_weaken_attempt") ?? false;
+                var overrideGranted = GetBodyBoolean(message, "override_granted") ?? false;
+
+                if (parentHardLock && childWeakenAttempt && !overrideGranted)
+                {
+                    context.PolicyDenyRequired = true;
+                    context.ExpectedPolicyDenyCode = "PolicyDenied";
+                }
+                else
+                {
+                    context.PolicyDenyRequired = false;
+                    context.ExpectedPolicyDenyCode = null;
+                    TryTransition(fixtureId, context, "Completed", errors);
+                }
+
+                break;
+            }
+            case "PolicyDeny":
+            {
+                if (!string.Equals(context.SliceProfile, SliceProfileS5, StringComparison.Ordinal))
+                {
+                    RejectWithDeterministicDeny(fixtureId, context, errors, "E3054_S5_POLICY_MESSAGE_OUTSIDE_PROFILE", "TrustInsufficient", $"{fixtureId}/{message.Type} is only supported in S5 policy-inheritance flow.");
+                    break;
+                }
+
+                if (!context.PolicyOperationStarted)
+                {
+                    RejectWithDeterministicDeny(fixtureId, context, errors, "E3051_S5_POLICY_DENY_BEFORE_DELTA", "TrustInsufficient", $"{fixtureId}/{message.Type} appears before PolicyDelta.");
+                    break;
+                }
+
+                if (!StateIs(context, "PolicyEvaluate"))
+                {
+                    RejectWithDeterministicDeny(fixtureId, context, errors, "E3007_INVALID_STATE_TRANSITION", "TrustInsufficient", $"{fixtureId}/{message.Type} invalid from state '{context.CurrentState}'.");
+                    break;
+                }
+
+                var denyCode = GetBodyString(message, "deny_code");
+                var expectedCode = context.ExpectedPolicyDenyCode ?? "PolicyDenied";
+                if (!string.Equals(denyCode, expectedCode, StringComparison.Ordinal))
+                {
+                    AddError(errors, "L3", "E3052_S5_POLICY_DENY_CODE_MISMATCH", $"{fixtureId}/{message.Type} expected deny_code '{expectedCode}' but observed '{denyCode ?? "null"}'.");
+                    context.ObservedDenyCode ??= expectedCode;
+                    context.PolicyDenyRequired = false;
+                    context.ExpectedPolicyDenyCode = null;
+                    ForceTerminalDeny(context);
+                    break;
+                }
+
+                context.ObservedDenyCode = denyCode;
+                context.PolicyDenyRequired = false;
+                context.ExpectedPolicyDenyCode = null;
+                ForceTerminalDeny(context);
                 break;
             }
             case "ObserveOpen":
@@ -1501,6 +1624,8 @@ internal sealed class OperationContext
     public bool EndpointOperationActive { get; set; }
     public bool EndpointDisclosureAllowed { get; set; } = true;
     public bool GrantPresentSeen { get; set; }
+    public bool PolicyOperationStarted { get; set; }
+    public bool PolicyDenyRequired { get; set; }
     public bool ObserveSessionStarted { get; set; }
     public bool ObserveFollowMoves { get; set; } = true;
     public bool RequiresSelectorHints { get; set; }
@@ -1508,6 +1633,7 @@ internal sealed class OperationContext
     public string EndpointDirectoryMode { get; set; } = "plaintext";
     public string EndpointGrantStatus { get; set; } = "not_required";
     public string ObserveScopeMode { get; set; } = "subtree";
+    public string? ExpectedPolicyDenyCode { get; set; }
     public string? ExpectedUpgradeRejectCode { get; set; }
     public string? ObservedDenyCode { get; set; }
     public string? ObservedUpgradeDecisionCode { get; set; }

@@ -51,6 +51,12 @@ Run S4 fixture pack:
 dotnet run --project playground/FabricS1Prototype/FabricS1Prototype.csproj -- D:\Dev\dotnext\Docs\Scynapse\Design\Fixtures\S4
 ```
 
+Run S5 fixture pack:
+
+```powershell
+dotnet run --project playground/FabricS1Prototype/FabricS1Prototype.csproj -- D:\Dev\dotnext\Docs\Scynapse\Design\Fixtures\S5
+```
+
 Expected-fail fixture semantics:
 
 1. `expected_error_ids` is the preferred exact failure oracle.
@@ -74,3 +80,8 @@ Slice profile semantics:
    - `ObserveOpen.follow_moves`
    - `ObserveGap.cause`
    - `ObserveResume.replay_available`
+5. `slice_profile: "S5"` enables policy inheritance hard-lock validation:
+   - `PolicyDelta.parent_hard_lock`
+   - `PolicyDelta.child_weaken_attempt`
+   - `PolicyDelta.override_granted`
+   - `PolicyDeny.deny_code`

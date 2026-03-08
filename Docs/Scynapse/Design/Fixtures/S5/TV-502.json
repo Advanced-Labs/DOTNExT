@@ -1,0 +1,41 @@
+{
+  "id": "TV-502",
+  "title": "Invalid Policy Deny Code Mismatch",
+  "slice_profile": "S5",
+  "expect_conformance": "fail",
+  "expected_error_ids": [
+    "E3052_S5_POLICY_DENY_CODE_MISMATCH"
+  ],
+  "expected_error_contains": [
+    "expected deny_code"
+  ],
+  "preconditions": [
+    "hard-lock violation requires PolicyDenied",
+    "response deny code is incorrect"
+  ],
+  "messages": [
+    {
+      "type": "PolicyDelta",
+      "role": "child_authority",
+      "body": {
+        "parent_hard_lock": true,
+        "child_weaken_attempt": true,
+        "override_granted": false
+      }
+    },
+    { "type": "PolicyDeny", "role": "ancestor_authority", "body": { "deny_code": "TrustInsufficient" } }
+  ],
+  "expected_state_trace": [
+    "PolicyEvaluate",
+    "Deny"
+  ],
+  "expected_outcome": {
+    "success": false,
+    "deny_code": "PolicyDenied",
+    "retryable": false
+  },
+  "assertions": [
+    { "id": "A1", "kind": "state", "check": "final_state_equals", "value": "Deny" },
+    { "id": "A2", "kind": "error", "check": "deny_code_equals", "value": "PolicyDenied" }
+  ]
+}

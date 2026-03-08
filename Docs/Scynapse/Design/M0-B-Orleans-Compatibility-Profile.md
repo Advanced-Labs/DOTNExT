@@ -153,7 +153,17 @@ This profile maps M0-B protocol fields to their Orleans lineage, with explicit c
 
 ---
 
-## 13. Review Checklist
+## 13. S5 Policy Inheritance Behavior Classification
+
+| Hardened Behavior | Tag | Notes |
+|---|---|---|
+| Policy inheritance hard-lock conformance (`PolicyDelta` -> deterministic deny) | `N` | Scynapse-native parent-policy authority model over CNS hierarchy |
+| Deterministic policy deny validation (`PolicyDeny` ordering and code consistency) | `N` | protocol-level machine-checkable conformance behavior |
+| Policy inheritance enforced through silo/client role assumptions | `D` | explicitly blocked; remains node-unified policy semantics |
+
+---
+
+## 14. Review Checklist
 
 1. Are any fields tagged `A` but still carrying hidden silo/cluster assumptions?
 2. Are all `N` fields tied to M0-A invariants?

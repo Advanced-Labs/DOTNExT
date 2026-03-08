@@ -1,0 +1,35 @@
+{
+  "id": "TV-011",
+  "title": "Parent Hard Policy Blocks Child Weakening",
+  "slice_profile": "S5",
+  "preconditions": [
+    "ancestor policy is hard-locked",
+    "child attempts weaker policy",
+    "no delegated override grant exists"
+  ],
+  "messages": [
+    {
+      "type": "PolicyDelta",
+      "role": "child_authority",
+      "body": {
+        "parent_hard_lock": true,
+        "child_weaken_attempt": true,
+        "override_granted": false
+      }
+    },
+    { "type": "PolicyDeny", "role": "ancestor_authority", "body": { "deny_code": "PolicyDenied" } }
+  ],
+  "expected_state_trace": [
+    "PolicyEvaluate",
+    "Deny"
+  ],
+  "expected_outcome": {
+    "success": false,
+    "deny_code": "PolicyDenied",
+    "retryable": false
+  },
+  "assertions": [
+    { "id": "A1", "kind": "state", "check": "final_state_equals", "value": "Deny" },
+    { "id": "A2", "kind": "error", "check": "deny_code_equals", "value": "PolicyDenied" }
+  ]
+}

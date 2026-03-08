@@ -150,6 +150,15 @@ S4 extension note:
    - `ObserveGap.cause` (`RetentionExpired|PolicyDenied|TransportLoss`)
    - `ObserveResume.replay_available` (bool)
 
+S5 extension note:
+
+1. `slice_profile: "S5"` enables policy inheritance hard-lock validation.
+2. S5 policy fixtures use:
+   - `PolicyDelta.parent_hard_lock` (bool)
+   - `PolicyDelta.child_weaken_attempt` (bool)
+   - `PolicyDelta.override_granted` (bool)
+   - `PolicyDeny.deny_code` (deterministic match required when hard-lock violation occurs)
+
 ---
 
 ## 5. Conformance Gates (Pass/Fail)

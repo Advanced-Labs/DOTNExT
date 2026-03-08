@@ -379,6 +379,10 @@ Expected outcome:
    - TV-008 (observe exact-path no-follow semantics)
    - TV-009 (replay resume success in retention window)
    - TV-010 (replay resume expiry behavior with deterministic deny semantics)
+5. S5 owned vectors:
+   - TV-011 (parent hard policy blocks child weakening)
+   - TV-501 (policy deny before policy context; expected fail by exact error ID)
+   - TV-502 (policy deny code mismatch; expected fail by exact error ID)
 
 ---
 
@@ -391,9 +395,10 @@ Completed:
 3. S2 fixture pack execution complete with deterministic baseline (`Docs/Scynapse/Design/Fixtures/S2`)
 4. S3 fixture pack execution complete with deterministic baseline (`Docs/Scynapse/Design/Fixtures/S3`)
 5. S4 fixture pack execution complete with deterministic baseline (`Docs/Scynapse/Design/Fixtures/S4`)
+6. S5 fixture pack execution complete with deterministic baseline (`Docs/Scynapse/Design/Fixtures/S5`)
 
 Current next step:
 
-1. open bounded S5 planning for policy inheritance hard-lock vector (`TV-011`)
-2. preserve S1/S2/S3/S4 baseline behavior and machine-checkable error ID stability
+1. package M0 cross-slice conformance closure and review unresolved design decisions
+2. preserve S1/S2/S3/S4/S5 baseline behavior and machine-checkable error ID stability
 3. keep deferred wire decisions (`D3`, `D5`, `D7`, `D8`) untouched until explicitly unlocked
