@@ -6,6 +6,12 @@ Last updated: 2026-03-08
 
 Current mission: finish M0 foundation without drift, then start S1 prototype from a locked M0-B baseline.
 
+Pre-compaction checkpoint status (2026-03-08):
+
+1. active branch: `codex/s1-prototype`
+2. continuity files synchronized
+3. no in-scope uncommitted changes at checkpoint handoff
+
 Current active path:
 
 1. M0-A complete draft
@@ -40,14 +46,14 @@ Current active path:
 
 ### Doing
 
-1. keep prototype and design docs synchronized as W4/W5 hardening starts
-2. prepare next strict message-order and transition edge cases beyond current negatives
+1. pre-compaction checkpoint finalized and ready for safe re-entry
+2. preserve deterministic handoff state for post-compaction continuation
 
 ### Next
 
-1. expand W4/W5 implementation to map actual message flow transitions and relation path behavior
-2. add deeper negative-order and transition edge vectors for stronger L1-L4 coverage
-3. lock/implement structured assert format for expected-fail vectors (error-code-level expectations)
+1. re-enter using mandatory read order (`METHODOLOGY` -> `M0-Status-Checkpoint` -> `M0-B-Protocol-Skeleton` -> `M0-S1-Task-Board` -> latest `SESSION-LOG`)
+2. expand W4/W5 implementation to map actual message flow transitions and relation path behavior
+3. add deeper negative-order and transition edge vectors for stronger L1-L4 coverage
 
 ---
 

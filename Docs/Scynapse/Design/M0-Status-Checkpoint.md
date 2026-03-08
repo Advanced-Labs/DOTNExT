@@ -10,6 +10,10 @@ Continuity anchors:
 2. `Docs/Scynapse/Design/METHODOLOGY.md`
 3. `Docs/Scynapse/Design/SESSION-LOG.md`
 
+Pre-compaction checkpoint (2026-03-08):
+
+1. continuity artifacts synchronized and pushed on `codex/s1-prototype`
+
 ---
 
 ## 2. Original M0 Direction (Agreed)
