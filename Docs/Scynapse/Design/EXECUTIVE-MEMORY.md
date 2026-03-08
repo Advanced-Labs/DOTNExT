@@ -29,17 +29,19 @@ Current active path:
 8. continuity layer commit pushed: `6b9b472793` on `codex/m0-design-foundation`
 9. pre-compaction refresh protocol added and pushed: `3ee989e892` on `codex/m0-design-foundation`
 10. implementation branch created and pushed: `codex/s1-prototype`
+11. S1 prototype harness scaffolded under `src/Scynapse/playground/FabricS1Prototype`
+12. first S1 harness run executed against `TV-001/002/003/012/013` with 5/5 pass
 
 ### Doing
 
-1. begin S1 implementation kickoff on `codex/s1-prototype`
+1. harden S1 prototype from fixture-trace validation toward message-driven state execution
 2. prepare S1 wire-lock closure inputs (`D1`, `D2`, `D4`, `D6`)
 
 ### Next
 
 1. lock S1-priority wire decisions: `D1`, `D2`, `D4`, `D6`
-2. begin S1 W1-W3 foundation implementation
-3. run first red/green conformance cycle (`TV-002`, then `TV-001`)
+2. expand W4/W5 implementation to map actual message flow transitions and relation path behavior
+3. add negative-order and missing-field vectors for stronger L1-L4 coverage
 
 ---
 

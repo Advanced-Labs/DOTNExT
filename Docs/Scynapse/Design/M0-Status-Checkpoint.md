@@ -84,6 +84,6 @@ Yes. We are still on the same track:
 
 ## 6. Done/Doing/Next Snapshot
 
-1. `Done`: M0-A contract baseline and M0-B skeleton + compatibility profiles + field matrix + error mapping + state transitions + protocol test vectors + conformance harness checklist + wire examples + cross-doc consistency report + implementation-slice plan + S1 task board + S1 fixture pack + wire-lock open decisions list + continuity layer (`METHODOLOGY`, `EXECUTIVE-MEMORY`, `SESSION-LOG`) + pre-compaction continuity protocol + `codex/s1-prototype` branch creation.
-2. `Doing`: S1 kickoff on implementation branch (`codex/s1-prototype`).
-3. `Next`: lock S1 wire decisions (`D1`, `D2`, `D4`, `D6`) and run first conformance cycle.
+1. `Done`: M0-A contract baseline and M0-B skeleton + compatibility profiles + field matrix + error mapping + state transitions + protocol test vectors + conformance harness checklist + wire examples + cross-doc consistency report + implementation-slice plan + S1 task board + S1 fixture pack + wire-lock open decisions list + continuity layer (`METHODOLOGY`, `EXECUTIVE-MEMORY`, `SESSION-LOG`) + pre-compaction continuity protocol + `codex/s1-prototype` branch creation + S1 prototype harness scaffold (`src/Scynapse/playground/FabricS1Prototype`) + first fixture run pass (5/5).
+2. `Doing`: S1 hardening pass from fixture-trace checks toward message-driven transition execution.
+3. `Next`: lock S1 wire decisions (`D1`, `D2`, `D4`, `D6`) and extend W4/W5 flow enforcement plus additional negative vectors.

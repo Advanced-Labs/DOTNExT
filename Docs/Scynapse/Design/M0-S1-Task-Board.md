@@ -116,3 +116,13 @@ Exit criteria:
 1. create code modules for W1-W3 foundations
 2. scaffold fixture format and vector loader (fixture pack created under `Docs/Scynapse/Design/Fixtures/S1/`)
 3. run first red test (`TV-002`) to validate fail-path plumbing
+
+---
+
+## 6. Progress Snapshot (2026-03-08)
+
+1. W1 baseline: in progress (prototype schema/field validation implemented in `src/Scynapse/playground/FabricS1Prototype`)
+2. W2 baseline: in progress (state-trace transition validator implemented)
+3. W3 baseline: in progress (deterministic deny mapper baseline implemented)
+4. W4-W5: pending (message-driven relation/resolve engine behavior still to harden)
+5. W6 baseline: in progress (fixture loader and run summary implemented; first run 5/5 pass on TV-001/002/003/012/013)

@@ -69,3 +69,19 @@ Use this structure for each new entry:
    - lock S1 wire decisions (`D1`, `D2`, `D4`, `D6`) and start W1-W3 work.
 5. Risks/blockers:
    - large unrelated untracked workspace files require strict scoped commits.
+
+### 2026-03-08 (S1 Prototype W1-W3 Baseline)
+
+1. Scope:
+   - implement first executable S1 conformance slice in Scynapse code workspace.
+2. Key outputs:
+   - added `src/Scynapse/playground/FabricS1Prototype` project and included it in `Scynapse.slnx`.
+   - implemented fixture loader, L1 envelope checks, L2 field checks, L3 trace-transition checks, and L4 deny mapping checks.
+   - executed harness against `TV-001`, `TV-002`, `TV-003`, `TV-012`, `TV-013`.
+   - first run result: 5 pass, 0 fail.
+3. Current doing:
+   - moving from trace-based checks toward stricter message-driven state transitions.
+4. Next:
+   - lock S1 wire decisions (`D1`, `D2`, `D4`, `D6`) and extend W4/W5 behavior checks.
+5. Risks/blockers:
+   - fixture set currently validates expected traces; stronger negative and order-sensitive cases still needed.
