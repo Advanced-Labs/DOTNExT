@@ -27,6 +27,9 @@ This draft assumes:
 
 Reference:
 
+- `Docs/Scynapse/Design/METHODOLOGY.md`
+- `Docs/Scynapse/Design/EXECUTIVE-MEMORY.md`
+- `Docs/Scynapse/Design/SESSION-LOG.md`
 - `Docs/Scynapse/Design/M0-A-Fabric-Contracts.md`
 - `Docs/Scynapse/Design/M0-Orleans-Reuse-Matrix.md`
 - `Docs/Scynapse/Design/M0-B-Orleans-Compatibility-Profile.md`

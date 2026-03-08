@@ -4,6 +4,12 @@
 
 This is a clarity checkpoint to prevent drift. It maps the original M0 direction to current artifacts and next actions.
 
+Continuity anchors:
+
+1. `Docs/Scynapse/Design/EXECUTIVE-MEMORY.md`
+2. `Docs/Scynapse/Design/METHODOLOGY.md`
+3. `Docs/Scynapse/Design/SESSION-LOG.md`
+
 ---
 
 ## 2. Original M0 Direction (Agreed)
@@ -78,6 +84,6 @@ Yes. We are still on the same track:
 
 ## 6. Done/Doing/Next Snapshot
 
-1. `Done`: M0-A contract baseline and M0-B skeleton + compatibility profiles + field matrix + error mapping + state transitions + protocol test vectors + conformance harness checklist + wire examples + cross-doc consistency report + implementation-slice plan + S1 task board + S1 fixture pack + wire-lock open decisions list.
+1. `Done`: M0-A contract baseline and M0-B skeleton + compatibility profiles + field matrix + error mapping + state transitions + protocol test vectors + conformance harness checklist + wire examples + cross-doc consistency report + implementation-slice plan + S1 task board + S1 fixture pack + wire-lock open decisions list + continuity layer (`METHODOLOGY`, `EXECUTIVE-MEMORY`, `SESSION-LOG`).
 2. `Doing`: prototype kickoff for S1.
 3. `Next`: first conformance cycle and wire-lock candidate review.
