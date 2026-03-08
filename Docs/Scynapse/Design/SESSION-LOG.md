@@ -53,3 +53,19 @@ Use this structure for each new entry:
    - lock S1 wire decisions and branch for implementation kickoff.
 5. Risks/blockers:
    - none technical; requires disciplined file updates each session.
+
+### 2026-03-08 (Compaction Protocol + S1 Branch Kickoff)
+
+1. Scope:
+   - encode explicit pre-compaction maintenance rules and transition to implementation branch.
+2. Key outputs:
+   - updated `AGENTS.md` with required compaction warning protocol.
+   - updated `METHODOLOGY.md` with pre-compaction refresh playbook.
+   - pushed continuity-protocol commit on `codex/m0-design-foundation` (`3ee989e892`).
+   - created and pushed `codex/s1-prototype`.
+3. Current doing:
+   - refreshing executive state and beginning S1 implementation kickoff.
+4. Next:
+   - lock S1 wire decisions (`D1`, `D2`, `D4`, `D6`) and start W1-W3 work.
+5. Risks/blockers:
+   - large unrelated untracked workspace files require strict scoped commits.

@@ -27,18 +27,19 @@ Current active path:
 6. root `AGENTS.md` created with mandatory orientation protocol
 7. methodology continuity layer established (`METHODOLOGY.md`, this file, `SESSION-LOG.md`)
 8. continuity layer commit pushed: `6b9b472793` on `codex/m0-design-foundation`
+9. pre-compaction refresh protocol added and pushed: `3ee989e892` on `codex/m0-design-foundation`
+10. implementation branch created and pushed: `codex/s1-prototype`
 
 ### Doing
 
-1. maintain M0 directional integrity while preparing coding kickoff
+1. begin S1 implementation kickoff on `codex/s1-prototype`
 2. prepare S1 wire-lock closure inputs (`D1`, `D2`, `D4`, `D6`)
 
 ### Next
 
 1. lock S1-priority wire decisions: `D1`, `D2`, `D4`, `D6`
-2. create/confirm implementation branch (`codex/s1-prototype`) from `codex/m0-design-foundation`
-3. begin S1 W1-W3 foundation implementation
-4. run first red/green conformance cycle (`TV-002`, then `TV-001`)
+2. begin S1 W1-W3 foundation implementation
+3. run first red/green conformance cycle (`TV-002`, then `TV-001`)
 
 ---
 
