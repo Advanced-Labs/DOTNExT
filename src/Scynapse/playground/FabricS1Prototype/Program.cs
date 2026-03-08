@@ -58,6 +58,24 @@ internal static class Program
                 {
                     result.Errors.Add("[EXPECT] Expected conformance failure but vector passed.");
                 }
+
+                if (fixture.ExpectedErrorContains.Count > 0)
+                {
+                    foreach (var expectedToken in fixture.ExpectedErrorContains)
+                    {
+                        var found = result.Errors.Any(error =>
+                            error.IndexOf(expectedToken, StringComparison.OrdinalIgnoreCase) >= 0);
+                        if (!found)
+                        {
+                            result.Errors.Add($"[EXPECT] Missing expected error token: '{expectedToken}'.");
+                        }
+                    }
+                }
+
+                if (result.Errors.Any(error => error.StartsWith("[EXPECT]", StringComparison.Ordinal)))
+                {
+                    result.EffectivePassed = false;
+                }
             }
             else
             {

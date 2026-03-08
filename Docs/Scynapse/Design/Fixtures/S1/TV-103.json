@@ -2,6 +2,10 @@
   "id": "TV-103",
   "title": "Invalid Deny Code: ResolveDeny Uses Unknown Code",
   "expect_conformance": "fail",
+  "expected_error_contains": [
+    "deny code 'NotARealCode' is not allowed",
+    "Unknown deny code 'NotARealCode'"
+  ],
   "preconditions": [
     "authority emits deny code outside deterministic mapping"
   ],
@@ -22,4 +26,3 @@
     { "id": "A1", "kind": "error", "check": "deny_code_equals", "value": "NotARealCode" }
   ]
 }
-

@@ -22,3 +22,4 @@ Conformance expectation mode:
 
 1. `expect_conformance: "pass"` (default) means harness must accept the vector.
 2. `expect_conformance: "fail"` means harness must reject the vector; rejection is counted as pass for that vector.
+3. `expected_error_contains` (optional) lists substrings that must appear in harness errors for `expect_conformance: "fail"` vectors.

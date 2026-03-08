@@ -14,6 +14,9 @@ internal sealed class FixtureCase
     [JsonPropertyName("expect_conformance")]
     public string ExpectConformance { get; set; } = "pass";
 
+    [JsonPropertyName("expected_error_contains")]
+    public List<string> ExpectedErrorContains { get; set; } = new();
+
     [JsonPropertyName("preconditions")]
     public List<string> Preconditions { get; set; } = new();
 

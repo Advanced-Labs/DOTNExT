@@ -125,4 +125,4 @@ Exit criteria:
 2. W2 baseline: in progress (observed message-flow state-trace derivation + transition validator implemented)
 3. W3 baseline: in progress (deterministic deny mapper baseline implemented)
 4. W4-W5: pending (message-driven relation/resolve engine behavior still to harden)
-5. W6 baseline: in progress (fixture loader and run summary implemented; expected-fail mode added; current run 8/8 effective pass on TV-001/002/003/012/013/101/102/103)
+5. W6 baseline: in progress (fixture loader and run summary implemented; expected-fail mode + expected error-token checks added; current run 8/8 effective pass on TV-001/002/003/012/013/101/102/103)

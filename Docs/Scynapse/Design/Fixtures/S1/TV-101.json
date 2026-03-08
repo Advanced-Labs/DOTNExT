@@ -2,6 +2,9 @@
   "id": "TV-101",
   "title": "Invalid Order: ResolveResponse Before ResolveRequest",
   "expect_conformance": "fail",
+  "expected_error_contains": [
+    "appears before ResolveRequest"
+  ],
   "preconditions": [
     "response arrives before request context exists"
   ],
@@ -26,4 +29,3 @@
     { "id": "A1", "kind": "state", "check": "contains_state", "value": "ResolveIntent" }
   ]
 }
-

@@ -36,6 +36,7 @@ Current active path:
 15. S1 fixture pack extended with expected-fail negative vectors (`TV-101`, `TV-102`, `TV-103`)
 16. S1 harness supports `expect_conformance` mode (`pass`/`fail`) with 8/8 effective pass
 17. wire examples synchronized to locked S1 profile (`M0-B-Wire-Examples.md`)
+18. expected-fail vectors now support `expected_error_contains` for reason-level rejection checks
 
 ### Doing
 

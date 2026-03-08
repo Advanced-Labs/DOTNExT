@@ -2,6 +2,9 @@
   "id": "TV-102",
   "title": "Invalid Payload: ResolveRequest Missing expr_raw",
   "expect_conformance": "fail",
+  "expected_error_contains": [
+    "missing required field 'expr_raw'"
+  ],
   "preconditions": [
     "required field omitted in resolve request body"
   ],
@@ -23,4 +26,3 @@
     { "id": "A1", "kind": "error", "check": "deny_code_equals", "value": "PathNotFound" }
   ]
 }
-

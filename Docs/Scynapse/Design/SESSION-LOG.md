@@ -132,3 +132,18 @@ Use this structure for each new entry:
    - tighten expected-fail assertions to specific expected validation categories/codes.
 5. Risks/blockers:
    - expected-fail mode currently validates rejection presence, not exact expected rejection set.
+
+### 2026-03-08 (Expected Error Token Checks)
+
+1. Scope:
+   - harden expected-fail vectors so they verify failure reason signatures, not only failure presence.
+2. Key outputs:
+   - added `expected_error_contains` support in fixture model/runner.
+   - updated `TV-101`, `TV-102`, `TV-103` with expected error tokens.
+   - run result unchanged: 8 vectors, 8 effective pass.
+3. Current doing:
+   - preparing next bounded edge-case additions.
+4. Next:
+   - add a small set of transition-edge negatives while staying within current compaction budget.
+5. Risks/blockers:
+   - expected-token matching is substring-based; may need stricter structured error IDs in later pass.
