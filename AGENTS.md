@@ -24,6 +24,18 @@ At the end of each significant session:
 3. Append a short entry to `SESSION-LOG.md`.
 4. Ensure new artifacts are linked from the relevant index/skeleton docs.
 
+## Compaction Warning Protocol (Required for Scynapse Work)
+
+When user indicates context is nearing compaction, or thread complexity is high enough that compaction risk is likely:
+
+1. Pause new design/coding changes unless critical.
+2. Perform a continuity refresh pass in this order:
+   - `EXECUTIVE-MEMORY.md` (done/doing/next, open decisions, branch status)
+   - `M0-Status-Checkpoint.md` (milestone-level status alignment)
+   - `SESSION-LOG.md` (append current session summary)
+3. Link any newly created artifacts from checkpoint/skeleton/index docs.
+4. Commit continuity updates in a focused commit before resuming implementation.
+
 ## Naming Conventions (Scynapse)
 
 The active shorthand system is documented in:

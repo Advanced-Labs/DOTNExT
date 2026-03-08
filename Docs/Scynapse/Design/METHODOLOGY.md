@@ -136,6 +136,21 @@ At end of each significant working block:
 4. Prefer references to canonical docs over repeating full content.
 5. Record decisions with IDs (`D*`) and status (`open`, `locked`, `deferred`).
 
+### 8.1 Pre-Compaction Refresh Playbook
+
+Trigger:
+
+1. user reports context is close to compaction, or
+2. agent judges thread complexity/history length as high-risk.
+
+Actions (in order):
+
+1. update `EXECUTIVE-MEMORY.md` with precise `Done`, `Doing`, `Next`, branch, and open decision state.
+2. reconcile `M0-Status-Checkpoint.md` with executive memory.
+3. append concise timeline entry to `SESSION-LOG.md`.
+4. ensure new artifacts are referenced from `M0-B-Protocol-Skeleton.md` and/or other active index docs.
+5. create a focused continuity commit before resuming feature work.
+
 ---
 
 ## 9. Branching and Commit Hygiene (Scynapse Design Work)
@@ -155,4 +170,3 @@ The work is on-track when:
 2. open decisions are explicit and bounded
 3. next executable step is unambiguous
 4. test vectors and conformance gates map to planned slice
-
