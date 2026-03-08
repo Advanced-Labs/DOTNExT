@@ -1,0 +1,31 @@
+{
+  "id": "TV-003",
+  "title": "Parent-Mediated Handshake, No Direct Upgrade",
+  "preconditions": [
+    "parent policy enforces mediated route",
+    "direct disclosure disallowed"
+  ],
+  "messages": [
+    { "type": "HandshakeInit", "role": "requester" },
+    { "type": "HandshakeChallenge", "role": "mediator" },
+    { "type": "HandshakeProof", "role": "requester" },
+    { "type": "HandshakeAccept", "role": "mediator", "body": { "route_mode": "parent_mediated", "disclosure_level": "mediator_visible" } },
+    { "type": "RouteUpgradeProbe", "role": "requester", "negative": true },
+    { "type": "RouteUpgradeReject", "role": "mediator", "body": { "decision_code": "UpgradeRejected" } }
+  ],
+  "expected_state_trace": [
+    "MediatedHandshake",
+    "RelayedSession",
+    "Completed"
+  ],
+  "expected_outcome": {
+    "success": true,
+    "deny_code": null,
+    "upgrade_attempt_code": "UpgradeRejected"
+  },
+  "assertions": [
+    { "id": "A1", "kind": "state", "check": "contains_state", "value": "RelayedSession" },
+    { "id": "A2", "kind": "security", "check": "direct_upgrade_rejected", "value": true },
+    { "id": "A3", "kind": "field", "check": "handshake_accept_route_mode", "value": "parent_mediated" }
+  ]
+}

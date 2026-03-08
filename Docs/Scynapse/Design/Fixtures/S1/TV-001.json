@@ -1,0 +1,32 @@
+{
+  "id": "TV-001",
+  "title": "Cold Resolve Miss, Full Walk, Success",
+  "preconditions": [
+    "requester cache miss",
+    "no direct authority hint",
+    "path exists under reachable namespace"
+  ],
+  "messages": [
+    { "type": "ResolveRequest", "role": "requester", "body": { "operation_class": "meta", "expr_raw": ".Adult.Games.RedX" } },
+    { "type": "ResolveReferral", "role": "mediator" },
+    { "type": "ResolveResponse", "role": "authority" }
+  ],
+  "expected_state_trace": [
+    "ResolveIntent",
+    "DiscoverPath",
+    "PolicyEvaluate",
+    "DisclosurePlan",
+    "MediatedHandshake",
+    "RelayedSession",
+    "Completed"
+  ],
+  "expected_outcome": {
+    "success": true,
+    "deny_code": null
+  },
+  "assertions": [
+    { "id": "A1", "kind": "state", "check": "final_state_equals", "value": "Completed" },
+    { "id": "A2", "kind": "error", "check": "deny_code_absent", "value": true },
+    { "id": "A3", "kind": "field", "check": "required_fields_present", "value": ["msg_type", "msg_id", "trace_id", "ttl_ms"] }
+  ]
+}

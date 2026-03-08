@@ -1,0 +1,27 @@
+{
+  "id": "TV-012",
+  "title": "Ambiguous Resolution Fail-Closed",
+  "preconditions": [
+    "multiple candidate bindings",
+    "no selector hints"
+  ],
+  "messages": [
+    { "type": "ResolveRequest", "role": "requester", "body": { "expr_raw": ".Adult.Games.RedX", "operation_class": "meta" } },
+    { "type": "ResolveDeny", "role": "authority", "body": { "deny_code": "AmbiguousResolution" } }
+  ],
+  "expected_state_trace": [
+    "ResolveIntent",
+    "DiscoverPath",
+    "Deny"
+  ],
+  "expected_outcome": {
+    "success": false,
+    "deny_code": "AmbiguousResolution",
+    "retryable": true
+  },
+  "assertions": [
+    { "id": "A1", "kind": "error", "check": "deny_code_equals", "value": "AmbiguousResolution" },
+    { "id": "A2", "kind": "error", "check": "retryable_equals", "value": true },
+    { "id": "A3", "kind": "error", "check": "remediation_contains", "value": "selector" }
+  ]
+}

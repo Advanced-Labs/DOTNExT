@@ -1,0 +1,30 @@
+{
+  "id": "TV-013",
+  "title": "Ambiguous Resolution with Selector",
+  "preconditions": [
+    "multiple candidate bindings",
+    "selector hints provided"
+  ],
+  "messages": [
+    { "type": "ResolveRequest", "role": "requester", "body": { "expr_raw": ".Adult.Games.RedX", "operation_class": "meta", "selector_hints": ["tenant=RedX"] } },
+    { "type": "ResolveResponse", "role": "authority", "body": { "decision_code": "Resolved" } }
+  ],
+  "expected_state_trace": [
+    "ResolveIntent",
+    "DiscoverPath",
+    "PolicyEvaluate",
+    "DisclosurePlan",
+    "MediatedHandshake",
+    "RelayedSession",
+    "Completed"
+  ],
+  "expected_outcome": {
+    "success": true,
+    "deny_code": null
+  },
+  "assertions": [
+    { "id": "A1", "kind": "state", "check": "final_state_equals", "value": "Completed" },
+    { "id": "A2", "kind": "error", "check": "deny_code_absent", "value": true },
+    { "id": "A3", "kind": "field", "check": "selector_hints_present", "value": true }
+  ]
+}
