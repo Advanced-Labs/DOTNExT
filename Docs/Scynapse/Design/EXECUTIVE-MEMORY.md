@@ -31,17 +31,19 @@ Current active path:
 10. implementation branch created and pushed: `codex/s1-prototype`
 11. S1 prototype harness scaffolded under `src/Scynapse/playground/FabricS1Prototype`
 12. first S1 harness run executed against `TV-001/002/003/012/013` with 5/5 pass
+13. S1 wire-lock decisions `D1`, `D2`, `D4`, `D6` locked and propagated to protocol/field/decision docs
+14. S1 harness upgraded to derive observed state traces from message flow and compare against expected traces
 
 ### Doing
 
-1. harden S1 prototype from fixture-trace validation toward message-driven state execution
-2. prepare S1 wire-lock closure inputs (`D1`, `D2`, `D4`, `D6`)
+1. add negative-order and missing-field vectors for stronger L1-L4 conformance coverage
+2. keep prototype and design docs synchronized as W4/W5 hardening starts
 
 ### Next
 
-1. lock S1-priority wire decisions: `D1`, `D2`, `D4`, `D6`
-2. expand W4/W5 implementation to map actual message flow transitions and relation path behavior
-3. add negative-order and missing-field vectors for stronger L1-L4 coverage
+1. expand W4/W5 implementation to map actual message flow transitions and relation path behavior
+2. add negative-order and missing-field vectors for stronger L1-L4 coverage
+3. update wire examples to canonicalized locked S1 profile
 
 ---
 
@@ -59,7 +61,7 @@ Current active path:
 
 ## 4. Open Decision Register (Current)
 
-S1 must-lock:
+S1 locked:
 
 1. `D1` enum encoding strategy
 2. `D2` timestamp wire representation
@@ -70,7 +72,8 @@ S2+ deferrable:
 
 1. `D3` typed identifier strictness
 2. `D5` normalization versioning details
-3. `D8` relation token serialization boundary optimization
+3. `D7` deny envelope required-field policy
+4. `D8` relation token serialization boundary optimization
 
 Authority file:
 

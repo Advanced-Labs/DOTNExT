@@ -77,13 +77,13 @@ Yes. We are still on the same track:
 
 1. start first prototype execution for S1 flow
 2. run first red/green conformance cycle on TV-002 then TV-001
-3. resolve S1-priority wire-lock decisions (D1/D2/D4/D6)
-4. expand fixture set to S2 when S1 gates stabilize
+3. extend W4/W5 flow enforcement toward message-driven transition checks
+4. expand negative fixtures for L1-L4 coverage and then extend fixture set to S2
 
 ---
 
 ## 6. Done/Doing/Next Snapshot
 
-1. `Done`: M0-A contract baseline and M0-B skeleton + compatibility profiles + field matrix + error mapping + state transitions + protocol test vectors + conformance harness checklist + wire examples + cross-doc consistency report + implementation-slice plan + S1 task board + S1 fixture pack + wire-lock open decisions list + continuity layer (`METHODOLOGY`, `EXECUTIVE-MEMORY`, `SESSION-LOG`) + pre-compaction continuity protocol + `codex/s1-prototype` branch creation + S1 prototype harness scaffold (`src/Scynapse/playground/FabricS1Prototype`) + first fixture run pass (5/5).
+1. `Done`: M0-A contract baseline and M0-B skeleton + compatibility profiles + field matrix + error mapping + state transitions + protocol test vectors + conformance harness checklist + wire examples + cross-doc consistency report + implementation-slice plan + S1 task board + S1 fixture pack + wire-lock decisions list + continuity layer (`METHODOLOGY`, `EXECUTIVE-MEMORY`, `SESSION-LOG`) + pre-compaction continuity protocol + `codex/s1-prototype` branch creation + S1 prototype harness scaffold (`src/Scynapse/playground/FabricS1Prototype`) + first fixture run pass (5/5) + S1 wire-lock decisions (`D1`, `D2`, `D4`, `D6`) locked and propagated.
 2. `Doing`: S1 hardening pass from fixture-trace checks toward message-driven transition execution.
-3. `Next`: lock S1 wire decisions (`D1`, `D2`, `D4`, `D6`) and extend W4/W5 flow enforcement plus additional negative vectors.
+3. `Next`: extend W4/W5 flow enforcement plus additional negative vectors, then refresh wire examples to locked S1 profile.

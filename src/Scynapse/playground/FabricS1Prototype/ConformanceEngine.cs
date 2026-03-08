@@ -82,7 +82,8 @@ internal sealed class ConformanceEngine
 
         ValidateEnvelopeAndSchema(fixture, envelopeMessages, errors);
         ValidateMessageFieldRules(fixture, errors);
-        ValidateStateTrace(fixture, errors);
+        var observedStateTrace = BuildObservedStateTrace(fixture, errors);
+        ValidateStateTrace(fixture, observedStateTrace, errors);
 
         var observedDenyCode = GetObservedDenyCode(fixture);
         bool? observedRetryable = null;
@@ -100,14 +101,14 @@ internal sealed class ConformanceEngine
         }
 
         ValidateExpectedOutcome(fixture, observedDenyCode, observedRetryable, errors);
-        ValidateAssertions(fixture, envelopeMessages, observedDenyCode, observedRetryable, errors);
+        ValidateAssertions(fixture, envelopeMessages, observedStateTrace, observedDenyCode, observedRetryable, errors);
 
         return new VectorResult
         {
             Id = fixture.Id,
             Passed = errors.Count == 0,
             Errors = errors,
-            ObservedStateTrace = fixture.ExpectedStateTrace.AsReadOnly(),
+            ObservedStateTrace = observedStateTrace.AsReadOnly(),
             ObservedDenyCode = observedDenyCode,
             ObservedRetryable = observedRetryable
         };
@@ -213,7 +214,88 @@ internal sealed class ConformanceEngine
         }
     }
 
-    private static void ValidateStateTrace(FixtureCase fixture, List<string> errors)
+    private static List<string> BuildObservedStateTrace(FixtureCase fixture, List<string> errors)
+    {
+        var observed = new List<string>();
+        if (fixture.Messages.Count == 0)
+        {
+            return observed;
+        }
+
+        var firstType = fixture.Messages[0].Type;
+        if (firstType.StartsWith("Resolve", StringComparison.Ordinal))
+        {
+            AppendState(observed, "ResolveIntent");
+            AppendState(observed, "DiscoverPath");
+        }
+        else if (firstType.StartsWith("Handshake", StringComparison.Ordinal))
+        {
+            AppendState(observed, "MediatedHandshake");
+        }
+
+        foreach (var message in fixture.Messages)
+        {
+            switch (message.Type)
+            {
+                case "ResolveReferral":
+                    AppendState(observed, "PolicyEvaluate");
+                    break;
+                case "ResolveResponse":
+                    AppendState(observed, "PolicyEvaluate");
+                    AppendState(observed, "DisclosurePlan");
+                    AppendState(observed, "MediatedHandshake");
+                    AppendState(observed, "RelayedSession");
+                    AppendState(observed, "Completed");
+                    break;
+                case "ResolveDeny":
+                case "HandshakeDeny":
+                    AppendState(observed, "Deny");
+                    break;
+                case "HandshakeInit":
+                case "HandshakeChallenge":
+                case "HandshakeProof":
+                    AppendState(observed, "MediatedHandshake");
+                    break;
+                case "HandshakeAccept":
+                    AppendState(observed, "RelayedSession");
+                    break;
+                case "RouteUpgradeProbe":
+                    if (!message.Negative)
+                    {
+                        AppendState(observed, "DirectUpgradeProbe");
+                    }
+                    break;
+                case "RouteUpgradeAccept":
+                    AppendState(observed, "DirectSession");
+                    break;
+                case "RouteUpgradeReject":
+                    AppendState(observed, "RelayedSession");
+                    break;
+            }
+        }
+
+        if (observed.Count > 0 && !IsTerminal(observed[^1]))
+        {
+            if (string.Equals(observed[^1], "RelayedSession", StringComparison.Ordinal) ||
+                string.Equals(observed[^1], "DirectSession", StringComparison.Ordinal))
+            {
+                AppendState(observed, "Completed");
+            }
+            else if (!fixture.ExpectedOutcome.Success)
+            {
+                AppendState(observed, "Deny");
+            }
+        }
+
+        if (observed.Count == 0)
+        {
+            errors.Add($"[L3] {fixture.Id} could not derive observed state trace from message flow.");
+        }
+
+        return observed;
+    }
+
+    private static void ValidateStateTrace(FixtureCase fixture, IReadOnlyList<string> observedStateTrace, List<string> errors)
     {
         if (fixture.ExpectedStateTrace.Count == 0)
         {
@@ -221,17 +303,30 @@ internal sealed class ConformanceEngine
             return;
         }
 
-        for (var i = 1; i < fixture.ExpectedStateTrace.Count; i++)
+        for (var i = 1; i < observedStateTrace.Count; i++)
         {
-            var current = fixture.ExpectedStateTrace[i - 1];
-            var next = fixture.ExpectedStateTrace[i];
+            var current = observedStateTrace[i - 1];
+            var next = observedStateTrace[i];
             if (!AllowedStateTransitions.TryGetValue(current, out var allowedNext) || !allowedNext.Contains(next))
             {
                 errors.Add($"[L3] {fixture.Id} invalid transition '{current}' -> '{next}'.");
             }
         }
 
-        var finalState = fixture.ExpectedStateTrace[^1];
+        var expectedTrace = string.Join(" -> ", fixture.ExpectedStateTrace);
+        var observedTrace = string.Join(" -> ", observedStateTrace);
+        if (!TraceEquals(fixture.ExpectedStateTrace, observedStateTrace))
+        {
+            errors.Add($"[L3] {fixture.Id} expected trace '{expectedTrace}' but observed '{observedTrace}'.");
+        }
+
+        if (observedStateTrace.Count == 0)
+        {
+            errors.Add($"[L3] {fixture.Id} observed state trace is empty.");
+            return;
+        }
+
+        var finalState = observedStateTrace[^1];
         if (fixture.ExpectedOutcome.Success && !string.Equals(finalState, "Completed", StringComparison.Ordinal))
         {
             errors.Add($"[L3] {fixture.Id} expected success but final state is '{finalState}'.");
@@ -274,6 +369,7 @@ internal sealed class ConformanceEngine
     private static void ValidateAssertions(
         FixtureCase fixture,
         IReadOnlyList<EnvelopeMessage> envelopeMessages,
+        IReadOnlyList<string> observedStateTrace,
         string? observedDenyCode,
         bool? observedRetryable,
         List<string> errors)
@@ -285,7 +381,7 @@ internal sealed class ConformanceEngine
                 case "final_state_equals":
                 {
                     var expected = assertion.Value?.GetStringOrNull();
-                    var actual = fixture.ExpectedStateTrace.Count == 0 ? null : fixture.ExpectedStateTrace[^1];
+                    var actual = observedStateTrace.Count == 0 ? null : observedStateTrace[^1];
                     if (!string.Equals(expected, actual, StringComparison.Ordinal))
                     {
                         errors.Add($"[A:{assertion.Id}] expected final state '{expected}', observed '{actual ?? "null"}'.");
@@ -296,7 +392,7 @@ internal sealed class ConformanceEngine
                 case "contains_state":
                 {
                     var expected = assertion.Value?.GetStringOrNull();
-                    if (expected is null || !fixture.ExpectedStateTrace.Contains(expected, StringComparer.Ordinal))
+                    if (expected is null || !observedStateTrace.Contains(expected, StringComparer.Ordinal))
                     {
                         errors.Add($"[A:{assertion.Id}] expected state trace to contain '{expected ?? "null"}'.");
                     }
@@ -428,6 +524,38 @@ internal sealed class ConformanceEngine
         }
     }
 
+    private static bool TraceEquals(IReadOnlyList<string> expected, IReadOnlyList<string> observed)
+    {
+        if (expected.Count != observed.Count)
+        {
+            return false;
+        }
+
+        for (var i = 0; i < expected.Count; i++)
+        {
+            if (!string.Equals(expected[i], observed[i], StringComparison.Ordinal))
+            {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    private static void AppendState(List<string> states, string state)
+    {
+        if (states.Count == 0 || !string.Equals(states[^1], state, StringComparison.Ordinal))
+        {
+            states.Add(state);
+        }
+    }
+
+    private static bool IsTerminal(string state)
+    {
+        return string.Equals(state, "Completed", StringComparison.Ordinal)
+            || string.Equals(state, "Deny", StringComparison.Ordinal);
+    }
+
     private static string? GetObservedDenyCode(FixtureCase fixture)
     {
         foreach (var message in fixture.Messages)
@@ -499,4 +627,3 @@ internal static class JsonElementExtensions
         return values.ToArray();
     }
 }
-

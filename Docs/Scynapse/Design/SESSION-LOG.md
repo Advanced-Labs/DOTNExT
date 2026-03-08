@@ -85,3 +85,33 @@ Use this structure for each new entry:
    - lock S1 wire decisions (`D1`, `D2`, `D4`, `D6`) and extend W4/W5 behavior checks.
 5. Risks/blockers:
    - fixture set currently validates expected traces; stronger negative and order-sensitive cases still needed.
+
+### 2026-03-08 (S1 Wire-Lock Decision Pass)
+
+1. Scope:
+   - lock S1-priority wire decisions and propagate across active protocol artifacts.
+2. Key outputs:
+   - locked `D1`, `D2`, `D4`, `D6` in `M0-B-Wire-Lock-Open-Decisions.md` (status register + lock details).
+   - synchronized lock profile in `M0-B-Protocol-Skeleton.md` (envelope/relation sample + locked defaults).
+   - synchronized lock profile and dictionary `v1` key assignments in `M0-B-Message-Field-Matrix.md`.
+3. Current doing:
+   - moving to W4/W5 implementation hardening and stronger negative vectors.
+4. Next:
+   - update wire examples to canonical locked S1 profile and extend harness checks.
+5. Risks/blockers:
+   - wire examples still need full lock-profile refresh to avoid mixed text/code representations.
+
+### 2026-03-08 (Message-Driven State Trace Baseline)
+
+1. Scope:
+   - move S1 harness from expected-trace-only checks toward observed message-flow state execution.
+2. Key outputs:
+   - updated `FabricS1Prototype` conformance engine to derive observed state trace from message sequence.
+   - added observed-vs-expected trace comparison and transition validation over observed flow.
+   - re-ran S1 fixture pack; result remained 5 pass, 0 fail.
+3. Current doing:
+   - preparing next negative vectors and W4/W5 behavior hardening.
+4. Next:
+   - add invalid-order/missing-field fixtures and wire-example lock profile refresh.
+5. Risks/blockers:
+   - message-to-state mapping is still S1 heuristic and should be tightened as protocol execution logic deepens.
