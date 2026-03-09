@@ -102,4 +102,5 @@ Deliverables:
 
 1. `M1-S1` execution complete (`M1-S1-Closure.md`).
 2. `M1-S2` runtime-bridge execution complete (`M1-S2-Closure.md`).
-3. open `M1-S3` security-adapter bridge task board from this closure baseline.
+3. `M1-S3` security-adapter bridge execution complete (`M1-S3-Closure.md`).
+4. open next bounded M1 slice task board from this closure baseline.

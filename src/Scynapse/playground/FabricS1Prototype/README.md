@@ -69,6 +69,12 @@ Run M1-S2 fixture pack:
 dotnet run --project playground/FabricS1Prototype/FabricS1Prototype.csproj -- D:\Dev\dotnext\Docs\Scynapse\Design\Fixtures\M1-S2
 ```
 
+Run M1-S3 fixture pack:
+
+```powershell
+dotnet run --project playground/FabricS1Prototype/FabricS1Prototype.csproj -- D:\Dev\dotnext\Docs\Scynapse\Design\Fixtures\M1-S3
+```
+
 Expected-fail fixture semantics:
 
 1. `expected_error_ids` is the preferred exact failure oracle.
@@ -114,3 +120,13 @@ Slice profile semantics:
    - bridge transit assertions available:
      - `bridge_transit_contains`
      - `bridge_transit_count_equals`
+8. `slice_profile: "M1-S3"` enables security-adapter bridge validation:
+   - `HandshakeProof` requires `verification_mode` (`mock|strict`)
+   - `mock` mode uses fixture flags:
+     - `mock_signature_valid`
+     - `mock_replay_detected`
+   - `strict` mode uses Scynapse.Security primitives:
+     - `proof_ref`
+     - optional `replay_probe`
+     - optional `force_bad_signature`
+   - deterministic deny mapping remains active for failure paths

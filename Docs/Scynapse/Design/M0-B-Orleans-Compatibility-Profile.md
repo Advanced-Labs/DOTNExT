@@ -187,7 +187,19 @@ This profile maps M0-B protocol fields to their Orleans lineage, with explicit c
 
 ---
 
-## 16. Review Checklist
+## 16. M1-S3 Security-Adapter Behavior Classification
+
+| Hardened Behavior | Tag | Notes |
+|---|---|---|
+| `HandshakeProof` security adapter mode (`mock|strict`) in `M1-S3` profile | `N` | Scynapse-native conformance harness extension for verification realism |
+| Strict-mode proof verification via `Scynapse.Security.Verification.AssertionVerifier` | `A` | adapts existing security primitives into bounded harness validation paths |
+| Strict-mode nonce replay deterministic deny mapping | `A` | adapts nonce replay semantics from verification layer into protocol conformance IDs |
+| Mock-mode deterministic security-failure simulation with stable IDs | `N` | Scynapse-native fixture control for bounded protocol validation |
+| Security validation requiring silo/client/gateway trust shortcuts | `D` | explicitly blocked; remains node-unified proof semantics |
+
+---
+
+## 17. Review Checklist
 
 1. Are any fields tagged `A` but still carrying hidden silo/cluster assumptions?
 2. Are all `N` fields tied to M0-A invariants?

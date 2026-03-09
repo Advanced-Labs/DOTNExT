@@ -585,6 +585,87 @@ Expected outcome:
 
 1. expected fail by exact error ID (`E3063_M1S2_ROUTE_DATA_OUTSIDE_SESSION`)
 
+### TV-801 M1-S3 Strict Proof Verification Success
+
+Preconditions:
+
+1. security adapter strict mode is active
+2. proof chain and nonce are valid
+
+Sequence:
+
+1. mediated handshake flow reaches `HandshakeProof`
+2. strict verification is executed
+3. `HandshakeAccept` establishes relayed session
+
+Expected outcome:
+
+1. success
+2. no deny code
+
+### TV-802 M1-S3 Strict Replay Detection
+
+Preconditions:
+
+1. strict mode replay probe is requested
+
+Sequence:
+
+1. mediated handshake flow reaches `HandshakeProof`
+2. strict verification executes replay path
+
+Expected outcome:
+
+1. expected fail by exact error ID (`E3072_M1S3_NONCE_REPLAY_DETECTED`)
+
+### TV-803 M1-S3 Strict Invalid Signature Detection
+
+Preconditions:
+
+1. strict mode proof payload is intentionally corrupted
+
+Sequence:
+
+1. mediated handshake flow reaches `HandshakeProof`
+2. strict verification executes invalid-signature path
+
+Expected outcome:
+
+1. expected fail by exact error ID (`E3071_M1S3_PROOF_INVALID_SIGNATURE`)
+
+### TV-804 M1-S3 Mock Verification Success
+
+Preconditions:
+
+1. mock mode is selected
+2. mock signature/replay flags are positive
+
+Sequence:
+
+1. mediated handshake flow reaches `HandshakeProof`
+2. mock verification passes
+3. `HandshakeAccept` establishes relayed session
+
+Expected outcome:
+
+1. success
+2. no deny code
+
+### TV-805 M1-S3 Mock Replay Detection
+
+Preconditions:
+
+1. mock mode replay flag is asserted
+
+Sequence:
+
+1. mediated handshake flow reaches `HandshakeProof`
+2. mock verification forces replay deny path
+
+Expected outcome:
+
+1. expected fail by exact error ID (`E3072_M1S3_NONCE_REPLAY_DETECTED`)
+
 ---
 
 ## 4. Minimal Coverage Map
@@ -596,6 +677,7 @@ Expected outcome:
 5. Policy inheritance: TV-011
 6. M1 wire closure: TV-601, TV-602, TV-603, TV-604, TV-605, TV-606, TV-607, TV-608, TV-609, TV-610
 7. M1 runtime bridge: TV-701, TV-702, TV-703, TV-704, TV-705, TV-706
+8. M1 security adapter bridge: TV-801, TV-802, TV-803, TV-804, TV-805
 
 ### 4.1 S1 Transition-Edge Negative Extension Set
 
@@ -654,6 +736,12 @@ Expected outcome:
    - TV-704 (direct data attempt while mediated; expected fail by exact error ID)
    - TV-705 (mediated data attempt after direct upgrade; expected fail by exact error ID)
    - TV-706 (route data before session; expected fail by exact error ID)
+8. M1-S3 owned vectors:
+   - TV-801 (strict proof verification success)
+   - TV-802 (strict nonce replay detection; expected fail by exact error ID)
+   - TV-803 (strict invalid signature detection; expected fail by exact error ID)
+   - TV-804 (mock proof verification success)
+   - TV-805 (mock replay detection; expected fail by exact error ID)
 
 ---
 
@@ -672,5 +760,6 @@ Current next step:
 
 1. M1-S1 deferred wire closure vectors executed and stabilized (`TV-601..TV-610`)
 2. M1-S2 runtime-bridge vectors executed and stabilized (`TV-701..TV-706`)
-3. preserve S1/S2/S3/S4/S5 + M1-S1 + M1-S2 baseline behavior and machine-checkable error ID stability
-4. open M1-S3 security-adapter vectors from current closure baseline
+3. M1-S3 security-adapter vectors executed and stabilized (`TV-801..TV-805`)
+4. preserve S1/S2/S3/S4/S5 + M1-S1 + M1-S2 + M1-S3 baseline behavior and machine-checkable error ID stability
+5. open next bounded M1 slice from current closure baseline

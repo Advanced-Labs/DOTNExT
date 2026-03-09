@@ -18,7 +18,8 @@ M1 focus:
 
 1. close deferred wire decisions with deterministic conformance (`M1-S1`)
 2. bridge conformance flows toward runtime-adjacent execution (`M1-S2`)
-3. preserve M0 semantic invariants while increasing execution realism
+3. connect bounded security-adapter verification realism (`M1-S3`)
+4. preserve M0 semantic invariants while increasing execution realism
 
 Guardrails:
 
@@ -51,17 +52,7 @@ Status:
    - S5 3/3
    - M1-S1 10/10
 
-### 3.2 M1-S2 (Next)
-
-Target:
-
-1. runtime bridge harness slice (message-pump node simulation)
-
-Entry condition:
-
-1. hold M1-S1 closure baseline unchanged while M1-S2 starts.
-
-### 3.3 M1-S2 (Complete)
+### 3.2 M1-S2 (Complete)
 
 Artifacts:
 
@@ -84,18 +75,43 @@ Status:
    - M1-S1 10/10
    - M1-S2 6/6
 
+### 3.3 M1-S3 (Complete)
+
+Artifacts:
+
+1. `Docs/Scynapse/Design/M1-S3-Task-Board.md`
+2. `Docs/Scynapse/Design/M1-S3-Closure.md`
+3. `Docs/Scynapse/Design/Fixtures/M1-S3/README.md`
+4. `Docs/Scynapse/Design/Fixtures/M1-S3/TV-801..TV-805`
+
+Status:
+
+1. security-adapter profile implemented (`slice_profile: "M1-S3"`)
+2. strict mode integrated with `Scynapse.Security.Verification` primitives
+3. mock mode deterministic fail/success controls added
+4. deterministic replay/signature deny mapping added
+5. baseline rerun stable:
+   - S1 14/14
+   - S2 8/8
+   - S3 4/4
+   - S4 4/4
+   - S5 3/3
+   - M1-S1 10/10
+   - M1-S2 6/6
+   - M1-S3 5/5
+
 ---
 
 ## 4. Immediate Next Work (Ordered)
 
-1. define and open `M1-S3-Task-Board.md`
-2. implement bounded security-adapter bridge slice without altering locked wire decisions
-3. keep S1..S5 + M1-S1 + M1-S2 regression suite green on each implementation pass
+1. define and open the next bounded M1 slice task board
+2. preserve locked wire decisions and M1-S3 deterministic error-ID behavior
+3. keep S1..S5 + M1-S1 + M1-S2 + M1-S3 regression suite green on each implementation pass
 
 ---
 
 ## 5. Done/Doing/Next Snapshot
 
-1. `Done`: M0 exit review, M1 entry plan, M1-S1 closure, M1-S2 closure.
-2. `Doing`: continuity synchronization and branch checkpoint for M1-S2 closure.
-3. `Next`: start M1-S3 security-adapter bridge slice.
+1. `Done`: M0 exit review, M1 entry plan, M1-S1 closure, M1-S2 closure, M1-S3 closure.
+2. `Doing`: continuity synchronization and branch checkpoint for M1-S3 closure.
+3. `Next`: define next bounded M1 slice.

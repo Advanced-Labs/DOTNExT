@@ -167,6 +167,12 @@ Handshake keys (S1-assigned):
 | `83` | `relation_token_ref` |
 | `84` | `relation_token_cid` |
 | `85` | `relation_token_blob` |
+| `86` | `verification_mode` |
+| `87` | `proof_ref` |
+| `88` | `replay_probe` |
+| `89` | `force_bad_signature` |
+| `90` | `mock_signature_valid` |
+| `91` | `mock_replay_detected` |
 
 Route/upgrade keys (S1-assigned):
 
@@ -285,6 +291,12 @@ Relation token CID convention:
 | `bearer_proof` | C | N | Required when capability bearer proof is requested |
 | `capability_refs` | C | N | Required when gated ops requested |
 | `attestation_refs` | O | N | Supplemental trust refs |
+| `verification_mode` | C | N | M1-S3 profile: required (`mock|strict`) |
+| `proof_ref` | C | N | M1-S3 strict mode: required stable proof reference |
+| `replay_probe` | O | N | M1-S3 strict mode: force deterministic nonce replay path |
+| `force_bad_signature` | O | N | M1-S3 strict mode: force deterministic invalid-signature path |
+| `mock_signature_valid` | O | N | M1-S3 mock mode: signature verdict flag (default `true`) |
+| `mock_replay_detected` | O | N | M1-S3 mock mode: replay verdict flag (default `false`) |
 
 ### 4.4 HandshakeAccept
 
@@ -348,13 +360,13 @@ Relation token CID convention:
 | `route_mode` | R | N | Current active route |
 | `close_reason` | C | A | Required for `RouteClose` |
 
-### 5.5 RouteData (M1-S2 Runtime Bridge)
+### 5.5 RouteData (M1-S2/M1-S3 Runtime Bridge)
 
 | Field | Req | Tag | Rule |
 |---|---|---|---|
 | `relation_id` | C | N | Recommended when data flow is relation-bound |
 | `route_mode` | R | N | Declared active route mode for this data transfer |
-| `transport_path` | R | N | `mediated|direct`; must match active session mode in M1-S2 |
+| `transport_path` | R | N | `mediated|direct`; must match active session mode in M1-S2/M1-S3 |
 | `payload_class` | O | N | lightweight payload marker (`invoke|event|meta`) |
 
 ---
@@ -446,6 +458,7 @@ Relation token CID convention:
 7. Policy-causal deny codes require `policy_ref`.
 8. In M1-S1 strict profile, id/ref fields use typed identifiers (`<prefix>:<value>`).
 9. In M1-S1 strict profile, `HandshakeAccept` relation token boundary fields are mandatory and mode-consistent.
+10. In M1-S3 profile, `HandshakeProof.verification_mode` governs strict/mock security adapter behavior and deterministic deny mapping.
 
 ---
 
@@ -459,4 +472,4 @@ Completed:
 Current next step:
 
 1. keep this matrix synchronized with wire examples and conformance harness fixtures
-2. preserve M1-S1 wire-closure constraints while extending runtime bridge slices
+2. preserve M1-S1 wire-closure constraints while extending runtime bridge and security-adapter slices

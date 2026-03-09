@@ -1,0 +1,33 @@
+{
+  "id": "TV-803",
+  "title": "M1-S3 Strict Invalid Signature Detection",
+  "slice_profile": "M1-S3",
+  "expect_conformance": "fail",
+  "expected_error_ids": [
+    "E3071_M1S3_PROOF_INVALID_SIGNATURE"
+  ],
+  "expected_error_contains": [
+    "bad signature"
+  ],
+  "preconditions": [
+    "strict mode proof is intentionally corrupted"
+  ],
+  "messages": [
+    { "type": "HandshakeInit", "role": "requester" },
+    { "type": "HandshakeChallenge", "role": "mediator" },
+    { "type": "HandshakeProof", "role": "requester", "body": { "verification_mode": "strict", "proof_ref": "nid:m1s3.strict.bad-sig", "force_bad_signature": true } }
+  ],
+  "expected_state_trace": [
+    "MediatedHandshake",
+    "Deny"
+  ],
+  "expected_outcome": {
+    "success": false,
+    "deny_code": "TrustInsufficient",
+    "retryable": false
+  },
+  "assertions": [
+    { "id": "A1", "kind": "state", "check": "final_state_equals", "value": "Deny" },
+    { "id": "A2", "kind": "error", "check": "deny_code_equals", "value": "TrustInsufficient" }
+  ]
+}

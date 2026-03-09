@@ -57,3 +57,4 @@ Deferred:
 3. first M1 execution board established: `M1-S1-Task-Board.md`
 4. M1-S1 deferred wire closure completed: `M1-S1-Closure.md`
 5. M1-S2 runtime bridge closure completed: `M1-S2-Closure.md`
+6. M1-S3 security-adapter bridge closure completed: `M1-S3-Closure.md`

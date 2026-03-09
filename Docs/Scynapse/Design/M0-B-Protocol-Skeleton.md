@@ -55,6 +55,8 @@ Reference:
 - `Docs/Scynapse/Design/M1-Status-Checkpoint.md`
 - `Docs/Scynapse/Design/M1-S2-Task-Board.md`
 - `Docs/Scynapse/Design/M1-S2-Closure.md`
+- `Docs/Scynapse/Design/M1-S3-Task-Board.md`
+- `Docs/Scynapse/Design/M1-S3-Closure.md`
 - `Docs/Scynapse/Design/M0-B-Wire-Lock-Open-Decisions.md`
 - `Docs/Scynapse/Design/M0-Status-Checkpoint.md`
 
@@ -326,3 +328,7 @@ Failure responses should include:
    - `HandshakeAccept` must declare `token_transport` (`reference|inline`).
    - `relation_token_ref` + `relation_token_cid` are required in both modes.
    - `relation_token_blob` is required only for `inline` and forbidden for `reference`.
+14. M1-S3 security-adapter handshake proof profile:
+   - `HandshakeProof` in `M1-S3` requires `verification_mode` (`mock|strict`).
+   - strict mode integrates bounded verification with nonce replay checks.
+   - strict/mock failure paths map to deterministic deny IDs.

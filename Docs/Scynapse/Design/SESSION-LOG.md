@@ -372,3 +372,41 @@ Use this structure for each new entry:
    - push M1-S2 closure baseline and open M1-S3 planning/implementation slice.
 6. Risks/blockers:
    - none immediate; preserve locked wire decisions and error-ID stability while extending runtime realism.
+
+### 2026-03-08 (M1-S3 Security-Adapter Bridge Slice Implementation)
+
+1. Scope:
+   - execute M1-S3 task board on top of M1-S2 baseline and add bounded security-adapter verification behavior.
+2. Key outputs:
+   - created `codex/m1-s3-security-adapter` from M1-S2 baseline.
+   - upgraded harness project to `net9.0` and linked `Scynapse.Security` for adapter integration.
+   - added `slice_profile: "M1-S3"` handling in conformance engine.
+   - added `HandshakeProof` verification mode contract (`mock|strict`) with field validation.
+   - added strict adapter session using:
+     - `AssertionVerifier`
+     - `InMemoryNonceStore`
+     - deterministic synthetic assertions for proof/replay checks
+   - added deterministic M1-S3 runtime IDs:
+     - `E3070_M1S3_VERIFICATION_MODE_INVALID`
+     - `E3071_M1S3_PROOF_INVALID_SIGNATURE`
+     - `E3072_M1S3_NONCE_REPLAY_DETECTED`
+     - `E3073_M1S3_STRICT_VERIFICATION_FAILED`
+   - added isolated fixture pack `Fixtures/M1-S3`: `TV-801..TV-805`.
+   - added closure/continuity artifacts:
+     - `M1-S3-Task-Board.md`
+     - `M1-S3-Closure.md`
+3. Validation runs:
+   - S1: 14/14
+   - S2: 8/8
+   - S3: 4/4
+   - S4: 4/4
+   - S5: 3/3
+   - M1-S1: 10/10
+   - M1-S2: 6/6
+   - M1-S3: 5/5
+4. Current doing:
+   - final continuity synchronization and scoped commit/push preparation on `codex/m1-s3-security-adapter`.
+5. Next:
+   - push M1-S3 closure baseline and define next bounded M1 slice.
+6. Risks/blockers:
+   - none immediate; preserve locked wire decisions and keep strict/mock error-ID surface stable.

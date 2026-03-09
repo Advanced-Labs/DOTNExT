@@ -1,0 +1,27 @@
+{
+  "id": "TV-804",
+  "title": "M1-S3 Mock Verification Success",
+  "slice_profile": "M1-S3",
+  "preconditions": [
+    "mock mode configured with positive verification flags"
+  ],
+  "messages": [
+    { "type": "HandshakeInit", "role": "requester" },
+    { "type": "HandshakeChallenge", "role": "mediator" },
+    { "type": "HandshakeProof", "role": "requester", "body": { "verification_mode": "mock", "mock_signature_valid": true, "mock_replay_detected": false } },
+    { "type": "HandshakeAccept", "role": "mediator", "body": { "route_mode": "parent_mediated", "disclosure_level": "mediator_visible" } }
+  ],
+  "expected_state_trace": [
+    "MediatedHandshake",
+    "RelayedSession",
+    "Completed"
+  ],
+  "expected_outcome": {
+    "success": true,
+    "deny_code": null
+  },
+  "assertions": [
+    { "id": "A1", "kind": "error", "check": "deny_code_absent", "value": true },
+    { "id": "A2", "kind": "field", "check": "handshake_accept_route_mode", "value": "parent_mediated" }
+  ]
+}

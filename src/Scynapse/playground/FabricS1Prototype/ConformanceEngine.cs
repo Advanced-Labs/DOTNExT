@@ -12,6 +12,7 @@ internal sealed class ConformanceEngine
     private const string SliceProfileS5 = "S5";
     private const string SliceProfileM1S1 = "M1-S1";
     private const string SliceProfileM1S2 = "M1-S2";
+    private const string SliceProfileM1S3 = "M1-S3";
 
     private static readonly Regex TypedIdentifierRegex = new("^[a-z]{2,6}:[A-Za-z0-9][A-Za-z0-9._-]{2,127}$", RegexOptions.Compiled);
     private static readonly Regex RelationTokenCidRegex = new("^sha256:[0-9a-fA-F]{8,128}$", RegexOptions.Compiled);
@@ -24,7 +25,8 @@ internal sealed class ConformanceEngine
         SliceProfileS4,
         SliceProfileS5,
         SliceProfileM1S1,
-        SliceProfileM1S2
+        SliceProfileM1S2,
+        SliceProfileM1S3
     };
 
     private static readonly HashSet<string> KnownTokenTransportModes = new(StringComparer.Ordinal)
@@ -37,6 +39,12 @@ internal sealed class ConformanceEngine
     {
         "mediated",
         "direct"
+    };
+
+    private static readonly HashSet<string> KnownVerificationModes = new(StringComparer.Ordinal)
+    {
+        "mock",
+        "strict"
     };
 
     private static readonly HashSet<string> PolicyCausalDenyCodes = new(StringComparer.Ordinal)
@@ -367,6 +375,12 @@ internal sealed class ConformanceEngine
             {
                 ValidateM1S2RuntimeBridgeFields(fixture, message, errors);
             }
+
+            if (string.Equals(sliceProfile, SliceProfileM1S3, StringComparison.Ordinal))
+            {
+                ValidateM1S2RuntimeBridgeFields(fixture, message, errors);
+                ValidateM1S3SecurityAdapterFields(fixture, message, errors);
+            }
         }
     }
 
@@ -385,7 +399,14 @@ internal sealed class ConformanceEngine
     private static bool IsDirectUpgradeProfile(string sliceProfile)
     {
         return string.Equals(sliceProfile, SliceProfileS2, StringComparison.Ordinal)
-            || string.Equals(sliceProfile, SliceProfileM1S2, StringComparison.Ordinal);
+            || string.Equals(sliceProfile, SliceProfileM1S2, StringComparison.Ordinal)
+            || string.Equals(sliceProfile, SliceProfileM1S3, StringComparison.Ordinal);
+    }
+
+    private static bool IsRuntimeBridgeProfile(string sliceProfile)
+    {
+        return string.Equals(sliceProfile, SliceProfileM1S2, StringComparison.Ordinal)
+            || string.Equals(sliceProfile, SliceProfileM1S3, StringComparison.Ordinal);
     }
 
     private static void ValidateS2RouteUpgradeProbeFields(FixtureCase fixture, FixtureMessage message, List<ConformanceError> errors)
@@ -772,6 +793,63 @@ internal sealed class ConformanceEngine
         }
     }
 
+    private static void ValidateM1S3SecurityAdapterFields(FixtureCase fixture, FixtureMessage message, List<ConformanceError> errors)
+    {
+        if (!string.Equals(message.Type, "HandshakeProof", StringComparison.Ordinal))
+        {
+            return;
+        }
+
+        if (message.Body is null || message.Body.Value.ValueKind != JsonValueKind.Object)
+        {
+            AddError(errors, "L2", "E2001_MISSING_REQUIRED_BODY", $"{fixture.Id}/{message.Type} missing required body.");
+            return;
+        }
+
+        var verificationMode = GetBodyString(message, "verification_mode");
+        if (verificationMode is null)
+        {
+            AddError(errors, "L2", "E2090_M1S3_VERIFICATION_MODE_REQUIRED", $"{fixture.Id}/{message.Type} requires 'verification_mode' ('mock' or 'strict').");
+            return;
+        }
+
+        if (!KnownVerificationModes.Contains(verificationMode))
+        {
+            AddError(errors, "L2", "E2091_M1S3_VERIFICATION_MODE_INVALID", $"{fixture.Id}/{message.Type} field 'verification_mode' value '{verificationMode}' is invalid.");
+            return;
+        }
+
+        if (string.Equals(verificationMode, "strict", StringComparison.Ordinal))
+        {
+            var proofRef = GetBodyString(message, "proof_ref");
+            if (string.IsNullOrWhiteSpace(proofRef))
+            {
+                AddError(errors, "L2", "E2092_M1S3_STRICT_PROOF_REF_REQUIRED", $"{fixture.Id}/{message.Type} strict mode requires non-empty 'proof_ref'.");
+            }
+
+            ValidateOptionalBooleanBodyField(fixture, message, "replay_probe", errors, "E2093_M1S3_BOOLEAN_FLAG_INVALID");
+            ValidateOptionalBooleanBodyField(fixture, message, "force_bad_signature", errors, "E2093_M1S3_BOOLEAN_FLAG_INVALID");
+        }
+        else
+        {
+            ValidateOptionalBooleanBodyField(fixture, message, "mock_signature_valid", errors, "E2093_M1S3_BOOLEAN_FLAG_INVALID");
+            ValidateOptionalBooleanBodyField(fixture, message, "mock_replay_detected", errors, "E2093_M1S3_BOOLEAN_FLAG_INVALID");
+        }
+    }
+
+    private static void ValidateOptionalBooleanBodyField(FixtureCase fixture, FixtureMessage message, string fieldName, List<ConformanceError> errors, string errorId)
+    {
+        if (!message.Body!.Value.TryGetProperty(fieldName, out var element))
+        {
+            return;
+        }
+
+        if (element.ValueKind is not JsonValueKind.True and not JsonValueKind.False)
+        {
+            AddError(errors, "L2", errorId, $"{fixture.Id}/{message.Type} field '{fieldName}' must be a boolean.");
+        }
+    }
+
     private static void ValidateOptionalTypedIdentifierField(FixtureCase fixture, FixtureMessage message, string fieldName, List<ConformanceError> errors)
     {
         if (!message.Body!.Value.TryGetProperty(fieldName, out var element))
@@ -1050,6 +1128,14 @@ internal sealed class ConformanceEngine
                 {
                     RejectWithDeterministicDeny(fixtureId, context, errors, "E3007_INVALID_STATE_TRANSITION", "TrustInsufficient", $"{fixtureId}/{message.Type} invalid from state '{context.CurrentState}'.");
                     break;
+                }
+
+                if (string.Equals(context.SliceProfile, SliceProfileM1S3, StringComparison.Ordinal))
+                {
+                    if (!TryEvaluateM1S3HandshakeProof(fixtureId, message, context, errors))
+                    {
+                        break;
+                    }
                 }
 
                 context.HandshakeProofSeen = true;
@@ -1435,9 +1521,9 @@ internal sealed class ConformanceEngine
             }
             case "RouteData":
             {
-                if (!string.Equals(context.SliceProfile, SliceProfileM1S2, StringComparison.Ordinal))
+                if (!IsRuntimeBridgeProfile(context.SliceProfile))
                 {
-                    RejectWithDeterministicDeny(fixtureId, context, errors, "E3062_M1S2_ROUTE_DATA_OUTSIDE_PROFILE", "TrustInsufficient", $"{fixtureId}/{message.Type} is only supported in M1-S2 runtime-bridge profile.");
+                    RejectWithDeterministicDeny(fixtureId, context, errors, "E3062_M1S2_ROUTE_DATA_OUTSIDE_PROFILE", "TrustInsufficient", $"{fixtureId}/{message.Type} is only supported in M1-S2/M1-S3 runtime-bridge profiles.");
                     break;
                 }
 
@@ -1484,6 +1570,73 @@ internal sealed class ConformanceEngine
                 break;
             }
         }
+    }
+
+    private static bool TryEvaluateM1S3HandshakeProof(string fixtureId, FixtureMessage message, OperationContext context, List<ConformanceError> errors)
+    {
+        var mode = GetBodyString(message, "verification_mode");
+        if (mode is null || !KnownVerificationModes.Contains(mode))
+        {
+            RejectWithDeterministicDeny(
+                fixtureId,
+                context,
+                errors,
+                "E3070_M1S3_VERIFICATION_MODE_INVALID",
+                "TrustInsufficient",
+                $"{fixtureId}/{message.Type} requires valid verification_mode ('mock' or 'strict').");
+            return false;
+        }
+
+        if (string.Equals(mode, "mock", StringComparison.Ordinal))
+        {
+            var mockSignatureValid = GetBodyBoolean(message, "mock_signature_valid") ?? true;
+            if (!mockSignatureValid)
+            {
+                RejectWithDeterministicDeny(
+                    fixtureId,
+                    context,
+                    errors,
+                    "E3071_M1S3_PROOF_INVALID_SIGNATURE",
+                    "TrustInsufficient",
+                    $"{fixtureId}/{message.Type} mock verification flagged invalid signature.");
+                return false;
+            }
+
+            var mockReplayDetected = GetBodyBoolean(message, "mock_replay_detected") ?? false;
+            if (mockReplayDetected)
+            {
+                RejectWithDeterministicDeny(
+                    fixtureId,
+                    context,
+                    errors,
+                    "E3072_M1S3_NONCE_REPLAY_DETECTED",
+                    "TrustInsufficient",
+                    $"{fixtureId}/{message.Type} mock verification flagged nonce replay.");
+                return false;
+            }
+
+            return true;
+        }
+
+        var proofRef = GetBodyString(message, "proof_ref") ?? string.Empty;
+        var replayProbe = GetBodyBoolean(message, "replay_probe") ?? false;
+        var forceBadSignature = GetBodyBoolean(message, "force_bad_signature") ?? false;
+
+        context.SecurityAdapterSession ??= new SecurityAdapterSession();
+        var outcome = context.SecurityAdapterSession.VerifyStrictProof(proofRef, forceBadSignature, replayProbe);
+        if (outcome.IsValid)
+        {
+            return true;
+        }
+
+        RejectWithDeterministicDeny(
+            fixtureId,
+            context,
+            errors,
+            outcome.ErrorId ?? "E3073_M1S3_STRICT_VERIFICATION_FAILED",
+            "TrustInsufficient",
+            $"{fixtureId}/{message.Type} {outcome.Message ?? "strict verification failed"}");
+        return false;
     }
 
     private static bool TryEvaluateS3EndpointGateFailure(string fixtureId, OperationContext context, List<ConformanceError> errors)
@@ -2028,6 +2181,7 @@ internal sealed class OperationContext
     public string? ExpectedUpgradeRejectCode { get; set; }
     public string? ObservedDenyCode { get; set; }
     public string? ObservedUpgradeDecisionCode { get; set; }
+    public SecurityAdapterSession? SecurityAdapterSession { get; set; }
     public List<string> ObservedStateTrace { get; } = new();
     public List<string> BridgeTransitTraces { get; } = new();
 }

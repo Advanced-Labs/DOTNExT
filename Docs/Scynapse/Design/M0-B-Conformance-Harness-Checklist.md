@@ -183,6 +183,20 @@ M1-S2 extension note:
    - `bridge_transit_contains`
    - `bridge_transit_count_equals`
 
+M1-S3 extension note:
+
+1. `slice_profile: "M1-S3"` enables security-adapter handshake proof validation.
+2. M1-S3 `HandshakeProof` fixtures require:
+   - `verification_mode` (`mock|strict`)
+3. strict mode fields:
+   - `proof_ref` (required)
+   - optional `replay_probe` (bool)
+   - optional `force_bad_signature` (bool)
+4. mock mode fields:
+   - optional `mock_signature_valid` (bool)
+   - optional `mock_replay_detected` (bool)
+5. deterministic deny IDs must be emitted for signature and replay failures.
+
 ---
 
 ## 5. Conformance Gates (Pass/Fail)
@@ -219,6 +233,7 @@ Pass criteria:
 5. S2 profile applies gate order deterministically:
    - `PolicyDenied -> DisclosureDenied -> GrantMissing/GrantExpired -> TrustInsufficient -> UpgradeRejected`
 6. S3 profile denies encrypted endpoint disclosure deterministically when grant/disclosure gates are unmet.
+7. M1-S3 strict/mock handshake proof failures map deterministically (`invalid signature`, `nonce replay`) without bypassing existing handshake state rules.
 
 ### 5.5 Gate G5: Observation Conformance
 

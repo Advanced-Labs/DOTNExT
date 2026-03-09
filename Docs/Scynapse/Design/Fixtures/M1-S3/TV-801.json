@@ -1,0 +1,28 @@
+{
+  "id": "TV-801",
+  "title": "M1-S3 Strict Proof Verification Success",
+  "slice_profile": "M1-S3",
+  "preconditions": [
+    "security-adapter strict mode is active",
+    "proof chain and nonce are valid"
+  ],
+  "messages": [
+    { "type": "HandshakeInit", "role": "requester" },
+    { "type": "HandshakeChallenge", "role": "mediator" },
+    { "type": "HandshakeProof", "role": "requester", "body": { "verification_mode": "strict", "proof_ref": "nid:m1s3.strict.pass" } },
+    { "type": "HandshakeAccept", "role": "mediator", "body": { "route_mode": "parent_mediated", "disclosure_level": "mediator_visible" } }
+  ],
+  "expected_state_trace": [
+    "MediatedHandshake",
+    "RelayedSession",
+    "Completed"
+  ],
+  "expected_outcome": {
+    "success": true,
+    "deny_code": null
+  },
+  "assertions": [
+    { "id": "A1", "kind": "error", "check": "deny_code_absent", "value": true },
+    { "id": "A2", "kind": "state", "check": "contains_state", "value": "RelayedSession" }
+  ]
+}
