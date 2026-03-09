@@ -62,3 +62,4 @@ Deferred:
 8. M1-S5 relation-token integrity closure completed: `M1-S5-Closure.md`
 9. M1-S6 reference-token guard closure completed: `M1-S6-Closure.md`
 10. M1-S7 reference-grant guard closure completed: `M1-S7-Closure.md`
+11. M1-S8 reference-grant proof-binding closure completed: `M1-S8-Closure.md`

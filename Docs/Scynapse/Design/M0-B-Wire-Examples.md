@@ -1,4 +1,4 @@
-# M0-B Wire Examples (S1 + M1-S1/M1-S5/M1-S6/M1-S7 Lock Profiles)
+# M0-B Wire Examples (S1 + M1-S1/M1-S5/M1-S6/M1-S7/M1-S8 Lock Profiles)
 
 ## 1. Purpose
 
@@ -39,6 +39,11 @@ These are semantic examples, not golden byte fixtures.
 11. M1-S7 reference-grant guard lock profile:
    - `HandshakeAccept` reference transport requires `reference_grant_status`
    - active grant requires typed `reference_grant_ref`
+12. M1-S8 reference-grant proof-binding lock profile:
+   - active reference grant requires `reference_grant_verification_mode` (`mock|strict`)
+   - strict mode requires typed `reference_grant_proof_ref`
+   - mock mode requires boolean `reference_grant_mock_valid`
+   - strict mode optional `reference_grant_strict_failure_mode`
 
 Authority references:
 
@@ -77,6 +82,7 @@ Example S1 body keys used below:
 1. resolve: `33=expr_raw`, `34=expr_norm`, `53=expr_norm_v`, `35=operation_class`, `49=deny_code`, `50=reason`, `51=retryable`, `52=remediation`
 2. handshake: `75=relation_token`, `76=route_mode`, `77=disclosure_level`, `71=expires_at`, `80=policy_ref`, `82=token_transport`, `83=relation_token_ref`, `84=relation_token_cid`, `85=relation_token_blob`, `93=reference_lookup_status`, `94=reference_lookup_cid`, `95=reference_grant_status`, `96=reference_grant_ref`
     - M1-S3/M1-S4 handshake proof extension: `86=verification_mode`, `87=proof_ref`, `88=replay_probe`, `89=force_bad_signature`, `90=mock_signature_valid`, `91=mock_replay_detected`, `92=strict_failure_mode`
+    - M1-S8 handshake accept extension fields (dictionary keys reserved for next lock pass): `reference_grant_verification_mode`, `reference_grant_proof_ref`, `reference_grant_mock_valid`, `reference_grant_strict_failure_mode`
 3. route/upgrade: `101=upgrade_target_mode`, `102=endpoint_disclosure_grant_ref`, `103=consent_proof`, `104=fallback_route_ref`
 
 ---

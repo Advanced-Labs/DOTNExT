@@ -1044,6 +1044,180 @@ Expected outcome:
 
 1. expected fail by exact error ID (`E3116_M1S7_REFERENCE_GRANT_REF_INVALID`)
 
+### TV-1301 M1-S8 Active Grant Strict Proof Pass
+
+Preconditions:
+
+1. strict security mode is active
+2. reference token transport is selected
+3. reference grant is active with strict grant-proof verification mode
+4. strict grant-proof failure mode is `none`
+
+Sequence:
+
+1. mediated handshake flow reaches `HandshakeProof`
+2. `HandshakeAccept` provides active grant metadata and strict proof-binding fields
+
+Expected outcome:
+
+1. success
+2. no deny code
+
+### TV-1302 M1-S8 Active Grant Mock Proof Pass
+
+Preconditions:
+
+1. strict security mode is active
+2. reference token transport is selected
+3. reference grant is active with mock grant-proof verification mode
+4. mock grant-proof validity is `true`
+
+Sequence:
+
+1. mediated handshake flow reaches `HandshakeProof`
+2. `HandshakeAccept` provides active grant metadata and mock proof-binding fields
+
+Expected outcome:
+
+1. success
+2. no deny code
+
+### TV-1303 M1-S8 Active Grant Missing Verification Mode
+
+Preconditions:
+
+1. reference token transport is selected
+2. reference grant is active
+3. `reference_grant_verification_mode` is omitted
+
+Expected outcome:
+
+1. expected fail by exact error ID (`E3120_M1S8_REFERENCE_GRANT_VERIFICATION_MODE_REQUIRED`)
+
+### TV-1304 M1-S8 Strict Mode Missing Proof Ref
+
+Preconditions:
+
+1. reference token transport is selected
+2. reference grant is active
+3. `reference_grant_verification_mode=strict`
+4. `reference_grant_proof_ref` is omitted
+
+Expected outcome:
+
+1. expected fail by exact error ID (`E3122_M1S8_REFERENCE_GRANT_PROOF_REF_REQUIRED`)
+
+### TV-1305 M1-S8 Strict Mode Invalid Proof Ref
+
+Preconditions:
+
+1. reference token transport is selected
+2. reference grant is active
+3. `reference_grant_verification_mode=strict`
+4. `reference_grant_proof_ref` is not a typed identifier
+
+Expected outcome:
+
+1. expected fail by exact error ID (`E3123_M1S8_REFERENCE_GRANT_PROOF_REF_INVALID`)
+
+### TV-1306 M1-S8 Mock Mode Missing Proof Valid Flag
+
+Preconditions:
+
+1. reference token transport is selected
+2. reference grant is active
+3. `reference_grant_verification_mode=mock`
+4. `reference_grant_mock_valid` is omitted
+
+Expected outcome:
+
+1. expected fail by exact error ID (`E3124_M1S8_REFERENCE_GRANT_MOCK_VALID_REQUIRED`)
+
+### TV-1307 M1-S8 Proof Fields Present for Non-Active Grant
+
+Preconditions:
+
+1. reference token transport is selected
+2. reference grant status is not active
+3. grant-proof fields are present
+
+Expected outcome:
+
+1. expected fail by exact error ID (`E3125_M1S8_REFERENCE_GRANT_PROOF_FIELDS_FORBIDDEN`)
+
+### TV-1308 M1-S8 Strict Grant Proof Expired
+
+Preconditions:
+
+1. reference token transport is selected
+2. reference grant is active
+3. strict grant proof failure mode is `expired`
+
+Expected outcome:
+
+1. expected fail by exact error ID (`E3132_M1S8_REFERENCE_GRANT_PROOF_EXPIRED`)
+
+### TV-1309 M1-S8 Strict Grant Proof Revoked
+
+Preconditions:
+
+1. reference token transport is selected
+2. reference grant is active
+3. strict grant proof failure mode is `revoked`
+
+Expected outcome:
+
+1. expected fail by exact error ID (`E3133_M1S8_REFERENCE_GRANT_PROOF_REVOKED`)
+
+### TV-1310 M1-S8 Strict Grant Proof Invalid Signature
+
+Preconditions:
+
+1. reference token transport is selected
+2. reference grant is active
+3. strict grant proof failure mode is `invalid_signature`
+
+Expected outcome:
+
+1. expected fail by exact error ID (`E3130_M1S8_REFERENCE_GRANT_PROOF_INVALID_SIGNATURE`)
+
+### TV-1311 M1-S8 Strict Grant Proof Unresolvable
+
+Preconditions:
+
+1. reference token transport is selected
+2. reference grant is active
+3. strict grant proof failure mode is `unresolvable_proof`
+
+Expected outcome:
+
+1. expected fail by exact error ID (`E3131_M1S8_REFERENCE_GRANT_PROOF_CHAIN_UNRESOLVABLE`)
+
+### TV-1312 M1-S8 Strict Grant Proof Not Yet Valid
+
+Preconditions:
+
+1. reference token transport is selected
+2. reference grant is active
+3. strict grant proof failure mode is `not_yet_valid`
+
+Expected outcome:
+
+1. expected fail by exact error ID (`E3134_M1S8_REFERENCE_GRANT_PROOF_NOT_YET_VALID`)
+
+### TV-1313 M1-S8 Mock Grant Proof Invalid
+
+Preconditions:
+
+1. reference token transport is selected
+2. reference grant is active
+3. `reference_grant_verification_mode=mock`
+4. `reference_grant_mock_valid=false`
+
+Expected outcome:
+
+1. expected fail by exact error ID (`E3135_M1S8_REFERENCE_GRANT_PROOF_INVALID_MOCK`)
+
 ---
 
 ## 4. Minimal Coverage Map
@@ -1060,6 +1234,7 @@ Expected outcome:
 10. M1 relation token integrity: TV-1001, TV-1002, TV-1003, TV-1004
 11. M1 reference token guard: TV-1101, TV-1102, TV-1103, TV-1104, TV-1105
 12. M1 reference grant guard: TV-1201, TV-1202, TV-1203, TV-1204, TV-1205, TV-1206, TV-1207
+13. M1 reference grant proof binding: TV-1301, TV-1302, TV-1303, TV-1304, TV-1305, TV-1306, TV-1307, TV-1308, TV-1309, TV-1310, TV-1311, TV-1312, TV-1313
 
 ### 4.1 S1 Transition-Edge Negative Extension Set
 
@@ -1143,13 +1318,27 @@ Expected outcome:
    - TV-1104 (reference lookup rebinding detected; expected fail by exact error ID)
    - TV-1105 (resolved lookup missing CID; expected fail by exact error ID)
 12. M1-S7 owned vectors:
-   - TV-1201 (active grant + resolved lookup pass)
-   - TV-1202 (missing grant status schema; expected fail by exact error ID)
-   - TV-1203 (grant missing deny; expected fail by exact error ID)
-   - TV-1204 (grant expired deny; expected fail by exact error ID)
-   - TV-1205 (grant revoked deny; expected fail by exact error ID)
-   - TV-1206 (active grant missing ref schema; expected fail by exact error ID)
-   - TV-1207 (active grant invalid ref schema; expected fail by exact error ID)
+    - TV-1201 (active grant + resolved lookup pass)
+    - TV-1202 (missing grant status schema; expected fail by exact error ID)
+    - TV-1203 (grant missing deny; expected fail by exact error ID)
+    - TV-1204 (grant expired deny; expected fail by exact error ID)
+    - TV-1205 (grant revoked deny; expected fail by exact error ID)
+    - TV-1206 (active grant missing ref schema; expected fail by exact error ID)
+    - TV-1207 (active grant invalid ref schema; expected fail by exact error ID)
+13. M1-S8 owned vectors:
+    - TV-1301 (active grant strict proof pass)
+    - TV-1302 (active grant mock proof pass)
+    - TV-1303 (active grant missing verification mode schema; expected fail by exact error ID)
+    - TV-1304 (strict mode missing grant proof ref schema; expected fail by exact error ID)
+    - TV-1305 (strict mode invalid grant proof ref schema; expected fail by exact error ID)
+    - TV-1306 (mock mode missing grant proof valid flag schema; expected fail by exact error ID)
+    - TV-1307 (grant proof fields forbidden when grant status non-active; expected fail by exact error ID)
+    - TV-1308 (strict grant proof expired; expected fail by exact error ID)
+    - TV-1309 (strict grant proof revoked; expected fail by exact error ID)
+    - TV-1310 (strict grant proof invalid signature; expected fail by exact error ID)
+    - TV-1311 (strict grant proof unresolvable; expected fail by exact error ID)
+    - TV-1312 (strict grant proof not-yet-valid; expected fail by exact error ID)
+    - TV-1313 (mock grant proof invalid; expected fail by exact error ID)
 
 ---
 
@@ -1173,5 +1362,6 @@ Current next step:
 5. M1-S5 relation-token integrity vectors executed and stabilized (`TV-1001..TV-1004`)
 6. M1-S6 reference-token guard vectors executed and stabilized (`TV-1101..TV-1105`)
 7. M1-S7 reference-grant guard vectors executed and stabilized (`TV-1201..TV-1207`)
-8. preserve S1/S2/S3/S4/S5 + M1-S1 + M1-S2 + M1-S3 + M1-S4 + M1-S5 + M1-S6 + M1-S7 baseline behavior and machine-checkable error ID stability
-9. open next bounded M1 slice from current closure baseline
+8. M1-S8 reference-grant proof-binding vectors executed and stabilized (`TV-1301..TV-1313`)
+9. preserve S1/S2/S3/S4/S5 + M1-S1 + M1-S2 + M1-S3 + M1-S4 + M1-S5 + M1-S6 + M1-S7 + M1-S8 baseline behavior and machine-checkable error ID stability
+10. open next bounded M1 slice from current closure baseline

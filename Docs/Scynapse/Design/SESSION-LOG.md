@@ -555,3 +555,42 @@ Use this structure for each new entry:
    - push M1-S7 closure baseline and open the next bounded M1 slice.
 6. Risks/blockers:
    - none immediate; preserve deterministic grant-gate/error-ID stability across all active packs.
+
+### 2026-03-08 (M1-S8 Reference-Grant Proof-Binding Slice Implementation)
+
+1. Scope:
+   - execute M1-S8 task board on top of M1-S7 baseline and harden active-grant proof verification determinism.
+2. Key outputs:
+   - created `codex/m1-s8-reference-grant-proof-binding` from M1-S7 baseline.
+   - added `slice_profile: "M1-S8"` handling in conformance engine.
+   - added M1-S8 schema contract on `HandshakeAccept` for active reference grants:
+     - `reference_grant_verification_mode` (`mock|strict`)
+     - strict mode typed `reference_grant_proof_ref`
+     - mock mode boolean `reference_grant_mock_valid`
+     - optional strict mode `reference_grant_strict_failure_mode` (`none|expired|revoked|unresolvable_proof|invalid_signature|not_yet_valid`)
+     - deterministic forbidden-field checks when grant status is non-active
+   - added deterministic M1-S8 schema/runtime IDs:
+     - `E3120`..`E3126`
+     - `E3130`..`E3135`
+   - added isolated fixture pack `Fixtures/M1-S8`: `TV-1301..TV-1313`.
+   - synchronized continuity + protocol docs for M1-S8 profile propagation.
+3. Validation runs:
+   - S1: 14/14
+   - S2: 8/8
+   - S3: 4/4
+   - S4: 4/4
+   - S5: 3/3
+   - M1-S1: 10/10
+   - M1-S2: 6/6
+   - M1-S3: 5/5
+   - M1-S4: 6/6
+   - M1-S5: 4/4
+   - M1-S6: 5/5
+   - M1-S7: 7/7
+   - M1-S8: 13/13
+4. Current doing:
+   - final continuity synchronization and scoped commit/push preparation on `codex/m1-s8-reference-grant-proof-binding`.
+5. Next:
+   - push M1-S8 closure baseline and open the next bounded M1 slice.
+6. Risks/blockers:
+   - none immediate; preserve deterministic grant-proof/error-ID stability across all active packs.

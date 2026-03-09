@@ -358,3 +358,9 @@ Failure responses should include:
    - `token_transport=reference` requires `reference_grant_status` in `active|missing|expired|revoked|not_required`.
    - `reference_grant_status=active` requires typed `reference_grant_ref`.
    - deterministic deny IDs: `E3111` (grant missing), `E3112` (grant expired), `E3113` (grant revoked).
+19. M1-S8 reference-grant proof binding profile:
+   - `HandshakeAccept` in `M1-S8` extends M1-S7 with active-grant proof verification checks.
+   - `reference_grant_status=active` requires `reference_grant_verification_mode` in `mock|strict`.
+   - strict mode requires typed `reference_grant_proof_ref` and optional deterministic failure control `reference_grant_strict_failure_mode`.
+   - mock mode requires boolean `reference_grant_mock_valid`.
+   - deterministic runtime deny IDs: `E3130`..`E3135`.

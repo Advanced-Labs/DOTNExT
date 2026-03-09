@@ -1,0 +1,51 @@
+{
+  "id": "TV-1312",
+  "title": "M1-S8 Strict Grant Proof Not Yet Valid",
+  "slice_profile": "M1-S8",
+  "expect_conformance": "fail",
+  "expected_error_ids": [
+    "E3134_M1S8_REFERENCE_GRANT_PROOF_NOT_YET_VALID"
+  ],
+  "expected_error_contains": [
+    "not yet valid"
+  ],
+  "preconditions": [
+    "reference grant is active",
+    "strict failure mode is not_yet_valid"
+  ],
+  "messages": [
+    { "type": "HandshakeInit", "role": "requester" },
+    { "type": "HandshakeChallenge", "role": "mediator" },
+    { "type": "HandshakeProof", "role": "requester", "body": { "verification_mode": "strict", "proof_ref": "nid:m1s8.runtime.notyetvalid" } },
+    {
+      "type": "HandshakeAccept",
+      "role": "mediator",
+      "body": {
+        "route_mode": "parent_mediated",
+        "disclosure_level": "mediator_visible",
+        "token_transport": "reference",
+        "relation_token_ref": "tid:reltok-1312",
+        "relation_token_cid": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+        "reference_lookup_status": "resolved",
+        "reference_lookup_cid": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+        "reference_grant_status": "active",
+        "reference_grant_ref": "gid:grant-1312",
+        "reference_grant_verification_mode": "strict",
+        "reference_grant_proof_ref": "gid:grantproof-1312",
+        "reference_grant_strict_failure_mode": "not_yet_valid"
+      }
+    }
+  ],
+  "expected_state_trace": [
+    "MediatedHandshake",
+    "Deny"
+  ],
+  "expected_outcome": {
+    "success": false,
+    "deny_code": "TrustInsufficient",
+    "retryable": false
+  },
+  "assertions": [
+    { "id": "A1", "kind": "error", "check": "deny_code_equals", "value": "TrustInsufficient" }
+  ]
+}

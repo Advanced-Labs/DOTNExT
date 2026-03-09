@@ -144,4 +144,5 @@ Current next action:
 7. M1-S5 relation-token integrity slice completed (`M1-S5-Closure.md`)
 8. M1-S6 reference-token guard slice completed (`M1-S6-Closure.md`)
 9. M1-S7 reference-grant guard slice completed (`M1-S7-Closure.md`)
-10. define next bounded M1 slice from M1-S7 closure baseline
+10. M1-S8 reference-grant proof-binding slice completed (`M1-S8-Closure.md`)
+11. define next bounded M1 slice from M1-S8 closure baseline

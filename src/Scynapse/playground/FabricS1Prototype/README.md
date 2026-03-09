@@ -99,6 +99,12 @@ Run M1-S7 fixture pack:
 dotnet run --project playground/FabricS1Prototype/FabricS1Prototype.csproj -- D:\Dev\dotnext\Docs\Scynapse\Design\Fixtures\M1-S7
 ```
 
+Run M1-S8 fixture pack:
+
+```powershell
+dotnet run --project playground/FabricS1Prototype/FabricS1Prototype.csproj -- D:\Dev\dotnext\Docs\Scynapse\Design\Fixtures\M1-S8
+```
+
 Expected-fail fixture semantics:
 
 1. `expected_error_ids` is the preferred exact failure oracle.
@@ -175,3 +181,15 @@ Slice profile semantics:
      - `E3111_M1S7_REFERENCE_GRANT_MISSING`
      - `E3112_M1S7_REFERENCE_GRANT_EXPIRED`
      - `E3113_M1S7_REFERENCE_GRANT_REVOKED`
+13. `slice_profile: "M1-S8"` extends M1-S7 with reference grant proof binding checks:
+   - `reference_grant_status=active` requires `reference_grant_verification_mode` (`mock|strict`)
+   - strict mode requires typed `reference_grant_proof_ref`
+   - mock mode requires boolean `reference_grant_mock_valid`
+   - optional strict mode control: `reference_grant_strict_failure_mode` (`none|expired|revoked|unresolvable_proof|invalid_signature|not_yet_valid`)
+   - deterministic grant-proof IDs:
+     - `E3130_M1S8_REFERENCE_GRANT_PROOF_INVALID_SIGNATURE`
+     - `E3131_M1S8_REFERENCE_GRANT_PROOF_CHAIN_UNRESOLVABLE`
+     - `E3132_M1S8_REFERENCE_GRANT_PROOF_EXPIRED`
+     - `E3133_M1S8_REFERENCE_GRANT_PROOF_REVOKED`
+     - `E3134_M1S8_REFERENCE_GRANT_PROOF_NOT_YET_VALID`
+     - `E3135_M1S8_REFERENCE_GRANT_PROOF_INVALID_MOCK`

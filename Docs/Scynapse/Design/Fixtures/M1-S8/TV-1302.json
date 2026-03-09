@@ -1,0 +1,44 @@
+{
+  "id": "TV-1302",
+  "title": "M1-S8 Active Grant Mock Proof Pass",
+  "slice_profile": "M1-S8",
+  "preconditions": [
+    "reference token transport is selected",
+    "reference grant is active",
+    "mock grant proof verification is valid"
+  ],
+  "messages": [
+    { "type": "HandshakeInit", "role": "requester" },
+    { "type": "HandshakeChallenge", "role": "mediator" },
+    { "type": "HandshakeProof", "role": "requester", "body": { "verification_mode": "strict", "proof_ref": "nid:m1s8.handshake.mock.pass" } },
+    {
+      "type": "HandshakeAccept",
+      "role": "mediator",
+      "body": {
+        "route_mode": "parent_mediated",
+        "disclosure_level": "mediator_visible",
+        "token_transport": "reference",
+        "relation_token_ref": "tid:reltok-1302",
+        "relation_token_cid": "sha256:2222222222222222222222222222222222222222222222222222222222222222",
+        "reference_lookup_status": "resolved",
+        "reference_lookup_cid": "sha256:2222222222222222222222222222222222222222222222222222222222222222",
+        "reference_grant_status": "active",
+        "reference_grant_ref": "gid:grant-1302",
+        "reference_grant_verification_mode": "mock",
+        "reference_grant_mock_valid": true
+      }
+    }
+  ],
+  "expected_state_trace": [
+    "MediatedHandshake",
+    "RelayedSession",
+    "Completed"
+  ],
+  "expected_outcome": {
+    "success": true,
+    "deny_code": null
+  },
+  "assertions": [
+    { "id": "A1", "kind": "error", "check": "deny_code_absent", "value": true }
+  ]
+}

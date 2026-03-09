@@ -1,0 +1,49 @@
+{
+  "id": "TV-1307",
+  "title": "M1-S8 Grant Proof Fields Forbidden For Non-Active Status",
+  "slice_profile": "M1-S8",
+  "expect_conformance": "fail",
+  "expected_error_ids": [
+    "E3125_M1S8_REFERENCE_GRANT_PROOF_FIELDS_FORBIDDEN"
+  ],
+  "expected_error_contains": [
+    "grant proof fields are forbidden"
+  ],
+  "preconditions": [
+    "reference grant status is not active",
+    "grant proof fields are present"
+  ],
+  "messages": [
+    { "type": "HandshakeInit", "role": "requester" },
+    { "type": "HandshakeChallenge", "role": "mediator" },
+    { "type": "HandshakeProof", "role": "requester", "body": { "verification_mode": "strict", "proof_ref": "nid:m1s8.schema.nonactive.forbidden" } },
+    {
+      "type": "HandshakeAccept",
+      "role": "mediator",
+      "body": {
+        "route_mode": "parent_mediated",
+        "disclosure_level": "mediator_visible",
+        "token_transport": "reference",
+        "relation_token_ref": "tid:reltok-1307",
+        "relation_token_cid": "sha256:7777777777777777777777777777777777777777777777777777777777777777",
+        "reference_lookup_status": "resolved",
+        "reference_lookup_cid": "sha256:7777777777777777777777777777777777777777777777777777777777777777",
+        "reference_grant_status": "not_required",
+        "reference_grant_verification_mode": "strict",
+        "reference_grant_proof_ref": "gid:grantproof-1307"
+      }
+    }
+  ],
+  "expected_state_trace": [
+    "MediatedHandshake",
+    "RelayedSession",
+    "Completed"
+  ],
+  "expected_outcome": {
+    "success": true,
+    "deny_code": null
+  },
+  "assertions": [
+    { "id": "A1", "kind": "error", "check": "deny_code_absent", "value": true }
+  ]
+}

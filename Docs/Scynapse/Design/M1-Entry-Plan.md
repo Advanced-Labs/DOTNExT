@@ -117,6 +117,18 @@ Deliverables:
 2. typed `reference_grant_ref` requirement when `reference_grant_status=active`.
 3. deterministic deny mapping for `missing`, `expired`, and `revoked` grant states.
 
+### M1-S8: Reference Grant Proof Binding (Bounded)
+
+Primary goal:
+
+1. enforce deterministic active-grant proof verification on reference transport in handshake acceptance.
+
+Deliverables:
+
+1. profile `M1-S8` extending M1-S7 with strict/mock grant-proof verification controls.
+2. deterministic schema validation for mode-specific fields and forbidden proof fields when grant status is non-active.
+3. deterministic deny mapping for strict/mock proof failures with stable machine-checkable IDs.
+
 ---
 
 ## 4. Non-Negotiable Guardrails
@@ -155,4 +167,5 @@ Deliverables:
 5. `M1-S5` relation-token integrity execution complete (`M1-S5-Closure.md`).
 6. `M1-S6` reference-token guard execution complete (`M1-S6-Closure.md`).
 7. `M1-S7` reference-grant guard execution complete (`M1-S7-Closure.md`).
-8. open next bounded M1 slice task board from this closure baseline.
+8. `M1-S8` reference-grant proof-binding execution complete (`M1-S8-Closure.md`).
+9. open next bounded M1 slice task board from this closure baseline.

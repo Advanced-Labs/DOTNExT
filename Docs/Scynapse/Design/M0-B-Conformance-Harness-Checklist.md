@@ -258,6 +258,33 @@ M1-S7 extension note:
    - `E3115_M1S7_REFERENCE_GRANT_REF_REQUIRED`
    - `E3116_M1S7_REFERENCE_GRANT_REF_INVALID`
 
+M1-S8 extension note:
+
+1. `slice_profile: "M1-S8"` extends M1-S7 with active-grant proof binding checks.
+2. M1-S8 `HandshakeAccept` with `token_transport=reference` and `reference_grant_status=active` must include:
+   - `reference_grant_verification_mode` (`mock|strict`)
+3. strict mode requires:
+   - typed `reference_grant_proof_ref`
+   - optional `reference_grant_strict_failure_mode` (`none|expired|revoked|unresolvable_proof|invalid_signature|not_yet_valid`)
+4. mock mode requires:
+   - boolean `reference_grant_mock_valid`
+5. non-active grant statuses must not include grant-proof fields.
+6. deterministic runtime IDs:
+   - `E3130_M1S8_REFERENCE_GRANT_PROOF_INVALID_SIGNATURE`
+   - `E3131_M1S8_REFERENCE_GRANT_PROOF_CHAIN_UNRESOLVABLE`
+   - `E3132_M1S8_REFERENCE_GRANT_PROOF_EXPIRED`
+   - `E3133_M1S8_REFERENCE_GRANT_PROOF_REVOKED`
+   - `E3134_M1S8_REFERENCE_GRANT_PROOF_NOT_YET_VALID`
+   - `E3135_M1S8_REFERENCE_GRANT_PROOF_INVALID_MOCK`
+7. deterministic schema IDs:
+   - `E3120_M1S8_REFERENCE_GRANT_VERIFICATION_MODE_REQUIRED`
+   - `E3121_M1S8_REFERENCE_GRANT_VERIFICATION_MODE_INVALID`
+   - `E3122_M1S8_REFERENCE_GRANT_PROOF_REF_REQUIRED`
+   - `E3123_M1S8_REFERENCE_GRANT_PROOF_REF_INVALID`
+   - `E3124_M1S8_REFERENCE_GRANT_MOCK_VALID_REQUIRED`
+   - `E3125_M1S8_REFERENCE_GRANT_PROOF_FIELDS_FORBIDDEN`
+   - `E3126_M1S8_REFERENCE_GRANT_STRICT_FAILURE_MODE_INVALID`
+
 ---
 
 ## 5. Conformance Gates (Pass/Fail)
@@ -299,6 +326,7 @@ Pass criteria:
 9. M1-S5 inline relation-token CID integrity mismatches map deterministically to `E3091` without bypassing existing handshake state rules.
 10. M1-S6 reference lookup unresolved/rebinding/CID mismatch paths map deterministically to `E3101`/`E3102`/`E3103` without bypassing existing handshake state rules.
 11. M1-S7 reference grant missing/expired/revoked paths map deterministically to `E3111`/`E3112`/`E3113` before reference lookup-resolution guard checks.
+12. M1-S8 active-grant proof verification failures map deterministically to `E3130`..`E3135` with deny-code mapping preserved (`GrantExpired`, `PolicyDenied`, `TrustInsufficient`) before reference lookup-resolution guard checks.
 
 ### 5.5 Gate G5: Observation Conformance
 

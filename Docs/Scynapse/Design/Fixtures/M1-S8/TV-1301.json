@@ -1,0 +1,45 @@
+{
+  "id": "TV-1301",
+  "title": "M1-S8 Active Grant Strict Proof Pass",
+  "slice_profile": "M1-S8",
+  "preconditions": [
+    "reference token transport is selected",
+    "reference grant is active",
+    "strict grant proof verification succeeds"
+  ],
+  "messages": [
+    { "type": "HandshakeInit", "role": "requester" },
+    { "type": "HandshakeChallenge", "role": "mediator" },
+    { "type": "HandshakeProof", "role": "requester", "body": { "verification_mode": "strict", "proof_ref": "nid:m1s8.handshake.proof.pass" } },
+    {
+      "type": "HandshakeAccept",
+      "role": "mediator",
+      "body": {
+        "route_mode": "parent_mediated",
+        "disclosure_level": "mediator_visible",
+        "token_transport": "reference",
+        "relation_token_ref": "tid:reltok-1301",
+        "relation_token_cid": "sha256:1111111111111111111111111111111111111111111111111111111111111111",
+        "reference_lookup_status": "resolved",
+        "reference_lookup_cid": "sha256:1111111111111111111111111111111111111111111111111111111111111111",
+        "reference_grant_status": "active",
+        "reference_grant_ref": "gid:grant-1301",
+        "reference_grant_verification_mode": "strict",
+        "reference_grant_proof_ref": "gid:grantproof-1301",
+        "reference_grant_strict_failure_mode": "none"
+      }
+    }
+  ],
+  "expected_state_trace": [
+    "MediatedHandshake",
+    "RelayedSession",
+    "Completed"
+  ],
+  "expected_outcome": {
+    "success": true,
+    "deny_code": null
+  },
+  "assertions": [
+    { "id": "A1", "kind": "error", "check": "deny_code_absent", "value": true }
+  ]
+}

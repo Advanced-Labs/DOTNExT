@@ -1,0 +1,50 @@
+{
+  "id": "TV-1304",
+  "title": "M1-S8 Strict Mode Missing Grant Proof Ref",
+  "slice_profile": "M1-S8",
+  "expect_conformance": "fail",
+  "expected_error_ids": [
+    "E3122_M1S8_REFERENCE_GRANT_PROOF_REF_REQUIRED"
+  ],
+  "expected_error_contains": [
+    "requires 'reference_grant_proof_ref'"
+  ],
+  "preconditions": [
+    "reference grant is active",
+    "strict verification mode is selected",
+    "grant proof ref is omitted"
+  ],
+  "messages": [
+    { "type": "HandshakeInit", "role": "requester" },
+    { "type": "HandshakeChallenge", "role": "mediator" },
+    { "type": "HandshakeProof", "role": "requester", "body": { "verification_mode": "strict", "proof_ref": "nid:m1s8.schema.strict.missingref" } },
+    {
+      "type": "HandshakeAccept",
+      "role": "mediator",
+      "body": {
+        "route_mode": "parent_mediated",
+        "disclosure_level": "mediator_visible",
+        "token_transport": "reference",
+        "relation_token_ref": "tid:reltok-1304",
+        "relation_token_cid": "sha256:4444444444444444444444444444444444444444444444444444444444444444",
+        "reference_lookup_status": "resolved",
+        "reference_lookup_cid": "sha256:4444444444444444444444444444444444444444444444444444444444444444",
+        "reference_grant_status": "active",
+        "reference_grant_ref": "gid:grant-1304",
+        "reference_grant_verification_mode": "strict"
+      }
+    }
+  ],
+  "expected_state_trace": [
+    "MediatedHandshake",
+    "RelayedSession",
+    "Completed"
+  ],
+  "expected_outcome": {
+    "success": true,
+    "deny_code": null
+  },
+  "assertions": [
+    { "id": "A1", "kind": "error", "check": "deny_code_absent", "value": true }
+  ]
+}

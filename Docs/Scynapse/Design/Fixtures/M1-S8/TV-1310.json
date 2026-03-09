@@ -1,0 +1,51 @@
+{
+  "id": "TV-1310",
+  "title": "M1-S8 Strict Grant Proof Invalid Signature",
+  "slice_profile": "M1-S8",
+  "expect_conformance": "fail",
+  "expected_error_ids": [
+    "E3130_M1S8_REFERENCE_GRANT_PROOF_INVALID_SIGNATURE"
+  ],
+  "expected_error_contains": [
+    "invalid signature"
+  ],
+  "preconditions": [
+    "reference grant is active",
+    "strict failure mode is invalid_signature"
+  ],
+  "messages": [
+    { "type": "HandshakeInit", "role": "requester" },
+    { "type": "HandshakeChallenge", "role": "mediator" },
+    { "type": "HandshakeProof", "role": "requester", "body": { "verification_mode": "strict", "proof_ref": "nid:m1s8.runtime.invalidsig" } },
+    {
+      "type": "HandshakeAccept",
+      "role": "mediator",
+      "body": {
+        "route_mode": "parent_mediated",
+        "disclosure_level": "mediator_visible",
+        "token_transport": "reference",
+        "relation_token_ref": "tid:reltok-1310",
+        "relation_token_cid": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "reference_lookup_status": "resolved",
+        "reference_lookup_cid": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "reference_grant_status": "active",
+        "reference_grant_ref": "gid:grant-1310",
+        "reference_grant_verification_mode": "strict",
+        "reference_grant_proof_ref": "gid:grantproof-1310",
+        "reference_grant_strict_failure_mode": "invalid_signature"
+      }
+    }
+  ],
+  "expected_state_trace": [
+    "MediatedHandshake",
+    "Deny"
+  ],
+  "expected_outcome": {
+    "success": false,
+    "deny_code": "TrustInsufficient",
+    "retryable": false
+  },
+  "assertions": [
+    { "id": "A1", "kind": "error", "check": "deny_code_equals", "value": "TrustInsufficient" }
+  ]
+}

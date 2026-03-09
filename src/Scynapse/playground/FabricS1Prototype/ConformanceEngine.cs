@@ -17,6 +17,7 @@ internal sealed class ConformanceEngine
     private const string SliceProfileM1S5 = "M1-S5";
     private const string SliceProfileM1S6 = "M1-S6";
     private const string SliceProfileM1S7 = "M1-S7";
+    private const string SliceProfileM1S8 = "M1-S8";
 
     private static readonly Regex TypedIdentifierRegex = new("^[a-z]{2,6}:[A-Za-z0-9][A-Za-z0-9._-]{2,127}$", RegexOptions.Compiled);
     private static readonly Regex RelationTokenCidRegex = new("^sha256:[0-9a-fA-F]{8,128}$", RegexOptions.Compiled);
@@ -34,7 +35,8 @@ internal sealed class ConformanceEngine
         SliceProfileM1S4,
         SliceProfileM1S5,
         SliceProfileM1S6,
-        SliceProfileM1S7
+        SliceProfileM1S7,
+        SliceProfileM1S8
     };
 
     private static readonly HashSet<string> KnownTokenTransportModes = new(StringComparer.Ordinal)
@@ -78,6 +80,22 @@ internal sealed class ConformanceEngine
         "expired",
         "revoked",
         "not_required"
+    };
+
+    private static readonly HashSet<string> KnownReferenceGrantVerificationModes = new(StringComparer.Ordinal)
+    {
+        "mock",
+        "strict"
+    };
+
+    private static readonly HashSet<string> KnownReferenceGrantStrictFailureModes = new(StringComparer.Ordinal)
+    {
+        "none",
+        "expired",
+        "revoked",
+        "unresolvable_proof",
+        "invalid_signature",
+        "not_yet_valid"
     };
 
     private static readonly HashSet<string> PolicyCausalDenyCodes = new(StringComparer.Ordinal)
@@ -402,20 +420,28 @@ internal sealed class ConformanceEngine
             if (string.Equals(sliceProfile, SliceProfileM1S1, StringComparison.Ordinal) ||
                 string.Equals(sliceProfile, SliceProfileM1S5, StringComparison.Ordinal) ||
                 string.Equals(sliceProfile, SliceProfileM1S6, StringComparison.Ordinal) ||
-                string.Equals(sliceProfile, SliceProfileM1S7, StringComparison.Ordinal))
+                string.Equals(sliceProfile, SliceProfileM1S7, StringComparison.Ordinal) ||
+                string.Equals(sliceProfile, SliceProfileM1S8, StringComparison.Ordinal))
             {
                 ValidateM1S1WireClosureFields(fixture, message, errors);
             }
 
             if (string.Equals(sliceProfile, SliceProfileM1S6, StringComparison.Ordinal) ||
-                string.Equals(sliceProfile, SliceProfileM1S7, StringComparison.Ordinal))
+                string.Equals(sliceProfile, SliceProfileM1S7, StringComparison.Ordinal) ||
+                string.Equals(sliceProfile, SliceProfileM1S8, StringComparison.Ordinal))
             {
                 ValidateM1S6ReferenceTokenFields(fixture, message, errors);
             }
 
-            if (string.Equals(sliceProfile, SliceProfileM1S7, StringComparison.Ordinal))
+            if (string.Equals(sliceProfile, SliceProfileM1S7, StringComparison.Ordinal) ||
+                string.Equals(sliceProfile, SliceProfileM1S8, StringComparison.Ordinal))
             {
                 ValidateM1S7ReferenceGrantFields(fixture, message, errors);
+            }
+
+            if (string.Equals(sliceProfile, SliceProfileM1S8, StringComparison.Ordinal))
+            {
+                ValidateM1S8ReferenceGrantProofFields(fixture, message, errors);
             }
 
             if (string.Equals(sliceProfile, SliceProfileM1S2, StringComparison.Ordinal))
@@ -451,7 +477,8 @@ internal sealed class ConformanceEngine
             || string.Equals(sliceProfile, SliceProfileM1S4, StringComparison.Ordinal)
             || string.Equals(sliceProfile, SliceProfileM1S5, StringComparison.Ordinal)
             || string.Equals(sliceProfile, SliceProfileM1S6, StringComparison.Ordinal)
-            || string.Equals(sliceProfile, SliceProfileM1S7, StringComparison.Ordinal);
+            || string.Equals(sliceProfile, SliceProfileM1S7, StringComparison.Ordinal)
+            || string.Equals(sliceProfile, SliceProfileM1S8, StringComparison.Ordinal);
     }
 
     private static bool IsRuntimeBridgeProfile(string sliceProfile)
@@ -461,7 +488,8 @@ internal sealed class ConformanceEngine
             || string.Equals(sliceProfile, SliceProfileM1S4, StringComparison.Ordinal)
             || string.Equals(sliceProfile, SliceProfileM1S5, StringComparison.Ordinal)
             || string.Equals(sliceProfile, SliceProfileM1S6, StringComparison.Ordinal)
-            || string.Equals(sliceProfile, SliceProfileM1S7, StringComparison.Ordinal);
+            || string.Equals(sliceProfile, SliceProfileM1S7, StringComparison.Ordinal)
+            || string.Equals(sliceProfile, SliceProfileM1S8, StringComparison.Ordinal);
     }
 
     private static bool IsM1SecurityAdapterProfile(string sliceProfile)
@@ -470,7 +498,8 @@ internal sealed class ConformanceEngine
             || string.Equals(sliceProfile, SliceProfileM1S4, StringComparison.Ordinal)
             || string.Equals(sliceProfile, SliceProfileM1S5, StringComparison.Ordinal)
             || string.Equals(sliceProfile, SliceProfileM1S6, StringComparison.Ordinal)
-            || string.Equals(sliceProfile, SliceProfileM1S7, StringComparison.Ordinal);
+            || string.Equals(sliceProfile, SliceProfileM1S7, StringComparison.Ordinal)
+            || string.Equals(sliceProfile, SliceProfileM1S8, StringComparison.Ordinal);
     }
 
     private static void ValidateS2RouteUpgradeProbeFields(FixtureCase fixture, FixtureMessage message, List<ConformanceError> errors)
@@ -979,6 +1008,106 @@ internal sealed class ConformanceEngine
         }
     }
 
+    private static void ValidateM1S8ReferenceGrantProofFields(FixtureCase fixture, FixtureMessage message, List<ConformanceError> errors)
+    {
+        if (!string.Equals(message.Type, "HandshakeAccept", StringComparison.Ordinal))
+        {
+            return;
+        }
+
+        if (message.Body is null || message.Body.Value.ValueKind != JsonValueKind.Object)
+        {
+            return;
+        }
+
+        var tokenTransport = GetBodyString(message, "token_transport");
+        if (!string.Equals(tokenTransport, "reference", StringComparison.Ordinal))
+        {
+            return;
+        }
+
+        var hasVerificationMode = message.Body.Value.TryGetProperty("reference_grant_verification_mode", out var verificationModeElement);
+        var hasProofRef = message.Body.Value.TryGetProperty("reference_grant_proof_ref", out var proofRefElement);
+        var hasMockValid = message.Body.Value.TryGetProperty("reference_grant_mock_valid", out var mockValidElement);
+        var hasStrictFailureMode = message.Body.Value.TryGetProperty("reference_grant_strict_failure_mode", out var strictFailureModeElement);
+
+        var referenceGrantStatus = GetBodyString(message, "reference_grant_status");
+        if (!string.Equals(referenceGrantStatus, "active", StringComparison.Ordinal))
+        {
+            if (hasVerificationMode || hasProofRef || hasMockValid || hasStrictFailureMode)
+            {
+                AddError(errors, "L2", "E3125_M1S8_REFERENCE_GRANT_PROOF_FIELDS_FORBIDDEN", $"{fixture.Id}/{message.Type} grant proof fields are forbidden when reference_grant_status is not 'active'.");
+            }
+
+            return;
+        }
+
+        if (!hasVerificationMode)
+        {
+            AddError(errors, "L2", "E3120_M1S8_REFERENCE_GRANT_VERIFICATION_MODE_REQUIRED", $"{fixture.Id}/{message.Type} requires 'reference_grant_verification_mode' when reference_grant_status='active'.");
+            return;
+        }
+
+        if (verificationModeElement.ValueKind != JsonValueKind.String)
+        {
+            AddError(errors, "L2", "E3121_M1S8_REFERENCE_GRANT_VERIFICATION_MODE_INVALID", $"{fixture.Id}/{message.Type} field 'reference_grant_verification_mode' must be a string.");
+            return;
+        }
+
+        var verificationMode = verificationModeElement.GetString() ?? string.Empty;
+        if (!KnownReferenceGrantVerificationModes.Contains(verificationMode))
+        {
+            AddError(errors, "L2", "E3121_M1S8_REFERENCE_GRANT_VERIFICATION_MODE_INVALID", $"{fixture.Id}/{message.Type} field 'reference_grant_verification_mode' value '{verificationMode}' is invalid.");
+            return;
+        }
+
+        if (string.Equals(verificationMode, "strict", StringComparison.Ordinal))
+        {
+            if (!hasProofRef)
+            {
+                AddError(errors, "L2", "E3122_M1S8_REFERENCE_GRANT_PROOF_REF_REQUIRED", $"{fixture.Id}/{message.Type} requires 'reference_grant_proof_ref' when reference_grant_verification_mode='strict'.");
+            }
+            else if (proofRefElement.ValueKind != JsonValueKind.String || !IsTypedIdentifier(proofRefElement.GetString() ?? string.Empty))
+            {
+                AddError(errors, "L2", "E3123_M1S8_REFERENCE_GRANT_PROOF_REF_INVALID", $"{fixture.Id}/{message.Type} field 'reference_grant_proof_ref' must be a typed identifier.");
+            }
+
+            if (hasMockValid)
+            {
+                AddError(errors, "L2", "E3125_M1S8_REFERENCE_GRANT_PROOF_FIELDS_FORBIDDEN", $"{fixture.Id}/{message.Type} field 'reference_grant_mock_valid' is forbidden when reference_grant_verification_mode='strict'.");
+            }
+
+            if (!hasStrictFailureMode)
+            {
+                return;
+            }
+
+            if (strictFailureModeElement.ValueKind != JsonValueKind.String)
+            {
+                AddError(errors, "L2", "E3126_M1S8_REFERENCE_GRANT_STRICT_FAILURE_MODE_INVALID", $"{fixture.Id}/{message.Type} field 'reference_grant_strict_failure_mode' must be a string.");
+                return;
+            }
+
+            var strictFailureMode = strictFailureModeElement.GetString() ?? string.Empty;
+            if (!KnownReferenceGrantStrictFailureModes.Contains(strictFailureMode))
+            {
+                AddError(errors, "L2", "E3126_M1S8_REFERENCE_GRANT_STRICT_FAILURE_MODE_INVALID", $"{fixture.Id}/{message.Type} field 'reference_grant_strict_failure_mode' value '{strictFailureMode}' is invalid.");
+            }
+
+            return;
+        }
+
+        if (!hasMockValid || mockValidElement.ValueKind is not (JsonValueKind.True or JsonValueKind.False))
+        {
+            AddError(errors, "L2", "E3124_M1S8_REFERENCE_GRANT_MOCK_VALID_REQUIRED", $"{fixture.Id}/{message.Type} requires boolean 'reference_grant_mock_valid' when reference_grant_verification_mode='mock'.");
+        }
+
+        if (hasProofRef || hasStrictFailureMode)
+        {
+            AddError(errors, "L2", "E3125_M1S8_REFERENCE_GRANT_PROOF_FIELDS_FORBIDDEN", $"{fixture.Id}/{message.Type} strict grant proof fields are forbidden when reference_grant_verification_mode='mock'.");
+        }
+    }
+
     private static void ValidateM1SecurityAdapterFields(FixtureCase fixture, FixtureMessage message, List<ConformanceError> errors)
     {
         if (!string.Equals(message.Type, "HandshakeProof", StringComparison.Ordinal))
@@ -1386,6 +1515,29 @@ internal sealed class ConformanceEngine
                     }
                 }
 
+                if (string.Equals(context.SliceProfile, SliceProfileM1S8, StringComparison.Ordinal))
+                {
+                    if (!TryEvaluateM1S5RelationTokenIntegrity(fixtureId, message, context, errors))
+                    {
+                        break;
+                    }
+
+                    if (!TryEvaluateM1S7ReferenceGrantIntegrity(fixtureId, message, context, errors))
+                    {
+                        break;
+                    }
+
+                    if (!TryEvaluateM1S8ReferenceGrantProofBinding(fixtureId, message, context, errors))
+                    {
+                        break;
+                    }
+
+                    if (!TryEvaluateM1S6ReferenceTokenIntegrity(fixtureId, message, context, errors))
+                    {
+                        break;
+                    }
+                }
+
                 TryTransition(fixtureId, context, "RelayedSession", errors);
                 break;
             }
@@ -1754,7 +1906,7 @@ internal sealed class ConformanceEngine
             {
                 if (!IsRuntimeBridgeProfile(context.SliceProfile))
                 {
-                    RejectWithDeterministicDeny(fixtureId, context, errors, "E3062_M1S2_ROUTE_DATA_OUTSIDE_PROFILE", "TrustInsufficient", $"{fixtureId}/{message.Type} is only supported in M1-S2/M1-S3/M1-S4/M1-S5/M1-S6/M1-S7 runtime-bridge profiles.");
+                    RejectWithDeterministicDeny(fixtureId, context, errors, "E3062_M1S2_ROUTE_DATA_OUTSIDE_PROFILE", "TrustInsufficient", $"{fixtureId}/{message.Type} is only supported in M1-S2/M1-S3/M1-S4/M1-S5/M1-S6/M1-S7/M1-S8 runtime-bridge profiles.");
                     break;
                 }
 
@@ -2041,6 +2193,97 @@ internal sealed class ConformanceEngine
         }
 
         return true;
+    }
+
+    private static bool TryEvaluateM1S8ReferenceGrantProofBinding(string fixtureId, FixtureMessage message, OperationContext context, List<ConformanceError> errors)
+    {
+        var tokenTransport = GetBodyString(message, "token_transport");
+        if (!string.Equals(tokenTransport, "reference", StringComparison.Ordinal))
+        {
+            return true;
+        }
+
+        var referenceGrantStatus = GetBodyString(message, "reference_grant_status");
+        if (!string.Equals(referenceGrantStatus, "active", StringComparison.Ordinal))
+        {
+            return true;
+        }
+
+        var verificationMode = GetBodyString(message, "reference_grant_verification_mode");
+        if (!KnownReferenceGrantVerificationModes.Contains(verificationMode ?? string.Empty))
+        {
+            return true;
+        }
+
+        if (string.Equals(verificationMode, "mock", StringComparison.Ordinal))
+        {
+            var mockValid = GetBodyBoolean(message, "reference_grant_mock_valid") ?? true;
+            if (!mockValid)
+            {
+                RejectWithDeterministicDeny(
+                    fixtureId,
+                    context,
+                    errors,
+                    "E3135_M1S8_REFERENCE_GRANT_PROOF_INVALID_MOCK",
+                    "TrustInsufficient",
+                    $"{fixtureId}/{message.Type} mock grant proof verification reported invalid proof.");
+                return false;
+            }
+
+            return true;
+        }
+
+        var strictFailureMode = GetBodyString(message, "reference_grant_strict_failure_mode") ?? "none";
+        switch (strictFailureMode)
+        {
+            case "expired":
+                RejectWithDeterministicDeny(
+                    fixtureId,
+                    context,
+                    errors,
+                    "E3132_M1S8_REFERENCE_GRANT_PROOF_EXPIRED",
+                    "GrantExpired",
+                    $"{fixtureId}/{message.Type} strict grant proof verification failed: expired.");
+                return false;
+            case "revoked":
+                RejectWithDeterministicDeny(
+                    fixtureId,
+                    context,
+                    errors,
+                    "E3133_M1S8_REFERENCE_GRANT_PROOF_REVOKED",
+                    "PolicyDenied",
+                    $"{fixtureId}/{message.Type} strict grant proof verification failed: revoked.");
+                return false;
+            case "invalid_signature":
+                RejectWithDeterministicDeny(
+                    fixtureId,
+                    context,
+                    errors,
+                    "E3130_M1S8_REFERENCE_GRANT_PROOF_INVALID_SIGNATURE",
+                    "TrustInsufficient",
+                    $"{fixtureId}/{message.Type} strict grant proof verification failed: invalid signature.");
+                return false;
+            case "unresolvable_proof":
+                RejectWithDeterministicDeny(
+                    fixtureId,
+                    context,
+                    errors,
+                    "E3131_M1S8_REFERENCE_GRANT_PROOF_CHAIN_UNRESOLVABLE",
+                    "TrustInsufficient",
+                    $"{fixtureId}/{message.Type} strict grant proof verification failed: unresolvable proof chain.");
+                return false;
+            case "not_yet_valid":
+                RejectWithDeterministicDeny(
+                    fixtureId,
+                    context,
+                    errors,
+                    "E3134_M1S8_REFERENCE_GRANT_PROOF_NOT_YET_VALID",
+                    "TrustInsufficient",
+                    $"{fixtureId}/{message.Type} strict grant proof verification failed: not yet valid.");
+                return false;
+            default:
+                return true;
+        }
     }
 
     private static bool TryParseRelationTokenCidHex(string relationTokenCid, out string hex)

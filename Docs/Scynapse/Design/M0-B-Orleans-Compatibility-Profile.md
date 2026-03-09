@@ -245,7 +245,18 @@ This profile maps M0-B protocol fields to their Orleans lineage, with explicit c
 
 ---
 
-## 21. Review Checklist
+## 21. M1-S8 Reference-Grant Proof-Binding Behavior Classification
+
+| Hardened Behavior | Tag | Notes |
+|---|---|---|
+| M1-S7 grant-state guard reuse in `M1-S8` handshake accept path | `A` | adapts prior grant-state gates into proof-bound disclosure semantics |
+| Active-grant proof verification contract on `HandshakeAccept` (`mock|strict`) | `N` | Scynapse-native deterministic proof-binding gate for reference grant use |
+| Strict/mock grant-proof failure mapping (`E3130`..`E3135`) | `N` | machine-checkable conformance behavior for proof integrity/temporal/revocation outcomes |
+| Grant proof handling relying on silo/client trust shortcuts | `D` | explicitly blocked; remains node-unified and capability-gated by policy semantics |
+
+---
+
+## 22. Review Checklist
 
 1. Are any fields tagged `A` but still carrying hidden silo/cluster assumptions?
 2. Are all `N` fields tied to M0-A invariants?
