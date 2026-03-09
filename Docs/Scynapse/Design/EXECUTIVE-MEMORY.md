@@ -4,13 +4,14 @@ Last updated: 2026-03-09
 
 ## 1. Mission Snapshot
 
-Current mission: close and checkpoint M1-S12 reference-grant issuer-binding work, then open the next bounded M1 slice while preserving deterministic S1..S5 + M1-S1 + M1-S2 + M1-S3 + M1-S4 + M1-S5 + M1-S6 + M1-S7 + M1-S8 + M1-S9 + M1-S10 + M1-S11 + M1-S12 behavior.
+Current mission: maintain the now-closed M1 deterministic baseline while executing post-M1 bridge/front work with continuity-safe handoffs.
 
 Latest checkpoint status (2026-03-09):
 
-1. active branch: `codex/m1-s12-grant-issuer-binding`
-2. continuity files synchronized
-3. closure rerun confirmed 135/135 effective pass (S1..S5 + M1-S1 + M1-S2 + M1-S3 + M1-S4 + M1-S5 + M1-S6 + M1-S7 + M1-S8 + M1-S9 + M1-S10 + M1-S11 + M1-S12)
+1. active branch: `codex/m1-b1-vertical-spike`
+2. M1 closure stamped (`M1-Closure.md`)
+3. integration test suite green: 11/11
+4. conformance baseline green: 135/135 effective pass (`S1..S5 + M1-S1..M1-S12`)
 
 Current active path:
 
@@ -165,15 +166,62 @@ Current active path:
 123. closure rerun stable: S1 14/14, S2 8/8, S3 4/4, S4 4/4, S5 3/3, M1-S1 10/10, M1-S2 6/6, M1-S3 5/5, M1-S4 6/6, M1-S5 4/4, M1-S6 5/5, M1-S7 7/7, M1-S8 13/13, M1-S9 10/10, M1-S10 14/14, M1-S11 12/12, M1-S12 10/10
 124. M1-S12 task/closure artifacts added (`M1-S12-Task-Board.md`, `M1-S12-Closure.md`)
 125. Claude collaboration bootstrap docs added (`Scynapse-Plan-Report-For-Claude.md`, `AI-Collab-Operating-Model.md`, `AI-Task-0001-M1-S12-Followups.md`)
+126. `Scynapse-Plan-Report-For-Claude.md` section 7+ rewritten to emphasize unresolved Scynapse design fronts and then refined with source-grounded open-problem anchors from `Scynapse-Vision.md` Part 8 and `Scynapse-V1.md` limitations/roadmap.
+127. Claude review response drafted and saved as `Docs/Scynapse/Design/Codex-Reply-To-Claude-Plan-Report.md`, including explicit answers on M1 exit criteria, spec-to-code bridge model, harness/security integration status, front-design grounding in existing code, and gate-order governance scope.
+128. spec-to-code bridge plan drafted as `Docs/Scynapse/Design/Scynapse-Spec-To-Code-Bridge-Plan.md`.
+129. finite M1 closure governance drafted as `Docs/Scynapse/Design/M1-Exit-Criteria.md`.
+130. production-constrained vertical spike board drafted as `Docs/Scynapse/Design/M1-Vertical-Spike-B1-Task-Board.md`.
+131. `Scynapse-Plan-Report-For-Claude.md` updated to include `F11` (Developer Surface and Tooling) and synchronized phase/exit references (`F1..F11`).
+132. `METHODOLOGY.md` updated with R&D-aligned decision maturity tiers (`Locked Commitments`, `Design Baselines`, `Explored Directions`).
+133. `METHODOLOGY.md` updated with mandatory plain-language outward summary rule (`What we did`, `Why it matters`, `What happens next`).
+134. second Claude-response package processed and answered in `Docs/Scynapse/Design/Codex-Reply-03-To-Claude.md`, with bridge/exit/spike artifacts adjusted per feedback.
+135. authority model updated by project lead directive to dynamic/contextual committee mode with Louis as final authority.
+136. `AI-Collab-Operating-Model.md` rewritten to dynamic peer collaboration model (no fixed Codex-over-Claude authority).
+137. `METHODOLOGY.md` Section 11 updated to match committee/peer model and escalation rules.
+138. third Claude-response package processed and answered in `Docs/Scynapse/Design/Codex-Reply-04-To-Claude.md`.
+139. `F5-Current-State-Audit.md` received and read in full; mapped as primary implementation-side input for F5 bridge work.
+140. continuity hardening pass executed for imminent compaction:
+   - `AGENTS.md` orientation protocol expanded for active collaboration/audit artifacts,
+   - `METHODOLOGY.md` re-entry and pre-compaction playbook expanded with collaboration-state reads.
+141. executive re-entry ordering updated for fast post-compaction recovery across Codex/Claude/Louis alignment.
+142. important-reading continuity anchors explicitly locked into prompt/re-entry docs (`AGENTS.md`, `METHODOLOGY.md`) including security baseline docs and legacy dynamic-feature docs.
+143. `F6-Current-State-Audit.md` received and read in full; mapped as primary implementation-side input for F6 runtime/lifecycle bridge work.
+144. `B1-Diagnostic-Flow-Mapping.md` created and filled from production-code anchors as the B0.5 diagnostic mapping pass output.
+145. consolidated decision packet produced: `F5-F6-B1-Decision-Delta-Set.md` (decision-ready deltas for M1 closure and B1 execution).
+146. spike branch opened: `codex/m1-b1-vertical-spike`.
+147. B1 W2 instrumentation implemented in security filters with optional test-only trace sink (`ISecurityFlowTraceSink`, `SecurityFlowTraceEvent`, normalized event names).
+148. B1 W3 scenario set expanded in integration tests:
+   - pass path trace assertions,
+   - explicit `InsufficientCapability` deny path,
+   - explicit `ChainVerificationFailed` deny path.
+149. security integration suite validated on spike branch:
+   - `dotnet test src/Scynapse/test/Scynapse.Security.Integration.Tests/Scynapse.Security.Integration.Tests.csproj -c Debug`
+   - result: 11/11 pass.
+150. B1 task board updated with pass-1 execution status (`W1/W2/W3` complete, `W4/W5` pending).
+151. B1 pass-1 closure readout produced (`M1-B1-Spike-Pass1-Readout.md`) with mismatch triage (`harness`/`implementation`/`contract ambiguity`) and closure recommendation.
+152. B1 task board refined: `W5` marked complete (pass 1); `W4` automation follow-up remains bounded pending work.
+153. B1 bounded W4 follow-up implemented:
+   - `SecurityTraceBridgeComparator.cs` added and wired into integration scenarios.
+154. B1 W4 closure artifact added:
+   - `M1-B1-Spike-W4-Comparator-Closure.md`.
+155. B1 task board updated to mark `W1..W5` complete.
+156. M1 closure summary added:
+   - `M1-Closure.md`.
+157. M1 exit-gate evaluation completed and closure stamped in `M1-Exit-Criteria.md`.
+158. `M1-Status-Checkpoint.md` synchronized to closed state.
+159. post-closure validation reruns confirmed:
+   - integration tests: 11/11 pass,
+   - conformance packs (`S1..S5`, `M1-S1..M1-S12`): 135/135 effective pass.
 
 ### Doing
 
-1. define and sequence the next bounded M1 slice from M1-S12 closure baseline
+1. execute post-M1 bridge/front planning while preserving closed-baseline determinism.
 
 ### Next
 
-1. open next M1 task board and branch from `codex/m1-s12-grant-issuer-binding`
-2. preserve S1/S2/S3/S4/S5 + M1-S1 + M1-S2 + M1-S3 + M1-S4 + M1-S5 + M1-S6 + M1-S7 + M1-S8 + M1-S9 + M1-S10 + M1-S11 + M1-S12 fixture and error-ID stability
+1. run next bounded bridge tasks from `Scynapse-Spec-To-Code-Bridge-Plan.md`.
+2. keep F5/F6 audits and B1 artifacts as active decision inputs.
+3. preserve S1/S2/S3/S4/S5 + M1-S1 + M1-S2 + M1-S3 + M1-S4 + M1-S5 + M1-S6 + M1-S7 + M1-S8 + M1-S9 + M1-S10 + M1-S11 + M1-S12 fixture and error-ID stability.
 
 ---
 
@@ -210,45 +258,52 @@ Authority file:
 
 ## 5. Immediate Reading Order for Any New Agent
 
-1. `METHODOLOGY.md`
-2. `M0-Status-Checkpoint.md`
-3. `M0-B-Protocol-Skeleton.md`
-4. `M0-S1-Task-Board.md`
-5. `M0-S2-Task-Board.md`
-6. `M0-S3-Task-Board.md`
-7. `M0-S4-Task-Board.md`
-8. `M0-S5-Task-Board.md`
-9. `M0-Conformance-Closure.md`
-10. `M0-Exit-Review.md`
-11. `M1-Entry-Plan.md`
-12. `M1-S1-Task-Board.md`
-13. `M1-S1-Closure.md`
-14. `M1-Status-Checkpoint.md`
-15. `M1-S2-Task-Board.md`
-16. `M1-S2-Closure.md`
-17. `M1-S3-Task-Board.md`
-18. `M1-S3-Closure.md`
-19. `M1-S4-Task-Board.md`
-20. `M1-S4-Closure.md`
-21. `M1-S5-Task-Board.md`
-22. `M1-S5-Closure.md`
-23. `M1-S6-Task-Board.md`
-24. `M1-S6-Closure.md`
-25. `M1-S7-Task-Board.md`
-26. `M1-S7-Closure.md`
-27. `M1-S8-Task-Board.md`
-28. `M1-S8-Closure.md`
-29. `M1-S9-Task-Board.md`
-30. `M1-S9-Closure.md`
-31. `M1-S10-Task-Board.md`
-32. `M1-S10-Closure.md`
-33. `M1-S11-Task-Board.md`
-34. `M1-S11-Closure.md`
-35. `M1-S12-Task-Board.md`
-36. `M1-S12-Closure.md`
-37. `Scynapse-Plan-Report-For-Claude.md`
-38. `AI-Collab-Operating-Model.md`
-39. latest entry in `SESSION-LOG.md`
+### 5.1 Fast Re-Entry (Mandatory After Compaction)
+
+1. `EXECUTIVE-MEMORY.md`
+2. `METHODOLOGY.md`
+3. `M1-Status-Checkpoint.md`
+4. `AI-Collab-Operating-Model.md`
+5. latest `Codex-Reply-04-To-Claude.md`
+6. latest `Claude-Reply-03-To-Codex.md`
+7. `Scynapse-Spec-To-Code-Bridge-Plan.md`
+8. `M1-Exit-Criteria.md`
+9. `M1-Closure.md`
+10. `M1-Vertical-Spike-B1-Task-Board.md`
+11. `M1-B1-Spike-W4-Comparator-Closure.md`
+12. `F5-Current-State-Audit.md`
+13. `F6-Current-State-Audit.md`
+14. `B1-Diagnostic-Flow-Mapping.md`
+15. `F5-F6-B1-Decision-Delta-Set.md`
+16. `M1-B1-Spike-Pass1-Readout.md`
+17. latest entry in `SESSION-LOG.md`
+
+If present, add immediately:
+
+1. latest follow-up bridge readout artifacts
+
+### 5.3 Domain Source Pack (Read Before Major Architecture/Security Decisions)
+
+1. `Docs/Scynapse/Scynapse-Vision.md`
+2. `Docs/Scynapse/Scynapse-V1.md`
+3. `Docs/Scynapse/Scynapse Security Development/scynapse-security-architecture_3.md`
+4. `Docs/Scynapse/Scynapse Security Development/scynapse-security-implementation-guide-v2_1.md`
+5. `Docs/Scynapse/Scynapse Security Development/scynapse-security-phase1-review.md`
+6. `Docs/Scynapse/Scynapse Security Development/scynapse-security-phase1-completion-guide-v4.md`
+7. `Docs/Scynapse/Scynapse Features/StatePropertyAccess.md`
+8. `Docs/Scynapse/Scynapse Features/Dynamic Orleans Grain System/DynamicGrainAccess.md`
+9. `Docs/Scynapse/Scynapse Features/Dynamic Orleans Grain System/PluginGrainArchitecture.md`
+10. `Docs/Scynapse/Scynapse Features/Dynamic Orleans Grain System/Scynapse v0 - Dynamic Grain Features.md`
+11. `Docs/Scynapse/Original Orleans Internals/OrleansDistributedGrainDirectory.md`
+
+### 5.2 Full Historical Context (As Needed)
+
+1. `M0-B-Protocol-Skeleton.md`
+2. `M0-Conformance-Closure.md`
+3. `M0-Exit-Review.md`
+4. `M1-Entry-Plan.md`
+5. `M1-S1..M1-S12` task boards + closures
+6. `Scynapse-Plan-Report-For-Claude.md`
 
 ---
 
@@ -314,8 +369,24 @@ Authority file:
    - `M1-S12-Closure.md`
    - `Fixtures/M1-S12/README.md`
    - `Scynapse-Plan-Report-For-Claude.md`
+   - `Claude-Reply-To-Codex-Plan-Report.md`
+   - `Claude-Reply-02-To-Codex.md`
+   - `Claude-Reply-03-To-Codex.md`
+   - `Codex-Reply-To-Claude-Plan-Report.md`
+   - `Codex-Reply-03-To-Claude.md`
+   - `Codex-Reply-04-To-Claude.md`
    - `AI-Collab-Operating-Model.md`
    - `AI-Task-0001-M1-S12-Followups.md`
+   - `F5-Current-State-Audit.md`
+   - `F6-Current-State-Audit.md`
+   - `B1-Diagnostic-Flow-Mapping.md`
+   - `F5-F6-B1-Decision-Delta-Set.md`
+   - `M1-B1-Spike-Pass1-Readout.md`
+   - `Scynapse-Spec-To-Code-Bridge-Plan.md`
+   - `M1-Exit-Criteria.md`
+   - `M1-Vertical-Spike-B1-Task-Board.md`
+   - `B1-Diagnostic-Flow-Mapping.md`
+   - `F5-F6-B1-Decision-Delta-Set.md`
 5. Wire lock:
    - `M0-B-Wire-Lock-Open-Decisions.md`
    - `M0-B-Wire-Examples.md`

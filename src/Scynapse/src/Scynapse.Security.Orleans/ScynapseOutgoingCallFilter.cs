@@ -15,15 +15,27 @@ public sealed class ScynapseOutgoingCallFilter : IOutgoingGrainCallFilter
 {
     private readonly ScynapseKeyPair _nodeKeyPair;
     private readonly ICCapWallet _wallet;
+    private readonly ISecurityFlowTraceSink? _traceSink;
 
-    public ScynapseOutgoingCallFilter(ScynapseKeyPair nodeKeyPair, ICCapWallet wallet)
+    public ScynapseOutgoingCallFilter(
+        ScynapseKeyPair nodeKeyPair,
+        ICCapWallet wallet,
+        ISecurityFlowTraceSink? traceSink = null)
     {
         _nodeKeyPair = nodeKeyPair;
         _wallet = wallet;
+        _traceSink = traceSink;
     }
 
     public async Task Invoke(IOutgoingGrainCallContext context)
     {
+        var grainInterfaceName = context.InterfaceMethod.DeclaringType?.Name ?? "UnknownInterface";
+        var methodName = context.InterfaceMethod.Name;
+        _traceSink?.Emit(new SecurityFlowTraceEvent(
+            SecurityFlowTraceNames.OutgoingContextStart,
+            GrainInterface: grainInterfaceName,
+            Method: methodName));
+
         // Preserve OriginalCallerKey if already present (grain-to-grain call).
         // If not present, this is a client-originated call — the caller key becomes the original caller.
         var existingOriginalCaller = RequestContext.Get(ScynapseSecurityConstants.OriginalCallerKeyKey);
@@ -50,6 +62,17 @@ public sealed class ScynapseOutgoingCallFilter : IOutgoingGrainCallFilter
 
         // Find matching CCap in wallet
         var ccap = _wallet.FindCapability(resource, action);
+        _traceSink?.Emit(new SecurityFlowTraceEvent(
+            SecurityFlowTraceNames.OutgoingWalletLookup,
+            GrainInterface: grainInterfaceName,
+            Method: methodName,
+            Details: new Dictionary<string, string>(StringComparer.Ordinal)
+            {
+                ["resource"] = resource,
+                ["action"] = action,
+                ["found"] = (ccap is not null).ToString()
+            }));
+
         if (ccap != null)
         {
             RequestContext.Set(ScynapseSecurityConstants.CallerPublicKeyKey,
@@ -65,6 +88,17 @@ public sealed class ScynapseOutgoingCallFilter : IOutgoingGrainCallFilter
             RequestContext.Set(ScynapseSecurityConstants.CallerPublicKeyKey,
                 _nodeKeyPair.PublicKeyBytes.ToArray());
         }
+
+        _traceSink?.Emit(new SecurityFlowTraceEvent(
+            SecurityFlowTraceNames.OutgoingContextAttached,
+            GrainInterface: grainInterfaceName,
+            Method: methodName,
+            Details: new Dictionary<string, string>(StringComparer.Ordinal)
+            {
+                ["has_caller_key"] = "true",
+                ["has_ccap"] = (ccap is not null).ToString(),
+                ["has_bearer_proof"] = (ccap is not null).ToString()
+            }));
 
         await context.Invoke();
     }

@@ -819,3 +819,289 @@ Use this structure for each new entry:
    - open next bounded M1 slice from M1-S12 closure baseline and review Claude packet outputs under the new operating model.
 6. Risks/blockers:
    - none immediate; preserve deterministic issuer-binding/error-ID stability and gate-order invariants.
+
+### 2026-03-09 (Scynapse Plan Report Tail Rewrite + Source-Grounded Open-Front Alignment)
+
+1. Scope:
+   - rework `Scynapse-Plan-Report-For-Claude.md` from section 7 onward to focus on unresolved Scynapse design work instead of collaboration/model comparison.
+2. Key outputs:
+   - section 7 replaced with an explicit "not yet designed" reality check.
+   - section 8 expanded into front model `F1..F10`, adding packaging/distribution/survival and privacy/anonymity/capability vocabulary fronts.
+   - section 9/10/11 updated for `F1..F10` sequencing and exit criteria.
+   - content grounded against repo authority docs:
+     - `Docs/Scynapse/Scynapse-Vision.md` Part 8 and Part 9
+     - `Docs/Scynapse/Scynapse-V1.md` Part 7 and Part 8
+3. Validation:
+   - headings and section flow verified after patch.
+4. Current doing:
+   - maintain continuity alignment after report rewrite.
+5. Next:
+   - produce the three planning artifacts referenced in section 11 (`Scynapse-Open-Design-Questions.md`, `Scynapse-Decision-Backlog.md`, `Scynapse-Design-Roadmap.md`).
+6. Risks/blockers:
+   - no blocker; key risk is drifting into micro-slice-only planning without front-level architecture closure.
+
+### 2026-03-09 (Codex Reply to Claude Plan-Report Review)
+
+1. Scope:
+   - read `Claude-Reply-To-Codex-Plan-Report.md` and produce a formal response file from Codex.
+2. Key outputs:
+   - created `Docs/Scynapse/Design/Codex-Reply-To-Claude-Plan-Report.md`.
+   - response includes explicit answers to Q1..Q5:
+     - finite M1 exit criteria,
+     - staged spec-to-code bridge model,
+     - current real-vs-simulated `Scynapse.Security` integration boundaries,
+     - requirement that front design is grounded in current implementation,
+     - append-only gate-order policy scoped to M1 governance (not permanent architecture).
+   - accepted and incorporated major suggestions:
+     - vertical bridge spike,
+     - conformance-engine decomposition,
+     - add F11 DX/API front,
+     - refine "no production code" rule to permit bounded spikes and existing subsystem evolution.
+3. Validation:
+   - reply file content reviewed after write.
+4. Current doing:
+   - continuity synchronization.
+5. Next:
+   - generate bridge/exit/spike planning artifacts referenced in the reply (`Scynapse-Spec-To-Code-Bridge-Plan.md`, `M1-Exit-Criteria.md`, `M1-Vertical-Spike-B1-Task-Board.md`).
+6. Risks/blockers:
+   - no blocker; main risk remains delayed spec-to-code bridge execution.
+
+### 2026-03-09 (Bridge/Exit/Spike Planning Artifact Set)
+
+1. Scope:
+   - produce the three follow-up planning artifacts committed in the Codex reply to Claude.
+2. Key outputs:
+   - created `Docs/Scynapse/Design/Scynapse-Spec-To-Code-Bridge-Plan.md`.
+   - created `Docs/Scynapse/Design/M1-Exit-Criteria.md`.
+   - created `Docs/Scynapse/Design/M1-Vertical-Spike-B1-Task-Board.md`.
+   - updated `Scynapse-Plan-Report-For-Claude.md` to include `F11` (Developer Surface and Tooling) and synchronized references to `F1..F11`.
+3. Validation:
+   - artifact content reviewed after creation.
+4. Continuity updates:
+   - `EXECUTIVE-MEMORY.md` updated for new done items and revised doing/next.
+5. Next:
+   - review/approve M1 closure decision path using `M1-Exit-Criteria.md`,
+   - if approved, open and execute `codex/m1-b1-vertical-spike`.
+6. Risks/blockers:
+   - no blocker; key risk remains postponing spike execution and letting spec/code drift persist.
+
+### 2026-03-09 (Claude Reply #2 Processing + R&D/Clarity Methodology Update)
+
+1. Scope:
+   - process `Claude-Reply-02-To-Codex.md`, respond, and apply immediate plan/method updates.
+2. Key outputs:
+   - created `Docs/Scynapse/Design/Codex-Reply-03-To-Claude.md`.
+   - updated `METHODOLOGY.md` with:
+     - decision maturity tiers (`Locked Commitments`, `Design Baselines`, `Explored Directions`),
+     - mandatory plain-language outward summary rule.
+   - updated `M1-Exit-Criteria.md` to clarify project-lead closure decision authority.
+   - updated `Scynapse-Spec-To-Code-Bridge-Plan.md` with lightweight first-pass `B0.5` diagnostic mapping step.
+   - updated `M1-Vertical-Spike-B1-Task-Board.md` to implementation-first diagnostic framing and added gap-analysis readout workstream.
+3. Validation:
+   - reply and updated artifact content reviewed after write.
+4. Current doing:
+   - prepare for implementation-side audits (`F5/F6`) and B1 diagnostic mapping handoff cycle.
+5. Next:
+   - receive and review Claude/Louis implementation-side audit outputs, then refine spec/front deltas.
+6. Risks/blockers:
+   - no blocker; primary risk remains delay in implementation-side feedback loop.
+
+### 2026-03-09 (Dynamic Committee Governance Update + Claude Reply #4)
+
+1. Scope:
+   - apply project-lead directive for dynamic/contextual authority between agents and respond to `Claude-Reply-03-To-Codex.md`.
+2. Key outputs:
+   - rewrote `AI-Collab-Operating-Model.md` to dynamic committee/peer model:
+     - Louis final authority,
+     - no fixed Codex-over-Claude authority,
+     - routine bounded work proceeds without approval on every detail.
+   - updated `METHODOLOGY.md` section 11 to align with committee governance and escalation rules.
+   - created `Docs/Scynapse/Design/Codex-Reply-04-To-Claude.md`.
+3. Validation:
+   - updated artifacts reviewed after write.
+4. Current doing:
+   - awaiting F5/F6/B1 implementation-side artifacts under updated operating model.
+5. Next:
+   - reconcile audit findings into spec/front deltas and decision packet for Louis.
+6. Risks/blockers:
+   - no blocker; risk remains asynchronous context drift if artifacts are not circulated together.
+
+### 2026-03-09 (F5 Audit Ingestion + Pre-Compaction Continuity Hardening)
+
+1. Scope:
+   - ingest `F5-Current-State-Audit.md` and harden post-compaction re-entry protocol for active multi-agent phase.
+2. Key outputs:
+   - read `F5-Current-State-Audit.md` in full and integrated it into immediate M1 bridge inputs.
+   - updated `AGENTS.md` orientation protocol to require, when present:
+     - active collaboration operating model,
+     - latest Codex/Claude exchange docs,
+     - latest F*/B* audit/mapping artifacts.
+   - updated `METHODOLOGY.md`:
+     - re-entry protocol now includes collaboration/audit reads,
+     - pre-compaction playbook now reconciles both milestone checkpoints and collaboration state.
+   - updated `EXECUTIVE-MEMORY.md`:
+     - added fast mandatory post-compaction reading order for current phase,
+     - recorded this continuity hardening pass.
+   - updated `M1-Status-Checkpoint.md` to include F5 ingestion and pending F6/B1 inputs in immediate next work.
+3. Validation:
+   - read-order references verified after patch.
+4. Current doing:
+   - waiting for `F6-Current-State-Audit.md` and `B1-Diagnostic-Flow-Mapping.md` while preserving M1 baseline stability.
+5. Next:
+   - reconcile F5/F6/B1 findings into spec deltas and closure recommendation for Louis.
+6. Risks/blockers:
+   - compaction risk mitigated; remaining risk is delayed delivery of implementation-side artifacts.
+
+### 2026-03-09 (Important Reading Pack Locked Into Prompt/Re-Entry Files)
+
+1. Scope:
+   - apply project-lead directive to permanently pin relevant Scynapse security and legacy-feature docs into prompt/re-entry continuity.
+2. Key outputs:
+   - updated `AGENTS.md` orientation protocol with explicit important reading pack:
+     - Vision + v1 docs,
+     - Scynapse security architecture/implementation/review/completion docs,
+     - legacy dynamic-feature docs (`StatePropertyAccess`, dynamic grain docs, Orleans directory internals).
+   - updated `METHODOLOGY.md` with `Important Reading Pack (Persistent)` section for post-compaction/new-thread re-entry.
+   - updated `EXECUTIVE-MEMORY.md`:
+     - recorded completion as a new done item,
+     - added `Domain Source Pack` under immediate reading guidance.
+   - updated `M1-Status-Checkpoint.md` immediate next work to keep this reading pack in active context for bridge/front decisions.
+3. Validation:
+   - references verified after patch.
+4. Current doing:
+   - continuity and re-entry hardening complete.
+5. Next:
+   - continue bridge planning/execution with F5/F6/B1 inputs while preserving M1 deterministic baseline.
+6. Risks/blockers:
+   - no blocker; major continuity drift risk reduced by now-explicit reading pack.
+
+### 2026-03-09 (F6 Audit Ingestion: Runtime/Lifecycle Baseline)
+
+1. Scope:
+   - read and integrate `F6-Current-State-Audit.md` from Claude into current bridge/continuity context.
+2. Key outputs:
+   - read `Docs/Scynapse/Design/F6-Current-State-Audit.md` in full.
+   - captured F6 framing into active baseline:
+     - Orleans internals are starting material and can be deeply modified.
+     - reusable runtime primitives: activation semantics, placement/rebalancing, serialization, lifecycle patterns.
+     - major architecture gaps remain: Component abstraction (`Varia/Varion/Cell/Hive`), node unification, mediation layer, per-component isolation, decentralized CNS discovery.
+     - GTD remains discard-tier; dynamic grain/access features are reference/PoC inputs, not final architecture.
+   - updated continuity files:
+     - `EXECUTIVE-MEMORY.md` done/next alignment for F6 ingestion.
+     - `M1-Status-Checkpoint.md` immediate-next and snapshot alignment (`F6` integrated, `B1` pending).
+3. Validation:
+   - F6 file read fully (131 lines) and continuity references verified after patch.
+4. Current doing:
+   - waiting for `B1-Diagnostic-Flow-Mapping.md` to complete bridge intake set.
+5. Next:
+   - reconcile `F5 + F6 + B1` into concrete spec-to-code delta packet and M1 closure recommendation.
+6. Risks/blockers:
+   - no blocker; remaining dependency is B1 mapping delivery.
+
+### 2026-03-09 (B1 Diagnostic Mapping + F5/F6/B1 Decision Packet)
+
+1. Scope:
+   - complete bridge intake set by producing the missing `B1-Diagnostic-Flow-Mapping.md` and consolidated decision-ready deltas.
+2. Key outputs:
+   - created `Docs/Scynapse/Design/B1-Diagnostic-Flow-Mapping.md`:
+     - representative production-flow mapping (outgoing/incoming filters + verifier),
+     - direct/partial/missing analog table against conformance intents,
+     - concrete trace-schema draft and prioritized bridge deltas.
+   - created `Docs/Scynapse/Design/F5-F6-B1-Decision-Delta-Set.md`:
+     - consolidated baseline and decision matrix for Louis,
+     - recommended next-step sequence (B1 spike before opening further micro-slices).
+   - updated bridge/continuity docs:
+     - `Scynapse-Spec-To-Code-Bridge-Plan.md` follow-on artifact list now includes B1 + decision packet,
+     - `EXECUTIVE-MEMORY.md` and `M1-Status-Checkpoint.md` updated to mark B1 ingested and shift next-step posture to closure decision + spike execution.
+3. Validation:
+   - artifact references and checkpoint alignment verified after patch.
+4. Current doing:
+   - ready for M1 closure decision using `M1-Exit-Criteria.md` with `F5+F6+B1` evidence.
+5. Next:
+   - if approved, open `codex/m1-b1-vertical-spike` and execute W1-W5.
+6. Risks/blockers:
+   - no blocker; key risk remains spike scope expansion beyond one bounded flow.
+
+### 2026-03-09 (B1 Spike Pass 1: Trace Instrumentation + Scenario Expansion)
+
+1. Scope:
+   - begin execution on `codex/m1-b1-vertical-spike` with bounded W1/W2/W3 implementation.
+2. Key outputs:
+   - branch created: `codex/m1-b1-vertical-spike`.
+   - added optional test-only trace abstraction in `Scynapse.Security.Orleans`:
+     - `ISecurityFlowTraceSink`,
+     - `SecurityFlowTraceEvent`,
+     - `SecurityFlowTraceNames`.
+   - instrumented outgoing/incoming security call filters with normalized gate/terminal events.
+   - wired optional sink resolution through security silo/client extension factories.
+   - expanded integration tests with:
+     - pass flow trace assertions,
+     - explicit `InsufficientCapability` scenario (`ResourceMismatch`),
+     - explicit `ChainVerificationFailed` scenario (`BrokenProofChain`),
+     - serialized test collection for deterministic trace assertions.
+   - updated B1 task board status section (W1/W2/W3 complete, W4/W5 pending).
+3. Validation:
+   - ran:
+     - `dotnet test src/Scynapse/test/Scynapse.Security.Integration.Tests/Scynapse.Security.Integration.Tests.csproj -c Debug`
+   - result:
+     - passed 11/11, failed 0.
+4. Current doing:
+   - preparing W4 comparative mapping and W5 closure readout.
+5. Next:
+   - produce mismatch triage output (`harness` / `implementation` / `contract ambiguity`) and final B1 readout for M1 closure decision.
+6. Risks/blockers:
+   - no blocker; keep spike scope bounded to avoid architecture-overreach during bridge validation.
+
+### 2026-03-09 (B1 W4/W5 Pass-1 Readout and Closure Packet Sync)
+
+1. Scope:
+   - complete B1 pass-1 comparative readout and synchronize closure-governance artifacts.
+2. Key outputs:
+   - created `Docs/Scynapse/Design/M1-B1-Spike-Pass1-Readout.md`:
+     - manual comparative triage across categories (`harness`, `implementation`, `contract ambiguity`),
+     - gate readout for W1..W5,
+     - closure recommendation and bounded follow-up deltas.
+   - updated `M1-Vertical-Spike-B1-Task-Board.md` status:
+     - W5 marked complete (pass 1),
+     - W4 automation follow-up explicitly bounded and pending.
+   - synchronized continuity:
+     - `EXECUTIVE-MEMORY.md`,
+     - `M1-Status-Checkpoint.md`.
+3. Validation:
+   - artifact cross-references and status alignment verified after patch.
+4. Current doing:
+   - preparing final M1 closure decision packet using B1 pass-1 evidence.
+5. Next:
+   - decide M1 closure under `M1-Exit-Criteria.md`; if needed, run only bounded W4 automation follow-up.
+6. Risks/blockers:
+   - no blocker; major risk remains reopening unbounded M1 micro-slice growth instead of bounded bridge follow-through.
+
+### 2026-03-09 (Bounded W4 Comparator Follow-Up + M1 Closure)
+
+1. Scope:
+   - execute approved bounded B1 `W4` comparator automation follow-up, then close M1.
+2. Key outputs:
+   - added comparator utility:
+     - `src/Scynapse/test/Scynapse.Security.Integration.Tests/SecurityTraceBridgeComparator.cs`
+     - tokenized runtime-trace comparison + mismatch classification (`ImplementationMismatch`, `HarnessMismatch`, `ContractAmbiguity`).
+   - wired comparator-oracle assertions into integration scenarios:
+     - valid pass path,
+     - `InsufficientCapability` deny path,
+     - `ChainVerificationFailed` deny path.
+   - published closure artifacts:
+     - `Docs/Scynapse/Design/M1-B1-Spike-W4-Comparator-Closure.md`
+     - `Docs/Scynapse/Design/M1-Closure.md`
+   - synchronized status/governance docs:
+     - `M1-Vertical-Spike-B1-Task-Board.md`
+     - `M1-Exit-Criteria.md`
+     - `M1-Status-Checkpoint.md`
+     - `EXECUTIVE-MEMORY.md`
+3. Validation:
+   - `dotnet test src/Scynapse/test/Scynapse.Security.Integration.Tests/Scynapse.Security.Integration.Tests.csproj -c Debug --nologo`: 11/11 pass.
+   - conformance rerun across `S1..S5` and `M1-S1..M1-S12`: 135/135 effective pass.
+4. Current doing:
+   - post-M1 continuity synchronization complete.
+5. Next:
+   - execute next bounded bridge/front tasks under closed M1 baseline.
+6. Risks/blockers:
+   - no blocker; maintain strict guardrail against re-opening unbounded M1 micro-slice growth.

@@ -1,5 +1,7 @@
 # Scynapse M1 Status Checkpoint
 
+Status: M1 closed on 2026-03-09 (after bounded B1 W4 comparator follow-up)
+
 ## 1. Why This Exists
 
 M1 introduces implementation-forward work after M0 closure. This checkpoint prevents drift while expanding from wire closure into runtime bridge slices.
@@ -374,14 +376,17 @@ Status:
 
 ## 4. Immediate Next Work (Ordered)
 
-1. define and open the next bounded M1 slice task board
-2. preserve locked wire decisions and M1-S3/M1-S4/M1-S5/M1-S6/M1-S7/M1-S8/M1-S9/M1-S10/M1-S11/M1-S12 deterministic error-ID behavior
-3. keep S1..S5 + M1-S1 + M1-S2 + M1-S3 + M1-S4 + M1-S5 + M1-S6 + M1-S7 + M1-S8 + M1-S9 + M1-S10 + M1-S11 + M1-S12 regression suite green on each implementation pass
+1. execute post-M1 bridge track from `Scynapse-Spec-To-Code-Bridge-Plan.md` (B2/B3 progression)
+2. keep `F5-Current-State-Audit.md` + `F6-Current-State-Audit.md` as baseline inputs for runtime mapping decisions
+3. preserve locked wire decisions and deterministic error-ID behavior from closed M1 slices
+4. keep S1..S5 + M1-S1..M1-S12 regression suite green on each implementation pass
+5. keep the important reading pack active for front-design decisions (Vision, v1, security baseline docs, legacy dynamic-feature docs)
+6. track all new bridge/front decisions in continuity artifacts to preserve post-compaction alignment
 
 ---
 
 ## 5. Done/Doing/Next Snapshot
 
-1. `Done`: M0 exit review, M1 entry plan, M1-S1 closure, M1-S2 closure, M1-S3 closure, M1-S4 closure, M1-S5 closure, M1-S6 closure, M1-S7 closure, M1-S8 closure, M1-S9 closure, M1-S10 closure, M1-S11 closure, M1-S12 closure.
-2. `Doing`: next bounded M1 slice selection and sequencing from M1-S12 closure baseline.
-3. `Next`: open the next M1 task board and implementation branch.
+1. `Done`: M0 exit review, M1 entry plan, M1-S1 closure, M1-S2 closure, M1-S3 closure, M1-S4 closure, M1-S5 closure, M1-S6 closure, M1-S7 closure, M1-S8 closure, M1-S9 closure, M1-S10 closure, M1-S11 closure, M1-S12 closure, post-review bridge/exit/spike planning artifacts, F5 current-state audit ingestion, F6 current-state audit ingestion, B1 diagnostic flow mapping, consolidated F5+F6+B1 decision-delta packet, B1 W1/W2/W3 implementation, B1 W5 pass-1 readout, bounded B1 W4 comparator automation follow-up, integration tests green (11/11), full conformance baseline green (135/135), M1 closure approved and stamped (`M1-Closure.md`).
+2. `Doing`: post-M1 bridge and architecture-front execution planning.
+3. `Next`: execute next bounded bridge/front work while preserving the closed M1 deterministic baseline.

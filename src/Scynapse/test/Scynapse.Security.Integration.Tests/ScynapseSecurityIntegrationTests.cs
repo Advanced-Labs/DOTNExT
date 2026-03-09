@@ -1,3 +1,4 @@
+using System.Collections.Concurrent;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -12,6 +13,31 @@ using Scynapse.TestingHost;
 using Xunit;
 
 namespace Scynapse.Security.Integration.Tests;
+
+// Keep these integration tests serialized because trace collection is process-global.
+[CollectionDefinition("SecurityTrace", DisableParallelization = true)]
+public sealed class SecurityTraceCollectionDefinition { }
+
+internal static class SecurityTraceCollector
+{
+    private static readonly ConcurrentQueue<SecurityFlowTraceEvent> Events = new();
+
+    public static void Reset()
+    {
+        while (Events.TryDequeue(out _))
+        {
+        }
+    }
+
+    public static void Add(SecurityFlowTraceEvent traceEvent) => Events.Enqueue(traceEvent);
+
+    public static IReadOnlyList<SecurityFlowTraceEvent> Snapshot() => Events.ToArray();
+}
+
+internal sealed class CollectingSecurityFlowTraceSink : ISecurityFlowTraceSink
+{
+    public void Emit(SecurityFlowTraceEvent traceEvent) => SecurityTraceCollector.Add(traceEvent);
+}
 
 // ────────────────────────────────────────────────────────
 // Test grain interfaces
@@ -33,6 +59,13 @@ public interface ISecuredGrain : IGrainWithStringKey
 public interface IOpenGrain : IGrainWithStringKey
 {
     Task<string> Hello();
+}
+
+[SecurityPolicy(RequiresAuthentication = true)]
+public interface IRestrictedResourceGrain : IGrainWithStringKey
+{
+    [RequireCapability(Action = "read", Resource = "scynapse.app.RestrictedResource")]
+    Task<string> ReadRestricted();
 }
 
 // ────────────────────────────────────────────────────────
@@ -62,6 +95,11 @@ public class OpenGrain : Grain, IOpenGrain
     public Task<string> Hello() => Task.FromResult("hello");
 }
 
+public class RestrictedResourceGrain : Grain, IRestrictedResourceGrain
+{
+    public Task<string> ReadRestricted() => Task.FromResult("restricted");
+}
+
 // ────────────────────────────────────────────────────────
 // Shared test infrastructure
 // ────────────────────────────────────────────────────────
@@ -80,6 +118,7 @@ internal static class TestSecuritySetup
     public const string ClientSeedKey = "ScynapseSecurity:ClientSeed";
     public const string ClientDelegationKey = "ScynapseSecurity:ClientDelegation";
     public const string ClientCCapKey = "ScynapseSecurity:ClientCCap";
+    public const string OmitOrgIdentityInSiloKey = "ScynapseSecurity:OmitOrgIdentityInSilo";
 
     /// <summary>
     /// Creates the full key hierarchy and assertion chain for a test.
@@ -159,6 +198,7 @@ internal class SecuredSiloConfigurator : IHostConfigurator
         var orgIdentity = TestSecuritySetup.LoadAssertion(config, TestSecuritySetup.OrgIdentityKey);
         var nodeDelegation = TestSecuritySetup.LoadAssertion(config, TestSecuritySetup.NodeDelegationKey);
         var clientDelegation = TestSecuritySetup.LoadAssertion(config, TestSecuritySetup.ClientDelegationKey);
+        var omitOrgIdentity = bool.TryParse(config[TestSecuritySetup.OmitOrgIdentityInSiloKey], out var parsed) && parsed;
 
         hostBuilder.UseScynapse((ctx, siloBuilder) =>
         {
@@ -166,7 +206,6 @@ internal class SecuredSiloConfigurator : IHostConfigurator
             {
                 NodeKeyPair = nodeKey,
                 TrustedRoots = { orgKey.PublicKeyBytes.ToArray() },
-                BootstrapAssertions = { orgIdentity, nodeDelegation, clientDelegation },
                 PeerAssertions = { },
                 RequireMutualTls = false,
                 // TLS disabled for TestCluster: in-process transport doesn't need encryption.
@@ -174,7 +213,18 @@ internal class SecuredSiloConfigurator : IHostConfigurator
                 // These tests validate the call filter / CCap / assertion chain flow.
                 EnableTls = false,
             };
-            siloBuilder.UseScynapseSecurity(options);
+            if (!omitOrgIdentity)
+            {
+                options.BootstrapAssertions.Add(orgIdentity);
+            }
+
+            options.BootstrapAssertions.Add(nodeDelegation);
+            options.BootstrapAssertions.Add(clientDelegation);
+
+            siloBuilder.UseScynapseSecurity(options, services =>
+            {
+                services.AddSingleton<ISecurityFlowTraceSink, CollectingSecurityFlowTraceSink>();
+            });
         });
     }
 }
@@ -202,7 +252,10 @@ internal class SecuredClientConfigurator : IClientBuilderConfigurator
             BootstrapCapabilities = { clientCCap },
             EnableTls = false,
         };
-        clientBuilder.UseScynapseSecurity(options);
+        clientBuilder.UseScynapseSecurity(options, services =>
+        {
+            services.AddSingleton<ISecurityFlowTraceSink, CollectingSecurityFlowTraceSink>();
+        });
     }
 }
 
@@ -211,6 +264,7 @@ internal class SecuredClientConfigurator : IClientBuilderConfigurator
 // ────────────────────────────────────────────────────────
 
 [Trait("Category", "BVT")]
+[Collection("SecurityTrace")]
 public class ScynapseSecurityIntegrationTests
 {
     /// <summary>
@@ -224,6 +278,7 @@ public class ScynapseSecurityIntegrationTests
         TestCluster? testCluster = null;
         try
         {
+            SecurityTraceCollector.Reset();
             var props = TestSecuritySetup.CreateTestHierarchy();
             var builder = new TestClusterBuilder(2)
                 .AddSiloBuilderConfigurator<SecuredSiloConfigurator>()
@@ -238,6 +293,74 @@ public class ScynapseSecurityIntegrationTests
             var grain = testCluster.Client.GetGrain<ISecuredGrain>("test-1");
             var result = await grain.GetData();
             Assert.Equal("initial", result);
+
+            var trace = SecurityTraceCollector.Snapshot();
+            var comparison = SecurityTraceBridgeComparator.Compare(trace, new SecurityTraceComparisonSpec(
+                Name: "ValidCCapPass",
+                RequiredTokens: new[]
+                {
+                    SecurityTraceBridgeTokens.OutgoingWalletLookupFoundTrue,
+                    SecurityTraceBridgeTokens.IncomingChainVerifySuccess,
+                    SecurityTraceBridgeTokens.TerminalAllow
+                },
+                ForbiddenTokens: new[]
+                {
+                    SecurityTraceBridgeTokens.TerminalDeny
+                }));
+            SecurityTraceBridgeComparator.AssertMatch(comparison);
+        }
+        finally
+        {
+            if (testCluster != null)
+            {
+                await testCluster.StopAllSilosAsync();
+                testCluster.Dispose();
+            }
+        }
+    }
+
+    /// <summary>
+    /// CCap present on outgoing path but rejected on incoming path due resource policy mismatch.
+    /// Ensures we exercise explicit InsufficientCapability (not wallet-collapse to MissingCapability).
+    /// </summary>
+    [Fact]
+    public async Task SecuredGrainCall_ResourceMismatch_IsRejectedAsInsufficientCapability()
+    {
+        TestCluster? testCluster = null;
+        try
+        {
+            SecurityTraceCollector.Reset();
+            var props = TestSecuritySetup.CreateTestHierarchy(
+                ccapResource: "scynapse.app.IRestrictedResourceGrain",
+                ccapAction: "read");
+
+            var builder = new TestClusterBuilder(1)
+                .AddSiloBuilderConfigurator<SecuredSiloConfigurator>()
+                .AddClientBuilderConfigurator<SecuredClientConfigurator>();
+
+            foreach (var kv in props)
+                builder.Properties[kv.Key] = kv.Value;
+
+            testCluster = builder.Build();
+            await testCluster.DeployAsync();
+
+            var grain = testCluster.Client.GetGrain<IRestrictedResourceGrain>("restricted-1");
+            var ex = await Assert.ThrowsAsync<ScynapseSecurityException>(
+                () => grain.ReadRestricted());
+
+            Assert.Equal(SecurityFailureCode.InsufficientCapability, ex.FailureCode);
+
+            var trace = SecurityTraceCollector.Snapshot();
+            var comparison = SecurityTraceBridgeComparator.Compare(trace, new SecurityTraceComparisonSpec(
+                Name: "InsufficientCapabilityDeny",
+                RequiredTokens: new[]
+                {
+                    SecurityTraceBridgeTokens.OutgoingWalletLookupFoundTrue,
+                    SecurityTraceBridgeTokens.IncomingCapabilityMatchFail,
+                    SecurityTraceBridgeTokens.TerminalDeny,
+                    SecurityTraceBridgeTokens.TerminalDenyCode(SecurityFailureCode.InsufficientCapability)
+                }));
+            SecurityTraceBridgeComparator.AssertMatch(comparison);
         }
         finally
         {
@@ -443,6 +566,7 @@ public class BackendGrain : Grain, IBackendGrain
 // ────────────────────────────────────────────────────────
 
 [Trait("Category", "BVT")]
+[Collection("SecurityTrace")]
 public class ScynapseSecurityCrossSiloTests
 {
     /// <summary>
@@ -579,6 +703,7 @@ internal class UnsecuredClientConfigurator : IClientBuilderConfigurator
 }
 
 [Trait("Category", "BVT")]
+[Collection("SecurityTrace")]
 public class ScynapseSecurityNegativeTests
 {
     /// <summary>
@@ -606,6 +731,59 @@ public class ScynapseSecurityNegativeTests
             var ex = await Assert.ThrowsAsync<ScynapseSecurityException>(
                 () => grain.GetData());
             Assert.Contains("Authentication required", ex.Message);
+        }
+        finally
+        {
+            if (testCluster != null)
+            {
+                await testCluster.StopAllSilosAsync();
+                testCluster.Dispose();
+            }
+        }
+    }
+
+    /// <summary>
+    /// Missing root assertion on silo side breaks CCap proof-chain verification.
+    /// Ensures explicit chain verification deny class is observable.
+    /// </summary>
+    [Fact]
+    public async Task SecuredGrainCall_BrokenProofChain_IsRejected()
+    {
+        TestCluster? testCluster = null;
+        try
+        {
+            SecurityTraceCollector.Reset();
+            var props = TestSecuritySetup.CreateTestHierarchy();
+            var builder = new TestClusterBuilder(1)
+                .AddSiloBuilderConfigurator<SecuredSiloConfigurator>()
+                .AddClientBuilderConfigurator<SecuredClientConfigurator>();
+
+            foreach (var kv in props)
+                builder.Properties[kv.Key] = kv.Value;
+
+            // Force missing org identity on silo side so proof resolution fails.
+            builder.Properties[TestSecuritySetup.OmitOrgIdentityInSiloKey] = "true";
+
+            testCluster = builder.Build();
+            await testCluster.DeployAsync();
+
+            var grain = testCluster.Client.GetGrain<ISecuredGrain>("test-broken-chain");
+            var ex = await Assert.ThrowsAsync<ScynapseSecurityException>(
+                () => grain.GetData());
+
+            Assert.Equal(SecurityFailureCode.ChainVerificationFailed, ex.FailureCode);
+
+            var trace = SecurityTraceCollector.Snapshot();
+            var comparison = SecurityTraceBridgeComparator.Compare(trace, new SecurityTraceComparisonSpec(
+                Name: "BrokenProofChainDeny",
+                RequiredTokens: new[]
+                {
+                    SecurityTraceBridgeTokens.OutgoingWalletLookupFoundTrue,
+                    SecurityTraceBridgeTokens.IncomingChainVerifyFail,
+                    SecurityTraceBridgeTokens.TerminalDeny,
+                    SecurityTraceBridgeTokens.TerminalDenyCode(SecurityFailureCode.ChainVerificationFailed)
+                }));
+            SecurityTraceBridgeComparator.AssertMatch(comparison);
         }
         finally
         {

@@ -65,7 +65,8 @@ public static class ScynapseSecurityClientBuilderExtensions
         builder.Services.AddSingleton<IOutgoingGrainCallFilter>(sp =>
         {
             var wallet = sp.GetRequiredService<ICCapWallet>();
-            return new ScynapseOutgoingCallFilter(options.NodeKeyPair, wallet);
+            var traceSink = sp.GetService<ISecurityFlowTraceSink>();
+            return new ScynapseOutgoingCallFilter(options.NodeKeyPair, wallet, traceSink);
         });
 
         // Allow caller to override default implementations

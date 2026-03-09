@@ -25,6 +25,7 @@ public sealed class ScynapseIncomingCallFilter : IIncomingGrainCallFilter
     private readonly IAttenuationChecker _attenuationChecker;
     private readonly IReadOnlySet<ReadOnlyMemory<byte>> _trustedNodeKeys;
     private readonly ILogger? _logger;
+    private readonly ISecurityFlowTraceSink? _traceSink;
 
     public ScynapseIncomingCallFilter(
         IAssertionStore store,
@@ -33,7 +34,8 @@ public sealed class ScynapseIncomingCallFilter : IIncomingGrainCallFilter
         IGrainSecurityPolicyProvider policyProvider,
         IAttenuationChecker? attenuationChecker = null,
         IReadOnlySet<ReadOnlyMemory<byte>>? trustedNodeKeys = null,
-        ILogger<ScynapseIncomingCallFilter>? logger = null)
+        ILogger<ScynapseIncomingCallFilter>? logger = null,
+        ISecurityFlowTraceSink? traceSink = null)
     {
         _store = store;
         _nonceStore = nonceStore;
@@ -43,22 +45,53 @@ public sealed class ScynapseIncomingCallFilter : IIncomingGrainCallFilter
         _trustedNodeKeys = trustedNodeKeys
             ?? new HashSet<ReadOnlyMemory<byte>>(ByteMemoryEqualityComparer.Instance);
         _logger = logger;
+        _traceSink = traceSink;
     }
 
     public async Task Invoke(IIncomingGrainCallContext context)
     {
         // Determine the grain interface type from the method's declaring type
         var grainInterfaceType = context.InterfaceMethod.DeclaringType ?? typeof(object);
+        var grainInterfaceName = grainInterfaceType.Name;
+        var methodName = context.InterfaceMethod.Name;
         var policy = _policyProvider.GetPolicy(grainInterfaceType);
+        _traceSink?.Emit(new SecurityFlowTraceEvent(
+            SecurityFlowTraceNames.IncomingPolicyResolved,
+            GrainInterface: grainInterfaceName,
+            Method: methodName,
+            Details: new Dictionary<string, string>(StringComparer.Ordinal)
+            {
+                ["requires_authentication"] = policy.RequiresAuthentication.ToString(),
+                ["allow_anonymous"] = policy.AllowAnonymous.ToString(),
+                ["requires_caller_capability"] = policy.RequiresCallerCapability.ToString()
+            }));
 
         if (policy.AllowAnonymous)
         {
+            _traceSink?.Emit(new SecurityFlowTraceEvent(
+                SecurityFlowTraceNames.IncomingTerminal,
+                GrainInterface: grainInterfaceName,
+                Method: methodName,
+                Details: new Dictionary<string, string>(StringComparer.Ordinal)
+                {
+                    ["outcome"] = "allow",
+                    ["mode"] = "allow_anonymous"
+                }));
             await context.Invoke();
             return;
         }
 
         if (!policy.RequiresAuthentication)
         {
+            _traceSink?.Emit(new SecurityFlowTraceEvent(
+                SecurityFlowTraceNames.IncomingTerminal,
+                GrainInterface: grainInterfaceName,
+                Method: methodName,
+                Details: new Dictionary<string, string>(StringComparer.Ordinal)
+                {
+                    ["outcome"] = "allow",
+                    ["mode"] = "no_auth_required"
+                }));
             await context.Invoke();
             return;
         }
@@ -70,6 +103,15 @@ public sealed class ScynapseIncomingCallFilter : IIncomingGrainCallFilter
 
         if (callerKey is null)
         {
+            _traceSink?.Emit(new SecurityFlowTraceEvent(
+                SecurityFlowTraceNames.IncomingTerminal,
+                GrainInterface: grainInterfaceName,
+                Method: methodName,
+                Details: new Dictionary<string, string>(StringComparer.Ordinal)
+                {
+                    ["outcome"] = "deny"
+                },
+                FailureCode: SecurityFailureCode.MissingAuthentication));
             _logger?.LogWarning("Security: {FailureCode} on {GrainType}.{Method} — no caller key",
                 SecurityFailureCode.MissingAuthentication,
                 grainInterfaceType.Name, context.InterfaceMethod.Name);
@@ -79,11 +121,31 @@ public sealed class ScynapseIncomingCallFilter : IIncomingGrainCallFilter
 
         // HYBRID MODEL: Check if caller is a trusted node (valid delegation chain).
         // If yes, and grain doesn't require caller capability (strict mode), allow.
-        if (!policy.RequiresCallerCapability && IsTrustedNode(callerKey))
+        var isTrustedNode = IsTrustedNode(callerKey);
+        _traceSink?.Emit(new SecurityFlowTraceEvent(
+            SecurityFlowTraceNames.IncomingNodeTrustEvaluated,
+            GrainInterface: grainInterfaceName,
+            Method: methodName,
+            Details: new Dictionary<string, string>(StringComparer.Ordinal)
+            {
+                ["is_trusted_node"] = isTrustedNode.ToString(),
+                ["strict_mode"] = policy.RequiresCallerCapability.ToString()
+            }));
+
+        if (!policy.RequiresCallerCapability && isTrustedNode)
         {
             // Node-trusted call — allowed without CCap verification.
             // Set verified identity for grain code.
             RequestContext.Set(ScynapseSecurityConstants.VerifiedCallerKeyKey, callerKey);
+            _traceSink?.Emit(new SecurityFlowTraceEvent(
+                SecurityFlowTraceNames.IncomingTerminal,
+                GrainInterface: grainInterfaceName,
+                Method: methodName,
+                Details: new Dictionary<string, string>(StringComparer.Ordinal)
+                {
+                    ["outcome"] = "allow",
+                    ["mode"] = "trusted_node"
+                }));
             await context.Invoke();
             return;
         }
@@ -91,6 +153,15 @@ public sealed class ScynapseIncomingCallFilter : IIncomingGrainCallFilter
         // Not a trusted node, or grain requires caller capability — full CCap verification.
         if (ccapBytes is null)
         {
+            _traceSink?.Emit(new SecurityFlowTraceEvent(
+                SecurityFlowTraceNames.IncomingTerminal,
+                GrainInterface: grainInterfaceName,
+                Method: methodName,
+                Details: new Dictionary<string, string>(StringComparer.Ordinal)
+                {
+                    ["outcome"] = "deny"
+                },
+                FailureCode: SecurityFailureCode.MissingCapability));
             _logger?.LogWarning("Security: {FailureCode} on {GrainType}.{Method} — no CCap presented",
                 SecurityFailureCode.MissingCapability,
                 grainInterfaceType.Name, context.InterfaceMethod.Name);
@@ -100,6 +171,14 @@ public sealed class ScynapseIncomingCallFilter : IIncomingGrainCallFilter
 
         // Deserialize and verify the CCap
         var ccap = SignedAssertion.Deserialize(ccapBytes);
+        _traceSink?.Emit(new SecurityFlowTraceEvent(
+            SecurityFlowTraceNames.IncomingCCapDeserialize,
+            GrainInterface: grainInterfaceName,
+            Method: methodName,
+            Details: new Dictionary<string, string>(StringComparer.Ordinal)
+            {
+                ["success"] = "true"
+            }));
 
         // Use a fresh nonce store per verification — CCap presentations are reusable,
         // so we must not flag the same CCap as "replay" across calls.
@@ -107,22 +186,76 @@ public sealed class ScynapseIncomingCallFilter : IIncomingGrainCallFilter
         var result = await verifier.VerifyAsync(ccap);
         if (!result.IsValid)
         {
+            _traceSink?.Emit(new SecurityFlowTraceEvent(
+                SecurityFlowTraceNames.IncomingChainVerify,
+                GrainInterface: grainInterfaceName,
+                Method: methodName,
+                Details: new Dictionary<string, string>(StringComparer.Ordinal)
+                {
+                    ["success"] = "false"
+                },
+                FailureCode: SecurityFailureCode.ChainVerificationFailed,
+                FailureReason: result.FailureReason));
+            _traceSink?.Emit(new SecurityFlowTraceEvent(
+                SecurityFlowTraceNames.IncomingTerminal,
+                GrainInterface: grainInterfaceName,
+                Method: methodName,
+                Details: new Dictionary<string, string>(StringComparer.Ordinal)
+                {
+                    ["outcome"] = "deny"
+                },
+                FailureCode: SecurityFailureCode.ChainVerificationFailed,
+                FailureReason: result.FailureReason));
             _logger?.LogWarning("Security: {FailureCode} on {GrainType}.{Method} — {Reason}",
                 SecurityFailureCode.ChainVerificationFailed,
                 grainInterfaceType.Name, context.InterfaceMethod.Name, result.FailureReason);
             throw new ScynapseSecurityException($"Invalid CCap: {result.FailureReason}",
                 SecurityFailureCode.ChainVerificationFailed);
         }
+        _traceSink?.Emit(new SecurityFlowTraceEvent(
+            SecurityFlowTraceNames.IncomingChainVerify,
+            GrainInterface: grainInterfaceName,
+            Method: methodName,
+            Details: new Dictionary<string, string>(StringComparer.Ordinal)
+            {
+                ["success"] = "true"
+            }));
 
         // Verify bearer proof: caller must prove they own the CCap's subject key
         if (bearerProof is null || !VerifyBearerProof(ccap, callerKey, bearerProof))
         {
+            _traceSink?.Emit(new SecurityFlowTraceEvent(
+                SecurityFlowTraceNames.IncomingBearerVerify,
+                GrainInterface: grainInterfaceName,
+                Method: methodName,
+                Details: new Dictionary<string, string>(StringComparer.Ordinal)
+                {
+                    ["success"] = "false"
+                },
+                FailureCode: SecurityFailureCode.BearerVerificationFailed));
+            _traceSink?.Emit(new SecurityFlowTraceEvent(
+                SecurityFlowTraceNames.IncomingTerminal,
+                GrainInterface: grainInterfaceName,
+                Method: methodName,
+                Details: new Dictionary<string, string>(StringComparer.Ordinal)
+                {
+                    ["outcome"] = "deny"
+                },
+                FailureCode: SecurityFailureCode.BearerVerificationFailed));
             _logger?.LogWarning("Security: {FailureCode} on {GrainType}.{Method}",
                 SecurityFailureCode.BearerVerificationFailed,
                 grainInterfaceType.Name, context.InterfaceMethod.Name);
             throw new ScynapseSecurityException("Bearer verification failed",
                 SecurityFailureCode.BearerVerificationFailed);
         }
+        _traceSink?.Emit(new SecurityFlowTraceEvent(
+            SecurityFlowTraceNames.IncomingBearerVerify,
+            GrainInterface: grainInterfaceName,
+            Method: methodName,
+            Details: new Dictionary<string, string>(StringComparer.Ordinal)
+            {
+                ["success"] = "true"
+            }));
 
         // Check action/resource match if the method requires a specific capability
         var requiredAction = _policyProvider.GetRequiredAction(context.InterfaceMethod);
@@ -131,10 +264,32 @@ public sealed class ScynapseIncomingCallFilter : IIncomingGrainCallFilter
             var claim = CapabilityClaim.Deserialize(ccap.ClaimData.Span);
             var requiredResource = _policyProvider.GetRequiredResource(context.InterfaceMethod)
                 ?? GrainResourceInference.FromGrainInterface(grainInterfaceType);
+            var capabilityMatch = ActionMatches(claim.Action, requiredAction) &&
+                                  ResourceMatches(claim.Resource, requiredResource);
+            _traceSink?.Emit(new SecurityFlowTraceEvent(
+                SecurityFlowTraceNames.IncomingCapabilityMatch,
+                GrainInterface: grainInterfaceName,
+                Method: methodName,
+                Details: new Dictionary<string, string>(StringComparer.Ordinal)
+                {
+                    ["success"] = capabilityMatch.ToString(),
+                    ["required_action"] = requiredAction,
+                    ["required_resource"] = requiredResource,
+                    ["granted_action"] = claim.Action,
+                    ["granted_resource"] = claim.Resource
+                }));
 
-            if (!ActionMatches(claim.Action, requiredAction) ||
-                !ResourceMatches(claim.Resource, requiredResource))
+            if (!capabilityMatch)
             {
+                _traceSink?.Emit(new SecurityFlowTraceEvent(
+                    SecurityFlowTraceNames.IncomingTerminal,
+                    GrainInterface: grainInterfaceName,
+                    Method: methodName,
+                    Details: new Dictionary<string, string>(StringComparer.Ordinal)
+                    {
+                        ["outcome"] = "deny"
+                    },
+                    FailureCode: SecurityFailureCode.InsufficientCapability));
                 _logger?.LogWarning("Security: {FailureCode} on {GrainType}.{Method} — needed {RequiredAction}:{RequiredResource}, had {GrantedAction}:{GrantedResource}",
                     SecurityFailureCode.InsufficientCapability,
                     grainInterfaceType.Name, context.InterfaceMethod.Name,
@@ -147,6 +302,15 @@ public sealed class ScynapseIncomingCallFilter : IIncomingGrainCallFilter
         // Set verified caller identity for grain code
         RequestContext.Set(ScynapseSecurityConstants.VerifiedCallerKeyKey, callerKey);
         RequestContext.Set(ScynapseSecurityConstants.VerifiedCCapKey, ccapBytes);
+        _traceSink?.Emit(new SecurityFlowTraceEvent(
+            SecurityFlowTraceNames.IncomingTerminal,
+            GrainInterface: grainInterfaceName,
+            Method: methodName,
+            Details: new Dictionary<string, string>(StringComparer.Ordinal)
+            {
+                ["outcome"] = "allow",
+                ["mode"] = "capability_verified"
+            }));
 
         await context.Invoke();
     }

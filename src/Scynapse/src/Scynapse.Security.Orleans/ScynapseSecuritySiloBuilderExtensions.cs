@@ -95,15 +95,17 @@ public static class ScynapseSecuritySiloBuilderExtensions
             var policyProvider = sp.GetRequiredService<IGrainSecurityPolicyProvider>();
             var attenuationChecker = sp.GetRequiredService<IAttenuationChecker>();
             var logger = sp.GetService<Microsoft.Extensions.Logging.ILogger<ScynapseIncomingCallFilter>>();
+            var traceSink = sp.GetService<ISecurityFlowTraceSink>();
             return new ScynapseIncomingCallFilter(
                 store, nonceStore, options.TrustedRoots, policyProvider,
-                attenuationChecker, trustedNodeKeys, logger);
+                attenuationChecker, trustedNodeKeys, logger, traceSink);
         });
 
         builder.Services.AddSingleton<IOutgoingGrainCallFilter>(sp =>
         {
             var wallet = sp.GetRequiredService<ICCapWallet>();
-            return new ScynapseOutgoingCallFilter(options.NodeKeyPair, wallet);
+            var traceSink = sp.GetService<ISecurityFlowTraceSink>();
+            return new ScynapseOutgoingCallFilter(options.NodeKeyPair, wallet, traceSink);
         });
 
         // Register lifecycle participant for bootstrap assertion and CCap loading
