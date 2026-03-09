@@ -1,0 +1,32 @@
+{
+  "id": "TV-701",
+  "title": "M1-S2 Mediated Runtime Data Path Success",
+  "slice_profile": "M1-S2",
+  "preconditions": [
+    "relation is established in mediated mode",
+    "data exchange remains mediated"
+  ],
+  "messages": [
+    { "type": "HandshakeInit", "role": "requester" },
+    { "type": "HandshakeChallenge", "role": "mediator" },
+    { "type": "HandshakeProof", "role": "requester" },
+    { "type": "HandshakeAccept", "role": "mediator", "body": { "route_mode": "parent_mediated", "disclosure_level": "mediator_visible" } },
+    { "type": "RouteData", "role": "requester", "body": { "route_mode": "parent_mediated", "transport_path": "mediated", "payload_class": "invoke" } },
+    { "type": "RouteData", "role": "target", "body": { "route_mode": "parent_mediated", "transport_path": "mediated", "payload_class": "invoke" } }
+  ],
+  "expected_state_trace": [
+    "MediatedHandshake",
+    "RelayedSession",
+    "Completed"
+  ],
+  "expected_outcome": {
+    "success": true,
+    "deny_code": null
+  },
+  "assertions": [
+    { "id": "A1", "kind": "error", "check": "deny_code_absent", "value": true },
+    { "id": "A2", "kind": "runtime", "check": "bridge_transit_contains", "value": "requester->mediator->target" },
+    { "id": "A3", "kind": "runtime", "check": "bridge_transit_contains", "value": "target->mediator->requester" },
+    { "id": "A4", "kind": "runtime", "check": "bridge_transit_count_equals", "value": 2 }
+  ]
+}

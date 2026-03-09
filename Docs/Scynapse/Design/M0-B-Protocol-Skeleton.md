@@ -53,6 +53,8 @@ Reference:
 - `Docs/Scynapse/Design/M1-S1-Task-Board.md`
 - `Docs/Scynapse/Design/M1-S1-Closure.md`
 - `Docs/Scynapse/Design/M1-Status-Checkpoint.md`
+- `Docs/Scynapse/Design/M1-S2-Task-Board.md`
+- `Docs/Scynapse/Design/M1-S2-Closure.md`
 - `Docs/Scynapse/Design/M0-B-Wire-Lock-Open-Decisions.md`
 - `Docs/Scynapse/Design/M0-Status-Checkpoint.md`
 
@@ -83,6 +85,7 @@ Reference:
 4. `RouteUpgradeReject`
 5. `RouteKeepAlive`
 6. `RouteClose`
+7. `RouteData` (runtime-bridge validation/control-plane payload path marker)
 
 ### 3.4 Observation
 

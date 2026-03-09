@@ -63,6 +63,12 @@ Run M1-S1 fixture pack:
 dotnet run --project playground/FabricS1Prototype/FabricS1Prototype.csproj -- D:\Dev\dotnext\Docs\Scynapse\Design\Fixtures\M1-S1
 ```
 
+Run M1-S2 fixture pack:
+
+```powershell
+dotnet run --project playground/FabricS1Prototype/FabricS1Prototype.csproj -- D:\Dev\dotnext\Docs\Scynapse\Design\Fixtures\M1-S2
+```
+
 Expected-fail fixture semantics:
 
 1. `expected_error_ids` is the preferred exact failure oracle.
@@ -100,3 +106,11 @@ Slice profile semantics:
      - `relation_token_ref`
      - `relation_token_cid` (`sha256:<hex>`)
      - `relation_token_blob` required only when `token_transport=inline`
+7. `slice_profile: "M1-S2"` enables runtime-bridge data-path validation:
+   - direct-upgrade gates from S2 remain active
+   - `RouteData` messages validated against active session mode
+   - mediated session requires `transport_path=mediated`
+   - direct session requires `transport_path=direct`
+   - bridge transit assertions available:
+     - `bridge_transit_contains`
+     - `bridge_transit_count_equals`

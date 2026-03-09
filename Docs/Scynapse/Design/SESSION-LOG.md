@@ -336,3 +336,39 @@ Use this structure for each new entry:
    - start M1-S2 runtime-bridge slice from locked wire baseline.
 6. Risks/blockers:
    - none immediate; keep wire decisions closed unless explicitly reopened.
+
+### 2026-03-08 (M1-S2 Runtime Bridge Slice Implementation)
+
+1. Scope:
+   - execute M1-S2 task board on top of locked M1-S1 baseline and add deterministic runtime bridge behavior.
+2. Key outputs:
+   - implemented `slice_profile: "M1-S2"` in `FabricS1Prototype` conformance engine.
+   - added `RouteData` message handling with deterministic session-path enforcement (`mediated` vs `direct`).
+   - added deterministic M1-S2 runtime IDs:
+     - `E3062_M1S2_ROUTE_DATA_OUTSIDE_PROFILE`
+     - `E3063_M1S2_ROUTE_DATA_OUTSIDE_SESSION`
+     - `E3064_M1S2_DIRECT_PATH_WHILE_MEDIATED`
+     - `E3065_M1S2_MEDIATED_PATH_AFTER_DIRECT`
+     - `E3066_M1S2_ROUTE_MODE_MISMATCH`
+     - `E3067_M1S2_ROUTE_DATA_ROLE_INVALID`
+   - added bridge transit assertion support:
+     - `bridge_transit_contains`
+     - `bridge_transit_count_equals`
+   - added isolated fixture pack `Fixtures/M1-S2` with `TV-701..TV-706`.
+   - synchronized protocol/matrix/checklist/vector/compatibility docs and added:
+     - `M1-S2-Task-Board.md`
+     - `M1-S2-Closure.md`
+3. Validation runs:
+   - S1: 14/14
+   - S2: 8/8
+   - S3: 4/4
+   - S4: 4/4
+   - S5: 3/3
+   - M1-S1: 10/10
+   - M1-S2: 6/6
+4. Current doing:
+   - final continuity synchronization and scoped commit/push preparation on `codex/m1-s1-wire-closure`.
+5. Next:
+   - push M1-S2 closure baseline and open M1-S3 planning/implementation slice.
+6. Risks/blockers:
+   - none immediate; preserve locked wire decisions and error-ID stability while extending runtime realism.

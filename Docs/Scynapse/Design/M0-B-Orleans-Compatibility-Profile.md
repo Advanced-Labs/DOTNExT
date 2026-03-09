@@ -175,7 +175,19 @@ This profile maps M0-B protocol fields to their Orleans lineage, with explicit c
 
 ---
 
-## 15. Review Checklist
+## 15. M1-S2 Runtime-Bridge Behavior Classification
+
+| Hardened Behavior | Tag | Notes |
+|---|---|---|
+| Runtime bridge profile with deterministic data-path checks (`M1-S2`) | `N` | Scynapse-native runtime-adjacent conformance layer |
+| `RouteData` mediated/direct session-path enforcement | `N` | no Orleans equivalent at this protocol layer |
+| Direct-upgrade gate reuse from S2 into runtime profile | `A` | adapts existing gate-order semantics into runtime transit context |
+| Bridge transit trace assertions for deterministic flow proofs | `N` | Scynapse-native conformance observability |
+| Gateway-style silo/client transport shortcuts in runtime bridge | `D` | explicitly blocked; remains node-unified transport semantics |
+
+---
+
+## 16. Review Checklist
 
 1. Are any fields tagged `A` but still carrying hidden silo/cluster assumptions?
 2. Are all `N` fields tied to M0-A invariants?

@@ -11,6 +11,7 @@ internal sealed class ConformanceEngine
     private const string SliceProfileS4 = "S4";
     private const string SliceProfileS5 = "S5";
     private const string SliceProfileM1S1 = "M1-S1";
+    private const string SliceProfileM1S2 = "M1-S2";
 
     private static readonly Regex TypedIdentifierRegex = new("^[a-z]{2,6}:[A-Za-z0-9][A-Za-z0-9._-]{2,127}$", RegexOptions.Compiled);
     private static readonly Regex RelationTokenCidRegex = new("^sha256:[0-9a-fA-F]{8,128}$", RegexOptions.Compiled);
@@ -22,13 +23,20 @@ internal sealed class ConformanceEngine
         SliceProfileS3,
         SliceProfileS4,
         SliceProfileS5,
-        SliceProfileM1S1
+        SliceProfileM1S1,
+        SliceProfileM1S2
     };
 
     private static readonly HashSet<string> KnownTokenTransportModes = new(StringComparer.Ordinal)
     {
         "reference",
         "inline"
+    };
+
+    private static readonly HashSet<string> KnownTransportPaths = new(StringComparer.Ordinal)
+    {
+        "mediated",
+        "direct"
     };
 
     private static readonly HashSet<string> PolicyCausalDenyCodes = new(StringComparer.Ordinal)
@@ -100,7 +108,8 @@ internal sealed class ConformanceEngine
         "ObserveEvent",
         "ObserveGap",
         "ObserveResume",
-        "ObserveClose"
+        "ObserveClose",
+        "RouteData"
     };
 
     private static readonly Dictionary<string, HashSet<string>> RequiredBodyFieldsByType = new(StringComparer.Ordinal)
@@ -115,7 +124,8 @@ internal sealed class ConformanceEngine
         ["RouteUpgradeReject"] = new(StringComparer.Ordinal) { "decision_code" },
         ["ObserveOpen"] = new(StringComparer.Ordinal) { "scope_mode" },
         ["ObserveGap"] = new(StringComparer.Ordinal) { "cause" },
-        ["ObserveResume"] = new(StringComparer.Ordinal) { "replay_available" }
+        ["ObserveResume"] = new(StringComparer.Ordinal) { "replay_available" },
+        ["RouteData"] = new(StringComparer.Ordinal) { "route_mode", "transport_path" }
     };
 
     private static readonly Dictionary<string, HashSet<string>> AllowedDenyCodesByMessageType = new(StringComparer.Ordinal)
@@ -155,9 +165,9 @@ internal sealed class ConformanceEngine
         ["PolicyEvaluate"] = new(StringComparer.Ordinal) { "DisclosurePlan", "Deny", "Completed" },
         ["DisclosurePlan"] = new(StringComparer.Ordinal) { "MediatedHandshake", "Deny" },
         ["MediatedHandshake"] = new(StringComparer.Ordinal) { "RelayedSession", "Deny" },
-        ["RelayedSession"] = new(StringComparer.Ordinal) { "DirectUpgradeProbe", "Completed" },
+        ["RelayedSession"] = new(StringComparer.Ordinal) { "DirectUpgradeProbe", "Completed", "Deny" },
         ["DirectUpgradeProbe"] = new(StringComparer.Ordinal) { "DirectSession", "RelayedSession", "Deny" },
-        ["DirectSession"] = new(StringComparer.Ordinal) { "RelayedSession", "Completed" },
+        ["DirectSession"] = new(StringComparer.Ordinal) { "RelayedSession", "Completed", "Deny" },
         ["ObserveIdle"] = new(StringComparer.Ordinal) { "ObservePendingAck" },
         ["ObservePendingAck"] = new(StringComparer.Ordinal) { "ObserveActive", "ObserveDenied" },
         ["ObserveActive"] = new(StringComparer.Ordinal) { "ObserveActive", "ObserveGap", "ObserveClosed" },
@@ -208,7 +218,8 @@ internal sealed class ConformanceEngine
 
         ValidateStateTrace(fixture, observedStateTrace, errors);
         ValidateExpectedOutcome(fixture, observedDenyCode, observedUpgradeDecisionCode, observedRetryable, errors);
-        ValidateAssertions(fixture, envelopeMessages, observedStateTrace, observedDenyCode, observedUpgradeDecisionCode, observedRetryable, errors);
+        var observedBridgeTransits = context.BridgeTransitTraces.AsReadOnly();
+        ValidateAssertions(fixture, envelopeMessages, observedStateTrace, observedBridgeTransits, observedDenyCode, observedUpgradeDecisionCode, observedRetryable, errors);
 
         var errorMessages = errors.Select(FormatError).ToList();
         return new VectorResult
@@ -218,6 +229,7 @@ internal sealed class ConformanceEngine
             ErrorDetails = errors,
             Errors = errorMessages,
             ObservedStateTrace = observedStateTrace,
+            ObservedBridgeTransits = observedBridgeTransits,
             ObservedDenyCode = observedDenyCode,
             ObservedUpgradeDecisionCode = observedUpgradeDecisionCode,
             ObservedRetryable = observedRetryable,
@@ -324,7 +336,7 @@ internal sealed class ConformanceEngine
             ValidateExprNormVersionFields(fixture, message, errors);
             ValidateDenyPolicyReferenceFields(fixture, message, errors);
 
-            if (string.Equals(sliceProfile, SliceProfileS2, StringComparison.Ordinal) &&
+            if (IsDirectUpgradeProfile(sliceProfile) &&
                 string.Equals(message.Type, "RouteUpgradeProbe", StringComparison.Ordinal))
             {
                 ValidateS2RouteUpgradeProbeFields(fixture, message, errors);
@@ -350,6 +362,11 @@ internal sealed class ConformanceEngine
             {
                 ValidateM1S1WireClosureFields(fixture, message, errors);
             }
+
+            if (string.Equals(sliceProfile, SliceProfileM1S2, StringComparison.Ordinal))
+            {
+                ValidateM1S2RuntimeBridgeFields(fixture, message, errors);
+            }
         }
     }
 
@@ -363,6 +380,12 @@ internal sealed class ConformanceEngine
 
         AddError(errors, "L1", "E1006_UNKNOWN_SLICE_PROFILE", $"{fixture.Id} uses unsupported slice_profile '{rawProfile}'. Falling back to '{SliceProfileS1}'.");
         return SliceProfileS1;
+    }
+
+    private static bool IsDirectUpgradeProfile(string sliceProfile)
+    {
+        return string.Equals(sliceProfile, SliceProfileS2, StringComparison.Ordinal)
+            || string.Equals(sliceProfile, SliceProfileM1S2, StringComparison.Ordinal);
     }
 
     private static void ValidateS2RouteUpgradeProbeFields(FixtureCase fixture, FixtureMessage message, List<ConformanceError> errors)
@@ -715,6 +738,40 @@ internal sealed class ConformanceEngine
         }
     }
 
+    private static void ValidateM1S2RuntimeBridgeFields(FixtureCase fixture, FixtureMessage message, List<ConformanceError> errors)
+    {
+        if (!string.Equals(message.Type, "RouteData", StringComparison.Ordinal))
+        {
+            return;
+        }
+
+        if (message.Body is null || message.Body.Value.ValueKind != JsonValueKind.Object)
+        {
+            AddError(errors, "L2", "E2001_MISSING_REQUIRED_BODY", $"{fixture.Id}/{message.Type} missing required body.");
+            return;
+        }
+
+        var routeMode = GetBodyString(message, "route_mode");
+        if (routeMode is null)
+        {
+            AddError(errors, "L2", "E2002_MISSING_REQUIRED_FIELD", $"{fixture.Id}/{message.Type} missing required field 'route_mode'.");
+        }
+        else if (routeMode is not ("parent_mediated" or "relay_mediated" or "anonymous_relay" or "direct_upgraded"))
+        {
+            AddError(errors, "L2", "E2004_INVALID_FIELD_VALUE", $"{fixture.Id}/{message.Type} field 'route_mode' value '{routeMode}' is invalid.");
+        }
+
+        var transportPath = GetBodyString(message, "transport_path");
+        if (transportPath is null)
+        {
+            AddError(errors, "L2", "E2002_MISSING_REQUIRED_FIELD", $"{fixture.Id}/{message.Type} missing required field 'transport_path'.");
+        }
+        else if (!KnownTransportPaths.Contains(transportPath))
+        {
+            AddError(errors, "L2", "E2004_INVALID_FIELD_VALUE", $"{fixture.Id}/{message.Type} field 'transport_path' value '{transportPath}' is invalid.");
+        }
+    }
+
     private static void ValidateOptionalTypedIdentifierField(FixtureCase fixture, FixtureMessage message, string fieldName, List<ConformanceError> errors)
     {
         if (!message.Body!.Value.TryGetProperty(fieldName, out var element))
@@ -775,14 +832,14 @@ internal sealed class ConformanceEngine
             }
             else
             {
-                AddError(errors, "L3", "E3028_S2_UPGRADE_PROBE_UNRESOLVED", $"{fixture.Id} requires RouteUpgradeAccept or RouteUpgradeReject after RouteUpgradeProbe in S2.");
+                AddError(errors, "L3", "E3028_S2_UPGRADE_PROBE_UNRESOLVED", $"{fixture.Id} requires RouteUpgradeAccept or RouteUpgradeReject after RouteUpgradeProbe in direct-upgrade profile.");
                 context.ObservedDenyCode ??= "UpgradeRejected";
                 context.ObservedUpgradeDecisionCode ??= "UpgradeRejected";
                 ForceTerminalDeny(context);
             }
         }
 
-        if (string.Equals(sliceProfile, SliceProfileS2, StringComparison.Ordinal) && context.UpgradeRejectSeen)
+        if (IsDirectUpgradeProfile(sliceProfile) && context.UpgradeRejectSeen)
         {
             if (!context.UpgradeFallbackRestored)
             {
@@ -1275,14 +1332,14 @@ internal sealed class ConformanceEngine
             {
                 if (!StateIs(context, "RelayedSession"))
                 {
-                    var reason = string.Equals(context.SliceProfile, SliceProfileS2, StringComparison.Ordinal)
-                        ? $"{fixtureId}/{message.Type} is only valid from RelayedSession in S2 direct-upgrade flow."
+                    var reason = IsDirectUpgradeProfile(context.SliceProfile)
+                        ? $"{fixtureId}/{message.Type} is only valid from RelayedSession in direct-upgrade flow."
                         : $"{fixtureId}/{message.Type} is only valid from RelayedSession and is denied in S1 mediated-only mode.";
                     RejectWithDeterministicDeny(fixtureId, context, errors, "E3012_DIRECT_UPGRADE_FORBIDDEN", "UpgradeRejected", reason);
                     break;
                 }
 
-                if (string.Equals(context.SliceProfile, SliceProfileS2, StringComparison.Ordinal))
+                if (IsDirectUpgradeProfile(context.SliceProfile))
                 {
                     if (!TryTransition(fixtureId, context, "DirectUpgradeProbe", errors))
                     {
@@ -1310,7 +1367,7 @@ internal sealed class ConformanceEngine
                 context.UpgradeProbePending = false;
                 var decisionCode = GetBodyString(message, "decision_code");
 
-                if (string.Equals(context.SliceProfile, SliceProfileS2, StringComparison.Ordinal))
+                if (IsDirectUpgradeProfile(context.SliceProfile))
                 {
                     var expectedRejectCode = context.ExpectedUpgradeRejectCode ?? "UpgradeRejected";
                     if (!string.Equals(decisionCode, expectedRejectCode, StringComparison.Ordinal))
@@ -1352,7 +1409,7 @@ internal sealed class ConformanceEngine
 
                 context.UpgradeProbePending = false;
 
-                if (string.Equals(context.SliceProfile, SliceProfileS2, StringComparison.Ordinal))
+                if (IsDirectUpgradeProfile(context.SliceProfile))
                 {
                     if (context.ExpectedUpgradeRejectCode is not null)
                     {
@@ -1374,6 +1431,56 @@ internal sealed class ConformanceEngine
                 }
 
                 RejectWithDeterministicDeny(fixtureId, context, errors, "E3012_DIRECT_UPGRADE_FORBIDDEN", "UpgradeRejected", $"{fixtureId}/{message.Type} is forbidden in S1 mediated-only mode.");
+                break;
+            }
+            case "RouteData":
+            {
+                if (!string.Equals(context.SliceProfile, SliceProfileM1S2, StringComparison.Ordinal))
+                {
+                    RejectWithDeterministicDeny(fixtureId, context, errors, "E3062_M1S2_ROUTE_DATA_OUTSIDE_PROFILE", "TrustInsufficient", $"{fixtureId}/{message.Type} is only supported in M1-S2 runtime-bridge profile.");
+                    break;
+                }
+
+                if (!StateIs(context, "RelayedSession", "DirectSession"))
+                {
+                    RejectWithDeterministicDeny(fixtureId, context, errors, "E3063_M1S2_ROUTE_DATA_OUTSIDE_SESSION", "TrustInsufficient", $"{fixtureId}/{message.Type} requires an active relayed or direct session.");
+                    break;
+                }
+
+                var senderRole = message.Role?.Trim() ?? string.Empty;
+                if (!string.Equals(senderRole, "requester", StringComparison.Ordinal) &&
+                    !string.Equals(senderRole, "target", StringComparison.Ordinal))
+                {
+                    RejectWithDeterministicDeny(fixtureId, context, errors, "E3067_M1S2_ROUTE_DATA_ROLE_INVALID", "TrustInsufficient", $"{fixtureId}/{message.Type} role '{senderRole}' is invalid for runtime bridge data transfer.");
+                    break;
+                }
+
+                var transportPath = GetBodyString(message, "transport_path") ?? string.Empty;
+                var declaredRouteMode = GetBodyString(message, "route_mode") ?? string.Empty;
+                var expectedPath = string.Equals(context.CurrentState, "DirectSession", StringComparison.Ordinal) ? "direct" : "mediated";
+                var expectedRouteMode = string.Equals(context.CurrentState, "DirectSession", StringComparison.Ordinal) ? "direct_upgraded" : "parent_mediated";
+
+                if (!string.Equals(transportPath, expectedPath, StringComparison.Ordinal))
+                {
+                    if (string.Equals(expectedPath, "mediated", StringComparison.Ordinal))
+                    {
+                        RejectWithDeterministicDeny(fixtureId, context, errors, "E3064_M1S2_DIRECT_PATH_WHILE_MEDIATED", "UpgradeRejected", $"{fixtureId}/{message.Type} attempted direct transport while session is mediated.");
+                    }
+                    else
+                    {
+                        RejectWithDeterministicDeny(fixtureId, context, errors, "E3065_M1S2_MEDIATED_PATH_AFTER_DIRECT", "TrustInsufficient", $"{fixtureId}/{message.Type} attempted mediated transport while session is direct.");
+                    }
+
+                    break;
+                }
+
+                if (!string.Equals(declaredRouteMode, expectedRouteMode, StringComparison.Ordinal))
+                {
+                    RejectWithDeterministicDeny(fixtureId, context, errors, "E3066_M1S2_ROUTE_MODE_MISMATCH", "TrustInsufficient", $"{fixtureId}/{message.Type} route_mode '{declaredRouteMode}' does not match active session mode '{expectedRouteMode}'.");
+                    break;
+                }
+
+                context.BridgeTransitTraces.Add(BuildBridgeTransitTrace(senderRole, expectedPath));
                 break;
             }
         }
@@ -1502,6 +1609,7 @@ internal sealed class ConformanceEngine
         FixtureCase fixture,
         IReadOnlyList<EnvelopeMessage> envelopeMessages,
         IReadOnlyList<string> observedStateTrace,
+        IReadOnlyList<string> observedBridgeTransits,
         string? observedDenyCode,
         string? observedUpgradeDecisionCode,
         bool? observedRetryable,
@@ -1650,6 +1758,31 @@ internal sealed class ConformanceEngine
                     if (!string.Equals(expected, observedUpgradeDecisionCode, StringComparison.Ordinal))
                     {
                         AddAssertionError(errors, assertion.Id, $"expected upgrade decision code '{expected ?? "null"}', observed '{observedUpgradeDecisionCode ?? "null"}'.");
+                    }
+
+                    break;
+                }
+                case "bridge_transit_contains":
+                {
+                    var expected = assertion.Value?.GetStringOrNull();
+                    if (expected is null || !observedBridgeTransits.Contains(expected, StringComparer.Ordinal))
+                    {
+                        AddAssertionError(errors, assertion.Id, $"expected bridge transit trace to contain '{expected ?? "null"}'.");
+                    }
+
+                    break;
+                }
+                case "bridge_transit_count_equals":
+                {
+                    if (assertion.Value is null || assertion.Value.Value.ValueKind != JsonValueKind.Number || !assertion.Value.Value.TryGetInt32(out var expectedCount))
+                    {
+                        AddAssertionError(errors, assertion.Id, "bridge_transit_count_equals requires an integer value.");
+                        break;
+                    }
+
+                    if (observedBridgeTransits.Count != expectedCount)
+                    {
+                        AddAssertionError(errors, assertion.Id, $"expected bridge transit count '{expectedCount}', observed '{observedBridgeTransits.Count}'.");
                     }
 
                     break;
@@ -1851,6 +1984,20 @@ internal sealed class ConformanceEngine
     {
         return !string.Equals(scopeMode, "exact", StringComparison.Ordinal);
     }
+
+    private static string BuildBridgeTransitTrace(string senderRole, string transportPath)
+    {
+        if (string.Equals(transportPath, "mediated", StringComparison.Ordinal))
+        {
+            return string.Equals(senderRole, "requester", StringComparison.Ordinal)
+                ? "requester->mediator->target"
+                : "target->mediator->requester";
+        }
+
+        return string.Equals(senderRole, "requester", StringComparison.Ordinal)
+            ? "requester->target"
+            : "target->requester";
+    }
 }
 
 internal sealed class OperationContext
@@ -1882,6 +2029,7 @@ internal sealed class OperationContext
     public string? ObservedDenyCode { get; set; }
     public string? ObservedUpgradeDecisionCode { get; set; }
     public List<string> ObservedStateTrace { get; } = new();
+    public List<string> BridgeTransitTraces { get; } = new();
 }
 
 internal static class JsonElementExtensions

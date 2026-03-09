@@ -486,6 +486,105 @@ Expected outcome:
 
 1. expected fail by exact error ID (`E2070_TOKEN_CID_REQUIRED`)
 
+### TV-701 M1-S2 Mediated Runtime Data Path Success
+
+Preconditions:
+
+1. relation established in mediated mode
+2. no direct upgrade accepted
+
+Sequence:
+
+1. handshake accept into `RelayedSession`
+2. `RouteData` requester to target over mediated transport
+3. `RouteData` target to requester over mediated transport
+
+Expected outcome:
+
+1. success
+2. bridge transit trace includes mediated hops through mediator
+
+### TV-702 M1-S2 Direct Runtime Data Path Success After Upgrade
+
+Preconditions:
+
+1. direct-upgrade gates pass
+2. direct session accepted
+
+Sequence:
+
+1. relayed session established
+2. `RouteUpgradeProbe` + `RouteUpgradeAccept`
+3. `RouteData` over direct transport
+
+Expected outcome:
+
+1. success
+2. bridge transit trace includes direct requester-target hop
+
+### TV-703 M1-S2 Upgrade Reject Fallback Continuity
+
+Preconditions:
+
+1. direct-upgrade gate fails
+2. fallback relayed session remains active
+
+Sequence:
+
+1. `RouteUpgradeProbe` + `RouteUpgradeReject`
+2. `RouteData` over mediated transport
+
+Expected outcome:
+
+1. success
+2. fallback relayed data path remains usable
+
+### TV-704 M1-S2 Direct Data Attempt While Mediated
+
+Preconditions:
+
+1. session remains relayed
+2. data transfer claims direct path
+
+Sequence:
+
+1. relayed handshake
+2. `RouteData` with `transport_path=direct`
+
+Expected outcome:
+
+1. expected fail by exact error ID (`E3064_M1S2_DIRECT_PATH_WHILE_MEDIATED`)
+
+### TV-705 M1-S2 Mediated Data Attempt After Direct Upgrade
+
+Preconditions:
+
+1. direct session established
+2. data transfer claims mediated path
+
+Sequence:
+
+1. direct upgrade accepted
+2. `RouteData` with `transport_path=mediated`
+
+Expected outcome:
+
+1. expected fail by exact error ID (`E3065_M1S2_MEDIATED_PATH_AFTER_DIRECT`)
+
+### TV-706 M1-S2 RouteData Before Session
+
+Preconditions:
+
+1. no relayed or direct session established
+
+Sequence:
+
+1. `RouteData` emitted before handshake accept
+
+Expected outcome:
+
+1. expected fail by exact error ID (`E3063_M1S2_ROUTE_DATA_OUTSIDE_SESSION`)
+
 ---
 
 ## 4. Minimal Coverage Map
@@ -496,6 +595,7 @@ Expected outcome:
 4. Observation/replay: TV-007, TV-008, TV-009, TV-010
 5. Policy inheritance: TV-011
 6. M1 wire closure: TV-601, TV-602, TV-603, TV-604, TV-605, TV-606, TV-607, TV-608, TV-609, TV-610
+7. M1 runtime bridge: TV-701, TV-702, TV-703, TV-704, TV-705, TV-706
 
 ### 4.1 S1 Transition-Edge Negative Extension Set
 
@@ -547,6 +647,13 @@ Expected outcome:
    - TV-608 (reference mode with token blob; expected fail by exact error ID)
    - TV-609 (typed identifier invalid for policy_ref; expected fail by exact error ID)
    - TV-610 (missing relation token CID; expected fail by exact error ID)
+7. M1-S2 owned vectors:
+   - TV-701 (mediated runtime data path success)
+   - TV-702 (direct runtime data path success after upgrade)
+   - TV-703 (upgrade reject fallback continuity with mediated data path)
+   - TV-704 (direct data attempt while mediated; expected fail by exact error ID)
+   - TV-705 (mediated data attempt after direct upgrade; expected fail by exact error ID)
+   - TV-706 (route data before session; expected fail by exact error ID)
 
 ---
 
@@ -564,5 +671,6 @@ Completed:
 Current next step:
 
 1. M1-S1 deferred wire closure vectors executed and stabilized (`TV-601..TV-610`)
-2. preserve S1/S2/S3/S4/S5 + M1-S1 baseline behavior and machine-checkable error ID stability
-3. start M1-S2 runtime-bridge vectors from this locked baseline
+2. M1-S2 runtime-bridge vectors executed and stabilized (`TV-701..TV-706`)
+3. preserve S1/S2/S3/S4/S5 + M1-S1 + M1-S2 baseline behavior and machine-checkable error ID stability
+4. open M1-S3 security-adapter vectors from current closure baseline

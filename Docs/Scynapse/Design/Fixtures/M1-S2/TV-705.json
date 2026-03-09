@@ -1,0 +1,51 @@
+{
+  "id": "TV-705",
+  "title": "M1-S2 Mediated Data Attempt After Direct Upgrade",
+  "slice_profile": "M1-S2",
+  "expect_conformance": "fail",
+  "expected_error_ids": [
+    "E3065_M1S2_MEDIATED_PATH_AFTER_DIRECT"
+  ],
+  "expected_error_contains": [
+    "attempted mediated transport while session is direct"
+  ],
+  "preconditions": [
+    "session is direct-upgraded",
+    "data path incorrectly attempts mediated transport"
+  ],
+  "messages": [
+    { "type": "HandshakeInit", "role": "requester" },
+    { "type": "HandshakeChallenge", "role": "mediator" },
+    { "type": "HandshakeProof", "role": "requester" },
+    { "type": "HandshakeAccept", "role": "mediator", "body": { "route_mode": "parent_mediated", "disclosure_level": "mediator_visible" } },
+    {
+      "type": "RouteUpgradeProbe",
+      "role": "requester",
+      "body": {
+        "policy_allowed": true,
+        "disclosure_allowed": true,
+        "grant_status": "active",
+        "trust_sufficient": true
+      }
+    },
+    { "type": "RouteUpgradeAccept", "role": "mediator", "body": { "decision_code": "UpgradeAccepted" } },
+    { "type": "RouteData", "role": "requester", "body": { "route_mode": "parent_mediated", "transport_path": "mediated", "payload_class": "invoke" } }
+  ],
+  "expected_state_trace": [
+    "MediatedHandshake",
+    "RelayedSession",
+    "DirectUpgradeProbe",
+    "DirectSession",
+    "Deny"
+  ],
+  "expected_outcome": {
+    "success": false,
+    "deny_code": "TrustInsufficient",
+    "retryable": false,
+    "upgrade_attempt_code": "UpgradeAccepted"
+  },
+  "assertions": [
+    { "id": "A1", "kind": "state", "check": "final_state_equals", "value": "Deny" },
+    { "id": "A2", "kind": "error", "check": "deny_code_equals", "value": "TrustInsufficient" }
+  ]
+}

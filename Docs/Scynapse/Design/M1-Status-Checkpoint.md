@@ -61,18 +61,41 @@ Entry condition:
 
 1. hold M1-S1 closure baseline unchanged while M1-S2 starts.
 
+### 3.3 M1-S2 (Complete)
+
+Artifacts:
+
+1. `Docs/Scynapse/Design/M1-S2-Task-Board.md`
+2. `Docs/Scynapse/Design/M1-S2-Closure.md`
+3. `Docs/Scynapse/Design/Fixtures/M1-S2/README.md`
+4. `Docs/Scynapse/Design/Fixtures/M1-S2/TV-701..TV-706`
+
+Status:
+
+1. runtime bridge profile implemented (`slice_profile: "M1-S2"`)
+2. `RouteData` transport-path deterministic checks added
+3. bridge transit assertion checks added
+4. baseline rerun stable:
+   - S1 14/14
+   - S2 8/8
+   - S3 4/4
+   - S4 4/4
+   - S5 3/3
+   - M1-S1 10/10
+   - M1-S2 6/6
+
 ---
 
 ## 4. Immediate Next Work (Ordered)
 
-1. define and open `M1-S2-Task-Board.md`
-2. implement bounded runtime bridge harness path without altering locked wire decisions
-3. keep S1..S5 + M1-S1 regression suite green on each implementation pass
+1. define and open `M1-S3-Task-Board.md`
+2. implement bounded security-adapter bridge slice without altering locked wire decisions
+3. keep S1..S5 + M1-S1 + M1-S2 regression suite green on each implementation pass
 
 ---
 
 ## 5. Done/Doing/Next Snapshot
 
-1. `Done`: M0 exit review, M1 entry plan, M1-S1 closure (deferred wire decisions + vectors + harness validation).
-2. `Doing`: continuity synchronization and branch checkpoint for M1-S1 closure.
-3. `Next`: start M1-S2 runtime bridge slice.
+1. `Done`: M0 exit review, M1 entry plan, M1-S1 closure, M1-S2 closure.
+2. `Doing`: continuity synchronization and branch checkpoint for M1-S2 closure.
+3. `Next`: start M1-S3 security-adapter bridge slice.

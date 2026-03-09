@@ -107,6 +107,7 @@ internal sealed class VectorResult
     public required List<ConformanceError> ErrorDetails { get; init; }
     public required List<string> Errors { get; init; }
     public required IReadOnlyList<string> ObservedStateTrace { get; init; }
+    public required IReadOnlyList<string> ObservedBridgeTransits { get; init; }
     public string? ObservedDenyCode { get; init; }
     public string? ObservedUpgradeDecisionCode { get; init; }
     public bool? ObservedRetryable { get; init; }

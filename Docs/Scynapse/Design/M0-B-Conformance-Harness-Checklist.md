@@ -170,6 +170,19 @@ M1-S1 extension note:
    - required `relation_token_ref` + `relation_token_cid`
    - conditional `relation_token_blob` (inline-only)
 
+M1-S2 extension note:
+
+1. `slice_profile: "M1-S2"` enables runtime-bridge session transport checks.
+2. M1-S2 introduces `RouteData` control vectors with required fields:
+   - `route_mode`
+   - `transport_path` (`mediated|direct`)
+3. active session mode governs allowed transport path:
+   - `RelayedSession` -> `mediated`
+   - `DirectSession` -> `direct`
+4. bridge transit assertions are machine-checkable:
+   - `bridge_transit_contains`
+   - `bridge_transit_count_equals`
+
 ---
 
 ## 5. Conformance Gates (Pass/Fail)

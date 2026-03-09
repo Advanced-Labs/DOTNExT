@@ -1,0 +1,30 @@
+{
+  "id": "TV-706",
+  "title": "M1-S2 RouteData Before Session",
+  "slice_profile": "M1-S2",
+  "expect_conformance": "fail",
+  "expected_error_ids": [
+    "E3063_M1S2_ROUTE_DATA_OUTSIDE_SESSION"
+  ],
+  "expected_error_contains": [
+    "requires an active relayed or direct session"
+  ],
+  "preconditions": [
+    "no relation session has been established"
+  ],
+  "messages": [
+    { "type": "RouteData", "role": "requester", "body": { "route_mode": "parent_mediated", "transport_path": "mediated", "payload_class": "invoke" } }
+  ],
+  "expected_state_trace": [
+    "Deny"
+  ],
+  "expected_outcome": {
+    "success": false,
+    "deny_code": "TrustInsufficient",
+    "retryable": false
+  },
+  "assertions": [
+    { "id": "A1", "kind": "state", "check": "final_state_equals", "value": "Deny" },
+    { "id": "A2", "kind": "error", "check": "deny_code_equals", "value": "TrustInsufficient" }
+  ]
+}

@@ -51,6 +51,7 @@ internal static class Program
                     },
                     Errors = new List<string> { "Failed to deserialize fixture JSON." },
                     ObservedStateTrace = Array.Empty<string>(),
+                    ObservedBridgeTransits = Array.Empty<string>(),
                     ObservedDenyCode = null,
                     ObservedUpgradeDecisionCode = null,
                     ObservedRetryable = null

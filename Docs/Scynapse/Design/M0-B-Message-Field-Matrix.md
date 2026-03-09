@@ -184,6 +184,8 @@ Route/upgrade keys (S1-assigned):
 | `106` | `reason` |
 | `107` | `active_route_ref` |
 | `108` | `close_reason` |
+| `109` | `transport_path` |
+| `110` | `payload_class` |
 
 ---
 
@@ -345,6 +347,15 @@ Relation token CID convention:
 | `relation_id` | R | N | Existing relation |
 | `route_mode` | R | N | Current active route |
 | `close_reason` | C | A | Required for `RouteClose` |
+
+### 5.5 RouteData (M1-S2 Runtime Bridge)
+
+| Field | Req | Tag | Rule |
+|---|---|---|---|
+| `relation_id` | C | N | Recommended when data flow is relation-bound |
+| `route_mode` | R | N | Declared active route mode for this data transfer |
+| `transport_path` | R | N | `mediated|direct`; must match active session mode in M1-S2 |
+| `payload_class` | O | N | lightweight payload marker (`invoke|event|meta`) |
 
 ---
 

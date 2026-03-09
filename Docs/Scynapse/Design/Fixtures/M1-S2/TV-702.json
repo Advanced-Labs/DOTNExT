@@ -1,0 +1,45 @@
+{
+  "id": "TV-702",
+  "title": "M1-S2 Direct Runtime Data Path Success After Upgrade",
+  "slice_profile": "M1-S2",
+  "preconditions": [
+    "upgrade gates pass",
+    "direct session is established"
+  ],
+  "messages": [
+    { "type": "HandshakeInit", "role": "requester" },
+    { "type": "HandshakeChallenge", "role": "mediator" },
+    { "type": "HandshakeProof", "role": "requester" },
+    { "type": "HandshakeAccept", "role": "mediator", "body": { "route_mode": "parent_mediated", "disclosure_level": "mediator_visible" } },
+    {
+      "type": "RouteUpgradeProbe",
+      "role": "requester",
+      "body": {
+        "policy_allowed": true,
+        "disclosure_allowed": true,
+        "grant_status": "active",
+        "trust_sufficient": true
+      }
+    },
+    { "type": "RouteUpgradeAccept", "role": "mediator", "body": { "decision_code": "UpgradeAccepted" } },
+    { "type": "RouteData", "role": "requester", "body": { "route_mode": "direct_upgraded", "transport_path": "direct", "payload_class": "invoke" } }
+  ],
+  "expected_state_trace": [
+    "MediatedHandshake",
+    "RelayedSession",
+    "DirectUpgradeProbe",
+    "DirectSession",
+    "Completed"
+  ],
+  "expected_outcome": {
+    "success": true,
+    "deny_code": null,
+    "upgrade_attempt_code": "UpgradeAccepted"
+  },
+  "assertions": [
+    { "id": "A1", "kind": "error", "check": "deny_code_absent", "value": true },
+    { "id": "A2", "kind": "security", "check": "upgrade_decision_code_equals", "value": "UpgradeAccepted" },
+    { "id": "A3", "kind": "runtime", "check": "bridge_transit_contains", "value": "requester->target" },
+    { "id": "A4", "kind": "runtime", "check": "bridge_transit_count_equals", "value": 1 }
+  ]
+}

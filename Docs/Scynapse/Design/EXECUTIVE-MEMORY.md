@@ -4,13 +4,13 @@ Last updated: 2026-03-08
 
 ## 1. Mission Snapshot
 
-Current mission: carry M1-S1 closure forward into M1-S2 runtime-bridge work while preserving deterministic S1..S5 + M1-S1 behavior.
+Current mission: close and checkpoint M1-S2 runtime-bridge work, then open M1-S3 while preserving deterministic S1..S5 + M1-S1 + M1-S2 behavior.
 
 Latest checkpoint status (2026-03-08):
 
 1. active branch: `codex/m1-s1-wire-closure`
 2. continuity files synchronized
-3. closure rerun confirmed 43/43 effective pass (S1..S5 + M1-S1)
+3. closure rerun confirmed 49/49 effective pass (S1..S5 + M1-S1 + M1-S2)
 
 Current active path:
 
@@ -22,6 +22,7 @@ Current active path:
 6. S4 observation/replay slice implemented (observe lifecycle and replay-expiry semantics)
 7. S5 policy hard-lock slice implemented (policy inheritance deterministic deny semantics)
 8. M1-S1 wire-closure slice implemented (D3/D5/D7/D8 locked with deterministic fixture coverage)
+9. M1-S2 runtime-bridge slice implemented (RouteData path semantics + transit assertions)
 
 ---
 
@@ -89,16 +90,22 @@ Current active path:
 58. deferred wire decisions (`D3`, `D5`, `D7`, `D8`) locked in wire decision authority doc
 59. cross-pack rerun stable: S1 14/14, S2 8/8, S3 4/4, S4 4/4, S5 3/3, M1-S1 10/10
 60. M1-S1 closure artifact added (`M1-S1-Closure.md`) and M1 checkpoint initialized (`M1-Status-Checkpoint.md`)
+61. M1-S2 task board added (`M1-S2-Task-Board.md`)
+62. M1-S2 harness/profile implemented (`slice_profile: "M1-S2"`) with runtime bridge route-data checks
+63. `RouteData` deterministic runtime IDs added (`E3062`..`E3067`) with deterministic deny behavior
+64. M1-S2 fixture pack added (`Docs/Scynapse/Design/Fixtures/M1-S2`, TV-701..TV-706)
+65. cross-pack rerun stable: S1 14/14, S2 8/8, S3 4/4, S4 4/4, S5 3/3, M1-S1 10/10, M1-S2 6/6
+66. M1-S2 closure artifact added (`M1-S2-Closure.md`) and M1 checkpoint synchronized
 
 ### Doing
 
-1. continuity synchronization for M1-S1 closure handoff
+1. final continuity synchronization and scoped commit/push preparation for M1-S2 closure baseline
 
 ### Next
 
-1. open and execute M1-S2 runtime-bridge slice
-2. preserve S1/S2/S3/S4/S5 + M1-S1 fixture and error-ID stability
-3. keep locked wire decisions (`D1`..`D8`) stable unless explicitly reopened
+1. commit and push M1-S2 closure baseline on `codex/m1-s1-wire-closure`
+2. open M1-S3 security-adapter bridge slice from M1-S2 closure
+3. preserve S1/S2/S3/S4/S5 + M1-S1 + M1-S2 fixture and error-ID stability
 
 ---
 
@@ -149,7 +156,9 @@ Authority file:
 12. `M1-S1-Task-Board.md`
 13. `M1-S1-Closure.md`
 14. `M1-Status-Checkpoint.md`
-15. latest entry in `SESSION-LOG.md`
+15. `M1-S2-Task-Board.md`
+16. `M1-S2-Closure.md`
+17. latest entry in `SESSION-LOG.md`
 
 ---
 
@@ -181,6 +190,9 @@ Authority file:
    - `M1-S1-Closure.md`
    - `M1-Status-Checkpoint.md`
    - `Fixtures/M1-S1/README.md`
+   - `M1-S2-Task-Board.md`
+   - `M1-S2-Closure.md`
+   - `Fixtures/M1-S2/README.md`
 5. Wire lock:
    - `M0-B-Wire-Lock-Open-Decisions.md`
    - `M0-B-Wire-Examples.md`

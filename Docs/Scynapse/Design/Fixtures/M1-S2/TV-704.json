@@ -1,0 +1,37 @@
+{
+  "id": "TV-704",
+  "title": "M1-S2 Direct Data Attempt While Mediated",
+  "slice_profile": "M1-S2",
+  "expect_conformance": "fail",
+  "expected_error_ids": [
+    "E3064_M1S2_DIRECT_PATH_WHILE_MEDIATED"
+  ],
+  "expected_error_contains": [
+    "attempted direct transport while session is mediated"
+  ],
+  "preconditions": [
+    "session remains relayed",
+    "data path incorrectly attempts direct transport"
+  ],
+  "messages": [
+    { "type": "HandshakeInit", "role": "requester" },
+    { "type": "HandshakeChallenge", "role": "mediator" },
+    { "type": "HandshakeProof", "role": "requester" },
+    { "type": "HandshakeAccept", "role": "mediator", "body": { "route_mode": "parent_mediated", "disclosure_level": "mediator_visible" } },
+    { "type": "RouteData", "role": "requester", "body": { "route_mode": "direct_upgraded", "transport_path": "direct", "payload_class": "invoke" } }
+  ],
+  "expected_state_trace": [
+    "MediatedHandshake",
+    "RelayedSession",
+    "Deny"
+  ],
+  "expected_outcome": {
+    "success": false,
+    "deny_code": "UpgradeRejected",
+    "retryable": true
+  },
+  "assertions": [
+    { "id": "A1", "kind": "state", "check": "final_state_equals", "value": "Deny" },
+    { "id": "A2", "kind": "error", "check": "deny_code_equals", "value": "UpgradeRejected" }
+  ]
+}

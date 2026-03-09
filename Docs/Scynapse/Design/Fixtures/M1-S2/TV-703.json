@@ -1,0 +1,45 @@
+{
+  "id": "TV-703",
+  "title": "M1-S2 Upgrade Reject Fallback Continuity",
+  "slice_profile": "M1-S2",
+  "preconditions": [
+    "upgrade gate is denied",
+    "relayed fallback remains active"
+  ],
+  "messages": [
+    { "type": "HandshakeInit", "role": "requester" },
+    { "type": "HandshakeChallenge", "role": "mediator" },
+    { "type": "HandshakeProof", "role": "requester" },
+    { "type": "HandshakeAccept", "role": "mediator", "body": { "route_mode": "parent_mediated", "disclosure_level": "mediator_visible" } },
+    {
+      "type": "RouteUpgradeProbe",
+      "role": "requester",
+      "body": {
+        "policy_allowed": false,
+        "disclosure_allowed": true,
+        "grant_status": "active",
+        "trust_sufficient": true
+      }
+    },
+    { "type": "RouteUpgradeReject", "role": "mediator", "body": { "decision_code": "PolicyDenied" } },
+    { "type": "RouteData", "role": "requester", "body": { "route_mode": "parent_mediated", "transport_path": "mediated", "payload_class": "invoke" } }
+  ],
+  "expected_state_trace": [
+    "MediatedHandshake",
+    "RelayedSession",
+    "DirectUpgradeProbe",
+    "RelayedSession",
+    "Completed"
+  ],
+  "expected_outcome": {
+    "success": true,
+    "deny_code": null,
+    "upgrade_attempt_code": "PolicyDenied"
+  },
+  "assertions": [
+    { "id": "A1", "kind": "error", "check": "deny_code_absent", "value": true },
+    { "id": "A2", "kind": "security", "check": "upgrade_decision_code_equals", "value": "PolicyDenied" },
+    { "id": "A3", "kind": "runtime", "check": "bridge_transit_contains", "value": "requester->mediator->target" },
+    { "id": "A4", "kind": "runtime", "check": "bridge_transit_count_equals", "value": 1 }
+  ]
+}

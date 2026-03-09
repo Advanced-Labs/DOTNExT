@@ -347,6 +347,55 @@ CBOR diagnostic:
 }
 ```
 
+### 6.6 RouteData (runtime bridge transport marker)
+
+JSON debug:
+
+```json
+{
+  "msg_type": "RouteData",
+  "msg_id": "mid:msg-0013",
+  "trace_id": "trc:tr-2001",
+  "timestamp": 1772964210000,
+  "from": {
+    "node_id": "nid:N1PUB",
+    "name_anchor": ".Users.Alice"
+  },
+  "intent": "invoke",
+  "target_scope": ".Adult.Games.RedX",
+  "relation_id": "rid:rel-777",
+  "route_mode": "parent_mediated",
+  "ttl_ms": 30000,
+  "body": {
+    "route_mode": "parent_mediated",
+    "transport_path": "mediated",
+    "payload_class": "invoke"
+  }
+}
+```
+
+CBOR diagnostic:
+
+```cbor-diag
+{
+  1: "RouteData",
+  2: "mid:msg-0013",
+  3: "trc:tr-2001",
+  4: 1772964210000,
+  5: {1: "nid:N1PUB", 2: ".Users.Alice"},
+  6: 1,
+  7: ".Adult.Games.RedX",
+  8: "rid:rel-777",
+  9: 0,
+  12: 30000,
+  13: {
+    76: 0,
+    109: "mediated",
+    110: "invoke"
+  }
+}
+```
+
 Observe-family wire examples are intentionally deferred to S2 when observe key assignments are locked.
 
 
