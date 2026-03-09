@@ -174,6 +174,8 @@ Handshake keys (S1-assigned):
 | `90` | `mock_signature_valid` |
 | `91` | `mock_replay_detected` |
 | `92` | `strict_failure_mode` |
+| `93` | `reference_lookup_status` |
+| `94` | `reference_lookup_cid` |
 
 Route/upgrade keys (S1-assigned):
 
@@ -309,10 +311,12 @@ Relation token CID convention:
 | `disclosure_level` | R | N | Granted disclosure level |
 | `expires_at` | R | N | Relation token expiry |
 | `fallback_route_ref` | C | N | Required if direct-upgrade is granted |
-| `token_transport` | C | N | M1-S1/M1-S5 profile: required (`reference|inline`) |
-| `relation_token_ref` | C | N | M1-S1/M1-S5 profile: required typed identifier |
-| `relation_token_cid` | C | N | M1-S1/M1-S5 profile: required `sha256:<hex>` digest id |
-| `relation_token_blob` | C | N | M1-S1/M1-S5 profile: required for `inline`, forbidden for `reference` |
+| `token_transport` | C | N | M1-S1/M1-S5/M1-S6 profile: required (`reference|inline`) |
+| `relation_token_ref` | C | N | M1-S1/M1-S5/M1-S6 profile: required typed identifier |
+| `relation_token_cid` | C | N | M1-S1/M1-S5/M1-S6 profile: required `sha256:<hex>` digest id |
+| `relation_token_blob` | C | N | M1-S1/M1-S5/M1-S6 profile: required for `inline`, forbidden for `reference` |
+| `reference_lookup_status` | C | N | M1-S6 profile + `token_transport=reference`: required (`resolved|missing|rebinding_detected`) |
+| `reference_lookup_cid` | C | N | M1-S6 profile + `token_transport=reference` + `reference_lookup_status=resolved`: required `sha256:<hex>` |
 
 ### 4.5 HandshakeDeny
 
@@ -463,6 +467,7 @@ Relation token CID convention:
 10. In M1-S3 profile, `HandshakeProof.verification_mode` governs strict/mock security adapter behavior and deterministic deny mapping.
 11. In M1-S4 profile, `HandshakeProof.strict_failure_mode` is valid only in strict mode and must be from the locked domain.
 12. In M1-S5 profile, inline `HandshakeAccept` token CID must match `sha256(relation_token_blob)` or deterministic deny is emitted.
+13. In M1-S6 profile, reference `HandshakeAccept` requires lookup status contract, and resolved lookup CID must match `relation_token_cid` or deterministic deny is emitted.
 
 ---
 
@@ -476,4 +481,4 @@ Completed:
 Current next step:
 
 1. keep this matrix synchronized with wire examples and conformance harness fixtures
-2. preserve M1-S1 wire-closure constraints while extending runtime bridge and security-adapter slices, including M1-S4 strict failure mapping and M1-S5 token-integrity constraints
+2. preserve M1-S1 wire-closure constraints while extending runtime bridge and security-adapter slices, including M1-S4 strict failure mapping, M1-S5 token-integrity constraints, and M1-S6 reference-token guard constraints

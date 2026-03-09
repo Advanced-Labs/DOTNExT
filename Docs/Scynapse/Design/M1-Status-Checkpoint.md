@@ -21,7 +21,8 @@ M1 focus:
 3. connect bounded security-adapter verification realism (`M1-S3`)
 4. map strict security-adapter failure semantics deterministically (`M1-S4`)
 5. add relation-token integrity determinism for inline transport (`M1-S5`)
-6. preserve M0 semantic invariants while increasing execution realism
+6. add reference-token lookup/rebinding determinism for reference transport (`M1-S6`)
+7. preserve M0 semantic invariants while increasing execution realism
 
 Guardrails:
 
@@ -153,18 +154,45 @@ Status:
    - M1-S4 6/6
    - M1-S5 4/4
 
+### 3.6 M1-S6 (Complete)
+
+Artifacts:
+
+1. `Docs/Scynapse/Design/M1-S6-Task-Board.md`
+2. `Docs/Scynapse/Design/M1-S6-Closure.md`
+3. `Docs/Scynapse/Design/Fixtures/M1-S6/README.md`
+4. `Docs/Scynapse/Design/Fixtures/M1-S6/TV-1101..TV-1105`
+
+Status:
+
+1. reference-token guard profile implemented (`slice_profile: "M1-S6"`)
+2. M1-S1 token-boundary checks are enforced in M1-S6 handshake accepts
+3. deterministic reference guard IDs added (`E3100`..`E3106`)
+4. baseline rerun stable:
+   - S1 14/14
+   - S2 8/8
+   - S3 4/4
+   - S4 4/4
+   - S5 3/3
+   - M1-S1 10/10
+   - M1-S2 6/6
+   - M1-S3 5/5
+   - M1-S4 6/6
+   - M1-S5 4/4
+   - M1-S6 5/5
+
 ---
 
 ## 4. Immediate Next Work (Ordered)
 
 1. define and open the next bounded M1 slice task board
-2. preserve locked wire decisions and M1-S3/M1-S4/M1-S5 deterministic error-ID behavior
-3. keep S1..S5 + M1-S1 + M1-S2 + M1-S3 + M1-S4 + M1-S5 regression suite green on each implementation pass
+2. preserve locked wire decisions and M1-S3/M1-S4/M1-S5/M1-S6 deterministic error-ID behavior
+3. keep S1..S5 + M1-S1 + M1-S2 + M1-S3 + M1-S4 + M1-S5 + M1-S6 regression suite green on each implementation pass
 
 ---
 
 ## 5. Done/Doing/Next Snapshot
 
-1. `Done`: M0 exit review, M1 entry plan, M1-S1 closure, M1-S2 closure, M1-S3 closure, M1-S4 closure, M1-S5 closure.
-2. `Doing`: final continuity synchronization and scoped commit/push preparation for M1-S5 closure.
+1. `Done`: M0 exit review, M1 entry plan, M1-S1 closure, M1-S2 closure, M1-S3 closure, M1-S4 closure, M1-S5 closure, M1-S6 closure.
+2. `Doing`: final continuity synchronization and scoped commit/push preparation for M1-S6 closure.
 3. `Next`: define next bounded M1 slice.

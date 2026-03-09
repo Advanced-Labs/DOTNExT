@@ -1,0 +1,45 @@
+{
+  "id": "TV-1103",
+  "title": "M1-S6 Reference Token Lookup CID Mismatch",
+  "slice_profile": "M1-S6",
+  "expect_conformance": "fail",
+  "expected_error_ids": [
+    "E3102_M1S6_REFERENCE_TOKEN_CID_MISMATCH"
+  ],
+  "expected_error_contains": [
+    "reference_lookup_cid does not match relation_token_cid"
+  ],
+  "preconditions": [
+    "reference lookup resolves to CID different from handshake CID"
+  ],
+  "messages": [
+    { "type": "HandshakeInit", "role": "requester" },
+    { "type": "HandshakeChallenge", "role": "mediator" },
+    { "type": "HandshakeProof", "role": "requester", "body": { "verification_mode": "strict", "proof_ref": "nid:m1s6.reference.mismatch" } },
+    {
+      "type": "HandshakeAccept",
+      "role": "mediator",
+      "body": {
+        "route_mode": "parent_mediated",
+        "disclosure_level": "mediator_visible",
+        "token_transport": "reference",
+        "relation_token_ref": "tid:reltok-1103",
+        "relation_token_cid": "sha256:ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+        "reference_lookup_status": "resolved",
+        "reference_lookup_cid": "sha256:1111111111111111111111111111111111111111111111111111111111111111"
+      }
+    }
+  ],
+  "expected_state_trace": [
+    "MediatedHandshake",
+    "Deny"
+  ],
+  "expected_outcome": {
+    "success": false,
+    "deny_code": "TrustInsufficient",
+    "retryable": false
+  },
+  "assertions": [
+    { "id": "A1", "kind": "error", "check": "deny_code_equals", "value": "TrustInsufficient" }
+  ]
+}

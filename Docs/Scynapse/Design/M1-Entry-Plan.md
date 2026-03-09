@@ -93,6 +93,18 @@ Deliverables:
 2. inline transport CID integrity check (`relation_token_cid == sha256(relation_token_blob)`).
 3. deterministic mismatch deny mapping with stable machine-checkable ID.
 
+### M1-S6: Reference Token Resolution/Rebinding Guard (Bounded)
+
+Primary goal:
+
+1. enforce deterministic reference-token lookup safety for handshake acceptance when `token_transport=reference`.
+
+Deliverables:
+
+1. profile `M1-S6` extending M1-S5 with reference lookup status contract.
+2. deterministic deny mapping for `missing`, `rebinding_detected`, and resolved CID mismatch outcomes.
+3. schema-level validation for required/valid lookup CID in resolved reference paths.
+
 ---
 
 ## 4. Non-Negotiable Guardrails
@@ -129,4 +141,5 @@ Deliverables:
 3. `M1-S3` security-adapter bridge execution complete (`M1-S3-Closure.md`).
 4. `M1-S4` strict failure-mapping execution complete (`M1-S4-Closure.md`).
 5. `M1-S5` relation-token integrity execution complete (`M1-S5-Closure.md`).
-6. open next bounded M1 slice task board from this closure baseline.
+6. `M1-S6` reference-token guard execution complete (`M1-S6-Closure.md`).
+7. open next bounded M1 slice task board from this closure baseline.

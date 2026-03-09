@@ -61,6 +61,8 @@ Reference:
 - `Docs/Scynapse/Design/M1-S4-Closure.md`
 - `Docs/Scynapse/Design/M1-S5-Task-Board.md`
 - `Docs/Scynapse/Design/M1-S5-Closure.md`
+- `Docs/Scynapse/Design/M1-S6-Task-Board.md`
+- `Docs/Scynapse/Design/M1-S6-Closure.md`
 - `Docs/Scynapse/Design/M0-B-Wire-Lock-Open-Decisions.md`
 - `Docs/Scynapse/Design/M0-Status-Checkpoint.md`
 
@@ -344,3 +346,8 @@ Failure responses should include:
    - `HandshakeAccept` in `M1-S5` uses M1-S1 token-boundary contract fields.
    - `token_transport=inline` requires `relation_token_cid` to match `sha256(relation_token_blob)`.
    - CID mismatch maps deterministically to `E3091_M1S5_TOKEN_CID_MISMATCH`.
+17. M1-S6 reference-token guard profile:
+   - `HandshakeAccept` in `M1-S6` extends M1-S5 with reference lookup status checks.
+   - `token_transport=reference` requires `reference_lookup_status` in `resolved|missing|rebinding_detected`.
+   - resolved lookup requires `reference_lookup_cid` and equality with `relation_token_cid`.
+   - deterministic deny IDs: `E3101` (unresolved), `E3102` (CID mismatch), `E3103` (rebinding).

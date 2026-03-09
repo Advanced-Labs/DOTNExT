@@ -835,6 +835,92 @@ Expected outcome:
 
 1. expected fail by exact error ID (`E2073_TOKEN_BLOB_FORBIDDEN_REFERENCE`)
 
+### TV-1101 M1-S6 Reference Token Lookup Resolved
+
+Preconditions:
+
+1. strict security mode is active
+2. reference token transport is selected
+3. reference lookup resolves with CID equal to `relation_token_cid`
+
+Sequence:
+
+1. mediated handshake flow reaches `HandshakeProof`
+2. `HandshakeAccept` provides reference token fields and resolved lookup metadata
+
+Expected outcome:
+
+1. success
+2. no deny code
+
+### TV-1102 M1-S6 Reference Token Lookup Missing
+
+Preconditions:
+
+1. strict security mode is active
+2. reference token transport is selected
+3. reference lookup status is `missing`
+
+Sequence:
+
+1. mediated handshake flow reaches `HandshakeProof`
+2. `HandshakeAccept` provides `reference_lookup_status=missing`
+
+Expected outcome:
+
+1. expected fail by exact error ID (`E3101_M1S6_REFERENCE_TOKEN_UNRESOLVED`)
+
+### TV-1103 M1-S6 Reference Token Lookup CID Mismatch
+
+Preconditions:
+
+1. strict security mode is active
+2. reference token transport is selected
+3. reference lookup resolves to CID different from `relation_token_cid`
+
+Sequence:
+
+1. mediated handshake flow reaches `HandshakeProof`
+2. `HandshakeAccept` provides mismatched `reference_lookup_cid`
+
+Expected outcome:
+
+1. expected fail by exact error ID (`E3102_M1S6_REFERENCE_TOKEN_CID_MISMATCH`)
+
+### TV-1104 M1-S6 Reference Token Rebinding Detected
+
+Preconditions:
+
+1. strict security mode is active
+2. reference token transport is selected
+3. lookup path signals rebinding detection
+
+Sequence:
+
+1. mediated handshake flow reaches `HandshakeProof`
+2. `HandshakeAccept` provides `reference_lookup_status=rebinding_detected`
+
+Expected outcome:
+
+1. expected fail by exact error ID (`E3103_M1S6_REFERENCE_TOKEN_REBIND_DETECTED`)
+
+### TV-1105 M1-S6 Reference Lookup Schema Missing CID
+
+Preconditions:
+
+1. strict security mode is active
+2. reference token transport is selected
+3. lookup status is `resolved` but `reference_lookup_cid` is omitted
+
+Sequence:
+
+1. mediated handshake flow reaches `HandshakeProof`
+2. schema validation evaluates resolved lookup fields on `HandshakeAccept`
+
+Expected outcome:
+
+1. expected fail by exact error ID (`E3104_M1S6_REFERENCE_LOOKUP_CID_REQUIRED`)
+
 ---
 
 ## 4. Minimal Coverage Map
@@ -849,6 +935,7 @@ Expected outcome:
 8. M1 security adapter bridge: TV-801, TV-802, TV-803, TV-804, TV-805
 9. M1 strict failure mapping: TV-901, TV-902, TV-903, TV-904, TV-905, TV-906
 10. M1 relation token integrity: TV-1001, TV-1002, TV-1003, TV-1004
+11. M1 reference token guard: TV-1101, TV-1102, TV-1103, TV-1104, TV-1105
 
 ### 4.1 S1 Transition-Edge Negative Extension Set
 
@@ -925,6 +1012,12 @@ Expected outcome:
    - TV-1002 (inline token CID mismatch; expected fail by exact error ID)
    - TV-1003 (reference token boundary pass)
    - TV-1004 (reference token blob forbidden; expected fail by exact error ID)
+11. M1-S6 owned vectors:
+   - TV-1101 (reference lookup resolved with CID match pass)
+   - TV-1102 (reference lookup unresolved; expected fail by exact error ID)
+   - TV-1103 (reference lookup CID mismatch; expected fail by exact error ID)
+   - TV-1104 (reference lookup rebinding detected; expected fail by exact error ID)
+   - TV-1105 (resolved lookup missing CID; expected fail by exact error ID)
 
 ---
 
@@ -946,5 +1039,6 @@ Current next step:
 3. M1-S3 security-adapter vectors executed and stabilized (`TV-801..TV-805`)
 4. M1-S4 strict failure-mapping vectors executed and stabilized (`TV-901..TV-906`)
 5. M1-S5 relation-token integrity vectors executed and stabilized (`TV-1001..TV-1004`)
-6. preserve S1/S2/S3/S4/S5 + M1-S1 + M1-S2 + M1-S3 + M1-S4 + M1-S5 baseline behavior and machine-checkable error ID stability
-7. open next bounded M1 slice from current closure baseline
+6. M1-S6 reference-token guard vectors executed and stabilized (`TV-1101..TV-1105`)
+7. preserve S1/S2/S3/S4/S5 + M1-S1 + M1-S2 + M1-S3 + M1-S4 + M1-S5 + M1-S6 baseline behavior and machine-checkable error ID stability
+8. open next bounded M1 slice from current closure baseline

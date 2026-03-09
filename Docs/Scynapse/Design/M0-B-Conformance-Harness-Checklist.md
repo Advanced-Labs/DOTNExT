@@ -223,6 +223,24 @@ M1-S5 extension note:
 4. deterministic mismatch deny ID:
    - `E3091_M1S5_TOKEN_CID_MISMATCH`
 
+M1-S6 extension note:
+
+1. `slice_profile: "M1-S6"` extends M1-S5 with reference-token lookup/rebinding guard checks.
+2. M1-S6 `HandshakeAccept` with `token_transport=reference` must include:
+   - `reference_lookup_status` (`resolved|missing|rebinding_detected`)
+3. resolved lookup requires:
+   - `reference_lookup_cid` in `sha256:<hex>` form
+   - equality with `relation_token_cid`
+4. deterministic reference guard IDs:
+   - `E3101_M1S6_REFERENCE_TOKEN_UNRESOLVED`
+   - `E3102_M1S6_REFERENCE_TOKEN_CID_MISMATCH`
+   - `E3103_M1S6_REFERENCE_TOKEN_REBIND_DETECTED`
+5. deterministic schema IDs:
+   - `E3100_M1S6_REFERENCE_LOOKUP_STATUS_REQUIRED`
+   - `E3104_M1S6_REFERENCE_LOOKUP_CID_REQUIRED`
+   - `E3105_M1S6_REFERENCE_LOOKUP_CID_INVALID`
+   - `E3106_M1S6_REFERENCE_LOOKUP_STATUS_INVALID`
+
 ---
 
 ## 5. Conformance Gates (Pass/Fail)
@@ -262,6 +280,7 @@ Pass criteria:
 7. M1-S3 strict/mock handshake proof failures map deterministically (`invalid signature`, `nonce replay`) without bypassing existing handshake state rules.
 8. M1-S4 strict temporal/revocation/proof-chain failures map deterministically to stable strict-failure IDs, with invalid mode rejected at schema level.
 9. M1-S5 inline relation-token CID integrity mismatches map deterministically to `E3091` without bypassing existing handshake state rules.
+10. M1-S6 reference lookup unresolved/rebinding/CID mismatch paths map deterministically to `E3101`/`E3102`/`E3103` without bypassing existing handshake state rules.
 
 ### 5.5 Gate G5: Observation Conformance
 

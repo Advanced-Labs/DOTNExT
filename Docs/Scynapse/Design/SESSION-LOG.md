@@ -476,3 +476,42 @@ Use this structure for each new entry:
    - push M1-S5 closure baseline and open the next bounded M1 slice.
 6. Risks/blockers:
    - none immediate; preserve locked token boundary semantics and deterministic error-ID stability.
+
+### 2026-03-08 (M1-S6 Reference-Token Guard Slice Implementation)
+
+1. Scope:
+   - execute M1-S6 task board on top of M1-S5 baseline and harden reference-token resolution/rebinding safety.
+2. Key outputs:
+   - created `codex/m1-s6-reference-token-guard` from M1-S5 baseline.
+   - added `slice_profile: "M1-S6"` handling in conformance engine.
+   - added M1-S6 reference lookup field contract on `HandshakeAccept`:
+     - `reference_lookup_status` (`resolved|missing|rebinding_detected`)
+     - `reference_lookup_cid` required/validated for resolved status
+   - added deterministic M1-S6 runtime/schema IDs:
+     - `E3100_M1S6_REFERENCE_LOOKUP_STATUS_REQUIRED`
+     - `E3101_M1S6_REFERENCE_TOKEN_UNRESOLVED`
+     - `E3102_M1S6_REFERENCE_TOKEN_CID_MISMATCH`
+     - `E3103_M1S6_REFERENCE_TOKEN_REBIND_DETECTED`
+     - `E3104_M1S6_REFERENCE_LOOKUP_CID_REQUIRED`
+     - `E3105_M1S6_REFERENCE_LOOKUP_CID_INVALID`
+     - `E3106_M1S6_REFERENCE_LOOKUP_STATUS_INVALID`
+   - added isolated fixture pack `Fixtures/M1-S6`: `TV-1101..TV-1105`.
+   - synchronized continuity + protocol docs for M1-S6 profile propagation.
+3. Validation runs:
+   - S1: 14/14
+   - S2: 8/8
+   - S3: 4/4
+   - S4: 4/4
+   - S5: 3/3
+   - M1-S1: 10/10
+   - M1-S2: 6/6
+   - M1-S3: 5/5
+   - M1-S4: 6/6
+   - M1-S5: 4/4
+   - M1-S6: 5/5
+4. Current doing:
+   - final continuity synchronization and scoped commit/push preparation on `codex/m1-s6-reference-token-guard`.
+5. Next:
+   - push M1-S6 closure baseline and open the next bounded M1 slice.
+6. Risks/blockers:
+   - none immediate; preserve deterministic reference-token guard/error-ID stability across all active packs.

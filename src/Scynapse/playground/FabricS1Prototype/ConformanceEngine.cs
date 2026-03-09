@@ -15,6 +15,7 @@ internal sealed class ConformanceEngine
     private const string SliceProfileM1S3 = "M1-S3";
     private const string SliceProfileM1S4 = "M1-S4";
     private const string SliceProfileM1S5 = "M1-S5";
+    private const string SliceProfileM1S6 = "M1-S6";
 
     private static readonly Regex TypedIdentifierRegex = new("^[a-z]{2,6}:[A-Za-z0-9][A-Za-z0-9._-]{2,127}$", RegexOptions.Compiled);
     private static readonly Regex RelationTokenCidRegex = new("^sha256:[0-9a-fA-F]{8,128}$", RegexOptions.Compiled);
@@ -30,7 +31,8 @@ internal sealed class ConformanceEngine
         SliceProfileM1S2,
         SliceProfileM1S3,
         SliceProfileM1S4,
-        SliceProfileM1S5
+        SliceProfileM1S5,
+        SliceProfileM1S6
     };
 
     private static readonly HashSet<string> KnownTokenTransportModes = new(StringComparer.Ordinal)
@@ -58,6 +60,13 @@ internal sealed class ConformanceEngine
         "revoked",
         "unresolvable_proof",
         "not_yet_valid"
+    };
+
+    private static readonly HashSet<string> KnownReferenceLookupStatuses = new(StringComparer.Ordinal)
+    {
+        "resolved",
+        "missing",
+        "rebinding_detected"
     };
 
     private static readonly HashSet<string> PolicyCausalDenyCodes = new(StringComparer.Ordinal)
@@ -380,9 +389,15 @@ internal sealed class ConformanceEngine
             }
 
             if (string.Equals(sliceProfile, SliceProfileM1S1, StringComparison.Ordinal) ||
-                string.Equals(sliceProfile, SliceProfileM1S5, StringComparison.Ordinal))
+                string.Equals(sliceProfile, SliceProfileM1S5, StringComparison.Ordinal) ||
+                string.Equals(sliceProfile, SliceProfileM1S6, StringComparison.Ordinal))
             {
                 ValidateM1S1WireClosureFields(fixture, message, errors);
+            }
+
+            if (string.Equals(sliceProfile, SliceProfileM1S6, StringComparison.Ordinal))
+            {
+                ValidateM1S6ReferenceTokenFields(fixture, message, errors);
             }
 
             if (string.Equals(sliceProfile, SliceProfileM1S2, StringComparison.Ordinal))
@@ -416,7 +431,8 @@ internal sealed class ConformanceEngine
             || string.Equals(sliceProfile, SliceProfileM1S2, StringComparison.Ordinal)
             || string.Equals(sliceProfile, SliceProfileM1S3, StringComparison.Ordinal)
             || string.Equals(sliceProfile, SliceProfileM1S4, StringComparison.Ordinal)
-            || string.Equals(sliceProfile, SliceProfileM1S5, StringComparison.Ordinal);
+            || string.Equals(sliceProfile, SliceProfileM1S5, StringComparison.Ordinal)
+            || string.Equals(sliceProfile, SliceProfileM1S6, StringComparison.Ordinal);
     }
 
     private static bool IsRuntimeBridgeProfile(string sliceProfile)
@@ -424,14 +440,16 @@ internal sealed class ConformanceEngine
         return string.Equals(sliceProfile, SliceProfileM1S2, StringComparison.Ordinal)
             || string.Equals(sliceProfile, SliceProfileM1S3, StringComparison.Ordinal)
             || string.Equals(sliceProfile, SliceProfileM1S4, StringComparison.Ordinal)
-            || string.Equals(sliceProfile, SliceProfileM1S5, StringComparison.Ordinal);
+            || string.Equals(sliceProfile, SliceProfileM1S5, StringComparison.Ordinal)
+            || string.Equals(sliceProfile, SliceProfileM1S6, StringComparison.Ordinal);
     }
 
     private static bool IsM1SecurityAdapterProfile(string sliceProfile)
     {
         return string.Equals(sliceProfile, SliceProfileM1S3, StringComparison.Ordinal)
             || string.Equals(sliceProfile, SliceProfileM1S4, StringComparison.Ordinal)
-            || string.Equals(sliceProfile, SliceProfileM1S5, StringComparison.Ordinal);
+            || string.Equals(sliceProfile, SliceProfileM1S5, StringComparison.Ordinal)
+            || string.Equals(sliceProfile, SliceProfileM1S6, StringComparison.Ordinal);
     }
 
     private static void ValidateS2RouteUpgradeProbeFields(FixtureCase fixture, FixtureMessage message, List<ConformanceError> errors)
@@ -818,6 +836,67 @@ internal sealed class ConformanceEngine
         }
     }
 
+    private static void ValidateM1S6ReferenceTokenFields(FixtureCase fixture, FixtureMessage message, List<ConformanceError> errors)
+    {
+        if (!string.Equals(message.Type, "HandshakeAccept", StringComparison.Ordinal))
+        {
+            return;
+        }
+
+        if (message.Body is null || message.Body.Value.ValueKind != JsonValueKind.Object)
+        {
+            return;
+        }
+
+        var tokenTransport = GetBodyString(message, "token_transport");
+        if (!string.Equals(tokenTransport, "reference", StringComparison.Ordinal))
+        {
+            return;
+        }
+
+        if (!message.Body.Value.TryGetProperty("reference_lookup_status", out var referenceLookupStatusElement))
+        {
+            AddError(errors, "L2", "E3100_M1S6_REFERENCE_LOOKUP_STATUS_REQUIRED", $"{fixture.Id}/{message.Type} requires 'reference_lookup_status' when token_transport='reference'.");
+            return;
+        }
+
+        if (referenceLookupStatusElement.ValueKind != JsonValueKind.String)
+        {
+            AddError(errors, "L2", "E3106_M1S6_REFERENCE_LOOKUP_STATUS_INVALID", $"{fixture.Id}/{message.Type} field 'reference_lookup_status' must be a string.");
+            return;
+        }
+
+        var referenceLookupStatus = referenceLookupStatusElement.GetString() ?? string.Empty;
+        if (!KnownReferenceLookupStatuses.Contains(referenceLookupStatus))
+        {
+            AddError(errors, "L2", "E3106_M1S6_REFERENCE_LOOKUP_STATUS_INVALID", $"{fixture.Id}/{message.Type} field 'reference_lookup_status' value '{referenceLookupStatus}' is invalid.");
+            return;
+        }
+
+        if (!string.Equals(referenceLookupStatus, "resolved", StringComparison.Ordinal))
+        {
+            return;
+        }
+
+        if (!message.Body.Value.TryGetProperty("reference_lookup_cid", out var referenceLookupCidElement))
+        {
+            AddError(errors, "L2", "E3104_M1S6_REFERENCE_LOOKUP_CID_REQUIRED", $"{fixture.Id}/{message.Type} requires 'reference_lookup_cid' when reference_lookup_status='resolved'.");
+            return;
+        }
+
+        if (referenceLookupCidElement.ValueKind != JsonValueKind.String)
+        {
+            AddError(errors, "L2", "E3105_M1S6_REFERENCE_LOOKUP_CID_INVALID", $"{fixture.Id}/{message.Type} field 'reference_lookup_cid' must be a string.");
+            return;
+        }
+
+        var referenceLookupCid = referenceLookupCidElement.GetString() ?? string.Empty;
+        if (!RelationTokenCidRegex.IsMatch(referenceLookupCid))
+        {
+            AddError(errors, "L2", "E3105_M1S6_REFERENCE_LOOKUP_CID_INVALID", $"{fixture.Id}/{message.Type} field 'reference_lookup_cid' value '{referenceLookupCid}' is invalid. Expected 'sha256:<hex>'.");
+        }
+    }
+
     private static void ValidateM1SecurityAdapterFields(FixtureCase fixture, FixtureMessage message, List<ConformanceError> errors)
     {
         if (!string.Equals(message.Type, "HandshakeProof", StringComparison.Ordinal))
@@ -1194,6 +1273,19 @@ internal sealed class ConformanceEngine
                     }
                 }
 
+                if (string.Equals(context.SliceProfile, SliceProfileM1S6, StringComparison.Ordinal))
+                {
+                    if (!TryEvaluateM1S5RelationTokenIntegrity(fixtureId, message, context, errors))
+                    {
+                        break;
+                    }
+
+                    if (!TryEvaluateM1S6ReferenceTokenIntegrity(fixtureId, message, context, errors))
+                    {
+                        break;
+                    }
+                }
+
                 TryTransition(fixtureId, context, "RelayedSession", errors);
                 break;
             }
@@ -1562,7 +1654,7 @@ internal sealed class ConformanceEngine
             {
                 if (!IsRuntimeBridgeProfile(context.SliceProfile))
                 {
-                    RejectWithDeterministicDeny(fixtureId, context, errors, "E3062_M1S2_ROUTE_DATA_OUTSIDE_PROFILE", "TrustInsufficient", $"{fixtureId}/{message.Type} is only supported in M1-S2/M1-S3/M1-S4/M1-S5 runtime-bridge profiles.");
+                    RejectWithDeterministicDeny(fixtureId, context, errors, "E3062_M1S2_ROUTE_DATA_OUTSIDE_PROFILE", "TrustInsufficient", $"{fixtureId}/{message.Type} is only supported in M1-S2/M1-S3/M1-S4/M1-S5/M1-S6 runtime-bridge profiles.");
                     break;
                 }
 
@@ -1727,6 +1819,71 @@ internal sealed class ConformanceEngine
                 "E3091_M1S5_TOKEN_CID_MISMATCH",
                 "TrustInsufficient",
                 $"{fixtureId}/{message.Type} relation_token_cid does not match sha256(relation_token_blob).");
+            return false;
+        }
+
+        return true;
+    }
+
+    private static bool TryEvaluateM1S6ReferenceTokenIntegrity(string fixtureId, FixtureMessage message, OperationContext context, List<ConformanceError> errors)
+    {
+        var tokenTransport = GetBodyString(message, "token_transport");
+        if (!string.Equals(tokenTransport, "reference", StringComparison.Ordinal))
+        {
+            return true;
+        }
+
+        var referenceLookupStatus = GetBodyString(message, "reference_lookup_status");
+        if (referenceLookupStatus is null)
+        {
+            return true;
+        }
+
+        if (string.Equals(referenceLookupStatus, "missing", StringComparison.Ordinal))
+        {
+            RejectWithDeterministicDeny(
+                fixtureId,
+                context,
+                errors,
+                "E3101_M1S6_REFERENCE_TOKEN_UNRESOLVED",
+                "TrustInsufficient",
+                $"{fixtureId}/{message.Type} reference token lookup is unresolved.");
+            return false;
+        }
+
+        if (string.Equals(referenceLookupStatus, "rebinding_detected", StringComparison.Ordinal))
+        {
+            RejectWithDeterministicDeny(
+                fixtureId,
+                context,
+                errors,
+                "E3103_M1S6_REFERENCE_TOKEN_REBIND_DETECTED",
+                "TrustInsufficient",
+                $"{fixtureId}/{message.Type} reference token rebinding was detected.");
+            return false;
+        }
+
+        if (!string.Equals(referenceLookupStatus, "resolved", StringComparison.Ordinal))
+        {
+            return true;
+        }
+
+        var referenceLookupCid = GetBodyString(message, "reference_lookup_cid");
+        var relationTokenCid = GetBodyString(message, "relation_token_cid");
+        if (referenceLookupCid is null || relationTokenCid is null)
+        {
+            return true;
+        }
+
+        if (!string.Equals(referenceLookupCid, relationTokenCid, StringComparison.OrdinalIgnoreCase))
+        {
+            RejectWithDeterministicDeny(
+                fixtureId,
+                context,
+                errors,
+                "E3102_M1S6_REFERENCE_TOKEN_CID_MISMATCH",
+                "TrustInsufficient",
+                $"{fixtureId}/{message.Type} reference_lookup_cid does not match relation_token_cid.");
             return false;
         }
 

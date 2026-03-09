@@ -1,0 +1,44 @@
+{
+  "id": "TV-1104",
+  "title": "M1-S6 Reference Token Rebinding Detected",
+  "slice_profile": "M1-S6",
+  "expect_conformance": "fail",
+  "expected_error_ids": [
+    "E3103_M1S6_REFERENCE_TOKEN_REBIND_DETECTED"
+  ],
+  "expected_error_contains": [
+    "reference token rebinding was detected"
+  ],
+  "preconditions": [
+    "reference directory indicates rebinding for relation token ref"
+  ],
+  "messages": [
+    { "type": "HandshakeInit", "role": "requester" },
+    { "type": "HandshakeChallenge", "role": "mediator" },
+    { "type": "HandshakeProof", "role": "requester", "body": { "verification_mode": "strict", "proof_ref": "nid:m1s6.reference.rebind" } },
+    {
+      "type": "HandshakeAccept",
+      "role": "mediator",
+      "body": {
+        "route_mode": "parent_mediated",
+        "disclosure_level": "mediator_visible",
+        "token_transport": "reference",
+        "relation_token_ref": "tid:reltok-1104",
+        "relation_token_cid": "sha256:2222222222222222222222222222222222222222222222222222222222222222",
+        "reference_lookup_status": "rebinding_detected"
+      }
+    }
+  ],
+  "expected_state_trace": [
+    "MediatedHandshake",
+    "Deny"
+  ],
+  "expected_outcome": {
+    "success": false,
+    "deny_code": "TrustInsufficient",
+    "retryable": false
+  },
+  "assertions": [
+    { "id": "A1", "kind": "error", "check": "deny_code_equals", "value": "TrustInsufficient" }
+  ]
+}

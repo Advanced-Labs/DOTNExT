@@ -1,4 +1,4 @@
-# M0-B Wire Examples (S1 + M1-S1/M1-S5 Lock Profiles)
+# M0-B Wire Examples (S1 + M1-S1/M1-S5/M1-S6 Lock Profiles)
 
 ## 1. Purpose
 
@@ -33,6 +33,9 @@ These are semantic examples, not golden byte fixtures.
 9. M1-S5 relation-token integrity lock profile:
    - `HandshakeAccept` uses M1-S1 token-boundary fields
    - inline transport requires `relation_token_cid == sha256(relation_token_blob)`
+10. M1-S6 reference-token guard lock profile:
+   - `HandshakeAccept` reference transport requires `reference_lookup_status`
+   - resolved lookup requires `reference_lookup_cid` and equality with `relation_token_cid`
 
 Authority references:
 
@@ -69,8 +72,8 @@ Nested map keys:
 Example S1 body keys used below:
 
 1. resolve: `33=expr_raw`, `34=expr_norm`, `53=expr_norm_v`, `35=operation_class`, `49=deny_code`, `50=reason`, `51=retryable`, `52=remediation`
-2. handshake: `75=relation_token`, `76=route_mode`, `77=disclosure_level`, `71=expires_at`, `80=policy_ref`, `82=token_transport`, `83=relation_token_ref`, `84=relation_token_cid`, `85=relation_token_blob`
-   - M1-S3/M1-S4 handshake proof extension: `86=verification_mode`, `87=proof_ref`, `88=replay_probe`, `89=force_bad_signature`, `90=mock_signature_valid`, `91=mock_replay_detected`, `92=strict_failure_mode`
+2. handshake: `75=relation_token`, `76=route_mode`, `77=disclosure_level`, `71=expires_at`, `80=policy_ref`, `82=token_transport`, `83=relation_token_ref`, `84=relation_token_cid`, `85=relation_token_blob`, `93=reference_lookup_status`, `94=reference_lookup_cid`
+    - M1-S3/M1-S4 handshake proof extension: `86=verification_mode`, `87=proof_ref`, `88=replay_probe`, `89=force_bad_signature`, `90=mock_signature_valid`, `91=mock_replay_detected`, `92=strict_failure_mode`
 3. route/upgrade: `101=upgrade_target_mode`, `102=endpoint_disclosure_grant_ref`, `103=consent_proof`, `104=fallback_route_ref`
 
 ---
@@ -546,6 +549,59 @@ CBOR diagnostic:
     83: "tid:reltok-1001",
     84: "sha256:37b5f0dac1403b5e80b1b4946dce8347f76fcc0f1cd88062ac97994cb789a9eb",
     85: "m1s5-inline-token-alpha"
+  }
+}
+```
+
+### 6.10 HandshakeAccept (M1-S6 reference lookup resolved pass)
+
+JSON debug:
+
+```json
+{
+  "msg_type": "HandshakeAccept",
+  "msg_id": "mid:msg-0017",
+  "trace_id": "trc:tr-2002",
+  "timestamp": 1772964250000,
+  "from": {
+    "node_id": "nid:PARENTPUB",
+    "name_anchor": ".Adult"
+  },
+  "intent": "invoke",
+  "target_scope": ".Adult.Games.RedX",
+  "ttl_ms": 30000,
+  "body": {
+    "route_mode": "parent_mediated",
+    "disclosure_level": "mediator_visible",
+    "token_transport": "reference",
+    "relation_token_ref": "tid:reltok-1002",
+    "relation_token_cid": "sha256:8f8c5967903fd0d4f90f27f00f3db498f1c57b18a2668ec998ca0f8f40d31bd9",
+    "reference_lookup_status": "resolved",
+    "reference_lookup_cid": "sha256:8f8c5967903fd0d4f90f27f00f3db498f1c57b18a2668ec998ca0f8f40d31bd9"
+  }
+}
+```
+
+CBOR diagnostic:
+
+```cbor-diag
+{
+  1: "HandshakeAccept",
+  2: "mid:msg-0017",
+  3: "trc:tr-2002",
+  4: 1772964250000,
+  5: {1: "nid:PARENTPUB", 2: ".Adult"},
+  6: 1,
+  7: ".Adult.Games.RedX",
+  12: 30000,
+  13: {
+    76: 0,
+    77: 1,
+    82: "reference",
+    83: "tid:reltok-1002",
+    84: "sha256:8f8c5967903fd0d4f90f27f00f3db498f1c57b18a2668ec998ca0f8f40d31bd9",
+    93: "resolved",
+    94: "sha256:8f8c5967903fd0d4f90f27f00f3db498f1c57b18a2668ec998ca0f8f40d31bd9"
   }
 }
 ```

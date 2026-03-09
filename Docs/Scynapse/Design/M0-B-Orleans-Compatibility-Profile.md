@@ -221,7 +221,19 @@ This profile maps M0-B protocol fields to their Orleans lineage, with explicit c
 
 ---
 
-## 19. Review Checklist
+## 19. M1-S6 Reference-Token Guard Behavior Classification
+
+| Hardened Behavior | Tag | Notes |
+|---|---|---|
+| M1-S5 token-boundary/integrity reuse in `M1-S6` reference-transport handshake path | `A` | adapts prior integrity constraints into reference lookup safety layer |
+| Reference lookup status contract on `HandshakeAccept` (`resolved|missing|rebinding_detected`) | `N` | Scynapse-native deterministic guard for reference token resolution state |
+| Resolved lookup CID equality with relation token CID (`reference_lookup_cid == relation_token_cid`) | `N` | Scynapse-native anti-rebinding/consistency check for reference transport |
+| Deterministic reference deny mapping (`E3101`, `E3102`, `E3103`) | `N` | machine-checkable conformance behavior for unresolved/rebinding/mismatch outcomes |
+| Reference token guard relying on silo/client gateway trust shortcuts | `D` | explicitly blocked; remains node-unified, policy-gated relation semantics |
+
+---
+
+## 20. Review Checklist
 
 1. Are any fields tagged `A` but still carrying hidden silo/cluster assumptions?
 2. Are all `N` fields tied to M0-A invariants?

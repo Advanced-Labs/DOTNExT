@@ -1,0 +1,44 @@
+{
+  "id": "TV-1102",
+  "title": "M1-S6 Reference Token Lookup Missing",
+  "slice_profile": "M1-S6",
+  "expect_conformance": "fail",
+  "expected_error_ids": [
+    "E3101_M1S6_REFERENCE_TOKEN_UNRESOLVED"
+  ],
+  "expected_error_contains": [
+    "reference token lookup is unresolved"
+  ],
+  "preconditions": [
+    "reference lookup cannot resolve relation token ref"
+  ],
+  "messages": [
+    { "type": "HandshakeInit", "role": "requester" },
+    { "type": "HandshakeChallenge", "role": "mediator" },
+    { "type": "HandshakeProof", "role": "requester", "body": { "verification_mode": "strict", "proof_ref": "nid:m1s6.reference.missing" } },
+    {
+      "type": "HandshakeAccept",
+      "role": "mediator",
+      "body": {
+        "route_mode": "parent_mediated",
+        "disclosure_level": "mediator_visible",
+        "token_transport": "reference",
+        "relation_token_ref": "tid:reltok-1102",
+        "relation_token_cid": "sha256:eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+        "reference_lookup_status": "missing"
+      }
+    }
+  ],
+  "expected_state_trace": [
+    "MediatedHandshake",
+    "Deny"
+  ],
+  "expected_outcome": {
+    "success": false,
+    "deny_code": "TrustInsufficient",
+    "retryable": false
+  },
+  "assertions": [
+    { "id": "A1", "kind": "error", "check": "deny_code_equals", "value": "TrustInsufficient" }
+  ]
+}

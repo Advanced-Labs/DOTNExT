@@ -87,6 +87,12 @@ Run M1-S5 fixture pack:
 dotnet run --project playground/FabricS1Prototype/FabricS1Prototype.csproj -- D:\Dev\dotnext\Docs\Scynapse\Design\Fixtures\M1-S5
 ```
 
+Run M1-S6 fixture pack:
+
+```powershell
+dotnet run --project playground/FabricS1Prototype/FabricS1Prototype.csproj -- D:\Dev\dotnext\Docs\Scynapse\Design\Fixtures\M1-S6
+```
+
 Expected-fail fixture semantics:
 
 1. `expected_error_ids` is the preferred exact failure oracle.
@@ -149,3 +155,10 @@ Slice profile semantics:
    - M1-S1 relation-token boundary fields are required on `HandshakeAccept`
    - inline token transport enforces `relation_token_cid == sha256(relation_token_blob)`
    - mismatched inline token CID maps to deterministic ID (`E3091_M1S5_TOKEN_CID_MISMATCH`)
+11. `slice_profile: "M1-S6"` extends M1-S5 with reference-token resolution/rebinding guard:
+   - reference transport requires `reference_lookup_status` (`resolved|missing|rebinding_detected`)
+   - `resolved` status requires `reference_lookup_cid` and must match `relation_token_cid`
+   - deterministic reference guard IDs:
+     - `E3101_M1S6_REFERENCE_TOKEN_UNRESOLVED`
+     - `E3102_M1S6_REFERENCE_TOKEN_CID_MISMATCH`
+     - `E3103_M1S6_REFERENCE_TOKEN_REBIND_DETECTED`
