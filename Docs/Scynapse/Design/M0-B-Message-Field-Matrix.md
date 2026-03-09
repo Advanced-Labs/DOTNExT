@@ -309,10 +309,10 @@ Relation token CID convention:
 | `disclosure_level` | R | N | Granted disclosure level |
 | `expires_at` | R | N | Relation token expiry |
 | `fallback_route_ref` | C | N | Required if direct-upgrade is granted |
-| `token_transport` | C | N | M1-S1 strict profile: required (`reference|inline`) |
-| `relation_token_ref` | C | N | M1-S1 strict profile: required typed identifier |
-| `relation_token_cid` | C | N | M1-S1 strict profile: required `sha256:<hex>` digest id |
-| `relation_token_blob` | C | N | M1-S1 strict profile: required for `inline`, forbidden for `reference` |
+| `token_transport` | C | N | M1-S1/M1-S5 profile: required (`reference|inline`) |
+| `relation_token_ref` | C | N | M1-S1/M1-S5 profile: required typed identifier |
+| `relation_token_cid` | C | N | M1-S1/M1-S5 profile: required `sha256:<hex>` digest id |
+| `relation_token_blob` | C | N | M1-S1/M1-S5 profile: required for `inline`, forbidden for `reference` |
 
 ### 4.5 HandshakeDeny
 
@@ -462,6 +462,7 @@ Relation token CID convention:
 9. In M1-S1 strict profile, `HandshakeAccept` relation token boundary fields are mandatory and mode-consistent.
 10. In M1-S3 profile, `HandshakeProof.verification_mode` governs strict/mock security adapter behavior and deterministic deny mapping.
 11. In M1-S4 profile, `HandshakeProof.strict_failure_mode` is valid only in strict mode and must be from the locked domain.
+12. In M1-S5 profile, inline `HandshakeAccept` token CID must match `sha256(relation_token_blob)` or deterministic deny is emitted.
 
 ---
 
@@ -475,4 +476,4 @@ Completed:
 Current next step:
 
 1. keep this matrix synchronized with wire examples and conformance harness fixtures
-2. preserve M1-S1 wire-closure constraints while extending runtime bridge and security-adapter slices, including M1-S4 strict failure mapping constraints
+2. preserve M1-S1 wire-closure constraints while extending runtime bridge and security-adapter slices, including M1-S4 strict failure mapping and M1-S5 token-integrity constraints

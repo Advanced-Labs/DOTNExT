@@ -210,6 +210,19 @@ M1-S4 extension note:
 4. invalid `strict_failure_mode` must fail schema validation with:
    - `E3080_M1S4_STRICT_FAILURE_MODE_INVALID`
 
+M1-S5 extension note:
+
+1. `slice_profile: "M1-S5"` extends M1-S4 with relation-token integrity checks.
+2. M1-S5 `HandshakeAccept` reuses M1-S1 token-boundary requirements:
+   - `token_transport` (`reference|inline`)
+   - `relation_token_ref`
+   - `relation_token_cid`
+   - `relation_token_blob` (inline-only)
+3. inline transport deterministic integrity rule:
+   - `relation_token_cid == sha256(relation_token_blob)`
+4. deterministic mismatch deny ID:
+   - `E3091_M1S5_TOKEN_CID_MISMATCH`
+
 ---
 
 ## 5. Conformance Gates (Pass/Fail)
@@ -248,6 +261,7 @@ Pass criteria:
 6. S3 profile denies encrypted endpoint disclosure deterministically when grant/disclosure gates are unmet.
 7. M1-S3 strict/mock handshake proof failures map deterministically (`invalid signature`, `nonce replay`) without bypassing existing handshake state rules.
 8. M1-S4 strict temporal/revocation/proof-chain failures map deterministically to stable strict-failure IDs, with invalid mode rejected at schema level.
+9. M1-S5 inline relation-token CID integrity mismatches map deterministically to `E3091` without bypassing existing handshake state rules.
 
 ### 5.5 Gate G5: Observation Conformance
 

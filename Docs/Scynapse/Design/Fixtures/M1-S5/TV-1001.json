@@ -1,0 +1,40 @@
+{
+  "id": "TV-1001",
+  "title": "M1-S5 Inline Relation Token CID Match",
+  "slice_profile": "M1-S5",
+  "preconditions": [
+    "strict security mode is active",
+    "inline relation token transport is selected",
+    "relation_token_cid matches sha256(relation_token_blob)"
+  ],
+  "messages": [
+    { "type": "HandshakeInit", "role": "requester" },
+    { "type": "HandshakeChallenge", "role": "mediator" },
+    { "type": "HandshakeProof", "role": "requester", "body": { "verification_mode": "strict", "proof_ref": "nid:m1s5.strict.pass" } },
+    {
+      "type": "HandshakeAccept",
+      "role": "mediator",
+      "body": {
+        "route_mode": "parent_mediated",
+        "disclosure_level": "mediator_visible",
+        "token_transport": "inline",
+        "relation_token_ref": "tid:reltok-1001",
+        "relation_token_cid": "sha256:37b5f0dac1403b5e80b1b4946dce8347f76fcc0f1cd88062ac97994cb789a9eb",
+        "relation_token_blob": "m1s5-inline-token-alpha"
+      }
+    }
+  ],
+  "expected_state_trace": [
+    "MediatedHandshake",
+    "RelayedSession",
+    "Completed"
+  ],
+  "expected_outcome": {
+    "success": true,
+    "deny_code": null
+  },
+  "assertions": [
+    { "id": "A1", "kind": "error", "check": "deny_code_absent", "value": true },
+    { "id": "A2", "kind": "state", "check": "contains_state", "value": "RelayedSession" }
+  ]
+}

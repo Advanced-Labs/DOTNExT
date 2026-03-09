@@ -1,0 +1,45 @@
+{
+  "id": "TV-1004",
+  "title": "M1-S5 Reference Relation Token Blob Forbidden",
+  "slice_profile": "M1-S5",
+  "expect_conformance": "fail",
+  "expected_error_ids": [
+    "E2073_TOKEN_BLOB_FORBIDDEN_REFERENCE"
+  ],
+  "expected_error_contains": [
+    "must not include 'relation_token_blob'"
+  ],
+  "preconditions": [
+    "strict security mode is active",
+    "reference token transport incorrectly includes inline blob"
+  ],
+  "messages": [
+    { "type": "HandshakeInit", "role": "requester" },
+    { "type": "HandshakeChallenge", "role": "mediator" },
+    { "type": "HandshakeProof", "role": "requester", "body": { "verification_mode": "strict", "proof_ref": "nid:m1s5.strict.badref" } },
+    {
+      "type": "HandshakeAccept",
+      "role": "mediator",
+      "body": {
+        "route_mode": "parent_mediated",
+        "disclosure_level": "mediator_visible",
+        "token_transport": "reference",
+        "relation_token_ref": "tid:reltok-1004",
+        "relation_token_cid": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+        "relation_token_blob": "should-not-be-here"
+      }
+    }
+  ],
+  "expected_state_trace": [
+    "MediatedHandshake",
+    "RelayedSession",
+    "Completed"
+  ],
+  "expected_outcome": {
+    "success": true,
+    "deny_code": null
+  },
+  "assertions": [
+    { "id": "A1", "kind": "error", "check": "deny_code_absent", "value": true }
+  ]
+}

@@ -444,3 +444,35 @@ Use this structure for each new entry:
    - push M1-S4 closure baseline and open the next bounded M1 slice.
 6. Risks/blockers:
    - none immediate; preserve deterministic error-ID stability across all active packs.
+
+### 2026-03-08 (M1-S5 Relation-Token Integrity Slice Implementation)
+
+1. Scope:
+   - execute M1-S5 task board on top of M1-S4 baseline and harden relation-token integrity behavior.
+2. Key outputs:
+   - created `codex/m1-s5-token-integrity` from M1-S4 baseline.
+   - added `slice_profile: "M1-S5"` handling in conformance engine.
+   - carried M1-S1 token-boundary checks into M1-S5 handshake accept path.
+   - added deterministic inline token CID integrity check:
+     - `relation_token_cid == sha256(relation_token_blob)`
+   - added deterministic mismatch deny mapping:
+     - `E3091_M1S5_TOKEN_CID_MISMATCH`
+   - added isolated fixture pack `Fixtures/M1-S5`: `TV-1001..TV-1004`.
+   - synchronized continuity + protocol docs for M1-S5 profile propagation.
+3. Validation runs:
+   - S1: 14/14
+   - S2: 8/8
+   - S3: 4/4
+   - S4: 4/4
+   - S5: 3/3
+   - M1-S1: 10/10
+   - M1-S2: 6/6
+   - M1-S3: 5/5
+   - M1-S4: 6/6
+   - M1-S5: 4/4
+4. Current doing:
+   - final continuity synchronization and scoped commit/push preparation on `codex/m1-s5-token-integrity`.
+5. Next:
+   - push M1-S5 closure baseline and open the next bounded M1 slice.
+6. Risks/blockers:
+   - none immediate; preserve locked token boundary semantics and deterministic error-ID stability.

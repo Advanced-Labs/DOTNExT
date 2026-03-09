@@ -210,7 +210,18 @@ This profile maps M0-B protocol fields to their Orleans lineage, with explicit c
 
 ---
 
-## 18. Review Checklist
+## 18. M1-S5 Relation-Token Integrity Behavior Classification
+
+| Hardened Behavior | Tag | Notes |
+|---|---|---|
+| M1-S1 token-boundary contract reuse in `M1-S5` handshake accept path | `A` | adapts prior wire-closure boundaries into runtime/security integrated slice |
+| Inline token CID integrity enforcement (`relation_token_cid == sha256(relation_token_blob)`) | `N` | Scynapse-native deterministic relation-token integrity check |
+| Deterministic inline CID mismatch deny mapping (`E3091`) | `N` | machine-checkable conformance behavior for integrity violations |
+| Token integrity relying on silo/client gateway trust shortcuts | `D` | explicitly blocked; remains node-unified relation semantics |
+
+---
+
+## 19. Review Checklist
 
 1. Are any fields tagged `A` but still carrying hidden silo/cluster assumptions?
 2. Are all `N` fields tied to M0-A invariants?

@@ -81,6 +81,18 @@ Deliverables:
 2. deterministic strict failure IDs for expired/revoked/unresolvable/not-yet-valid outcomes.
 3. baseline stability preserved across S1..S5 + M1-S1 + M1-S2 + M1-S3.
 
+### M1-S5: Relation Token Integrity (Bounded)
+
+Primary goal:
+
+1. enforce deterministic relation-token integrity for inline transport in handshake acceptance.
+
+Deliverables:
+
+1. profile `M1-S5` with relation-token boundary checks carried from M1-S1.
+2. inline transport CID integrity check (`relation_token_cid == sha256(relation_token_blob)`).
+3. deterministic mismatch deny mapping with stable machine-checkable ID.
+
 ---
 
 ## 4. Non-Negotiable Guardrails
@@ -116,4 +128,5 @@ Deliverables:
 2. `M1-S2` runtime-bridge execution complete (`M1-S2-Closure.md`).
 3. `M1-S3` security-adapter bridge execution complete (`M1-S3-Closure.md`).
 4. `M1-S4` strict failure-mapping execution complete (`M1-S4-Closure.md`).
-5. open next bounded M1 slice task board from this closure baseline.
+5. `M1-S5` relation-token integrity execution complete (`M1-S5-Closure.md`).
+6. open next bounded M1 slice task board from this closure baseline.

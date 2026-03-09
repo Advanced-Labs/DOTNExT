@@ -765,6 +765,76 @@ Expected outcome:
 
 1. expected fail by exact error ID (`E3080_M1S4_STRICT_FAILURE_MODE_INVALID`)
 
+### TV-1001 M1-S5 Inline Relation Token CID Match
+
+Preconditions:
+
+1. strict security mode is active
+2. inline token transport is selected
+3. `relation_token_cid` matches `sha256(relation_token_blob)`
+
+Sequence:
+
+1. mediated handshake flow reaches `HandshakeProof`
+2. `HandshakeAccept` uses inline token transport with matching CID/blob
+3. relayed session is established
+
+Expected outcome:
+
+1. success
+2. no deny code
+
+### TV-1002 M1-S5 Inline Relation Token CID Mismatch
+
+Preconditions:
+
+1. strict security mode is active
+2. inline token transport is selected
+3. `relation_token_cid` is intentionally mismatched against blob hash
+
+Sequence:
+
+1. mediated handshake flow reaches `HandshakeProof`
+2. `HandshakeAccept` provides mismatched inline token CID/blob
+
+Expected outcome:
+
+1. expected fail by exact error ID (`E3091_M1S5_TOKEN_CID_MISMATCH`)
+
+### TV-1003 M1-S5 Reference Relation Token Boundary Pass
+
+Preconditions:
+
+1. strict security mode is active
+2. reference token transport is selected
+3. inline token blob is absent
+
+Sequence:
+
+1. mediated handshake flow reaches `HandshakeProof`
+2. `HandshakeAccept` provides reference token fields (`token_transport`, `relation_token_ref`, `relation_token_cid`)
+
+Expected outcome:
+
+1. success
+2. no deny code
+
+### TV-1004 M1-S5 Reference Relation Token Blob Forbidden
+
+Preconditions:
+
+1. strict security mode is active
+2. reference token transport incorrectly includes `relation_token_blob`
+
+Sequence:
+
+1. mediated handshake flow reaches `HandshakeProof`
+2. `HandshakeAccept` includes forbidden inline blob while `token_transport=reference`
+
+Expected outcome:
+
+1. expected fail by exact error ID (`E2073_TOKEN_BLOB_FORBIDDEN_REFERENCE`)
+
 ---
 
 ## 4. Minimal Coverage Map
@@ -778,6 +848,7 @@ Expected outcome:
 7. M1 runtime bridge: TV-701, TV-702, TV-703, TV-704, TV-705, TV-706
 8. M1 security adapter bridge: TV-801, TV-802, TV-803, TV-804, TV-805
 9. M1 strict failure mapping: TV-901, TV-902, TV-903, TV-904, TV-905, TV-906
+10. M1 relation token integrity: TV-1001, TV-1002, TV-1003, TV-1004
 
 ### 4.1 S1 Transition-Edge Negative Extension Set
 
@@ -849,6 +920,11 @@ Expected outcome:
    - TV-904 (strict unresolvable proof chain; expected fail by exact error ID)
    - TV-905 (strict not-yet-valid assertion; expected fail by exact error ID)
    - TV-906 (invalid strict_failure_mode schema; expected fail by exact error ID)
+10. M1-S5 owned vectors:
+   - TV-1001 (inline token CID match pass)
+   - TV-1002 (inline token CID mismatch; expected fail by exact error ID)
+   - TV-1003 (reference token boundary pass)
+   - TV-1004 (reference token blob forbidden; expected fail by exact error ID)
 
 ---
 
@@ -869,5 +945,6 @@ Current next step:
 2. M1-S2 runtime-bridge vectors executed and stabilized (`TV-701..TV-706`)
 3. M1-S3 security-adapter vectors executed and stabilized (`TV-801..TV-805`)
 4. M1-S4 strict failure-mapping vectors executed and stabilized (`TV-901..TV-906`)
-5. preserve S1/S2/S3/S4/S5 + M1-S1 + M1-S2 + M1-S3 + M1-S4 baseline behavior and machine-checkable error ID stability
-6. open next bounded M1 slice from current closure baseline
+5. M1-S5 relation-token integrity vectors executed and stabilized (`TV-1001..TV-1004`)
+6. preserve S1/S2/S3/S4/S5 + M1-S1 + M1-S2 + M1-S3 + M1-S4 + M1-S5 baseline behavior and machine-checkable error ID stability
+7. open next bounded M1 slice from current closure baseline

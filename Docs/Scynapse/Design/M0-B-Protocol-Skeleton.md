@@ -59,6 +59,8 @@ Reference:
 - `Docs/Scynapse/Design/M1-S3-Closure.md`
 - `Docs/Scynapse/Design/M1-S4-Task-Board.md`
 - `Docs/Scynapse/Design/M1-S4-Closure.md`
+- `Docs/Scynapse/Design/M1-S5-Task-Board.md`
+- `Docs/Scynapse/Design/M1-S5-Closure.md`
 - `Docs/Scynapse/Design/M0-B-Wire-Lock-Open-Decisions.md`
 - `Docs/Scynapse/Design/M0-Status-Checkpoint.md`
 
@@ -338,3 +340,7 @@ Failure responses should include:
    - `HandshakeProof` in `M1-S4` extends strict mode with optional `strict_failure_mode`.
    - supported failure modes: `none`, `expired`, `revoked`, `unresolvable_proof`, `not_yet_valid`.
    - strict failure paths map deterministically to `E3081`..`E3084`; invalid mode is schema error `E3080`.
+16. M1-S5 relation-token integrity profile:
+   - `HandshakeAccept` in `M1-S5` uses M1-S1 token-boundary contract fields.
+   - `token_transport=inline` requires `relation_token_cid` to match `sha256(relation_token_blob)`.
+   - CID mismatch maps deterministically to `E3091_M1S5_TOKEN_CID_MISMATCH`.

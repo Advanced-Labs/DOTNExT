@@ -1,0 +1,46 @@
+{
+  "id": "TV-1002",
+  "title": "M1-S5 Inline Relation Token CID Mismatch",
+  "slice_profile": "M1-S5",
+  "expect_conformance": "fail",
+  "expected_error_ids": [
+    "E3091_M1S5_TOKEN_CID_MISMATCH"
+  ],
+  "expected_error_contains": [
+    "relation_token_cid does not match"
+  ],
+  "preconditions": [
+    "strict security mode is active",
+    "inline relation token transport is selected",
+    "relation_token_cid is intentionally mismatched"
+  ],
+  "messages": [
+    { "type": "HandshakeInit", "role": "requester" },
+    { "type": "HandshakeChallenge", "role": "mediator" },
+    { "type": "HandshakeProof", "role": "requester", "body": { "verification_mode": "strict", "proof_ref": "nid:m1s5.strict.mismatch" } },
+    {
+      "type": "HandshakeAccept",
+      "role": "mediator",
+      "body": {
+        "route_mode": "parent_mediated",
+        "disclosure_level": "mediator_visible",
+        "token_transport": "inline",
+        "relation_token_ref": "tid:reltok-1002",
+        "relation_token_cid": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "relation_token_blob": "m1s5-inline-token-alpha"
+      }
+    }
+  ],
+  "expected_state_trace": [
+    "MediatedHandshake",
+    "Deny"
+  ],
+  "expected_outcome": {
+    "success": false,
+    "deny_code": "TrustInsufficient",
+    "retryable": false
+  },
+  "assertions": [
+    { "id": "A1", "kind": "error", "check": "deny_code_equals", "value": "TrustInsufficient" }
+  ]
+}

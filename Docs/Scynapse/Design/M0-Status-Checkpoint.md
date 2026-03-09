@@ -73,6 +73,8 @@ Artifacts:
 18. `Docs/Scynapse/Design/M1-S3-Closure.md`
 19. `Docs/Scynapse/Design/M1-S4-Task-Board.md`
 20. `Docs/Scynapse/Design/M1-S4-Closure.md`
+21. `Docs/Scynapse/Design/M1-S5-Task-Board.md`
+22. `Docs/Scynapse/Design/M1-S5-Closure.md`
 
 Status:
 
@@ -85,6 +87,7 @@ Status:
 7. M1-S2 runtime-bridge slice executed and stabilized (`TV-701..TV-706`)
 8. M1-S3 security-adapter slice executed and stabilized (`TV-801..TV-805`)
 9. M1-S4 strict failure-mapping slice executed and stabilized (`TV-901..TV-906`)
+10. M1-S5 relation-token integrity slice executed and stabilized (`TV-1001..TV-1004`)
 
 ---
 
@@ -105,13 +108,14 @@ Yes. We are still on the same track:
 2. M1-S2 runtime-bridge slice completed (`TV-701..TV-706`)
 3. M1-S3 security-adapter slice completed (`TV-801..TV-805`)
 4. M1-S4 strict failure-mapping slice completed (`TV-901..TV-906`)
-5. preserve S1/S2/S3/S4/S5 + M1-S1 + M1-S2 + M1-S3 + M1-S4 conformance behavior and error-ID stability
-6. define next bounded M1 slice from M1-S4 closure baseline
+5. M1-S5 relation-token integrity slice completed (`TV-1001..TV-1004`)
+6. preserve S1/S2/S3/S4/S5 + M1-S1 + M1-S2 + M1-S3 + M1-S4 + M1-S5 conformance behavior and error-ID stability
+7. define next bounded M1 slice from M1-S5 closure baseline
 
 ---
 
 ## 6. Done/Doing/Next Snapshot
 
-1. `Done`: M0-A contract baseline and M0-B skeleton + compatibility profiles + field matrix + error mapping + state transitions + protocol test vectors + conformance harness checklist + wire examples + cross-doc consistency report + implementation-slice plan + S1 task board + S1 fixture pack + wire-lock decisions list + continuity layer (`METHODOLOGY`, `EXECUTIVE-MEMORY`, `SESSION-LOG`) + pre-compaction continuity protocol + `codex/s1-prototype` branch creation + S1 prototype harness scaffold (`src/Scynapse/playground/FabricS1Prototype`) + first fixture run pass (5/5) + S1 wire-lock decisions (`D1`, `D2`, `D4`, `D6`) locked and propagated + expected-fail fixture mode with extended S1 pack (8/8 effective pass) + expected error-token checks + explicit message-driven operation state machine + structured error ID surface + fixture schema `expected_error_ids` + transition-edge negatives `TV-104`..`TV-109` + reproducible harness run pass (14/14 effective pass) + S1 closure artifact/commit (`M0-S1-Closure.md`, `04e297587d`) + S2 branch kickoff (`codex/s2-direct-upgrade`) + S2 task board and fixture pack (`Fixtures/S2`) + profile-aware direct-upgrade conformance with deterministic gate ordering and fallback continuity + S2 pass set (8/8 effective pass) with stable repeated runs + S2 commit push (`7bfa560428`) + S3 branch kickoff (`codex/s3-endpoint-grants`) + S3 task board and fixture pack (`Fixtures/S3`) + endpoint grant/disclosure conformance with deterministic proof-path checks + S3 pass set (4/4 effective pass) with repeated stable run + S3 commit push (`107ba3c9ce`) + S4 branch kickoff (`codex/s4-observe-replay`) + S4 task board and fixture pack (`Fixtures/S4`) + observe/replay lifecycle conformance with replay-expiry deterministic behavior + S4 pass set (4/4 effective pass) with repeated stable run + S4 commit push (`dfa863e3ce`) + S5 branch kickoff (`codex/s5-policy-inheritance`) + S5 task board and fixture pack (`Fixtures/S5`) + policy inheritance hard-lock conformance and deterministic deny validation + S5 pass set (3/3 effective pass) with repeated stable run + M0 conformance closure artifact (`M0-Conformance-Closure.md`) + M1-S1 wire-closure slice + M1-S2 runtime-bridge slice + M1-S3 security-adapter slice + M1-S4 strict failure-mapping slice + cross-slice regression stability (S1/S2/S3/S4/S5 + M1-S1/M1-S2/M1-S3/M1-S4 all green).
-2. `Doing`: M1-S4 closure synchronization and M1 checkpoint handoff.
-3. `Next`: define and execute the next bounded M1 slice from M1-S4 baseline.
+1. `Done`: M0-A contract baseline and M0-B skeleton + compatibility profiles + field matrix + error mapping + state transitions + protocol test vectors + conformance harness checklist + wire examples + cross-doc consistency report + implementation-slice plan + S1 task board + S1 fixture pack + wire-lock decisions list + continuity layer (`METHODOLOGY`, `EXECUTIVE-MEMORY`, `SESSION-LOG`) + pre-compaction continuity protocol + `codex/s1-prototype` branch creation + S1 prototype harness scaffold (`src/Scynapse/playground/FabricS1Prototype`) + first fixture run pass (5/5) + S1 wire-lock decisions (`D1`, `D2`, `D4`, `D6`) locked and propagated + expected-fail fixture mode with extended S1 pack (8/8 effective pass) + expected error-token checks + explicit message-driven operation state machine + structured error ID surface + fixture schema `expected_error_ids` + transition-edge negatives `TV-104`..`TV-109` + reproducible harness run pass (14/14 effective pass) + S1 closure artifact/commit (`M0-S1-Closure.md`, `04e297587d`) + S2 branch kickoff (`codex/s2-direct-upgrade`) + S2 task board and fixture pack (`Fixtures/S2`) + profile-aware direct-upgrade conformance with deterministic gate ordering and fallback continuity + S2 pass set (8/8 effective pass) with stable repeated runs + S2 commit push (`7bfa560428`) + S3 branch kickoff (`codex/s3-endpoint-grants`) + S3 task board and fixture pack (`Fixtures/S3`) + endpoint grant/disclosure conformance with deterministic proof-path checks + S3 pass set (4/4 effective pass) with repeated stable run + S3 commit push (`107ba3c9ce`) + S4 branch kickoff (`codex/s4-observe-replay`) + S4 task board and fixture pack (`Fixtures/S4`) + observe/replay lifecycle conformance with replay-expiry deterministic behavior + S4 pass set (4/4 effective pass) with repeated stable run + S4 commit push (`dfa863e3ce`) + S5 branch kickoff (`codex/s5-policy-inheritance`) + S5 task board and fixture pack (`Fixtures/S5`) + policy inheritance hard-lock conformance and deterministic deny validation + S5 pass set (3/3 effective pass) with repeated stable run + M0 conformance closure artifact (`M0-Conformance-Closure.md`) + M1-S1 wire-closure slice + M1-S2 runtime-bridge slice + M1-S3 security-adapter slice + M1-S4 strict failure-mapping slice + M1-S5 relation-token integrity slice + cross-slice regression stability (S1/S2/S3/S4/S5 + M1-S1/M1-S2/M1-S3/M1-S4/M1-S5 all green).
+2. `Doing`: M1-S5 closure synchronization and M1 checkpoint handoff.
+3. `Next`: define and execute the next bounded M1 slice from M1-S5 baseline.

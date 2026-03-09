@@ -1,4 +1,4 @@
-# M0-B Wire Examples (S1 + M1-S1/M1-S4 Lock Profiles)
+# M0-B Wire Examples (S1 + M1-S1/M1-S5 Lock Profiles)
 
 ## 1. Purpose
 
@@ -30,6 +30,9 @@ These are semantic examples, not golden byte fixtures.
 8. M1-S4 strict-failure mapping lock profile:
    - optional strict-mode field: `strict_failure_mode`
    - allowed values: `none|expired|revoked|unresolvable_proof|not_yet_valid`
+9. M1-S5 relation-token integrity lock profile:
+   - `HandshakeAccept` uses M1-S1 token-boundary fields
+   - inline transport requires `relation_token_cid == sha256(relation_token_blob)`
 
 Authority references:
 
@@ -492,6 +495,57 @@ CBOR diagnostic:
     86: "strict",
     87: "nid:m1s4.strict.expired",
     92: "expired"
+  }
+}
+```
+
+### 6.9 HandshakeAccept (M1-S5 inline token integrity pass)
+
+JSON debug:
+
+```json
+{
+  "msg_type": "HandshakeAccept",
+  "msg_id": "mid:msg-0016",
+  "trace_id": "trc:tr-2002",
+  "timestamp": 1772964240000,
+  "from": {
+    "node_id": "nid:PARENTPUB",
+    "name_anchor": ".Adult"
+  },
+  "intent": "invoke",
+  "target_scope": ".Adult.Games.RedX",
+  "ttl_ms": 30000,
+  "body": {
+    "route_mode": "parent_mediated",
+    "disclosure_level": "mediator_visible",
+    "token_transport": "inline",
+    "relation_token_ref": "tid:reltok-1001",
+    "relation_token_cid": "sha256:37b5f0dac1403b5e80b1b4946dce8347f76fcc0f1cd88062ac97994cb789a9eb",
+    "relation_token_blob": "m1s5-inline-token-alpha"
+  }
+}
+```
+
+CBOR diagnostic:
+
+```cbor-diag
+{
+  1: "HandshakeAccept",
+  2: "mid:msg-0016",
+  3: "trc:tr-2002",
+  4: 1772964240000,
+  5: {1: "nid:PARENTPUB", 2: ".Adult"},
+  6: 1,
+  7: ".Adult.Games.RedX",
+  12: 30000,
+  13: {
+    76: 0,
+    77: 1,
+    82: "inline",
+    83: "tid:reltok-1001",
+    84: "sha256:37b5f0dac1403b5e80b1b4946dce8347f76fcc0f1cd88062ac97994cb789a9eb",
+    85: "m1s5-inline-token-alpha"
   }
 }
 ```

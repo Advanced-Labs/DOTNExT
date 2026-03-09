@@ -14,6 +14,7 @@ internal sealed class ConformanceEngine
     private const string SliceProfileM1S2 = "M1-S2";
     private const string SliceProfileM1S3 = "M1-S3";
     private const string SliceProfileM1S4 = "M1-S4";
+    private const string SliceProfileM1S5 = "M1-S5";
 
     private static readonly Regex TypedIdentifierRegex = new("^[a-z]{2,6}:[A-Za-z0-9][A-Za-z0-9._-]{2,127}$", RegexOptions.Compiled);
     private static readonly Regex RelationTokenCidRegex = new("^sha256:[0-9a-fA-F]{8,128}$", RegexOptions.Compiled);
@@ -28,7 +29,8 @@ internal sealed class ConformanceEngine
         SliceProfileM1S1,
         SliceProfileM1S2,
         SliceProfileM1S3,
-        SliceProfileM1S4
+        SliceProfileM1S4,
+        SliceProfileM1S5
     };
 
     private static readonly HashSet<string> KnownTokenTransportModes = new(StringComparer.Ordinal)
@@ -377,7 +379,8 @@ internal sealed class ConformanceEngine
                 ValidateS5PolicyFields(fixture, message, errors);
             }
 
-            if (string.Equals(sliceProfile, SliceProfileM1S1, StringComparison.Ordinal))
+            if (string.Equals(sliceProfile, SliceProfileM1S1, StringComparison.Ordinal) ||
+                string.Equals(sliceProfile, SliceProfileM1S5, StringComparison.Ordinal))
             {
                 ValidateM1S1WireClosureFields(fixture, message, errors);
             }
@@ -412,20 +415,23 @@ internal sealed class ConformanceEngine
         return string.Equals(sliceProfile, SliceProfileS2, StringComparison.Ordinal)
             || string.Equals(sliceProfile, SliceProfileM1S2, StringComparison.Ordinal)
             || string.Equals(sliceProfile, SliceProfileM1S3, StringComparison.Ordinal)
-            || string.Equals(sliceProfile, SliceProfileM1S4, StringComparison.Ordinal);
+            || string.Equals(sliceProfile, SliceProfileM1S4, StringComparison.Ordinal)
+            || string.Equals(sliceProfile, SliceProfileM1S5, StringComparison.Ordinal);
     }
 
     private static bool IsRuntimeBridgeProfile(string sliceProfile)
     {
         return string.Equals(sliceProfile, SliceProfileM1S2, StringComparison.Ordinal)
             || string.Equals(sliceProfile, SliceProfileM1S3, StringComparison.Ordinal)
-            || string.Equals(sliceProfile, SliceProfileM1S4, StringComparison.Ordinal);
+            || string.Equals(sliceProfile, SliceProfileM1S4, StringComparison.Ordinal)
+            || string.Equals(sliceProfile, SliceProfileM1S5, StringComparison.Ordinal);
     }
 
     private static bool IsM1SecurityAdapterProfile(string sliceProfile)
     {
         return string.Equals(sliceProfile, SliceProfileM1S3, StringComparison.Ordinal)
-            || string.Equals(sliceProfile, SliceProfileM1S4, StringComparison.Ordinal);
+            || string.Equals(sliceProfile, SliceProfileM1S4, StringComparison.Ordinal)
+            || string.Equals(sliceProfile, SliceProfileM1S5, StringComparison.Ordinal);
     }
 
     private static void ValidateS2RouteUpgradeProbeFields(FixtureCase fixture, FixtureMessage message, List<ConformanceError> errors)
@@ -1180,6 +1186,14 @@ internal sealed class ConformanceEngine
                     break;
                 }
 
+                if (string.Equals(context.SliceProfile, SliceProfileM1S5, StringComparison.Ordinal))
+                {
+                    if (!TryEvaluateM1S5RelationTokenIntegrity(fixtureId, message, context, errors))
+                    {
+                        break;
+                    }
+                }
+
                 TryTransition(fixtureId, context, "RelayedSession", errors);
                 break;
             }
@@ -1548,7 +1562,7 @@ internal sealed class ConformanceEngine
             {
                 if (!IsRuntimeBridgeProfile(context.SliceProfile))
                 {
-                    RejectWithDeterministicDeny(fixtureId, context, errors, "E3062_M1S2_ROUTE_DATA_OUTSIDE_PROFILE", "TrustInsufficient", $"{fixtureId}/{message.Type} is only supported in M1-S2/M1-S3 runtime-bridge profiles.");
+                    RejectWithDeterministicDeny(fixtureId, context, errors, "E3062_M1S2_ROUTE_DATA_OUTSIDE_PROFILE", "TrustInsufficient", $"{fixtureId}/{message.Type} is only supported in M1-S2/M1-S3/M1-S4/M1-S5 runtime-bridge profiles.");
                     break;
                 }
 
@@ -1681,6 +1695,61 @@ internal sealed class ConformanceEngine
             "not_yet_valid" => StrictFailureMode.NotYetValid,
             _ => StrictFailureMode.None
         };
+    }
+
+    private static bool TryEvaluateM1S5RelationTokenIntegrity(string fixtureId, FixtureMessage message, OperationContext context, List<ConformanceError> errors)
+    {
+        var tokenTransport = GetBodyString(message, "token_transport");
+        if (!string.Equals(tokenTransport, "inline", StringComparison.Ordinal))
+        {
+            return true;
+        }
+
+        var relationTokenBlob = GetBodyString(message, "relation_token_blob");
+        var relationTokenCid = GetBodyString(message, "relation_token_cid");
+        if (string.IsNullOrWhiteSpace(relationTokenBlob) || string.IsNullOrWhiteSpace(relationTokenCid))
+        {
+            return true;
+        }
+
+        if (!TryParseRelationTokenCidHex(relationTokenCid, out var expectedHex))
+        {
+            return true;
+        }
+
+        var actualHex = ComputeSha256Hex(relationTokenBlob);
+        if (!string.Equals(expectedHex, actualHex, StringComparison.OrdinalIgnoreCase))
+        {
+            RejectWithDeterministicDeny(
+                fixtureId,
+                context,
+                errors,
+                "E3091_M1S5_TOKEN_CID_MISMATCH",
+                "TrustInsufficient",
+                $"{fixtureId}/{message.Type} relation_token_cid does not match sha256(relation_token_blob).");
+            return false;
+        }
+
+        return true;
+    }
+
+    private static bool TryParseRelationTokenCidHex(string relationTokenCid, out string hex)
+    {
+        hex = string.Empty;
+        if (!relationTokenCid.StartsWith("sha256:", StringComparison.OrdinalIgnoreCase))
+        {
+            return false;
+        }
+
+        hex = relationTokenCid.Substring("sha256:".Length);
+        return hex.Length > 0;
+    }
+
+    private static string ComputeSha256Hex(string value)
+    {
+        var bytes = System.Text.Encoding.UTF8.GetBytes(value);
+        var digest = System.Security.Cryptography.SHA256.HashData(bytes);
+        return Convert.ToHexString(digest).ToLowerInvariant();
     }
 
     private static bool TryEvaluateS3EndpointGateFailure(string fixtureId, OperationContext context, List<ConformanceError> errors)
