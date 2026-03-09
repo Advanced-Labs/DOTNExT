@@ -662,3 +662,34 @@ Use this structure for each new entry:
    - push M1-S9 closure baseline and open the next bounded M1 slice.
 6. Risks/blockers:
    - none immediate; preserve deterministic freshness/replay/error-ID stability across all active packs.
+
+### 2026-03-08 (M1-S9 Closure Commit/Push Checkpoint)
+
+1. Scope:
+   - finalize M1-S9 closure checkpoint after green regression runs.
+2. Key outputs:
+   - committed M1-S9 code+fixtures+docs on `codex/m1-s9-grant-proof-freshness-replay`.
+   - commit id: `cdb31da89a`.
+   - pushed branch to origin with upstream tracking.
+3. Validation status:
+   - full baseline remains green:
+     - S1 14/14
+     - S2 8/8
+     - S3 4/4
+     - S4 4/4
+     - S5 3/3
+     - M1-S1 10/10
+     - M1-S2 6/6
+     - M1-S3 5/5
+     - M1-S4 6/6
+     - M1-S5 4/4
+     - M1-S6 5/5
+     - M1-S7 7/7
+     - M1-S8 13/13
+     - M1-S9 10/10
+4. Current doing:
+   - sequence the next bounded M1 slice from the M1-S9 baseline.
+5. Next:
+   - open next task board/branch and continue with bounded harness-first scope.
+6. Risks/blockers:
+   - none immediate; keep deterministic error-ID stability and gate-order invariants intact.
