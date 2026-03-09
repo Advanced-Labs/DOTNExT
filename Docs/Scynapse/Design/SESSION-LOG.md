@@ -410,3 +410,37 @@ Use this structure for each new entry:
    - push M1-S3 closure baseline and define next bounded M1 slice.
 6. Risks/blockers:
    - none immediate; preserve locked wire decisions and keep strict/mock error-ID surface stable.
+
+### 2026-03-08 (M1-S4 Strict Failure-Mapping Slice Implementation)
+
+1. Scope:
+   - execute M1-S4 task board on top of M1-S3 baseline and extend strict verification determinism.
+2. Key outputs:
+   - created `codex/m1-s4-security-failure-mapping` from M1-S3 baseline.
+   - extended `slice_profile: "M1-S4"` handling for strict failure-mode mapping depth.
+   - added `HandshakeProof.strict_failure_mode` domain and deterministic schema enforcement.
+   - mapped strict failure reasons to stable runtime IDs:
+     - `E3081_M1S4_PROOF_EXPIRED`
+     - `E3082_M1S4_PROOF_REVOKED`
+     - `E3083_M1S4_PROOF_CHAIN_UNRESOLVABLE`
+     - `E3084_M1S4_PROOF_NOT_YET_VALID`
+   - added invalid-mode schema ID:
+     - `E3080_M1S4_STRICT_FAILURE_MODE_INVALID`
+   - added isolated fixture pack `Fixtures/M1-S4`: `TV-901..TV-906`.
+   - synchronized continuity + protocol docs for M1-S4 profile propagation.
+3. Validation runs:
+   - S1: 14/14
+   - S2: 8/8
+   - S3: 4/4
+   - S4: 4/4
+   - S5: 3/3
+   - M1-S1: 10/10
+   - M1-S2: 6/6
+   - M1-S3: 5/5
+   - M1-S4: 6/6
+4. Current doing:
+   - scoped staging and commit/push preparation on `codex/m1-s4-security-failure-mapping`.
+5. Next:
+   - push M1-S4 closure baseline and open the next bounded M1 slice.
+6. Risks/blockers:
+   - none immediate; preserve deterministic error-ID stability across all active packs.

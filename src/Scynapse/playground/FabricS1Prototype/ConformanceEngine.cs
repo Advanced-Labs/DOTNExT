@@ -13,6 +13,7 @@ internal sealed class ConformanceEngine
     private const string SliceProfileM1S1 = "M1-S1";
     private const string SliceProfileM1S2 = "M1-S2";
     private const string SliceProfileM1S3 = "M1-S3";
+    private const string SliceProfileM1S4 = "M1-S4";
 
     private static readonly Regex TypedIdentifierRegex = new("^[a-z]{2,6}:[A-Za-z0-9][A-Za-z0-9._-]{2,127}$", RegexOptions.Compiled);
     private static readonly Regex RelationTokenCidRegex = new("^sha256:[0-9a-fA-F]{8,128}$", RegexOptions.Compiled);
@@ -26,7 +27,8 @@ internal sealed class ConformanceEngine
         SliceProfileS5,
         SliceProfileM1S1,
         SliceProfileM1S2,
-        SliceProfileM1S3
+        SliceProfileM1S3,
+        SliceProfileM1S4
     };
 
     private static readonly HashSet<string> KnownTokenTransportModes = new(StringComparer.Ordinal)
@@ -45,6 +47,15 @@ internal sealed class ConformanceEngine
     {
         "mock",
         "strict"
+    };
+
+    private static readonly HashSet<string> KnownStrictFailureModes = new(StringComparer.Ordinal)
+    {
+        "none",
+        "expired",
+        "revoked",
+        "unresolvable_proof",
+        "not_yet_valid"
     };
 
     private static readonly HashSet<string> PolicyCausalDenyCodes = new(StringComparer.Ordinal)
@@ -376,10 +387,10 @@ internal sealed class ConformanceEngine
                 ValidateM1S2RuntimeBridgeFields(fixture, message, errors);
             }
 
-            if (string.Equals(sliceProfile, SliceProfileM1S3, StringComparison.Ordinal))
+            if (IsM1SecurityAdapterProfile(sliceProfile))
             {
                 ValidateM1S2RuntimeBridgeFields(fixture, message, errors);
-                ValidateM1S3SecurityAdapterFields(fixture, message, errors);
+                ValidateM1SecurityAdapterFields(fixture, message, errors);
             }
         }
     }
@@ -400,13 +411,21 @@ internal sealed class ConformanceEngine
     {
         return string.Equals(sliceProfile, SliceProfileS2, StringComparison.Ordinal)
             || string.Equals(sliceProfile, SliceProfileM1S2, StringComparison.Ordinal)
-            || string.Equals(sliceProfile, SliceProfileM1S3, StringComparison.Ordinal);
+            || string.Equals(sliceProfile, SliceProfileM1S3, StringComparison.Ordinal)
+            || string.Equals(sliceProfile, SliceProfileM1S4, StringComparison.Ordinal);
     }
 
     private static bool IsRuntimeBridgeProfile(string sliceProfile)
     {
         return string.Equals(sliceProfile, SliceProfileM1S2, StringComparison.Ordinal)
-            || string.Equals(sliceProfile, SliceProfileM1S3, StringComparison.Ordinal);
+            || string.Equals(sliceProfile, SliceProfileM1S3, StringComparison.Ordinal)
+            || string.Equals(sliceProfile, SliceProfileM1S4, StringComparison.Ordinal);
+    }
+
+    private static bool IsM1SecurityAdapterProfile(string sliceProfile)
+    {
+        return string.Equals(sliceProfile, SliceProfileM1S3, StringComparison.Ordinal)
+            || string.Equals(sliceProfile, SliceProfileM1S4, StringComparison.Ordinal);
     }
 
     private static void ValidateS2RouteUpgradeProbeFields(FixtureCase fixture, FixtureMessage message, List<ConformanceError> errors)
@@ -793,7 +812,7 @@ internal sealed class ConformanceEngine
         }
     }
 
-    private static void ValidateM1S3SecurityAdapterFields(FixtureCase fixture, FixtureMessage message, List<ConformanceError> errors)
+    private static void ValidateM1SecurityAdapterFields(FixtureCase fixture, FixtureMessage message, List<ConformanceError> errors)
     {
         if (!string.Equals(message.Type, "HandshakeProof", StringComparison.Ordinal))
         {
@@ -825,6 +844,12 @@ internal sealed class ConformanceEngine
             if (string.IsNullOrWhiteSpace(proofRef))
             {
                 AddError(errors, "L2", "E2092_M1S3_STRICT_PROOF_REF_REQUIRED", $"{fixture.Id}/{message.Type} strict mode requires non-empty 'proof_ref'.");
+            }
+
+            var strictFailureMode = GetBodyString(message, "strict_failure_mode");
+            if (strictFailureMode is not null && !KnownStrictFailureModes.Contains(strictFailureMode))
+            {
+                AddError(errors, "L2", "E3080_M1S4_STRICT_FAILURE_MODE_INVALID", $"{fixture.Id}/{message.Type} field 'strict_failure_mode' value '{strictFailureMode}' is invalid.");
             }
 
             ValidateOptionalBooleanBodyField(fixture, message, "replay_probe", errors, "E2093_M1S3_BOOLEAN_FLAG_INVALID");
@@ -1130,9 +1155,9 @@ internal sealed class ConformanceEngine
                     break;
                 }
 
-                if (string.Equals(context.SliceProfile, SliceProfileM1S3, StringComparison.Ordinal))
+                if (IsM1SecurityAdapterProfile(context.SliceProfile))
                 {
-                    if (!TryEvaluateM1S3HandshakeProof(fixtureId, message, context, errors))
+                    if (!TryEvaluateM1SecurityHandshakeProof(fixtureId, message, context, errors))
                     {
                         break;
                     }
@@ -1572,7 +1597,7 @@ internal sealed class ConformanceEngine
         }
     }
 
-    private static bool TryEvaluateM1S3HandshakeProof(string fixtureId, FixtureMessage message, OperationContext context, List<ConformanceError> errors)
+    private static bool TryEvaluateM1SecurityHandshakeProof(string fixtureId, FixtureMessage message, OperationContext context, List<ConformanceError> errors)
     {
         var mode = GetBodyString(message, "verification_mode");
         if (mode is null || !KnownVerificationModes.Contains(mode))
@@ -1621,9 +1646,10 @@ internal sealed class ConformanceEngine
         var proofRef = GetBodyString(message, "proof_ref") ?? string.Empty;
         var replayProbe = GetBodyBoolean(message, "replay_probe") ?? false;
         var forceBadSignature = GetBodyBoolean(message, "force_bad_signature") ?? false;
+        var strictFailureMode = ParseStrictFailureMode(GetBodyString(message, "strict_failure_mode"));
 
         context.SecurityAdapterSession ??= new SecurityAdapterSession();
-        var outcome = context.SecurityAdapterSession.VerifyStrictProof(proofRef, forceBadSignature, replayProbe);
+        var outcome = context.SecurityAdapterSession.VerifyStrictProof(proofRef, forceBadSignature, replayProbe, strictFailureMode);
         if (outcome.IsValid)
         {
             return true;
@@ -1637,6 +1663,24 @@ internal sealed class ConformanceEngine
             "TrustInsufficient",
             $"{fixtureId}/{message.Type} {outcome.Message ?? "strict verification failed"}");
         return false;
+    }
+
+    private static StrictFailureMode ParseStrictFailureMode(string? rawValue)
+    {
+        if (string.IsNullOrWhiteSpace(rawValue))
+        {
+            return StrictFailureMode.None;
+        }
+
+        return rawValue switch
+        {
+            "none" => StrictFailureMode.None,
+            "expired" => StrictFailureMode.Expired,
+            "revoked" => StrictFailureMode.Revoked,
+            "unresolvable_proof" => StrictFailureMode.UnresolvableProof,
+            "not_yet_valid" => StrictFailureMode.NotYetValid,
+            _ => StrictFailureMode.None
+        };
     }
 
     private static bool TryEvaluateS3EndpointGateFailure(string fixtureId, OperationContext context, List<ConformanceError> errors)

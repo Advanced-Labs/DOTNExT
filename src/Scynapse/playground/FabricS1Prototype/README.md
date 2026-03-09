@@ -75,6 +75,12 @@ Run M1-S3 fixture pack:
 dotnet run --project playground/FabricS1Prototype/FabricS1Prototype.csproj -- D:\Dev\dotnext\Docs\Scynapse\Design\Fixtures\M1-S3
 ```
 
+Run M1-S4 fixture pack:
+
+```powershell
+dotnet run --project playground/FabricS1Prototype/FabricS1Prototype.csproj -- D:\Dev\dotnext\Docs\Scynapse\Design\Fixtures\M1-S4
+```
+
 Expected-fail fixture semantics:
 
 1. `expected_error_ids` is the preferred exact failure oracle.
@@ -130,3 +136,6 @@ Slice profile semantics:
      - optional `replay_probe`
      - optional `force_bad_signature`
    - deterministic deny mapping remains active for failure paths
+9. `slice_profile: "M1-S4"` extends strict security-adapter validation with mapped strict failure modes:
+   - optional `strict_failure_mode` (`none|expired|revoked|unresolvable_proof|not_yet_valid`)
+   - strict-mode failures map to deterministic IDs (`E3081`..`E3084`)

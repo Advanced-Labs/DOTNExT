@@ -140,4 +140,5 @@ Current next action:
 3. M1-S1 wire-closure slice completed (`M1-S1-Closure.md`)
 4. M1-S2 runtime-bridge slice completed (`M1-S2-Closure.md`)
 5. M1-S3 security-adapter bridge slice completed (`M1-S3-Closure.md`)
-6. define next bounded M1 slice from M1-S3 closure baseline
+6. M1-S4 strict failure-mapping slice completed (`M1-S4-Closure.md`)
+7. define next bounded M1 slice from M1-S4 closure baseline

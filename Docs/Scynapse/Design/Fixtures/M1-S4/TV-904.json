@@ -1,0 +1,30 @@
+{
+  "id": "TV-904",
+  "title": "M1-S4 Strict Unresolvable Proof Chain",
+  "slice_profile": "M1-S4",
+  "expect_conformance": "fail",
+  "expected_error_ids": [
+    "E3083_M1S4_PROOF_CHAIN_UNRESOLVABLE"
+  ],
+  "expected_error_contains": [
+    "unresolvable proof"
+  ],
+  "messages": [
+    { "type": "HandshakeInit", "role": "requester" },
+    { "type": "HandshakeChallenge", "role": "mediator" },
+    { "type": "HandshakeProof", "role": "requester", "body": { "verification_mode": "strict", "proof_ref": "nid:m1s4.strict.unresolvable", "strict_failure_mode": "unresolvable_proof" } }
+  ],
+  "expected_state_trace": [
+    "MediatedHandshake",
+    "Deny"
+  ],
+  "expected_outcome": {
+    "success": false,
+    "deny_code": "TrustInsufficient",
+    "retryable": false
+  },
+  "assertions": [
+    { "id": "A1", "kind": "state", "check": "final_state_equals", "value": "Deny" },
+    { "id": "A2", "kind": "error", "check": "deny_code_equals", "value": "TrustInsufficient" }
+  ]
+}

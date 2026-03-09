@@ -666,6 +666,105 @@ Expected outcome:
 
 1. expected fail by exact error ID (`E3072_M1S3_NONCE_REPLAY_DETECTED`)
 
+### TV-901 M1-S4 Strict Verification Success
+
+Preconditions:
+
+1. security adapter strict mode is active
+2. strict failure mode is absent or `none`
+3. proof chain and nonce are valid
+
+Sequence:
+
+1. mediated handshake flow reaches `HandshakeProof`
+2. strict verification executes with no injected strict failure mode
+3. `HandshakeAccept` establishes relayed session
+
+Expected outcome:
+
+1. success
+2. no deny code
+
+### TV-902 M1-S4 Strict Expired Assertion
+
+Preconditions:
+
+1. strict mode is active
+2. strict failure mode is `expired`
+
+Sequence:
+
+1. mediated handshake flow reaches `HandshakeProof`
+2. strict verification executes expiry-failure path
+
+Expected outcome:
+
+1. expected fail by exact error ID (`E3081_M1S4_PROOF_EXPIRED`)
+
+### TV-903 M1-S4 Strict Revoked Assertion
+
+Preconditions:
+
+1. strict mode is active
+2. strict failure mode is `revoked`
+
+Sequence:
+
+1. mediated handshake flow reaches `HandshakeProof`
+2. strict verification executes revocation-failure path
+
+Expected outcome:
+
+1. expected fail by exact error ID (`E3082_M1S4_PROOF_REVOKED`)
+
+### TV-904 M1-S4 Strict Unresolvable Proof Chain
+
+Preconditions:
+
+1. strict mode is active
+2. strict failure mode is `unresolvable_proof`
+
+Sequence:
+
+1. mediated handshake flow reaches `HandshakeProof`
+2. strict verification executes proof-chain unresolvable path
+
+Expected outcome:
+
+1. expected fail by exact error ID (`E3083_M1S4_PROOF_CHAIN_UNRESOLVABLE`)
+
+### TV-905 M1-S4 Strict Not-Yet-Valid Assertion
+
+Preconditions:
+
+1. strict mode is active
+2. strict failure mode is `not_yet_valid`
+
+Sequence:
+
+1. mediated handshake flow reaches `HandshakeProof`
+2. strict verification executes not-yet-valid path
+
+Expected outcome:
+
+1. expected fail by exact error ID (`E3084_M1S4_PROOF_NOT_YET_VALID`)
+
+### TV-906 M1-S4 Invalid strict_failure_mode Schema
+
+Preconditions:
+
+1. strict mode is active
+2. `strict_failure_mode` contains a value outside the locked domain
+
+Sequence:
+
+1. mediated handshake flow reaches `HandshakeProof`
+2. schema validation evaluates `strict_failure_mode`
+
+Expected outcome:
+
+1. expected fail by exact error ID (`E3080_M1S4_STRICT_FAILURE_MODE_INVALID`)
+
 ---
 
 ## 4. Minimal Coverage Map
@@ -678,6 +777,7 @@ Expected outcome:
 6. M1 wire closure: TV-601, TV-602, TV-603, TV-604, TV-605, TV-606, TV-607, TV-608, TV-609, TV-610
 7. M1 runtime bridge: TV-701, TV-702, TV-703, TV-704, TV-705, TV-706
 8. M1 security adapter bridge: TV-801, TV-802, TV-803, TV-804, TV-805
+9. M1 strict failure mapping: TV-901, TV-902, TV-903, TV-904, TV-905, TV-906
 
 ### 4.1 S1 Transition-Edge Negative Extension Set
 
@@ -742,6 +842,13 @@ Expected outcome:
    - TV-803 (strict invalid signature detection; expected fail by exact error ID)
    - TV-804 (mock proof verification success)
    - TV-805 (mock replay detection; expected fail by exact error ID)
+9. M1-S4 owned vectors:
+   - TV-901 (strict verification success baseline)
+   - TV-902 (strict expired assertion; expected fail by exact error ID)
+   - TV-903 (strict revoked assertion; expected fail by exact error ID)
+   - TV-904 (strict unresolvable proof chain; expected fail by exact error ID)
+   - TV-905 (strict not-yet-valid assertion; expected fail by exact error ID)
+   - TV-906 (invalid strict_failure_mode schema; expected fail by exact error ID)
 
 ---
 
@@ -761,5 +868,6 @@ Current next step:
 1. M1-S1 deferred wire closure vectors executed and stabilized (`TV-601..TV-610`)
 2. M1-S2 runtime-bridge vectors executed and stabilized (`TV-701..TV-706`)
 3. M1-S3 security-adapter vectors executed and stabilized (`TV-801..TV-805`)
-4. preserve S1/S2/S3/S4/S5 + M1-S1 + M1-S2 + M1-S3 baseline behavior and machine-checkable error ID stability
-5. open next bounded M1 slice from current closure baseline
+4. M1-S4 strict failure-mapping vectors executed and stabilized (`TV-901..TV-906`)
+5. preserve S1/S2/S3/S4/S5 + M1-S1 + M1-S2 + M1-S3 + M1-S4 baseline behavior and machine-checkable error ID stability
+6. open next bounded M1 slice from current closure baseline

@@ -58,3 +58,4 @@ Deferred:
 4. M1-S1 deferred wire closure completed: `M1-S1-Closure.md`
 5. M1-S2 runtime bridge closure completed: `M1-S2-Closure.md`
 6. M1-S3 security-adapter bridge closure completed: `M1-S3-Closure.md`
+7. M1-S4 strict failure-mapping closure completed: `M1-S4-Closure.md`

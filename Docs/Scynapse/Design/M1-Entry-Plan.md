@@ -69,6 +69,18 @@ Deliverables:
 2. fixture-selectable strict/mock verification modes.
 3. deterministic deny mapping preserved when strict mode is active.
 
+### M1-S4: Strict Failure Mapping (Bounded)
+
+Primary goal:
+
+1. extend strict verification to deterministic temporal/revocation/proof-chain failure reasons.
+
+Deliverables:
+
+1. `strict_failure_mode` fixture control for strict verification paths.
+2. deterministic strict failure IDs for expired/revoked/unresolvable/not-yet-valid outcomes.
+3. baseline stability preserved across S1..S5 + M1-S1 + M1-S2 + M1-S3.
+
 ---
 
 ## 4. Non-Negotiable Guardrails
@@ -103,4 +115,5 @@ Deliverables:
 1. `M1-S1` execution complete (`M1-S1-Closure.md`).
 2. `M1-S2` runtime-bridge execution complete (`M1-S2-Closure.md`).
 3. `M1-S3` security-adapter bridge execution complete (`M1-S3-Closure.md`).
-4. open next bounded M1 slice task board from this closure baseline.
+4. `M1-S4` strict failure-mapping execution complete (`M1-S4-Closure.md`).
+5. open next bounded M1 slice task board from this closure baseline.

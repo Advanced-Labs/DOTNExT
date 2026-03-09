@@ -199,7 +199,18 @@ This profile maps M0-B protocol fields to their Orleans lineage, with explicit c
 
 ---
 
-## 17. Review Checklist
+## 17. M1-S4 Strict Failure-Mapping Behavior Classification
+
+| Hardened Behavior | Tag | Notes |
+|---|---|---|
+| Strict failure-mode extension on `HandshakeProof` (`strict_failure_mode`) in `M1-S4` | `N` | Scynapse-native deterministic conformance control for strict verification paths |
+| Deterministic strict temporal/revocation/proof-chain failure ID mapping (`E3081`..`E3084`) | `A` | adapts verification-layer failure semantics into stable protocol conformance IDs |
+| Invalid strict-failure-mode schema rejection (`E3080`) | `N` | Scynapse-native schema hardening for deterministic fail surfaces |
+| Strict failure behavior requiring silo/client trust shortcuts | `D` | explicitly blocked; remains node-unified proof and policy semantics |
+
+---
+
+## 18. Review Checklist
 
 1. Are any fields tagged `A` but still carrying hidden silo/cluster assumptions?
 2. Are all `N` fields tied to M0-A invariants?

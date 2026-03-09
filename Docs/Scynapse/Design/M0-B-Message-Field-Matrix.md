@@ -173,6 +173,7 @@ Handshake keys (S1-assigned):
 | `89` | `force_bad_signature` |
 | `90` | `mock_signature_valid` |
 | `91` | `mock_replay_detected` |
+| `92` | `strict_failure_mode` |
 
 Route/upgrade keys (S1-assigned):
 
@@ -297,6 +298,7 @@ Relation token CID convention:
 | `force_bad_signature` | O | N | M1-S3 strict mode: force deterministic invalid-signature path |
 | `mock_signature_valid` | O | N | M1-S3 mock mode: signature verdict flag (default `true`) |
 | `mock_replay_detected` | O | N | M1-S3 mock mode: replay verdict flag (default `false`) |
+| `strict_failure_mode` | O | N | M1-S4 strict mode: optional deterministic failure injection (`none|expired|revoked|unresolvable_proof|not_yet_valid`) |
 
 ### 4.4 HandshakeAccept
 
@@ -459,6 +461,7 @@ Relation token CID convention:
 8. In M1-S1 strict profile, id/ref fields use typed identifiers (`<prefix>:<value>`).
 9. In M1-S1 strict profile, `HandshakeAccept` relation token boundary fields are mandatory and mode-consistent.
 10. In M1-S3 profile, `HandshakeProof.verification_mode` governs strict/mock security adapter behavior and deterministic deny mapping.
+11. In M1-S4 profile, `HandshakeProof.strict_failure_mode` is valid only in strict mode and must be from the locked domain.
 
 ---
 
@@ -472,4 +475,4 @@ Completed:
 Current next step:
 
 1. keep this matrix synchronized with wire examples and conformance harness fixtures
-2. preserve M1-S1 wire-closure constraints while extending runtime bridge and security-adapter slices
+2. preserve M1-S1 wire-closure constraints while extending runtime bridge and security-adapter slices, including M1-S4 strict failure mapping constraints

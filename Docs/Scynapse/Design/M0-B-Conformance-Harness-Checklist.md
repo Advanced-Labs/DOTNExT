@@ -197,6 +197,19 @@ M1-S3 extension note:
    - optional `mock_replay_detected` (bool)
 5. deterministic deny IDs must be emitted for signature and replay failures.
 
+M1-S4 extension note:
+
+1. `slice_profile: "M1-S4"` extends strict security-adapter mapping depth.
+2. M1-S4 strict mode supports optional:
+   - `strict_failure_mode` (`none|expired|revoked|unresolvable_proof|not_yet_valid`)
+3. deterministic strict failure IDs:
+   - `E3081_M1S4_PROOF_EXPIRED`
+   - `E3082_M1S4_PROOF_REVOKED`
+   - `E3083_M1S4_PROOF_CHAIN_UNRESOLVABLE`
+   - `E3084_M1S4_PROOF_NOT_YET_VALID`
+4. invalid `strict_failure_mode` must fail schema validation with:
+   - `E3080_M1S4_STRICT_FAILURE_MODE_INVALID`
+
 ---
 
 ## 5. Conformance Gates (Pass/Fail)
@@ -234,6 +247,7 @@ Pass criteria:
    - `PolicyDenied -> DisclosureDenied -> GrantMissing/GrantExpired -> TrustInsufficient -> UpgradeRejected`
 6. S3 profile denies encrypted endpoint disclosure deterministically when grant/disclosure gates are unmet.
 7. M1-S3 strict/mock handshake proof failures map deterministically (`invalid signature`, `nonce replay`) without bypassing existing handshake state rules.
+8. M1-S4 strict temporal/revocation/proof-chain failures map deterministically to stable strict-failure IDs, with invalid mode rejected at schema level.
 
 ### 5.5 Gate G5: Observation Conformance
 

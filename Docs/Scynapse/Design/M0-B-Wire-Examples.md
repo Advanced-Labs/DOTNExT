@@ -1,4 +1,4 @@
-# M0-B Wire Examples (S1 + M1-S1/M1-S3 Lock Profiles)
+# M0-B Wire Examples (S1 + M1-S1/M1-S4 Lock Profiles)
 
 ## 1. Purpose
 
@@ -27,6 +27,9 @@ These are semantic examples, not golden byte fixtures.
    - `HandshakeProof.verification_mode` (`mock|strict`)
    - strict mode fields: `proof_ref`, optional `replay_probe`, optional `force_bad_signature`
    - mock mode fields: optional `mock_signature_valid`, optional `mock_replay_detected`
+8. M1-S4 strict-failure mapping lock profile:
+   - optional strict-mode field: `strict_failure_mode`
+   - allowed values: `none|expired|revoked|unresolvable_proof|not_yet_valid`
 
 Authority references:
 
@@ -64,7 +67,7 @@ Example S1 body keys used below:
 
 1. resolve: `33=expr_raw`, `34=expr_norm`, `53=expr_norm_v`, `35=operation_class`, `49=deny_code`, `50=reason`, `51=retryable`, `52=remediation`
 2. handshake: `75=relation_token`, `76=route_mode`, `77=disclosure_level`, `71=expires_at`, `80=policy_ref`, `82=token_transport`, `83=relation_token_ref`, `84=relation_token_cid`, `85=relation_token_blob`
-   - M1-S3 handshake proof extension: `86=verification_mode`, `87=proof_ref`, `88=replay_probe`, `89=force_bad_signature`, `90=mock_signature_valid`, `91=mock_replay_detected`
+   - M1-S3/M1-S4 handshake proof extension: `86=verification_mode`, `87=proof_ref`, `88=replay_probe`, `89=force_bad_signature`, `90=mock_signature_valid`, `91=mock_replay_detected`, `92=strict_failure_mode`
 3. route/upgrade: `101=upgrade_target_mode`, `102=endpoint_disclosure_grant_ref`, `103=consent_proof`, `104=fallback_route_ref`
 
 ---
@@ -444,6 +447,51 @@ CBOR diagnostic:
     87: "nid:m1s3.strict.pass",
     88: false,
     89: false
+  }
+}
+```
+
+### 6.8 HandshakeProof (M1-S4 strict failure mapping: expired)
+
+JSON debug:
+
+```json
+{
+  "msg_type": "HandshakeProof",
+  "msg_id": "mid:msg-0015",
+  "trace_id": "trc:tr-2002",
+  "timestamp": 1772964230000,
+  "from": {
+    "node_id": "nid:N1PUB",
+    "name_anchor": ".Users.Alice"
+  },
+  "intent": "invoke",
+  "target_scope": ".Adult.Games.RedX",
+  "ttl_ms": 30000,
+  "body": {
+    "verification_mode": "strict",
+    "proof_ref": "nid:m1s4.strict.expired",
+    "strict_failure_mode": "expired"
+  }
+}
+```
+
+CBOR diagnostic:
+
+```cbor-diag
+{
+  1: "HandshakeProof",
+  2: "mid:msg-0015",
+  3: "trc:tr-2002",
+  4: 1772964230000,
+  5: {1: "nid:N1PUB", 2: ".Users.Alice"},
+  6: 1,
+  7: ".Adult.Games.RedX",
+  12: 30000,
+  13: {
+    86: "strict",
+    87: "nid:m1s4.strict.expired",
+    92: "expired"
   }
 }
 ```

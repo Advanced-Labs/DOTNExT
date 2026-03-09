@@ -1,0 +1,30 @@
+{
+  "id": "TV-906",
+  "title": "M1-S4 Invalid strict_failure_mode Schema",
+  "slice_profile": "M1-S4",
+  "expect_conformance": "fail",
+  "expected_error_ids": [
+    "E3080_M1S4_STRICT_FAILURE_MODE_INVALID"
+  ],
+  "expected_error_contains": [
+    "strict_failure_mode"
+  ],
+  "messages": [
+    { "type": "HandshakeInit", "role": "requester" },
+    { "type": "HandshakeChallenge", "role": "mediator" },
+    { "type": "HandshakeProof", "role": "requester", "body": { "verification_mode": "strict", "proof_ref": "nid:m1s4.strict.bad-field", "strict_failure_mode": "foobar" } },
+    { "type": "HandshakeAccept", "role": "mediator", "body": { "route_mode": "parent_mediated", "disclosure_level": "mediator_visible" } }
+  ],
+  "expected_state_trace": [
+    "MediatedHandshake",
+    "RelayedSession",
+    "Completed"
+  ],
+  "expected_outcome": {
+    "success": true,
+    "deny_code": null
+  },
+  "assertions": [
+    { "id": "A1", "kind": "error", "check": "deny_code_absent", "value": true }
+  ]
+}

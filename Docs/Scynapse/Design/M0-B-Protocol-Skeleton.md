@@ -57,6 +57,8 @@ Reference:
 - `Docs/Scynapse/Design/M1-S2-Closure.md`
 - `Docs/Scynapse/Design/M1-S3-Task-Board.md`
 - `Docs/Scynapse/Design/M1-S3-Closure.md`
+- `Docs/Scynapse/Design/M1-S4-Task-Board.md`
+- `Docs/Scynapse/Design/M1-S4-Closure.md`
 - `Docs/Scynapse/Design/M0-B-Wire-Lock-Open-Decisions.md`
 - `Docs/Scynapse/Design/M0-Status-Checkpoint.md`
 
@@ -332,3 +334,7 @@ Failure responses should include:
    - `HandshakeProof` in `M1-S3` requires `verification_mode` (`mock|strict`).
    - strict mode integrates bounded verification with nonce replay checks.
    - strict/mock failure paths map to deterministic deny IDs.
+15. M1-S4 strict failure mapping profile:
+   - `HandshakeProof` in `M1-S4` extends strict mode with optional `strict_failure_mode`.
+   - supported failure modes: `none`, `expired`, `revoked`, `unresolvable_proof`, `not_yet_valid`.
+   - strict failure paths map deterministically to `E3081`..`E3084`; invalid mode is schema error `E3080`.

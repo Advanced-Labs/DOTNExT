@@ -4,13 +4,13 @@ Last updated: 2026-03-08
 
 ## 1. Mission Snapshot
 
-Current mission: close and checkpoint M1-S3 security-adapter work, then open the next bounded M1 slice while preserving deterministic S1..S5 + M1-S1 + M1-S2 + M1-S3 behavior.
+Current mission: close and checkpoint M1-S4 strict-failure mapping work, then open the next bounded M1 slice while preserving deterministic S1..S5 + M1-S1 + M1-S2 + M1-S3 + M1-S4 behavior.
 
 Latest checkpoint status (2026-03-08):
 
-1. active branch: `codex/m1-s3-security-adapter`
+1. active branch: `codex/m1-s4-security-failure-mapping`
 2. continuity files synchronized
-3. closure rerun confirmed 54/54 effective pass (S1..S5 + M1-S1 + M1-S2 + M1-S3)
+3. closure rerun confirmed 60/60 effective pass (S1..S5 + M1-S1 + M1-S2 + M1-S3 + M1-S4)
 
 Current active path:
 
@@ -24,6 +24,7 @@ Current active path:
 8. M1-S1 wire-closure slice implemented (D3/D5/D7/D8 locked with deterministic fixture coverage)
 9. M1-S2 runtime-bridge slice implemented (RouteData path semantics + transit assertions)
 10. M1-S3 security-adapter slice implemented (strict/mock proof verification + deterministic deny mapping)
+11. M1-S4 strict failure mapping slice implemented (deterministic strict temporal/revocation/chain fail IDs)
 
 ---
 
@@ -104,16 +105,22 @@ Current active path:
 71. deterministic M1-S3 runtime IDs added (`E3070`, `E3071`, `E3072`, `E3073`)
 72. M1-S3 fixture pack added (`Docs/Scynapse/Design/Fixtures/M1-S3`, TV-801..TV-805)
 73. cross-pack rerun stable: S1 14/14, S2 8/8, S3 4/4, S4 4/4, S5 3/3, M1-S1 10/10, M1-S2 6/6, M1-S3 5/5
+74. M1-S4 implementation branch created: `codex/m1-s4-security-failure-mapping`
+75. M1-S4 profile support added (`slice_profile: "M1-S4"`) with `HandshakeProof.strict_failure_mode` contract
+76. strict verification path extended with deterministic failure-mode mapping (`expired`, `revoked`, `unresolvable_proof`, `not_yet_valid`)
+77. deterministic M1-S4 IDs added (`E3080`, `E3081`, `E3082`, `E3083`, `E3084`)
+78. M1-S4 fixture pack added (`Docs/Scynapse/Design/Fixtures/M1-S4`, TV-901..TV-906)
+79. cross-pack rerun stable: S1 14/14, S2 8/8, S3 4/4, S4 4/4, S5 3/3, M1-S1 10/10, M1-S2 6/6, M1-S3 5/5, M1-S4 6/6
 
 ### Doing
 
-1. final continuity synchronization and scoped commit/push preparation for M1-S3 closure baseline
+1. final continuity synchronization and scoped commit/push preparation for M1-S4 closure baseline
 
 ### Next
 
-1. commit and push M1-S3 closure baseline on `codex/m1-s3-security-adapter`
-2. define and open the next bounded M1 slice from M1-S3 closure
-3. preserve S1/S2/S3/S4/S5 + M1-S1 + M1-S2 + M1-S3 fixture and error-ID stability
+1. commit and push M1-S4 closure baseline on `codex/m1-s4-security-failure-mapping`
+2. define and open the next bounded M1 slice from M1-S4 closure
+3. preserve S1/S2/S3/S4/S5 + M1-S1 + M1-S2 + M1-S3 + M1-S4 fixture and error-ID stability
 
 ---
 
@@ -168,7 +175,9 @@ Authority file:
 16. `M1-S2-Closure.md`
 17. `M1-S3-Task-Board.md`
 18. `M1-S3-Closure.md`
-19. latest entry in `SESSION-LOG.md`
+19. `M1-S4-Task-Board.md`
+20. `M1-S4-Closure.md`
+21. latest entry in `SESSION-LOG.md`
 
 ---
 
@@ -206,6 +215,9 @@ Authority file:
    - `M1-S3-Task-Board.md`
    - `M1-S3-Closure.md`
    - `Fixtures/M1-S3/README.md`
+   - `M1-S4-Task-Board.md`
+   - `M1-S4-Closure.md`
+   - `Fixtures/M1-S4/README.md`
 5. Wire lock:
    - `M0-B-Wire-Lock-Open-Decisions.md`
    - `M0-B-Wire-Examples.md`

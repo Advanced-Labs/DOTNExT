@@ -32,7 +32,7 @@ internal sealed class SecurityAdapterSession
         _verifier = new AssertionVerifier(_store, nonceStore, trustedRoots, new DefaultAttenuationChecker());
     }
 
-    public SecurityAdapterOutcome VerifyStrictProof(string proofRef, bool forceBadSignature, bool replayProbe)
+    public SecurityAdapterOutcome VerifyStrictProof(string proofRef, bool forceBadSignature, bool replayProbe, StrictFailureMode failureMode)
     {
         if (string.IsNullOrWhiteSpace(proofRef))
         {
@@ -41,8 +41,13 @@ internal sealed class SecurityAdapterSession
                 "strict verification requires non-empty proof_ref.");
         }
 
-        var assertion = BuildProofAssertion(proofRef);
+        var assertion = BuildProofAssertion(proofRef, failureMode);
         _store.StoreAsync(assertion).GetAwaiter().GetResult();
+
+        if (failureMode == StrictFailureMode.Revoked)
+        {
+            _store.Revoke(assertion.Id);
+        }
 
         if (forceBadSignature)
         {
@@ -65,18 +70,41 @@ internal sealed class SecurityAdapterSession
         return result.IsValid ? SecurityAdapterOutcome.Valid() : MapFailure(result.FailureReason);
     }
 
-    private SignedAssertion BuildProofAssertion(string proofRef)
+    private SignedAssertion BuildProofAssertion(string proofRef, StrictFailureMode failureMode)
     {
         var nonce = Encoding.UTF8.GetBytes($"m1s3:{proofRef}");
         var capability = new CapabilityClaim($"scynapse://m1-s3/{proofRef}", "handshake.proof");
+        var now = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+        long? notBefore = null;
+        long? expiresAt = null;
 
-        return new AssertionBuilder()
+        if (failureMode == StrictFailureMode.Expired)
+        {
+            notBefore = now - 120;
+            expiresAt = now - 60;
+        }
+        else if (failureMode == StrictFailureMode.NotYetValid)
+        {
+            notBefore = now + 300;
+            expiresAt = now + 900;
+        }
+
+        var builder = new AssertionBuilder()
             .SetIssuer(_rootIssuer)
             .SetSubject(_proofSubject.PublicKeyBytes)
             .SetClaim(ClaimType.Capability, capability.Serialize())
-            .SetScope(nonce: nonce)
-            .AddProof(_rootIdentity.Id.Span)
-            .Build();
+            .SetScope(notBefore: notBefore, expiresAt: expiresAt, nonce: nonce);
+
+        if (failureMode == StrictFailureMode.UnresolvableProof)
+        {
+            builder.AddProof(DeriveSeed($"m1s3.unresolvable.{proofRef}"));
+        }
+        else
+        {
+            builder.AddProof(_rootIdentity.Id.Span);
+        }
+
+        return builder.Build();
     }
 
     private static SignedAssertion CorruptSignature(SignedAssertion assertion)
@@ -107,6 +135,26 @@ internal sealed class SecurityAdapterSession
             return SecurityAdapterOutcome.Invalid("E3072_M1S3_NONCE_REPLAY_DETECTED", $"strict verification failed: {reason}.");
         }
 
+        if (reason.IndexOf("expired", StringComparison.OrdinalIgnoreCase) >= 0)
+        {
+            return SecurityAdapterOutcome.Invalid("E3081_M1S4_PROOF_EXPIRED", $"strict verification failed: {reason}.");
+        }
+
+        if (reason.IndexOf("revoked", StringComparison.OrdinalIgnoreCase) >= 0)
+        {
+            return SecurityAdapterOutcome.Invalid("E3082_M1S4_PROOF_REVOKED", $"strict verification failed: {reason}.");
+        }
+
+        if (reason.IndexOf("unresolvable proof", StringComparison.OrdinalIgnoreCase) >= 0)
+        {
+            return SecurityAdapterOutcome.Invalid("E3083_M1S4_PROOF_CHAIN_UNRESOLVABLE", $"strict verification failed: {reason}.");
+        }
+
+        if (reason.IndexOf("not yet valid", StringComparison.OrdinalIgnoreCase) >= 0)
+        {
+            return SecurityAdapterOutcome.Invalid("E3084_M1S4_PROOF_NOT_YET_VALID", $"strict verification failed: {reason}.");
+        }
+
         return SecurityAdapterOutcome.Invalid("E3073_M1S3_STRICT_VERIFICATION_FAILED", $"strict verification failed: {reason}.");
     }
 
@@ -122,4 +170,13 @@ internal sealed record SecurityAdapterOutcome(bool IsValid, string? ErrorId = nu
 
     public static SecurityAdapterOutcome Invalid(string errorId, string message)
         => new(false, errorId, message);
+}
+
+internal enum StrictFailureMode
+{
+    None,
+    Expired,
+    Revoked,
+    UnresolvableProof,
+    NotYetValid
 }

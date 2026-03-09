@@ -1,0 +1,30 @@
+{
+  "id": "TV-905",
+  "title": "M1-S4 Strict Not-Yet-Valid Assertion",
+  "slice_profile": "M1-S4",
+  "expect_conformance": "fail",
+  "expected_error_ids": [
+    "E3084_M1S4_PROOF_NOT_YET_VALID"
+  ],
+  "expected_error_contains": [
+    "not yet valid"
+  ],
+  "messages": [
+    { "type": "HandshakeInit", "role": "requester" },
+    { "type": "HandshakeChallenge", "role": "mediator" },
+    { "type": "HandshakeProof", "role": "requester", "body": { "verification_mode": "strict", "proof_ref": "nid:m1s4.strict.not-yet", "strict_failure_mode": "not_yet_valid" } }
+  ],
+  "expected_state_trace": [
+    "MediatedHandshake",
+    "Deny"
+  ],
+  "expected_outcome": {
+    "success": false,
+    "deny_code": "TrustInsufficient",
+    "retryable": false
+  },
+  "assertions": [
+    { "id": "A1", "kind": "state", "check": "final_state_equals", "value": "Deny" },
+    { "id": "A2", "kind": "error", "check": "deny_code_equals", "value": "TrustInsufficient" }
+  ]
+}
