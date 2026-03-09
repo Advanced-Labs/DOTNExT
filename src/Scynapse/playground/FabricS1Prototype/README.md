@@ -117,6 +117,12 @@ Run M1-S10 fixture pack:
 dotnet run --project playground/FabricS1Prototype/FabricS1Prototype.csproj -- D:\Dev\dotnext\Docs\Scynapse\Design\Fixtures\M1-S10
 ```
 
+Run M1-S11 fixture pack:
+
+```powershell
+dotnet run --project playground/FabricS1Prototype/FabricS1Prototype.csproj -- D:\Dev\dotnext\Docs\Scynapse\Design\Fixtures\M1-S11
+```
+
 Expected-fail fixture semantics:
 
 1. `expected_error_ids` is the preferred exact failure oracle.
@@ -226,3 +232,12 @@ Slice profile semantics:
      - `E3170_M1S10_REFERENCE_GRANT_CLAIM_SUBJECT_MISMATCH`
      - `E3171_M1S10_REFERENCE_GRANT_CLAIM_SCOPE_MISMATCH`
      - `E3172_M1S10_REFERENCE_GRANT_CLAIM_ACTION_MISMATCH`
+16. `slice_profile: "M1-S11"` extends M1-S10 with challenge-session nonce binding checks:
+   - `HandshakeChallenge` requires `challenge_nonce` (non-empty string)
+   - `HandshakeProof` requires `challenge_nonce` (non-empty string) and must match challenge nonce
+   - active reference-grant `HandshakeAccept` requires:
+     - `reference_grant_challenge_nonce` (non-empty string)
+     - nonce must match `HandshakeProof.challenge_nonce`
+   - deterministic nonce-binding IDs:
+     - `E3190_M1S11_PROOF_CHALLENGE_NONCE_MISMATCH`
+     - `E3191_M1S11_ACCEPT_PROOF_NONCE_MISMATCH`

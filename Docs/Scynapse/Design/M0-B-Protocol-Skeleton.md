@@ -71,6 +71,8 @@ Reference:
 - `Docs/Scynapse/Design/M1-S9-Closure.md`
 - `Docs/Scynapse/Design/M1-S10-Task-Board.md`
 - `Docs/Scynapse/Design/M1-S10-Closure.md`
+- `Docs/Scynapse/Design/M1-S11-Task-Board.md`
+- `Docs/Scynapse/Design/M1-S11-Closure.md`
 - `Docs/Scynapse/Design/M0-B-Wire-Lock-Open-Decisions.md`
 - `Docs/Scynapse/Design/M0-Status-Checkpoint.md`
 
@@ -377,10 +379,18 @@ Failure responses should include:
    - stale freshness maps deterministically to `E3150` (`GrantExpired`).
    - replayed proof maps deterministically to `E3151` (`TrustInsufficient`).
 21. M1-S10 reference-grant claim-binding profile:
-   - `M1-S10` extends M1-S9 with subject/scope/action binding checks for active reference grant acceptance.
-   - `HandshakeInit` must provide claim-binding source fields: `requester_subject_ref`, `requested_scope`, `requested_ops`.
-   - `HandshakeAccept` with active reference grant must provide claim fields: `reference_grant_claim_subject_ref`, `reference_grant_claim_scope`, `reference_grant_claim_action`.
-   - mismatch deny mapping is deterministic:
-     - `E3170` subject mismatch -> `TrustInsufficient`
-     - `E3171` scope mismatch -> `PolicyDenied`
-     - `E3172` action mismatch -> `PolicyDenied`
+- `M1-S10` extends M1-S9 with subject/scope/action binding checks for active reference grant acceptance.
+- `HandshakeInit` must provide claim-binding source fields: `requester_subject_ref`, `requested_scope`, `requested_ops`.
+- `HandshakeAccept` with active reference grant must provide claim fields: `reference_grant_claim_subject_ref`, `reference_grant_claim_scope`, `reference_grant_claim_action`.
+- mismatch deny mapping is deterministic:
+  - `E3170` subject mismatch -> `TrustInsufficient`
+  - `E3171` scope mismatch -> `PolicyDenied`
+  - `E3172` action mismatch -> `PolicyDenied`
+22. M1-S11 reference-grant challenge-session nonce-binding profile:
+- `M1-S11` extends M1-S10 with challenge/proof/accept nonce-binding checks for active reference grant acceptance.
+- `HandshakeChallenge` must provide `challenge_nonce` (non-empty string).
+- `HandshakeProof` must provide `challenge_nonce` (non-empty string) and match `HandshakeChallenge.challenge_nonce`.
+- `HandshakeAccept` with active reference grant must provide `reference_grant_challenge_nonce` (non-empty string) and match `HandshakeProof.challenge_nonce`.
+- mismatch deny mapping is deterministic:
+  - `E3190` proof/challenge nonce mismatch -> `TrustInsufficient`
+  - `E3191` accept/proof nonce mismatch -> `TrustInsufficient`

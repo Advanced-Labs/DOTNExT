@@ -279,7 +279,20 @@ This profile maps M0-B protocol fields to their Orleans lineage, with explicit c
 
 ---
 
-## 24. Review Checklist
+## 24. M1-S11 Reference-Grant Challenge-Session Nonce-Binding Behavior Classification
+
+| Hardened Behavior | Tag | Notes |
+|---|---|---|
+| M1-S10 claim-binding guard reuse in `M1-S11` handshake accept path | `A` | adapts prior claim-binding gates into challenge-session nonce-binding layer |
+| `HandshakeChallenge` nonce contract (`challenge_nonce` required non-empty string) | `N` | Scynapse-native deterministic challenge nonce anchor for session binding |
+| `HandshakeProof` nonce contract and challenge/proof nonce equality requirement | `N` | Scynapse-native deterministic proof-to-challenge nonce guard |
+| Active-grant `HandshakeAccept` nonce contract and accept/proof nonce equality requirement | `N` | Scynapse-native deterministic grant-accept nonce guard |
+| Deterministic nonce mismatch deny mapping (`E3190`, `E3191`) | `N` | machine-checkable conformance behavior for nonce-binding failures |
+| Challenge nonce handling relying on silo/client trust shortcuts | `D` | explicitly blocked; remains node-unified and capability-gated by policy semantics |
+
+---
+
+## 25. Review Checklist
 
 1. Are any fields tagged `A` but still carrying hidden silo/cluster assumptions?
 2. Are all `N` fields tied to M0-A invariants?

@@ -331,6 +331,28 @@ M1-S10 extension note:
    - `E3169_M1S10_REFERENCE_GRANT_CLAIM_ACTION_INVALID`
    - `E3174_M1S10_REFERENCE_GRANT_CLAIM_FIELDS_FORBIDDEN`
 
+M1-S11 extension note:
+
+1. `slice_profile: "M1-S11"` extends M1-S10 with deterministic challenge-session nonce-binding checks.
+2. M1-S11 `HandshakeChallenge` must include:
+   - `challenge_nonce` (non-empty string)
+3. M1-S11 `HandshakeProof` must include:
+   - `challenge_nonce` (non-empty string)
+4. M1-S11 active reference-grant `HandshakeAccept` (`token_transport=reference` and `reference_grant_status=active`) must include:
+   - `reference_grant_challenge_nonce` (non-empty string)
+5. non-active reference-grant statuses must not include `reference_grant_challenge_nonce`.
+6. deterministic runtime IDs:
+   - `E3190_M1S11_PROOF_CHALLENGE_NONCE_MISMATCH`
+   - `E3191_M1S11_ACCEPT_PROOF_NONCE_MISMATCH`
+7. deterministic schema IDs:
+   - `E3180_M1S11_CHALLENGE_NONCE_REQUIRED`
+   - `E3181_M1S11_CHALLENGE_NONCE_INVALID`
+   - `E3182_M1S11_PROOF_NONCE_REQUIRED`
+   - `E3183_M1S11_PROOF_NONCE_INVALID`
+   - `E3184_M1S11_ACCEPT_NONCE_REQUIRED`
+   - `E3185_M1S11_ACCEPT_NONCE_INVALID`
+   - `E3186_M1S11_ACCEPT_NONCE_FIELD_FORBIDDEN`
+
 ---
 
 ## 5. Conformance Gates (Pass/Fail)
@@ -375,6 +397,7 @@ Pass criteria:
 12. M1-S8 active-grant proof verification failures map deterministically to `E3130`..`E3135` with deny-code mapping preserved (`GrantExpired`, `PolicyDenied`, `TrustInsufficient`) before reference lookup-resolution guard checks.
 13. M1-S9 active-grant freshness/replay failures map deterministically to `E3150`/`E3151` with deny-code mapping preserved (`GrantExpired`, `TrustInsufficient`) before reference lookup-resolution guard checks.
 14. M1-S10 claim-binding mismatch failures map deterministically to `E3170`/`E3171`/`E3172` with deny-code mapping preserved (`TrustInsufficient`, `PolicyDenied`) before M1-S6 reference lookup-resolution guard checks.
+15. M1-S11 challenge-session nonce mismatches map deterministically to `E3190`/`E3191` with deny-code mapping preserved (`TrustInsufficient`) before M1-S6 reference lookup-resolution guard checks.
 
 ### 5.5 Gate G5: Observation Conformance
 

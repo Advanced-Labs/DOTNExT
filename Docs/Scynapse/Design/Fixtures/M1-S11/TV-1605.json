@@ -1,0 +1,88 @@
+{
+  "id": "TV-1605",
+  "title": "M1-S11 Missing Handshake Proof Nonce",
+  "slice_profile": "M1-S11",
+  "preconditions": [
+    "HandshakeProof body exists",
+    "challenge_nonce is missing"
+  ],
+  "messages": [
+    {
+      "type": "HandshakeInit",
+      "role": "requester",
+      "body": {
+        "proposed_route_mode": "parent_mediated",
+        "requested_ops": [
+          "invoke",
+          "meta"
+        ],
+        "requested_scope": ".Adult.Games.RedX",
+        "requester_subject_ref": "nid:subject.alice",
+        "requested_disclosure_level": "mediator_visible"
+      }
+    },
+    {
+      "type": "HandshakeChallenge",
+      "role": "mediator",
+      "body": {
+        "challenge_nonce": "nonce-1601"
+      }
+    },
+    {
+      "type": "HandshakeProof",
+      "role": "requester",
+      "body": {
+        "verification_mode": "strict",
+        "proof_ref": "nid:m1s11.handshake.tv-1601"
+      }
+    },
+    {
+      "type": "HandshakeAccept",
+      "role": "mediator",
+      "body": {
+        "route_mode": "parent_mediated",
+        "disclosure_level": "mediator_visible",
+        "token_transport": "reference",
+        "relation_token_ref": "tid:reltok-1601",
+        "relation_token_cid": "sha256:1111111111111111111111111111111111111111111111111111111111111111",
+        "reference_lookup_status": "resolved",
+        "reference_lookup_cid": "sha256:1111111111111111111111111111111111111111111111111111111111111111",
+        "reference_grant_status": "active",
+        "reference_grant_ref": "gid:grant-1601",
+        "reference_grant_verification_mode": "strict",
+        "reference_grant_proof_freshness_status": "fresh",
+        "reference_grant_proof_replay_status": "clear",
+        "reference_grant_claim_subject_ref": "nid:subject.alice",
+        "reference_grant_claim_scope": ".Adult.Games.RedX",
+        "reference_grant_claim_action": "invoke",
+        "reference_grant_challenge_nonce": "nonce-1605",
+        "reference_grant_proof_ref": "gid:grantproof-1601",
+        "reference_grant_strict_failure_mode": "none"
+      }
+    }
+  ],
+  "expected_state_trace": [
+    "MediatedHandshake",
+    "RelayedSession",
+    "Completed"
+  ],
+  "expected_outcome": {
+    "deny_code": null,
+    "success": true
+  },
+  "assertions": [
+    {
+      "id": "A1",
+      "kind": "error",
+      "check": "deny_code_absent",
+      "value": true
+    }
+  ],
+  "expect_conformance": "fail",
+  "expected_error_ids": [
+    "E3182_M1S11_PROOF_NONCE_REQUIRED"
+  ],
+  "expected_error_contains": [
+    "requires non-empty 'challenge_nonce'"
+  ]
+}

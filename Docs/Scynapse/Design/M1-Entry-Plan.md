@@ -153,6 +153,18 @@ Deliverables:
 2. deterministic schema validation for required/forbidden claim-binding fields.
 3. deterministic deny mapping for subject/scope/action mismatches with stable machine-checkable IDs.
 
+### M1-S11: Reference Grant Challenge-Session Nonce Binding (Bounded)
+
+Primary goal:
+
+1. enforce deterministic challenge-session nonce binding across `HandshakeChallenge`, `HandshakeProof`, and active reference-grant `HandshakeAccept`.
+
+Deliverables:
+
+1. profile `M1-S11` extending M1-S10 with challenge/proof/accept nonce-binding contracts.
+2. deterministic schema validation for required/forbidden nonce-binding fields.
+3. deterministic deny mapping for proof/challenge and accept/proof nonce mismatches with stable machine-checkable IDs.
+
 ---
 
 ## 4. Non-Negotiable Guardrails
@@ -194,4 +206,5 @@ Deliverables:
 8. `M1-S8` reference-grant proof-binding execution complete (`M1-S8-Closure.md`).
 9. `M1-S9` reference-grant freshness/replay execution complete (`M1-S9-Closure.md`).
 10. `M1-S10` reference-grant claim-binding execution complete (`M1-S10-Closure.md`).
-11. open next bounded M1 slice task board from this closure baseline.
+11. `M1-S11` reference-grant challenge-session nonce-binding execution complete (`M1-S11-Closure.md`).
+12. open next bounded M1 slice task board from this closure baseline.

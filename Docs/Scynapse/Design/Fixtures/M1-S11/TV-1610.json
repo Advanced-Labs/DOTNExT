@@ -1,0 +1,65 @@
+{
+  "id": "TV-1610",
+  "title": "M1-S11 Proof Nonce Mismatch with Challenge",
+  "slice_profile": "M1-S11",
+  "preconditions": [
+    "challenge nonce and proof nonce diverge",
+    "proof-stage deny is deterministic"
+  ],
+  "messages": [
+    {
+      "type": "HandshakeInit",
+      "role": "requester",
+      "body": {
+        "proposed_route_mode": "parent_mediated",
+        "requested_ops": [
+          "invoke",
+          "meta"
+        ],
+        "requested_scope": ".Adult.Games.RedX",
+        "requester_subject_ref": "nid:subject.alice",
+        "requested_disclosure_level": "mediator_visible"
+      }
+    },
+    {
+      "type": "HandshakeChallenge",
+      "role": "mediator",
+      "body": {
+        "challenge_nonce": "nonce-1610-a"
+      }
+    },
+    {
+      "type": "HandshakeProof",
+      "role": "requester",
+      "body": {
+        "verification_mode": "strict",
+        "proof_ref": "nid:m1s11.handshake.tv-1601",
+        "challenge_nonce": "nonce-1610-b"
+      }
+    }
+  ],
+  "expected_state_trace": [
+    "MediatedHandshake",
+    "Deny"
+  ],
+  "expected_outcome": {
+    "success": false,
+    "deny_code": "TrustInsufficient",
+    "retryable": false
+  },
+  "assertions": [
+    {
+      "id": "A1",
+      "kind": "error",
+      "check": "deny_code_equals",
+      "value": "TrustInsufficient"
+    }
+  ],
+  "expect_conformance": "fail",
+  "expected_error_ids": [
+    "E3190_M1S11_PROOF_CHALLENGE_NONCE_MISMATCH"
+  ],
+  "expected_error_contains": [
+    "proof challenge_nonce does not match"
+  ]
+}

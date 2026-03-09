@@ -1443,6 +1443,95 @@ Expected outcome:
 
 1. expected fail by exact error ID (`E3170_M1S10_REFERENCE_GRANT_CLAIM_SUBJECT_MISMATCH`)
 
+### TV-1601 M1-S11 Active Grant Strict Challenge-Binding Pass
+
+Preconditions:
+
+1. reference token transport is selected
+2. reference grant is active with strict verification and fresh/clear proof status
+3. challenge, proof, and accept nonce values are aligned
+
+Expected outcome:
+
+1. conformance pass
+
+### TV-1602 M1-S11 Active Grant Mock Challenge-Binding Pass
+
+Preconditions:
+
+1. reference token transport is selected
+2. reference grant is active with mock verification and fresh/clear proof status
+3. challenge, proof, and accept nonce values are aligned
+
+Expected outcome:
+
+1. conformance pass
+
+### TV-1603 M1-S11 Missing Handshake Challenge Nonce
+
+Expected outcome:
+
+1. expected fail by exact error ID (`E3180_M1S11_CHALLENGE_NONCE_REQUIRED`)
+
+### TV-1604 M1-S11 Invalid Handshake Challenge Nonce
+
+Expected outcome:
+
+1. expected fail by exact error ID (`E3181_M1S11_CHALLENGE_NONCE_INVALID`)
+
+### TV-1605 M1-S11 Missing Handshake Proof Nonce
+
+Expected outcome:
+
+1. expected fail by exact error ID (`E3182_M1S11_PROOF_NONCE_REQUIRED`)
+
+### TV-1606 M1-S11 Invalid Handshake Proof Nonce
+
+Expected outcome:
+
+1. expected fail by exact error ID (`E3183_M1S11_PROOF_NONCE_INVALID`)
+
+### TV-1607 M1-S11 Missing Handshake Accept Grant Challenge Nonce
+
+Expected outcome:
+
+1. expected fail by exact error ID (`E3184_M1S11_ACCEPT_NONCE_REQUIRED`)
+
+### TV-1608 M1-S11 Invalid Handshake Accept Grant Challenge Nonce
+
+Expected outcome:
+
+1. expected fail by exact error ID (`E3185_M1S11_ACCEPT_NONCE_INVALID`)
+
+### TV-1609 M1-S11 Forbidden Accept Nonce Outside Active Grant
+
+Expected outcome:
+
+1. expected fail by exact error ID (`E3186_M1S11_ACCEPT_NONCE_FIELD_FORBIDDEN`)
+
+### TV-1610 M1-S11 Proof/Challenge Nonce Mismatch
+
+Expected outcome:
+
+1. expected fail by exact error ID (`E3190_M1S11_PROOF_CHALLENGE_NONCE_MISMATCH`)
+
+### TV-1611 M1-S11 Accept/Proof Nonce Mismatch
+
+Expected outcome:
+
+1. expected fail by exact error ID (`E3191_M1S11_ACCEPT_PROOF_NONCE_MISMATCH`)
+
+### TV-1612 M1-S11 Nonce-Binding Precedence
+
+Preconditions:
+
+1. accept/proof nonce mismatch and lookup CID mismatch are both present
+2. nonce mismatch deny must be emitted before M1-S6 lookup guard mismatch
+
+Expected outcome:
+
+1. expected fail by exact error ID (`E3191_M1S11_ACCEPT_PROOF_NONCE_MISMATCH`)
+
 ---
 
 ## 4. Minimal Coverage Map
@@ -1462,6 +1551,7 @@ Expected outcome:
 13. M1 reference grant proof binding: TV-1301, TV-1302, TV-1303, TV-1304, TV-1305, TV-1306, TV-1307, TV-1308, TV-1309, TV-1310, TV-1311, TV-1312, TV-1313
 14. M1 reference grant freshness/replay: TV-1401, TV-1402, TV-1403, TV-1404, TV-1405, TV-1406, TV-1407, TV-1408, TV-1409, TV-1410
 15. M1 reference grant claim binding: TV-1501, TV-1502, TV-1503, TV-1504, TV-1505, TV-1506, TV-1507, TV-1508, TV-1509, TV-1510, TV-1511, TV-1512, TV-1513, TV-1514
+16. M1 reference grant challenge-session nonce binding: TV-1601, TV-1602, TV-1603, TV-1604, TV-1605, TV-1606, TV-1607, TV-1608, TV-1609, TV-1610, TV-1611, TV-1612
 
 ### 4.1 S1 Transition-Edge Negative Extension Set
 
@@ -1592,6 +1682,19 @@ Expected outcome:
     - TV-1512 (claim scope mismatch; expected fail by exact error ID)
     - TV-1513 (claim action mismatch; expected fail by exact error ID)
     - TV-1514 (claim mismatch precedence validates subject-first deterministic path; expected fail by exact error ID)
+16. M1-S11 owned vectors:
+    - TV-1601 (active grant strict challenge-binding pass)
+    - TV-1602 (active grant mock challenge-binding pass)
+    - TV-1603 (missing challenge nonce schema; expected fail by exact error ID)
+    - TV-1604 (invalid challenge nonce schema; expected fail by exact error ID)
+    - TV-1605 (missing proof nonce schema; expected fail by exact error ID)
+    - TV-1606 (invalid proof nonce schema; expected fail by exact error ID)
+    - TV-1607 (active grant missing accept nonce schema; expected fail by exact error ID)
+    - TV-1608 (active grant invalid accept nonce schema; expected fail by exact error ID)
+    - TV-1609 (accept nonce forbidden outside active grant path; expected fail by exact error ID)
+    - TV-1610 (proof/challenge nonce mismatch; expected fail by exact error ID)
+    - TV-1611 (accept/proof nonce mismatch; expected fail by exact error ID)
+    - TV-1612 (nonce mismatch precedence over lookup CID mismatch; expected fail by exact error ID)
 
 ---
 
@@ -1618,5 +1721,6 @@ Current next step:
 8. M1-S8 reference-grant proof-binding vectors executed and stabilized (`TV-1301..TV-1313`)
 9. M1-S9 reference-grant freshness/replay vectors executed and stabilized (`TV-1401..TV-1410`)
 10. M1-S10 reference-grant claim-binding vectors executed and stabilized (`TV-1501..TV-1514`)
-11. preserve S1/S2/S3/S4/S5 + M1-S1 + M1-S2 + M1-S3 + M1-S4 + M1-S5 + M1-S6 + M1-S7 + M1-S8 + M1-S9 + M1-S10 baseline behavior and machine-checkable error ID stability
-12. open next bounded M1 slice from current closure baseline
+11. M1-S11 reference-grant challenge-session nonce-binding vectors executed and stabilized (`TV-1601..TV-1612`)
+12. preserve S1/S2/S3/S4/S5 + M1-S1 + M1-S2 + M1-S3 + M1-S4 + M1-S5 + M1-S6 + M1-S7 + M1-S8 + M1-S9 + M1-S10 + M1-S11 baseline behavior and machine-checkable error ID stability
+13. open next bounded M1 slice from current closure baseline

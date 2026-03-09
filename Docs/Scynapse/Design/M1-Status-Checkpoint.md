@@ -26,7 +26,8 @@ M1 focus:
 8. add reference-grant proof binding determinism for reference transport (`M1-S8`)
 9. add reference-grant freshness/replay determinism for reference transport (`M1-S9`)
 10. add reference-grant claim-binding determinism for reference transport (`M1-S10`)
-11. preserve M0 semantic invariants while increasing execution realism
+11. add reference-grant challenge-session nonce-binding determinism for reference transport (`M1-S11`)
+12. preserve M0 semantic invariants while increasing execution realism
 
 Guardrails:
 
@@ -303,18 +304,50 @@ Status:
    - M1-S9 10/10
    - M1-S10 14/14
 
+### 3.11 M1-S11 (Complete)
+
+Artifacts:
+
+1. `Docs/Scynapse/Design/M1-S11-Task-Board.md`
+2. `Docs/Scynapse/Design/M1-S11-Closure.md`
+3. `Docs/Scynapse/Design/Fixtures/M1-S11/README.md`
+4. `Docs/Scynapse/Design/Fixtures/M1-S11/TV-1601..TV-1612`
+
+Status:
+
+1. reference-grant challenge-session nonce-binding profile implemented (`slice_profile: "M1-S11"`)
+2. M1-S5 token integrity + M1-S7 grant status + M1-S8 grant proof + M1-S9 freshness/replay + M1-S10 claim-binding + M1-S11 nonce-binding + M1-S6 lookup guard order is enforced on `HandshakeAccept`
+3. deterministic M1-S11 nonce-binding IDs added (`E3180`..`E3191`)
+4. baseline rerun stable:
+   - S1 14/14
+   - S2 8/8
+   - S3 4/4
+   - S4 4/4
+   - S5 3/3
+   - M1-S1 10/10
+   - M1-S2 6/6
+   - M1-S3 5/5
+   - M1-S4 6/6
+   - M1-S5 4/4
+   - M1-S6 5/5
+   - M1-S7 7/7
+   - M1-S8 13/13
+   - M1-S9 10/10
+   - M1-S10 14/14
+   - M1-S11 12/12
+
 ---
 
 ## 4. Immediate Next Work (Ordered)
 
 1. define and open the next bounded M1 slice task board
-2. preserve locked wire decisions and M1-S3/M1-S4/M1-S5/M1-S6/M1-S7/M1-S8/M1-S9/M1-S10 deterministic error-ID behavior
-3. keep S1..S5 + M1-S1 + M1-S2 + M1-S3 + M1-S4 + M1-S5 + M1-S6 + M1-S7 + M1-S8 + M1-S9 + M1-S10 regression suite green on each implementation pass
+2. preserve locked wire decisions and M1-S3/M1-S4/M1-S5/M1-S6/M1-S7/M1-S8/M1-S9/M1-S10/M1-S11 deterministic error-ID behavior
+3. keep S1..S5 + M1-S1 + M1-S2 + M1-S3 + M1-S4 + M1-S5 + M1-S6 + M1-S7 + M1-S8 + M1-S9 + M1-S10 + M1-S11 regression suite green on each implementation pass
 
 ---
 
 ## 5. Done/Doing/Next Snapshot
 
-1. `Done`: M0 exit review, M1 entry plan, M1-S1 closure, M1-S2 closure, M1-S3 closure, M1-S4 closure, M1-S5 closure, M1-S6 closure, M1-S7 closure, M1-S8 closure, M1-S9 closure, M1-S10 closure.
-2. `Doing`: next bounded M1 slice selection and sequencing from M1-S10 closure baseline.
+1. `Done`: M0 exit review, M1 entry plan, M1-S1 closure, M1-S2 closure, M1-S3 closure, M1-S4 closure, M1-S5 closure, M1-S6 closure, M1-S7 closure, M1-S8 closure, M1-S9 closure, M1-S10 closure, M1-S11 closure.
+2. `Doing`: next bounded M1 slice selection and sequencing from M1-S11 closure baseline.
 3. `Next`: open the next M1 task board and implementation branch.

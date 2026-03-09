@@ -147,4 +147,5 @@ Current next action:
 10. M1-S8 reference-grant proof-binding slice completed (`M1-S8-Closure.md`)
 11. M1-S9 reference-grant freshness/replay slice completed (`M1-S9-Closure.md`)
 12. M1-S10 reference-grant claim-binding slice completed (`M1-S10-Closure.md`)
-13. define next bounded M1 slice from M1-S10 closure baseline
+13. M1-S11 reference-grant challenge-session nonce-binding slice completed (`M1-S11-Closure.md`)
+14. define next bounded M1 slice from M1-S11 closure baseline

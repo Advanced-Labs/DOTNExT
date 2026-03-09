@@ -1,0 +1,81 @@
+{
+  "id": "TV-1609",
+  "title": "M1-S11 Accept Nonce Field Forbidden Outside Active Reference Grant",
+  "slice_profile": "M1-S11",
+  "preconditions": [
+    "token transport is reference",
+    "grant status is not active",
+    "accept nonce field is present"
+  ],
+  "messages": [
+    {
+      "type": "HandshakeInit",
+      "role": "requester",
+      "body": {
+        "proposed_route_mode": "parent_mediated",
+        "requested_ops": [
+          "invoke",
+          "meta"
+        ],
+        "requested_scope": ".Adult.Games.RedX",
+        "requester_subject_ref": "nid:subject.alice",
+        "requested_disclosure_level": "mediator_visible"
+      }
+    },
+    {
+      "type": "HandshakeChallenge",
+      "role": "mediator",
+      "body": {
+        "challenge_nonce": "nonce-1609"
+      }
+    },
+    {
+      "type": "HandshakeProof",
+      "role": "requester",
+      "body": {
+        "verification_mode": "strict",
+        "proof_ref": "nid:m1s11.handshake.tv-1601",
+        "challenge_nonce": "nonce-1609"
+      }
+    },
+    {
+      "type": "HandshakeAccept",
+      "role": "mediator",
+      "body": {
+        "route_mode": "parent_mediated",
+        "disclosure_level": "mediator_visible",
+        "token_transport": "reference",
+        "relation_token_ref": "tid:reltok-1601",
+        "relation_token_cid": "sha256:1111111111111111111111111111111111111111111111111111111111111111",
+        "reference_lookup_status": "resolved",
+        "reference_lookup_cid": "sha256:1111111111111111111111111111111111111111111111111111111111111111",
+        "reference_grant_status": "not_required",
+        "reference_grant_challenge_nonce": "nonce-1609"
+      }
+    }
+  ],
+  "expected_state_trace": [
+    "MediatedHandshake",
+    "RelayedSession",
+    "Completed"
+  ],
+  "expected_outcome": {
+    "deny_code": null,
+    "success": true
+  },
+  "assertions": [
+    {
+      "id": "A1",
+      "kind": "error",
+      "check": "deny_code_absent",
+      "value": true
+    }
+  ],
+  "expect_conformance": "fail",
+  "expected_error_ids": [
+    "E3186_M1S11_ACCEPT_NONCE_FIELD_FORBIDDEN"
+  ],
+  "expected_error_contains": [
+    "field 'reference_grant_challenge_nonce' is forbidden"
+  ]
+}
