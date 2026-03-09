@@ -150,10 +150,11 @@ Current active path:
 110. deterministic M1-S10 IDs added (`E3160`..`E3174`) for claim-binding schema/runtime deny paths
 111. M1-S10 fixture pack added (`Docs/Scynapse/Design/Fixtures/M1-S10`, TV-1501..TV-1514)
 112. closure rerun stable: S1 14/14, S2 8/8, S3 4/4, S4 4/4, S5 3/3, M1-S1 10/10, M1-S2 6/6, M1-S3 5/5, M1-S4 6/6, M1-S5 4/4, M1-S6 5/5, M1-S7 7/7, M1-S8 13/13, M1-S9 10/10, M1-S10 14/14
+113. M1-S10 closure committed and pushed on `codex/m1-s10-reference-grant-claim-binding` (`55bce2fe96`)
 
 ### Doing
 
-1. finalize M1-S10 closure checkpoint and sequence the next bounded M1 slice from M1-S10 baseline
+1. define and sequence the next bounded M1 slice from M1-S10 closure baseline
 
 ### Next
 
