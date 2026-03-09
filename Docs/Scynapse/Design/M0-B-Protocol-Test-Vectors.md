@@ -1343,6 +1343,106 @@ Expected outcome:
 
 1. expected fail by exact error ID (`E3150_M1S9_REFERENCE_GRANT_PROOF_FRESHNESS_STALE`)
 
+### TV-1501 M1-S10 Active Grant Strict Claim-Binding Pass
+
+Preconditions:
+
+1. reference token transport is selected
+2. reference grant is active with strict verification and fresh/clear proof status
+3. `HandshakeInit` source fields and `HandshakeAccept` claim fields are aligned
+
+Expected outcome:
+
+1. conformance pass
+
+### TV-1502 M1-S10 Active Grant Mock Claim-Binding Pass
+
+Preconditions:
+
+1. reference token transport is selected
+2. reference grant is active with mock verification and fresh/clear proof status
+3. `HandshakeInit` source fields and `HandshakeAccept` claim fields are aligned
+
+Expected outcome:
+
+1. conformance pass
+
+### TV-1503 M1-S10 Missing Requester Subject Ref
+
+Expected outcome:
+
+1. expected fail by exact error ID (`E3160_M1S10_REQUESTER_SUBJECT_REF_REQUIRED`)
+
+### TV-1504 M1-S10 Invalid Requester Subject Ref
+
+Expected outcome:
+
+1. expected fail by exact error ID (`E3161_M1S10_REQUESTER_SUBJECT_REF_INVALID`)
+
+### TV-1505 M1-S10 Invalid Requested Scope
+
+Expected outcome:
+
+1. expected fail by exact error ID (`E3162_M1S10_REQUESTED_SCOPE_INVALID`)
+
+### TV-1506 M1-S10 Invalid Requested Ops
+
+Expected outcome:
+
+1. expected fail by exact error ID (`E3163_M1S10_REQUESTED_OPS_INVALID`)
+
+### TV-1507 M1-S10 Missing Claim Subject
+
+Expected outcome:
+
+1. expected fail by exact error ID (`E3164_M1S10_REFERENCE_GRANT_CLAIM_SUBJECT_REQUIRED`)
+
+### TV-1508 M1-S10 Missing Claim Scope
+
+Expected outcome:
+
+1. expected fail by exact error ID (`E3166_M1S10_REFERENCE_GRANT_CLAIM_SCOPE_REQUIRED`)
+
+### TV-1509 M1-S10 Missing Claim Action
+
+Expected outcome:
+
+1. expected fail by exact error ID (`E3168_M1S10_REFERENCE_GRANT_CLAIM_ACTION_REQUIRED`)
+
+### TV-1510 M1-S10 Claim Fields Forbidden for Non-Active Grant
+
+Expected outcome:
+
+1. expected fail by exact error ID (`E3174_M1S10_REFERENCE_GRANT_CLAIM_FIELDS_FORBIDDEN`)
+
+### TV-1511 M1-S10 Claim Subject Mismatch
+
+Expected outcome:
+
+1. expected fail by exact error ID (`E3170_M1S10_REFERENCE_GRANT_CLAIM_SUBJECT_MISMATCH`)
+
+### TV-1512 M1-S10 Claim Scope Mismatch
+
+Expected outcome:
+
+1. expected fail by exact error ID (`E3171_M1S10_REFERENCE_GRANT_CLAIM_SCOPE_MISMATCH`)
+
+### TV-1513 M1-S10 Claim Action Mismatch
+
+Expected outcome:
+
+1. expected fail by exact error ID (`E3172_M1S10_REFERENCE_GRANT_CLAIM_ACTION_MISMATCH`)
+
+### TV-1514 M1-S10 Claim-Binding Precedence
+
+Preconditions:
+
+1. subject, scope, and action are all mismatched
+
+Expected outcome:
+
+1. expected fail by exact error ID (`E3170_M1S10_REFERENCE_GRANT_CLAIM_SUBJECT_MISMATCH`)
+
 ---
 
 ## 4. Minimal Coverage Map
@@ -1361,6 +1461,7 @@ Expected outcome:
 12. M1 reference grant guard: TV-1201, TV-1202, TV-1203, TV-1204, TV-1205, TV-1206, TV-1207
 13. M1 reference grant proof binding: TV-1301, TV-1302, TV-1303, TV-1304, TV-1305, TV-1306, TV-1307, TV-1308, TV-1309, TV-1310, TV-1311, TV-1312, TV-1313
 14. M1 reference grant freshness/replay: TV-1401, TV-1402, TV-1403, TV-1404, TV-1405, TV-1406, TV-1407, TV-1408, TV-1409, TV-1410
+15. M1 reference grant claim binding: TV-1501, TV-1502, TV-1503, TV-1504, TV-1505, TV-1506, TV-1507, TV-1508, TV-1509, TV-1510, TV-1511, TV-1512, TV-1513, TV-1514
 
 ### 4.1 S1 Transition-Edge Negative Extension Set
 
@@ -1476,6 +1577,21 @@ Expected outcome:
     - TV-1408 (grant proof freshness stale; expected fail by exact error ID)
     - TV-1409 (grant proof replay detected; expected fail by exact error ID)
     - TV-1410 (freshness/replay precedence validates stale-first deterministic path; expected fail by exact error ID)
+15. M1-S10 owned vectors:
+    - TV-1501 (active grant strict claim-binding pass)
+    - TV-1502 (active grant mock claim-binding pass)
+    - TV-1503 (missing requester subject schema; expected fail by exact error ID)
+    - TV-1504 (invalid requester subject schema; expected fail by exact error ID)
+    - TV-1505 (invalid requested scope schema; expected fail by exact error ID)
+    - TV-1506 (invalid requested ops schema; expected fail by exact error ID)
+    - TV-1507 (active grant missing claim subject schema; expected fail by exact error ID)
+    - TV-1508 (active grant missing claim scope schema; expected fail by exact error ID)
+    - TV-1509 (active grant missing claim action schema; expected fail by exact error ID)
+    - TV-1510 (claim fields forbidden when grant status non-active; expected fail by exact error ID)
+    - TV-1511 (claim subject mismatch; expected fail by exact error ID)
+    - TV-1512 (claim scope mismatch; expected fail by exact error ID)
+    - TV-1513 (claim action mismatch; expected fail by exact error ID)
+    - TV-1514 (claim mismatch precedence validates subject-first deterministic path; expected fail by exact error ID)
 
 ---
 
@@ -1501,5 +1617,6 @@ Current next step:
 7. M1-S7 reference-grant guard vectors executed and stabilized (`TV-1201..TV-1207`)
 8. M1-S8 reference-grant proof-binding vectors executed and stabilized (`TV-1301..TV-1313`)
 9. M1-S9 reference-grant freshness/replay vectors executed and stabilized (`TV-1401..TV-1410`)
-10. preserve S1/S2/S3/S4/S5 + M1-S1 + M1-S2 + M1-S3 + M1-S4 + M1-S5 + M1-S6 + M1-S7 + M1-S8 + M1-S9 baseline behavior and machine-checkable error ID stability
-11. open next bounded M1 slice from current closure baseline
+10. M1-S10 reference-grant claim-binding vectors executed and stabilized (`TV-1501..TV-1514`)
+11. preserve S1/S2/S3/S4/S5 + M1-S1 + M1-S2 + M1-S3 + M1-S4 + M1-S5 + M1-S6 + M1-S7 + M1-S8 + M1-S9 + M1-S10 baseline behavior and machine-checkable error ID stability
+12. open next bounded M1 slice from current closure baseline

@@ -1,0 +1,77 @@
+{
+  "id": "TV-1501",
+  "title": "M1-S10 Active Grant Strict Claim Binding Pass",
+  "slice_profile": "M1-S10",
+  "preconditions": [
+    "reference transport active grant strict path",
+    "claim subject/scope/action match handshake init request context"
+  ],
+  "messages": [
+    {
+      "type": "HandshakeInit",
+      "role": "requester",
+      "body": {
+        "proposed_route_mode": "parent_mediated",
+        "requested_ops": [
+          "invoke",
+          "meta"
+        ],
+        "requested_scope": ".Adult.Games.RedX",
+        "requester_subject_ref": "nid:subject.alice",
+        "requested_disclosure_level": "mediator_visible"
+      }
+    },
+    {
+      "type": "HandshakeChallenge",
+      "role": "mediator"
+    },
+    {
+      "type": "HandshakeProof",
+      "role": "requester",
+      "body": {
+        "verification_mode": "strict",
+        "proof_ref": "nid:m1s10.handshake.tv-1501"
+      }
+    },
+    {
+      "type": "HandshakeAccept",
+      "role": "mediator",
+      "body": {
+        "reference_grant_claim_action": "invoke",
+        "reference_grant_status": "active",
+        "reference_grant_strict_failure_mode": "none",
+        "relation_token_ref": "tid:reltok-1501",
+        "reference_grant_proof_replay_status": "clear",
+        "reference_grant_verification_mode": "strict",
+        "token_transport": "reference",
+        "reference_grant_proof_ref": "gid:grantproof-1501",
+        "reference_lookup_status": "resolved",
+        "reference_grant_claim_subject_ref": "nid:subject.alice",
+        "reference_grant_claim_scope": ".Adult.Games.RedX",
+        "reference_lookup_cid": "sha256:1111111111111111111111111111111111111111111111111111111111111111",
+        "reference_grant_ref": "gid:grant-1501",
+        "reference_grant_proof_freshness_status": "fresh",
+        "disclosure_level": "mediator_visible",
+        "relation_token_cid": "sha256:1111111111111111111111111111111111111111111111111111111111111111",
+        "route_mode": "parent_mediated"
+      }
+    }
+  ],
+  "expected_state_trace": [
+    "MediatedHandshake",
+    "RelayedSession",
+    "Completed"
+  ],
+  "expected_outcome": {
+    "deny_code": null,
+    "success": true
+  },
+  "assertions": [
+    {
+      "value": true,
+      "check": "deny_code_absent",
+      "kind": "error",
+      "id": "A1"
+    }
+  ]
+}

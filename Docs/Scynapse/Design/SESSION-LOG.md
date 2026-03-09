@@ -693,3 +693,41 @@ Use this structure for each new entry:
    - open next task board/branch and continue with bounded harness-first scope.
 6. Risks/blockers:
    - none immediate; keep deterministic error-ID stability and gate-order invariants intact.
+
+### 2026-03-08 (M1-S10 Reference-Grant Claim-Binding Slice Implementation)
+
+1. Scope:
+   - execute M1-S10 task board on top of M1-S9 baseline and harden reference-grant claim-binding determinism.
+2. Key outputs:
+   - created `codex/m1-s10-reference-grant-claim-binding` from M1-S9 baseline.
+   - added `slice_profile: "M1-S10"` handling in conformance engine.
+   - added M1-S10 schema contract:
+     - `HandshakeInit`: `requester_subject_ref`, `requested_scope`, `requested_ops`
+     - `HandshakeAccept` active reference grant: `reference_grant_claim_subject_ref`, `reference_grant_claim_scope`, `reference_grant_claim_action`
+   - added deterministic M1-S10 schema/runtime IDs:
+     - `E3160`..`E3169`, `E3174`
+     - `E3170`, `E3171`, `E3172`
+   - added isolated fixture pack `Fixtures/M1-S10`: `TV-1501..TV-1514`.
+   - synchronized protocol + matrix + checklist + vector + compatibility + continuity docs for M1-S10 propagation.
+3. Validation runs:
+   - S1: 14/14
+   - S2: 8/8
+   - S3: 4/4
+   - S4: 4/4
+   - S5: 3/3
+   - M1-S1: 10/10
+   - M1-S2: 6/6
+   - M1-S3: 5/5
+   - M1-S4: 6/6
+   - M1-S5: 4/4
+   - M1-S6: 5/5
+   - M1-S7: 7/7
+   - M1-S8: 13/13
+   - M1-S9: 10/10
+   - M1-S10: 14/14
+4. Current doing:
+   - finalize scoped commit/push and closure checkpoint sync for M1-S10.
+5. Next:
+   - open next bounded M1 slice from the M1-S10 closure baseline.
+6. Risks/blockers:
+   - none immediate; keep deterministic claim-binding/error-ID stability and gate-order invariants intact.

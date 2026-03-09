@@ -69,6 +69,8 @@ Reference:
 - `Docs/Scynapse/Design/M1-S8-Closure.md`
 - `Docs/Scynapse/Design/M1-S9-Task-Board.md`
 - `Docs/Scynapse/Design/M1-S9-Closure.md`
+- `Docs/Scynapse/Design/M1-S10-Task-Board.md`
+- `Docs/Scynapse/Design/M1-S10-Closure.md`
 - `Docs/Scynapse/Design/M0-B-Wire-Lock-Open-Decisions.md`
 - `Docs/Scynapse/Design/M0-Status-Checkpoint.md`
 
@@ -374,3 +376,11 @@ Failure responses should include:
    - `reference_grant_status=active` requires `reference_grant_proof_replay_status` in `clear|replayed`.
    - stale freshness maps deterministically to `E3150` (`GrantExpired`).
    - replayed proof maps deterministically to `E3151` (`TrustInsufficient`).
+21. M1-S10 reference-grant claim-binding profile:
+   - `M1-S10` extends M1-S9 with subject/scope/action binding checks for active reference grant acceptance.
+   - `HandshakeInit` must provide claim-binding source fields: `requester_subject_ref`, `requested_scope`, `requested_ops`.
+   - `HandshakeAccept` with active reference grant must provide claim fields: `reference_grant_claim_subject_ref`, `reference_grant_claim_scope`, `reference_grant_claim_action`.
+   - mismatch deny mapping is deterministic:
+     - `E3170` subject mismatch -> `TrustInsufficient`
+     - `E3171` scope mismatch -> `PolicyDenied`
+     - `E3172` action mismatch -> `PolicyDenied`

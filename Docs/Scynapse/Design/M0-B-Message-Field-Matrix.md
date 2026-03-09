@@ -275,8 +275,9 @@ Relation token CID convention:
 
 | Field | Req | Tag | Rule |
 |---|---|---|---|
-| `requested_ops` | R | N | Requested operation classes |
-| `requested_scope` | R | N | Relation scope |
+| `requested_ops` | R | N | Requested operation classes; M1-S10 claim-binding source requires non-empty string array |
+| `requester_subject_ref` | C | N | M1-S10 profile: required typed identifier for claim-binding source context |
+| `requested_scope` | R | N | Relation scope; M1-S10 claim-binding source requires non-empty string |
 | `requested_disclosure_level` | R | N | Desired visibility class |
 | `proposed_route_mode` | R | N | Initial mode (normally mediated) |
 
@@ -327,6 +328,9 @@ Relation token CID convention:
 | `reference_grant_strict_failure_mode` | O | N | M1-S8 strict mode optional deterministic failure injection (`none|expired|revoked|unresolvable_proof|invalid_signature|not_yet_valid`) |
 | `reference_grant_proof_freshness_status` | C | N | M1-S9 profile + `token_transport=reference` + `reference_grant_status=active`: required (`fresh|stale`) |
 | `reference_grant_proof_replay_status` | C | N | M1-S9 profile + `token_transport=reference` + `reference_grant_status=active`: required (`clear|replayed`) |
+| `reference_grant_claim_subject_ref` | C | N | M1-S10 profile + `token_transport=reference` + `reference_grant_status=active`: required typed identifier |
+| `reference_grant_claim_scope` | C | N | M1-S10 profile + `token_transport=reference` + `reference_grant_status=active`: required non-empty string |
+| `reference_grant_claim_action` | C | N | M1-S10 profile + `token_transport=reference` + `reference_grant_status=active`: required non-empty string |
 
 ### 4.5 HandshakeDeny
 
@@ -481,6 +485,7 @@ Relation token CID convention:
 14. In M1-S7 profile, reference `HandshakeAccept` requires grant status contract, and active grant requires typed `reference_grant_ref`; missing/expired/revoked grant states emit deterministic deny.
 15. In M1-S8 profile, active reference grant requires grant proof verification mode and mode-specific fields; strict/mock grant proof failures emit deterministic deny IDs (`E3130`..`E3135`) before reference lookup-resolution guard checks.
 16. In M1-S9 profile, active reference grant requires freshness/replay status fields; stale/replayed outcomes emit deterministic deny IDs (`E3150`, `E3151`) before reference lookup-resolution guard checks.
+17. In M1-S10 profile, `HandshakeInit` must carry claim-binding source fields (`requester_subject_ref`, `requested_scope`, `requested_ops`) and active reference-grant `HandshakeAccept` must carry claim-binding fields (`reference_grant_claim_subject_ref`, `reference_grant_claim_scope`, `reference_grant_claim_action`); mismatch outcomes emit deterministic deny IDs (`E3170`, `E3171`, `E3172`) before reference lookup-resolution guard checks.
 
 ---
 
@@ -494,4 +499,4 @@ Completed:
 Current next step:
 
 1. keep this matrix synchronized with wire examples and conformance harness fixtures
-2. preserve M1-S1 wire-closure constraints while extending runtime bridge and security-adapter slices, including M1-S4 strict failure mapping, M1-S5 token-integrity constraints, M1-S6 reference-token guard constraints, M1-S7 reference-grant guard constraints, M1-S8 reference-grant proof-binding constraints, and M1-S9 freshness/replay constraints
+2. preserve M1-S1 wire-closure constraints while extending runtime bridge and security-adapter slices, including M1-S4 strict failure mapping, M1-S5 token-integrity constraints, M1-S6 reference-token guard constraints, M1-S7 reference-grant guard constraints, M1-S8 reference-grant proof-binding constraints, M1-S9 freshness/replay constraints, and M1-S10 claim-binding constraints

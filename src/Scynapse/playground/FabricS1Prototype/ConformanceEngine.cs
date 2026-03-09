@@ -19,6 +19,7 @@ internal sealed class ConformanceEngine
     private const string SliceProfileM1S7 = "M1-S7";
     private const string SliceProfileM1S8 = "M1-S8";
     private const string SliceProfileM1S9 = "M1-S9";
+    private const string SliceProfileM1S10 = "M1-S10";
 
     private static readonly Regex TypedIdentifierRegex = new("^[a-z]{2,6}:[A-Za-z0-9][A-Za-z0-9._-]{2,127}$", RegexOptions.Compiled);
     private static readonly Regex RelationTokenCidRegex = new("^sha256:[0-9a-fA-F]{8,128}$", RegexOptions.Compiled);
@@ -38,7 +39,8 @@ internal sealed class ConformanceEngine
         SliceProfileM1S6,
         SliceProfileM1S7,
         SliceProfileM1S8,
-        SliceProfileM1S9
+        SliceProfileM1S9,
+        SliceProfileM1S10
     };
 
     private static readonly HashSet<string> KnownTokenTransportModes = new(StringComparer.Ordinal)
@@ -436,7 +438,8 @@ internal sealed class ConformanceEngine
                 string.Equals(sliceProfile, SliceProfileM1S6, StringComparison.Ordinal) ||
                 string.Equals(sliceProfile, SliceProfileM1S7, StringComparison.Ordinal) ||
                 string.Equals(sliceProfile, SliceProfileM1S8, StringComparison.Ordinal) ||
-                string.Equals(sliceProfile, SliceProfileM1S9, StringComparison.Ordinal))
+                string.Equals(sliceProfile, SliceProfileM1S9, StringComparison.Ordinal) ||
+                string.Equals(sliceProfile, SliceProfileM1S10, StringComparison.Ordinal))
             {
                 ValidateM1S1WireClosureFields(fixture, message, errors);
             }
@@ -444,27 +447,37 @@ internal sealed class ConformanceEngine
             if (string.Equals(sliceProfile, SliceProfileM1S6, StringComparison.Ordinal) ||
                 string.Equals(sliceProfile, SliceProfileM1S7, StringComparison.Ordinal) ||
                 string.Equals(sliceProfile, SliceProfileM1S8, StringComparison.Ordinal) ||
-                string.Equals(sliceProfile, SliceProfileM1S9, StringComparison.Ordinal))
+                string.Equals(sliceProfile, SliceProfileM1S9, StringComparison.Ordinal) ||
+                string.Equals(sliceProfile, SliceProfileM1S10, StringComparison.Ordinal))
             {
                 ValidateM1S6ReferenceTokenFields(fixture, message, errors);
             }
 
             if (string.Equals(sliceProfile, SliceProfileM1S7, StringComparison.Ordinal) ||
                 string.Equals(sliceProfile, SliceProfileM1S8, StringComparison.Ordinal) ||
-                string.Equals(sliceProfile, SliceProfileM1S9, StringComparison.Ordinal))
+                string.Equals(sliceProfile, SliceProfileM1S9, StringComparison.Ordinal) ||
+                string.Equals(sliceProfile, SliceProfileM1S10, StringComparison.Ordinal))
             {
                 ValidateM1S7ReferenceGrantFields(fixture, message, errors);
             }
 
             if (string.Equals(sliceProfile, SliceProfileM1S8, StringComparison.Ordinal) ||
-                string.Equals(sliceProfile, SliceProfileM1S9, StringComparison.Ordinal))
+                string.Equals(sliceProfile, SliceProfileM1S9, StringComparison.Ordinal) ||
+                string.Equals(sliceProfile, SliceProfileM1S10, StringComparison.Ordinal))
             {
                 ValidateM1S8ReferenceGrantProofFields(fixture, message, errors);
             }
 
-            if (string.Equals(sliceProfile, SliceProfileM1S9, StringComparison.Ordinal))
+            if (string.Equals(sliceProfile, SliceProfileM1S9, StringComparison.Ordinal) ||
+                string.Equals(sliceProfile, SliceProfileM1S10, StringComparison.Ordinal))
             {
                 ValidateM1S9ReferenceGrantFreshnessFields(fixture, message, errors);
+            }
+
+            if (string.Equals(sliceProfile, SliceProfileM1S10, StringComparison.Ordinal))
+            {
+                ValidateM1S10HandshakeInitFields(fixture, message, errors);
+                ValidateM1S10ReferenceGrantClaimFields(fixture, message, errors);
             }
 
             if (string.Equals(sliceProfile, SliceProfileM1S2, StringComparison.Ordinal))
@@ -502,7 +515,8 @@ internal sealed class ConformanceEngine
             || string.Equals(sliceProfile, SliceProfileM1S6, StringComparison.Ordinal)
             || string.Equals(sliceProfile, SliceProfileM1S7, StringComparison.Ordinal)
             || string.Equals(sliceProfile, SliceProfileM1S8, StringComparison.Ordinal)
-            || string.Equals(sliceProfile, SliceProfileM1S9, StringComparison.Ordinal);
+            || string.Equals(sliceProfile, SliceProfileM1S9, StringComparison.Ordinal)
+            || string.Equals(sliceProfile, SliceProfileM1S10, StringComparison.Ordinal);
     }
 
     private static bool IsRuntimeBridgeProfile(string sliceProfile)
@@ -514,7 +528,8 @@ internal sealed class ConformanceEngine
             || string.Equals(sliceProfile, SliceProfileM1S6, StringComparison.Ordinal)
             || string.Equals(sliceProfile, SliceProfileM1S7, StringComparison.Ordinal)
             || string.Equals(sliceProfile, SliceProfileM1S8, StringComparison.Ordinal)
-            || string.Equals(sliceProfile, SliceProfileM1S9, StringComparison.Ordinal);
+            || string.Equals(sliceProfile, SliceProfileM1S9, StringComparison.Ordinal)
+            || string.Equals(sliceProfile, SliceProfileM1S10, StringComparison.Ordinal);
     }
 
     private static bool IsM1SecurityAdapterProfile(string sliceProfile)
@@ -525,7 +540,8 @@ internal sealed class ConformanceEngine
             || string.Equals(sliceProfile, SliceProfileM1S6, StringComparison.Ordinal)
             || string.Equals(sliceProfile, SliceProfileM1S7, StringComparison.Ordinal)
             || string.Equals(sliceProfile, SliceProfileM1S8, StringComparison.Ordinal)
-            || string.Equals(sliceProfile, SliceProfileM1S9, StringComparison.Ordinal);
+            || string.Equals(sliceProfile, SliceProfileM1S9, StringComparison.Ordinal)
+            || string.Equals(sliceProfile, SliceProfileM1S10, StringComparison.Ordinal);
     }
 
     private static void ValidateS2RouteUpgradeProbeFields(FixtureCase fixture, FixtureMessage message, List<ConformanceError> errors)
@@ -1201,6 +1217,102 @@ internal sealed class ConformanceEngine
         }
     }
 
+    private static void ValidateM1S10HandshakeInitFields(FixtureCase fixture, FixtureMessage message, List<ConformanceError> errors)
+    {
+        if (!string.Equals(message.Type, "HandshakeInit", StringComparison.Ordinal))
+        {
+            return;
+        }
+
+        if (message.Body is null || message.Body.Value.ValueKind != JsonValueKind.Object)
+        {
+            AddError(errors, "L2", "E2001_MISSING_REQUIRED_BODY", $"{fixture.Id}/{message.Type} missing required body.");
+            return;
+        }
+
+        if (!message.Body.Value.TryGetProperty("requester_subject_ref", out var requesterSubjectElement))
+        {
+            AddError(errors, "L2", "E3160_M1S10_REQUESTER_SUBJECT_REF_REQUIRED", $"{fixture.Id}/{message.Type} requires typed 'requester_subject_ref' for claim binding.");
+        }
+        else if (requesterSubjectElement.ValueKind != JsonValueKind.String || !IsTypedIdentifier(requesterSubjectElement.GetString() ?? string.Empty))
+        {
+            AddError(errors, "L2", "E3161_M1S10_REQUESTER_SUBJECT_REF_INVALID", $"{fixture.Id}/{message.Type} field 'requester_subject_ref' must be a typed identifier.");
+        }
+
+        var requestedScope = GetBodyString(message, "requested_scope");
+        if (string.IsNullOrWhiteSpace(requestedScope))
+        {
+            AddError(errors, "L2", "E3162_M1S10_REQUESTED_SCOPE_INVALID", $"{fixture.Id}/{message.Type} requires non-empty string 'requested_scope' for claim binding.");
+        }
+
+        var requestedOps = GetBodyStringArray(message, "requested_ops");
+        if (requestedOps.Count == 0)
+        {
+            AddError(errors, "L2", "E3163_M1S10_REQUESTED_OPS_INVALID", $"{fixture.Id}/{message.Type} requires non-empty string array 'requested_ops' for claim binding.");
+        }
+    }
+
+    private static void ValidateM1S10ReferenceGrantClaimFields(FixtureCase fixture, FixtureMessage message, List<ConformanceError> errors)
+    {
+        if (!string.Equals(message.Type, "HandshakeAccept", StringComparison.Ordinal))
+        {
+            return;
+        }
+
+        if (message.Body is null || message.Body.Value.ValueKind != JsonValueKind.Object)
+        {
+            return;
+        }
+
+        var tokenTransport = GetBodyString(message, "token_transport");
+        if (!string.Equals(tokenTransport, "reference", StringComparison.Ordinal))
+        {
+            return;
+        }
+
+        var hasClaimSubject = message.Body.Value.TryGetProperty("reference_grant_claim_subject_ref", out var claimSubjectElement);
+        var hasClaimScope = message.Body.Value.TryGetProperty("reference_grant_claim_scope", out var claimScopeElement);
+        var hasClaimAction = message.Body.Value.TryGetProperty("reference_grant_claim_action", out var claimActionElement);
+
+        var referenceGrantStatus = GetBodyString(message, "reference_grant_status");
+        if (!string.Equals(referenceGrantStatus, "active", StringComparison.Ordinal))
+        {
+            if (hasClaimSubject || hasClaimScope || hasClaimAction)
+            {
+                AddError(errors, "L2", "E3174_M1S10_REFERENCE_GRANT_CLAIM_FIELDS_FORBIDDEN", $"{fixture.Id}/{message.Type} claim binding fields are forbidden when reference_grant_status is not 'active'.");
+            }
+
+            return;
+        }
+
+        if (!hasClaimSubject)
+        {
+            AddError(errors, "L2", "E3164_M1S10_REFERENCE_GRANT_CLAIM_SUBJECT_REQUIRED", $"{fixture.Id}/{message.Type} requires typed 'reference_grant_claim_subject_ref' when reference_grant_status='active'.");
+        }
+        else if (claimSubjectElement.ValueKind != JsonValueKind.String || !IsTypedIdentifier(claimSubjectElement.GetString() ?? string.Empty))
+        {
+            AddError(errors, "L2", "E3165_M1S10_REFERENCE_GRANT_CLAIM_SUBJECT_INVALID", $"{fixture.Id}/{message.Type} field 'reference_grant_claim_subject_ref' must be a typed identifier.");
+        }
+
+        if (!hasClaimScope)
+        {
+            AddError(errors, "L2", "E3166_M1S10_REFERENCE_GRANT_CLAIM_SCOPE_REQUIRED", $"{fixture.Id}/{message.Type} requires non-empty string 'reference_grant_claim_scope' when reference_grant_status='active'.");
+        }
+        else if (claimScopeElement.ValueKind != JsonValueKind.String || string.IsNullOrWhiteSpace(claimScopeElement.GetString()))
+        {
+            AddError(errors, "L2", "E3167_M1S10_REFERENCE_GRANT_CLAIM_SCOPE_INVALID", $"{fixture.Id}/{message.Type} field 'reference_grant_claim_scope' must be a non-empty string.");
+        }
+
+        if (!hasClaimAction)
+        {
+            AddError(errors, "L2", "E3168_M1S10_REFERENCE_GRANT_CLAIM_ACTION_REQUIRED", $"{fixture.Id}/{message.Type} requires non-empty string 'reference_grant_claim_action' when reference_grant_status='active'.");
+        }
+        else if (claimActionElement.ValueKind != JsonValueKind.String || string.IsNullOrWhiteSpace(claimActionElement.GetString()))
+        {
+            AddError(errors, "L2", "E3169_M1S10_REFERENCE_GRANT_CLAIM_ACTION_INVALID", $"{fixture.Id}/{message.Type} field 'reference_grant_claim_action' must be a non-empty string.");
+        }
+    }
+
     private static void ValidateM1SecurityAdapterFields(FixtureCase fixture, FixtureMessage message, List<ConformanceError> errors)
     {
         if (!string.Equals(message.Type, "HandshakeProof", StringComparison.Ordinal))
@@ -1502,6 +1614,13 @@ internal sealed class ConformanceEngine
 
                 context.HandshakeStarted = true;
                 context.HandshakeInitSeen = true;
+                if (string.Equals(context.SliceProfile, SliceProfileM1S10, StringComparison.Ordinal))
+                {
+                    context.RequesterSubjectRef = GetBodyString(message, "requester_subject_ref");
+                    context.RequestedScope = GetBodyString(message, "requested_scope");
+                    context.RequestedOps = GetBodyStringArray(message, "requested_ops");
+                }
+
                 if (context.CurrentState is null)
                 {
                     SetState(context, "MediatedHandshake");
@@ -1649,6 +1768,39 @@ internal sealed class ConformanceEngine
                     }
 
                     if (!TryEvaluateM1S9ReferenceGrantFreshness(fixtureId, message, context, errors))
+                    {
+                        break;
+                    }
+
+                    if (!TryEvaluateM1S6ReferenceTokenIntegrity(fixtureId, message, context, errors))
+                    {
+                        break;
+                    }
+                }
+
+                if (string.Equals(context.SliceProfile, SliceProfileM1S10, StringComparison.Ordinal))
+                {
+                    if (!TryEvaluateM1S5RelationTokenIntegrity(fixtureId, message, context, errors))
+                    {
+                        break;
+                    }
+
+                    if (!TryEvaluateM1S7ReferenceGrantIntegrity(fixtureId, message, context, errors))
+                    {
+                        break;
+                    }
+
+                    if (!TryEvaluateM1S8ReferenceGrantProofBinding(fixtureId, message, context, errors))
+                    {
+                        break;
+                    }
+
+                    if (!TryEvaluateM1S9ReferenceGrantFreshness(fixtureId, message, context, errors))
+                    {
+                        break;
+                    }
+
+                    if (!TryEvaluateM1S10ReferenceGrantClaimBinding(fixtureId, message, context, errors))
                     {
                         break;
                     }
@@ -2027,7 +2179,7 @@ internal sealed class ConformanceEngine
             {
                 if (!IsRuntimeBridgeProfile(context.SliceProfile))
                 {
-                    RejectWithDeterministicDeny(fixtureId, context, errors, "E3062_M1S2_ROUTE_DATA_OUTSIDE_PROFILE", "TrustInsufficient", $"{fixtureId}/{message.Type} is only supported in M1-S2/M1-S3/M1-S4/M1-S5/M1-S6/M1-S7/M1-S8/M1-S9 runtime-bridge profiles.");
+                    RejectWithDeterministicDeny(fixtureId, context, errors, "E3062_M1S2_ROUTE_DATA_OUTSIDE_PROFILE", "TrustInsufficient", $"{fixtureId}/{message.Type} is only supported in M1-S2/M1-S3/M1-S4/M1-S5/M1-S6/M1-S7/M1-S8/M1-S9/M1-S10 runtime-bridge profiles.");
                     break;
                 }
 
@@ -2444,6 +2596,85 @@ internal sealed class ConformanceEngine
                 "E3151_M1S9_REFERENCE_GRANT_PROOF_REPLAY_DETECTED",
                 "TrustInsufficient",
                 $"{fixtureId}/{message.Type} grant proof replay was detected.");
+            return false;
+        }
+
+        return true;
+    }
+
+    private static bool TryEvaluateM1S10ReferenceGrantClaimBinding(string fixtureId, FixtureMessage message, OperationContext context, List<ConformanceError> errors)
+    {
+        var tokenTransport = GetBodyString(message, "token_transport");
+        if (!string.Equals(tokenTransport, "reference", StringComparison.Ordinal))
+        {
+            return true;
+        }
+
+        var referenceGrantStatus = GetBodyString(message, "reference_grant_status");
+        if (!string.Equals(referenceGrantStatus, "active", StringComparison.Ordinal))
+        {
+            return true;
+        }
+
+        var claimSubject = GetBodyString(message, "reference_grant_claim_subject_ref");
+        if (string.IsNullOrWhiteSpace(claimSubject) || !IsTypedIdentifier(claimSubject))
+        {
+            return true;
+        }
+
+        var claimScope = GetBodyString(message, "reference_grant_claim_scope");
+        if (string.IsNullOrWhiteSpace(claimScope))
+        {
+            return true;
+        }
+
+        var claimAction = GetBodyString(message, "reference_grant_claim_action");
+        if (string.IsNullOrWhiteSpace(claimAction))
+        {
+            return true;
+        }
+
+        if (string.IsNullOrWhiteSpace(context.RequesterSubjectRef) || !IsTypedIdentifier(context.RequesterSubjectRef))
+        {
+            return true;
+        }
+
+        if (!string.IsNullOrWhiteSpace(context.RequesterSubjectRef) &&
+            !string.Equals(claimSubject, context.RequesterSubjectRef, StringComparison.Ordinal))
+        {
+            RejectWithDeterministicDeny(
+                fixtureId,
+                context,
+                errors,
+                "E3170_M1S10_REFERENCE_GRANT_CLAIM_SUBJECT_MISMATCH",
+                "TrustInsufficient",
+                $"{fixtureId}/{message.Type} grant claim subject does not match requester subject.");
+            return false;
+        }
+
+        if (!string.IsNullOrWhiteSpace(context.RequestedScope) &&
+            !string.Equals(claimScope, context.RequestedScope, StringComparison.Ordinal))
+        {
+            RejectWithDeterministicDeny(
+                fixtureId,
+                context,
+                errors,
+                "E3171_M1S10_REFERENCE_GRANT_CLAIM_SCOPE_MISMATCH",
+                "PolicyDenied",
+                $"{fixtureId}/{message.Type} grant claim scope does not match requested scope.");
+            return false;
+        }
+
+        if (context.RequestedOps.Count > 0 &&
+            !context.RequestedOps.Contains(claimAction ?? string.Empty, StringComparer.Ordinal))
+        {
+            RejectWithDeterministicDeny(
+                fixtureId,
+                context,
+                errors,
+                "E3172_M1S10_REFERENCE_GRANT_CLAIM_ACTION_MISMATCH",
+                "PolicyDenied",
+                $"{fixtureId}/{message.Type} grant claim action does not match requested operations.");
             return false;
         }
 
@@ -2963,6 +3194,30 @@ internal sealed class ConformanceEngine
         return message.Body.Value.TryGetProperty(propertyName, out _);
     }
 
+    private static List<string> GetBodyStringArray(FixtureMessage message, string propertyName)
+    {
+        if (message.Body is null || message.Body.Value.ValueKind != JsonValueKind.Object)
+        {
+            return new List<string>();
+        }
+
+        if (!message.Body.Value.TryGetProperty(propertyName, out var property))
+        {
+            return new List<string>();
+        }
+
+        if (property.ValueKind != JsonValueKind.Array)
+        {
+            return new List<string>();
+        }
+
+        return property
+            .EnumerateArray()
+            .Where(item => item.ValueKind == JsonValueKind.String && !string.IsNullOrWhiteSpace(item.GetString()))
+            .Select(item => item.GetString()!)
+            .ToList();
+    }
+
     private static bool GetDefaultFollowMoves(string scopeMode)
     {
         return !string.Equals(scopeMode, "exact", StringComparison.Ordinal);
@@ -3007,6 +3262,9 @@ internal sealed class OperationContext
     public string EndpointDirectoryMode { get; set; } = "plaintext";
     public string EndpointGrantStatus { get; set; } = "not_required";
     public string ObserveScopeMode { get; set; } = "subtree";
+    public string? RequesterSubjectRef { get; set; }
+    public string? RequestedScope { get; set; }
+    public List<string> RequestedOps { get; set; } = new();
     public string? ExpectedPolicyDenyCode { get; set; }
     public string? ExpectedUpgradeRejectCode { get; set; }
     public string? ObservedDenyCode { get; set; }

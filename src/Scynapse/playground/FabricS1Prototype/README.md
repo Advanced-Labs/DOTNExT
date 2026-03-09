@@ -111,6 +111,12 @@ Run M1-S9 fixture pack:
 dotnet run --project playground/FabricS1Prototype/FabricS1Prototype.csproj -- D:\Dev\dotnext\Docs\Scynapse\Design\Fixtures\M1-S9
 ```
 
+Run M1-S10 fixture pack:
+
+```powershell
+dotnet run --project playground/FabricS1Prototype/FabricS1Prototype.csproj -- D:\Dev\dotnext\Docs\Scynapse\Design\Fixtures\M1-S10
+```
+
 Expected-fail fixture semantics:
 
 1. `expected_error_ids` is the preferred exact failure oracle.
@@ -207,3 +213,16 @@ Slice profile semantics:
    - deterministic freshness/replay IDs:
      - `E3150_M1S9_REFERENCE_GRANT_PROOF_FRESHNESS_STALE`
      - `E3151_M1S9_REFERENCE_GRANT_PROOF_REPLAY_DETECTED`
+15. `slice_profile: "M1-S10"` extends M1-S9 with reference grant claim-binding checks:
+   - `HandshakeInit` claim-binding source fields:
+     - `requester_subject_ref` (typed identifier)
+     - `requested_scope` (non-empty string)
+     - `requested_ops` (non-empty string array)
+   - active reference grant `HandshakeAccept` claim fields:
+     - `reference_grant_claim_subject_ref` (typed identifier)
+     - `reference_grant_claim_scope` (non-empty string)
+     - `reference_grant_claim_action` (non-empty string)
+   - deterministic claim-binding IDs:
+     - `E3170_M1S10_REFERENCE_GRANT_CLAIM_SUBJECT_MISMATCH`
+     - `E3171_M1S10_REFERENCE_GRANT_CLAIM_SCOPE_MISMATCH`
+     - `E3172_M1S10_REFERENCE_GRANT_CLAIM_ACTION_MISMATCH`

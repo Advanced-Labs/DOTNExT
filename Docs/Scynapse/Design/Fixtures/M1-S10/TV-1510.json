@@ -1,0 +1,77 @@
+{
+  "id": "TV-1510",
+  "title": "M1-S10 Claim Fields Forbidden For Non-Active Grant",
+  "slice_profile": "M1-S10",
+  "expect_conformance": "fail",
+  "expected_error_ids": [
+    "E3174_M1S10_REFERENCE_GRANT_CLAIM_FIELDS_FORBIDDEN"
+  ],
+  "expected_error_contains": [
+    "claim binding fields are forbidden"
+  ],
+  "preconditions": [
+    "grant status non-active with claim fields present"
+  ],
+  "messages": [
+    {
+      "type": "HandshakeInit",
+      "role": "requester",
+      "body": {
+        "proposed_route_mode": "parent_mediated",
+        "requested_ops": [
+          "invoke",
+          "meta"
+        ],
+        "requested_scope": ".Adult.Games.RedX",
+        "requester_subject_ref": "nid:subject.alice",
+        "requested_disclosure_level": "mediator_visible"
+      }
+    },
+    {
+      "type": "HandshakeChallenge",
+      "role": "mediator"
+    },
+    {
+      "type": "HandshakeProof",
+      "role": "requester",
+      "body": {
+        "verification_mode": "strict",
+        "proof_ref": "nid:m1s10.handshake.tv-1510"
+      }
+    },
+    {
+      "type": "HandshakeAccept",
+      "role": "mediator",
+      "body": {
+        "route_mode": "parent_mediated",
+        "reference_grant_claim_subject_ref": "nid:subject.alice",
+        "reference_lookup_cid": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "token_transport": "reference",
+        "reference_grant_status": "not_required",
+        "relation_token_cid": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "reference_grant_claim_action": "invoke",
+        "disclosure_level": "mediator_visible",
+        "reference_lookup_status": "resolved",
+        "relation_token_ref": "tid:reltok-1510",
+        "reference_grant_claim_scope": ".Adult.Games.RedX"
+      }
+    }
+  ],
+  "expected_state_trace": [
+    "MediatedHandshake",
+    "RelayedSession",
+    "Completed"
+  ],
+  "expected_outcome": {
+    "deny_code": null,
+    "success": true
+  },
+  "assertions": [
+    {
+      "value": true,
+      "check": "deny_code_absent",
+      "kind": "error",
+      "id": "A1"
+    }
+  ]
+}

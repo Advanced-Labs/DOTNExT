@@ -141,6 +141,18 @@ Deliverables:
 2. deterministic schema validation for freshness/replay required and forbidden-field paths.
 3. deterministic deny mapping for stale/replayed proof outcomes with stable machine-checkable IDs.
 
+### M1-S10: Reference Grant Claim Binding (Bounded)
+
+Primary goal:
+
+1. enforce deterministic reference-grant claim binding between `HandshakeInit` request context and active reference-grant acceptance.
+
+Deliverables:
+
+1. profile `M1-S10` extending M1-S9 with claim-binding source/accept contracts.
+2. deterministic schema validation for required/forbidden claim-binding fields.
+3. deterministic deny mapping for subject/scope/action mismatches with stable machine-checkable IDs.
+
 ---
 
 ## 4. Non-Negotiable Guardrails
@@ -181,4 +193,5 @@ Deliverables:
 7. `M1-S7` reference-grant guard execution complete (`M1-S7-Closure.md`).
 8. `M1-S8` reference-grant proof-binding execution complete (`M1-S8-Closure.md`).
 9. `M1-S9` reference-grant freshness/replay execution complete (`M1-S9-Closure.md`).
-10. open next bounded M1 slice task board from this closure baseline.
+10. `M1-S10` reference-grant claim-binding execution complete (`M1-S10-Closure.md`).
+11. open next bounded M1 slice task board from this closure baseline.

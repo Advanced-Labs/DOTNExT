@@ -4,13 +4,13 @@ Last updated: 2026-03-08
 
 ## 1. Mission Snapshot
 
-Current mission: close and checkpoint M1-S9 reference-grant freshness/replay work, then open the next bounded M1 slice while preserving deterministic S1..S5 + M1-S1 + M1-S2 + M1-S3 + M1-S4 + M1-S5 + M1-S6 + M1-S7 + M1-S8 + M1-S9 behavior.
+Current mission: close and checkpoint M1-S10 reference-grant claim-binding work, then open the next bounded M1 slice while preserving deterministic S1..S5 + M1-S1 + M1-S2 + M1-S3 + M1-S4 + M1-S5 + M1-S6 + M1-S7 + M1-S8 + M1-S9 + M1-S10 behavior.
 
 Latest checkpoint status (2026-03-08):
 
-1. active branch: `codex/m1-s9-grant-proof-freshness-replay`
+1. active branch: `codex/m1-s10-reference-grant-claim-binding`
 2. continuity files synchronized
-3. closure rerun confirmed 99/99 effective pass (S1..S5 + M1-S1 + M1-S2 + M1-S3 + M1-S4 + M1-S5 + M1-S6 + M1-S7 + M1-S8 + M1-S9)
+3. closure rerun confirmed 113/113 effective pass (S1..S5 + M1-S1 + M1-S2 + M1-S3 + M1-S4 + M1-S5 + M1-S6 + M1-S7 + M1-S8 + M1-S9 + M1-S10)
 
 Current active path:
 
@@ -30,6 +30,7 @@ Current active path:
 14. M1-S7 reference-grant guard slice implemented (grant-state deterministic deny mapping for reference transport)
 15. M1-S8 reference-grant proof-binding slice implemented (active-grant proof verification deterministic deny mapping)
 16. M1-S9 reference-grant freshness/replay slice implemented (active-grant freshness/replay deterministic deny mapping)
+17. M1-S10 reference-grant claim-binding slice implemented (request-context to grant-claim deterministic binding checks)
 
 ---
 
@@ -144,15 +145,20 @@ Current active path:
 105. M1-S9 fixture pack added (`Docs/Scynapse/Design/Fixtures/M1-S9`, TV-1401..TV-1410)
 106. closure rerun stable: S1 14/14, S2 8/8, S3 4/4, S4 4/4, S5 3/3, M1-S1 10/10, M1-S2 6/6, M1-S3 5/5, M1-S4 6/6, M1-S5 4/4, M1-S6 5/5, M1-S7 7/7, M1-S8 13/13, M1-S9 10/10
 107. M1-S9 closure committed and pushed on `codex/m1-s9-grant-proof-freshness-replay` (`cdb31da89a`)
+108. M1-S10 implementation branch created: `codex/m1-s10-reference-grant-claim-binding`
+109. M1-S10 profile support added (`slice_profile: "M1-S10"`) with claim-binding source and active-grant claim-field checks
+110. deterministic M1-S10 IDs added (`E3160`..`E3174`) for claim-binding schema/runtime deny paths
+111. M1-S10 fixture pack added (`Docs/Scynapse/Design/Fixtures/M1-S10`, TV-1501..TV-1514)
+112. closure rerun stable: S1 14/14, S2 8/8, S3 4/4, S4 4/4, S5 3/3, M1-S1 10/10, M1-S2 6/6, M1-S3 5/5, M1-S4 6/6, M1-S5 4/4, M1-S6 5/5, M1-S7 7/7, M1-S8 13/13, M1-S9 10/10, M1-S10 14/14
 
 ### Doing
 
-1. define and sequence the next bounded M1 slice from M1-S9 closure baseline
+1. finalize M1-S10 closure checkpoint and sequence the next bounded M1 slice from M1-S10 baseline
 
 ### Next
 
-1. open next M1 task board and branch from `codex/m1-s9-grant-proof-freshness-replay`
-2. preserve S1/S2/S3/S4/S5 + M1-S1 + M1-S2 + M1-S3 + M1-S4 + M1-S5 + M1-S6 + M1-S7 + M1-S8 + M1-S9 fixture and error-ID stability
+1. open next M1 task board and branch from `codex/m1-s10-reference-grant-claim-binding`
+2. preserve S1/S2/S3/S4/S5 + M1-S1 + M1-S2 + M1-S3 + M1-S4 + M1-S5 + M1-S6 + M1-S7 + M1-S8 + M1-S9 + M1-S10 fixture and error-ID stability
 
 ---
 
@@ -219,7 +225,9 @@ Authority file:
 28. `M1-S8-Closure.md`
 29. `M1-S9-Task-Board.md`
 30. `M1-S9-Closure.md`
-31. latest entry in `SESSION-LOG.md`
+31. `M1-S10-Task-Board.md`
+32. `M1-S10-Closure.md`
+33. latest entry in `SESSION-LOG.md`
 
 ---
 
@@ -272,9 +280,12 @@ Authority file:
    - `M1-S8-Task-Board.md`
    - `M1-S8-Closure.md`
    - `Fixtures/M1-S8/README.md`
-   - `M1-S9-Task-Board.md`
-   - `M1-S9-Closure.md`
-   - `Fixtures/M1-S9/README.md`
+    - `M1-S9-Task-Board.md`
+    - `M1-S9-Closure.md`
+    - `Fixtures/M1-S9/README.md`
+    - `M1-S10-Task-Board.md`
+    - `M1-S10-Closure.md`
+    - `Fixtures/M1-S10/README.md`
 5. Wire lock:
    - `M0-B-Wire-Lock-Open-Decisions.md`
    - `M0-B-Wire-Examples.md`

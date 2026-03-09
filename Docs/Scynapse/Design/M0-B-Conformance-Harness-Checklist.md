@@ -302,6 +302,35 @@ M1-S9 extension note:
    - `E3143_M1S9_REFERENCE_GRANT_PROOF_REPLAY_STATUS_INVALID`
    - `E3144_M1S9_REFERENCE_GRANT_PROOF_FRESHNESS_FIELDS_FORBIDDEN`
 
+M1-S10 extension note:
+
+1. `slice_profile: "M1-S10"` extends M1-S9 with deterministic reference-grant claim-binding checks.
+2. M1-S10 `HandshakeInit` must include claim-binding source fields:
+   - `requester_subject_ref` (typed identifier)
+   - `requested_scope` (non-empty string)
+   - `requested_ops` (non-empty string array)
+3. M1-S10 `HandshakeAccept` with `token_transport=reference` and `reference_grant_status=active` must include:
+   - `reference_grant_claim_subject_ref` (typed identifier)
+   - `reference_grant_claim_scope` (non-empty string)
+   - `reference_grant_claim_action` (non-empty string)
+4. non-active grant statuses must not include claim-binding fields.
+5. deterministic runtime IDs:
+   - `E3170_M1S10_REFERENCE_GRANT_CLAIM_SUBJECT_MISMATCH`
+   - `E3171_M1S10_REFERENCE_GRANT_CLAIM_SCOPE_MISMATCH`
+   - `E3172_M1S10_REFERENCE_GRANT_CLAIM_ACTION_MISMATCH`
+6. deterministic schema IDs:
+   - `E3160_M1S10_REQUESTER_SUBJECT_REF_REQUIRED`
+   - `E3161_M1S10_REQUESTER_SUBJECT_REF_INVALID`
+   - `E3162_M1S10_REQUESTED_SCOPE_INVALID`
+   - `E3163_M1S10_REQUESTED_OPS_INVALID`
+   - `E3164_M1S10_REFERENCE_GRANT_CLAIM_SUBJECT_REQUIRED`
+   - `E3165_M1S10_REFERENCE_GRANT_CLAIM_SUBJECT_INVALID`
+   - `E3166_M1S10_REFERENCE_GRANT_CLAIM_SCOPE_REQUIRED`
+   - `E3167_M1S10_REFERENCE_GRANT_CLAIM_SCOPE_INVALID`
+   - `E3168_M1S10_REFERENCE_GRANT_CLAIM_ACTION_REQUIRED`
+   - `E3169_M1S10_REFERENCE_GRANT_CLAIM_ACTION_INVALID`
+   - `E3174_M1S10_REFERENCE_GRANT_CLAIM_FIELDS_FORBIDDEN`
+
 ---
 
 ## 5. Conformance Gates (Pass/Fail)
@@ -345,6 +374,7 @@ Pass criteria:
 11. M1-S7 reference grant missing/expired/revoked paths map deterministically to `E3111`/`E3112`/`E3113` before reference lookup-resolution guard checks.
 12. M1-S8 active-grant proof verification failures map deterministically to `E3130`..`E3135` with deny-code mapping preserved (`GrantExpired`, `PolicyDenied`, `TrustInsufficient`) before reference lookup-resolution guard checks.
 13. M1-S9 active-grant freshness/replay failures map deterministically to `E3150`/`E3151` with deny-code mapping preserved (`GrantExpired`, `TrustInsufficient`) before reference lookup-resolution guard checks.
+14. M1-S10 claim-binding mismatch failures map deterministically to `E3170`/`E3171`/`E3172` with deny-code mapping preserved (`TrustInsufficient`, `PolicyDenied`) before M1-S6 reference lookup-resolution guard checks.
 
 ### 5.5 Gate G5: Observation Conformance
 

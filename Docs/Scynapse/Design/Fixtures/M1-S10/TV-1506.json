@@ -1,0 +1,80 @@
+{
+  "id": "TV-1506",
+  "title": "M1-S10 Invalid Requested Ops",
+  "slice_profile": "M1-S10",
+  "expect_conformance": "fail",
+  "expected_error_ids": [
+    "E3163_M1S10_REQUESTED_OPS_INVALID"
+  ],
+  "expected_error_contains": [
+    "requested_ops"
+  ],
+  "preconditions": [
+    "handshake init requested_ops is not array"
+  ],
+  "messages": [
+    {
+      "type": "HandshakeInit",
+      "role": "requester",
+      "body": {
+        "proposed_route_mode": "parent_mediated",
+        "requested_ops": "invoke",
+        "requested_scope": ".Adult.Games.RedX",
+        "requester_subject_ref": "nid:subject.alice",
+        "requested_disclosure_level": "mediator_visible"
+      }
+    },
+    {
+      "type": "HandshakeChallenge",
+      "role": "mediator"
+    },
+    {
+      "type": "HandshakeProof",
+      "role": "requester",
+      "body": {
+        "verification_mode": "strict",
+        "proof_ref": "nid:m1s10.handshake.tv-1506"
+      }
+    },
+    {
+      "type": "HandshakeAccept",
+      "role": "mediator",
+      "body": {
+        "reference_grant_claim_action": "invoke",
+        "reference_grant_status": "active",
+        "reference_grant_strict_failure_mode": "none",
+        "relation_token_ref": "tid:reltok-1506",
+        "reference_grant_proof_replay_status": "clear",
+        "reference_grant_verification_mode": "strict",
+        "token_transport": "reference",
+        "reference_grant_proof_ref": "gid:grantproof-1506",
+        "reference_lookup_status": "resolved",
+        "reference_grant_claim_subject_ref": "nid:subject.alice",
+        "reference_grant_claim_scope": ".Adult.Games.RedX",
+        "reference_lookup_cid": "sha256:6666666666666666666666666666666666666666666666666666666666666666",
+        "reference_grant_ref": "gid:grant-1506",
+        "reference_grant_proof_freshness_status": "fresh",
+        "disclosure_level": "mediator_visible",
+        "relation_token_cid": "sha256:6666666666666666666666666666666666666666666666666666666666666666",
+        "route_mode": "parent_mediated"
+      }
+    }
+  ],
+  "expected_state_trace": [
+    "MediatedHandshake",
+    "RelayedSession",
+    "Completed"
+  ],
+  "expected_outcome": {
+    "deny_code": null,
+    "success": true
+  },
+  "assertions": [
+    {
+      "value": true,
+      "check": "deny_code_absent",
+      "kind": "error",
+      "id": "A1"
+    }
+  ]
+}

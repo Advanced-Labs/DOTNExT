@@ -267,7 +267,19 @@ This profile maps M0-B protocol fields to their Orleans lineage, with explicit c
 
 ---
 
-## 23. Review Checklist
+## 23. M1-S10 Reference-Grant Claim-Binding Behavior Classification
+
+| Hardened Behavior | Tag | Notes |
+|---|---|---|
+| M1-S9 freshness/replay guard reuse in `M1-S10` handshake accept path | `A` | adapts prior grant proof integrity gates into claim-binding layer |
+| Claim-binding source contract on `HandshakeInit` (`requester_subject_ref`, `requested_scope`, `requested_ops`) | `N` | Scynapse-native deterministic source context for claim binding |
+| Active-grant claim-binding contract on `HandshakeAccept` (subject/scope/action) | `N` | Scynapse-native deterministic grant-claim alignment guard |
+| Deterministic claim mismatch deny mapping (`E3170`, `E3171`, `E3172`) | `N` | machine-checkable conformance behavior for claim binding failures |
+| Claim-binding handling relying on silo/client trust shortcuts | `D` | explicitly blocked; remains node-unified and capability-gated by policy semantics |
+
+---
+
+## 24. Review Checklist
 
 1. Are any fields tagged `A` but still carrying hidden silo/cluster assumptions?
 2. Are all `N` fields tied to M0-A invariants?

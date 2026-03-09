@@ -1,0 +1,83 @@
+{
+  "id": "TV-1511",
+  "title": "M1-S10 Claim Subject Mismatch",
+  "slice_profile": "M1-S10",
+  "expect_conformance": "fail",
+  "expected_error_ids": [
+    "E3170_M1S10_REFERENCE_GRANT_CLAIM_SUBJECT_MISMATCH"
+  ],
+  "expected_error_contains": [
+    "claim subject does not match"
+  ],
+  "preconditions": [
+    "active claim subject differs from requester subject"
+  ],
+  "messages": [
+    {
+      "type": "HandshakeInit",
+      "role": "requester",
+      "body": {
+        "proposed_route_mode": "parent_mediated",
+        "requested_ops": [
+          "invoke",
+          "meta"
+        ],
+        "requested_scope": ".Adult.Games.RedX",
+        "requester_subject_ref": "nid:subject.alice",
+        "requested_disclosure_level": "mediator_visible"
+      }
+    },
+    {
+      "type": "HandshakeChallenge",
+      "role": "mediator"
+    },
+    {
+      "type": "HandshakeProof",
+      "role": "requester",
+      "body": {
+        "verification_mode": "strict",
+        "proof_ref": "nid:m1s10.handshake.tv-1511"
+      }
+    },
+    {
+      "type": "HandshakeAccept",
+      "role": "mediator",
+      "body": {
+        "reference_grant_claim_action": "invoke",
+        "reference_grant_status": "active",
+        "reference_grant_strict_failure_mode": "none",
+        "relation_token_ref": "tid:reltok-1511",
+        "reference_grant_proof_replay_status": "clear",
+        "reference_grant_verification_mode": "strict",
+        "token_transport": "reference",
+        "reference_grant_proof_ref": "gid:grantproof-1511",
+        "reference_lookup_status": "resolved",
+        "reference_grant_claim_subject_ref": "nid:subject.bob",
+        "reference_grant_claim_scope": ".Adult.Games.RedX",
+        "reference_lookup_cid": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "reference_grant_ref": "gid:grant-1511",
+        "reference_grant_proof_freshness_status": "fresh",
+        "disclosure_level": "mediator_visible",
+        "relation_token_cid": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "route_mode": "parent_mediated"
+      }
+    }
+  ],
+  "expected_state_trace": [
+    "MediatedHandshake",
+    "Deny"
+  ],
+  "expected_outcome": {
+    "success": false,
+    "retryable": false,
+    "deny_code": "TrustInsufficient"
+  },
+  "assertions": [
+    {
+      "value": "TrustInsufficient",
+      "check": "deny_code_equals",
+      "kind": "error",
+      "id": "A1"
+    }
+  ]
+}

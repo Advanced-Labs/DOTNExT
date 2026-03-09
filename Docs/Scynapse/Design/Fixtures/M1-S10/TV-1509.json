@@ -1,0 +1,82 @@
+{
+  "id": "TV-1509",
+  "title": "M1-S10 Missing Claim Action",
+  "slice_profile": "M1-S10",
+  "expect_conformance": "fail",
+  "expected_error_ids": [
+    "E3168_M1S10_REFERENCE_GRANT_CLAIM_ACTION_REQUIRED"
+  ],
+  "expected_error_contains": [
+    "reference_grant_claim_action"
+  ],
+  "preconditions": [
+    "active grant claim action omitted"
+  ],
+  "messages": [
+    {
+      "type": "HandshakeInit",
+      "role": "requester",
+      "body": {
+        "proposed_route_mode": "parent_mediated",
+        "requested_ops": [
+          "invoke",
+          "meta"
+        ],
+        "requested_scope": ".Adult.Games.RedX",
+        "requester_subject_ref": "nid:subject.alice",
+        "requested_disclosure_level": "mediator_visible"
+      }
+    },
+    {
+      "type": "HandshakeChallenge",
+      "role": "mediator"
+    },
+    {
+      "type": "HandshakeProof",
+      "role": "requester",
+      "body": {
+        "verification_mode": "strict",
+        "proof_ref": "nid:m1s10.handshake.tv-1509"
+      }
+    },
+    {
+      "type": "HandshakeAccept",
+      "role": "mediator",
+      "body": {
+        "reference_grant_claim_scope": ".Adult.Games.RedX",
+        "reference_grant_verification_mode": "strict",
+        "disclosure_level": "mediator_visible",
+        "route_mode": "parent_mediated",
+        "reference_grant_proof_replay_status": "clear",
+        "reference_grant_status": "active",
+        "reference_lookup_status": "resolved",
+        "reference_grant_proof_ref": "gid:grantproof-1509",
+        "reference_grant_ref": "gid:grant-1509",
+        "reference_grant_claim_subject_ref": "nid:subject.alice",
+        "relation_token_ref": "tid:reltok-1509",
+        "reference_grant_strict_failure_mode": "none",
+        "reference_grant_proof_freshness_status": "fresh",
+        "token_transport": "reference",
+        "reference_lookup_cid": "sha256:9999999999999999999999999999999999999999999999999999999999999999",
+        "relation_token_cid": "sha256:9999999999999999999999999999999999999999999999999999999999999999"
+      }
+    }
+  ],
+  "expected_state_trace": [
+    "MediatedHandshake",
+    "RelayedSession",
+    "Completed"
+  ],
+  "expected_outcome": {
+    "deny_code": null,
+    "success": true
+  },
+  "assertions": [
+    {
+      "value": true,
+      "check": "deny_code_absent",
+      "kind": "error",
+      "id": "A1"
+    }
+  ]
+}
