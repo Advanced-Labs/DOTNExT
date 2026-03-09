@@ -4,13 +4,13 @@ Last updated: 2026-03-08
 
 ## 1. Mission Snapshot
 
-Current mission: close and checkpoint M1-S8 reference-grant proof-binding work, then open the next bounded M1 slice while preserving deterministic S1..S5 + M1-S1 + M1-S2 + M1-S3 + M1-S4 + M1-S5 + M1-S6 + M1-S7 + M1-S8 behavior.
+Current mission: close and checkpoint M1-S9 reference-grant freshness/replay work, then open the next bounded M1 slice while preserving deterministic S1..S5 + M1-S1 + M1-S2 + M1-S3 + M1-S4 + M1-S5 + M1-S6 + M1-S7 + M1-S8 + M1-S9 behavior.
 
 Latest checkpoint status (2026-03-08):
 
-1. active branch: `codex/m1-s8-reference-grant-proof-binding`
+1. active branch: `codex/m1-s9-grant-proof-freshness-replay`
 2. continuity files synchronized
-3. closure rerun confirmed 89/89 effective pass (S1..S5 + M1-S1 + M1-S2 + M1-S3 + M1-S4 + M1-S5 + M1-S6 + M1-S7 + M1-S8)
+3. closure rerun confirmed 99/99 effective pass (S1..S5 + M1-S1 + M1-S2 + M1-S3 + M1-S4 + M1-S5 + M1-S6 + M1-S7 + M1-S8 + M1-S9)
 
 Current active path:
 
@@ -29,6 +29,7 @@ Current active path:
 13. M1-S6 reference-token guard slice implemented (reference lookup unresolved/rebinding/CID-mismatch deterministic deny mapping)
 14. M1-S7 reference-grant guard slice implemented (grant-state deterministic deny mapping for reference transport)
 15. M1-S8 reference-grant proof-binding slice implemented (active-grant proof verification deterministic deny mapping)
+16. M1-S9 reference-grant freshness/replay slice implemented (active-grant freshness/replay deterministic deny mapping)
 
 ---
 
@@ -137,15 +138,21 @@ Current active path:
 99. M1-S8 fixture pack added (`Docs/Scynapse/Design/Fixtures/M1-S8`, TV-1301..TV-1313)
 100. closure rerun stable: S1 14/14, S2 8/8, S3 4/4, S4 4/4, S5 3/3, M1-S1 10/10, M1-S2 6/6, M1-S3 5/5, M1-S4 6/6, M1-S5 4/4, M1-S6 5/5, M1-S7 7/7, M1-S8 13/13
 101. M1-S8 closure committed and pushed on `codex/m1-s8-reference-grant-proof-binding` (`150a424da2`)
+102. M1-S9 implementation branch created: `codex/m1-s9-grant-proof-freshness-replay`
+103. M1-S9 profile support added (`slice_profile: "M1-S9"`) with active-grant freshness/replay checks on reference transport
+104. deterministic M1-S9 IDs added (`E3140`..`E3151`) for freshness/replay schema/runtime deny paths
+105. M1-S9 fixture pack added (`Docs/Scynapse/Design/Fixtures/M1-S9`, TV-1401..TV-1410)
+106. closure rerun stable: S1 14/14, S2 8/8, S3 4/4, S4 4/4, S5 3/3, M1-S1 10/10, M1-S2 6/6, M1-S3 5/5, M1-S4 6/6, M1-S5 4/4, M1-S6 5/5, M1-S7 7/7, M1-S8 13/13, M1-S9 10/10
 
 ### Doing
 
-1. define and sequence the next bounded M1 slice from M1-S8 closure baseline
+1. finalize M1-S9 closure docs and checkpoint continuity synchronization
 
 ### Next
 
-1. open next M1 task board and branch from `codex/m1-s8-reference-grant-proof-binding`
-2. preserve S1/S2/S3/S4/S5 + M1-S1 + M1-S2 + M1-S3 + M1-S4 + M1-S5 + M1-S6 + M1-S7 + M1-S8 fixture and error-ID stability
+1. commit and push M1-S9 closure baseline on `codex/m1-s9-grant-proof-freshness-replay`
+2. open next M1 task board and branch from `codex/m1-s9-grant-proof-freshness-replay`
+3. preserve S1/S2/S3/S4/S5 + M1-S1 + M1-S2 + M1-S3 + M1-S4 + M1-S5 + M1-S6 + M1-S7 + M1-S8 + M1-S9 fixture and error-ID stability
 
 ---
 
@@ -210,7 +217,9 @@ Authority file:
 26. `M1-S7-Closure.md`
 27. `M1-S8-Task-Board.md`
 28. `M1-S8-Closure.md`
-29. latest entry in `SESSION-LOG.md`
+29. `M1-S9-Task-Board.md`
+30. `M1-S9-Closure.md`
+31. latest entry in `SESSION-LOG.md`
 
 ---
 
@@ -263,6 +272,9 @@ Authority file:
    - `M1-S8-Task-Board.md`
    - `M1-S8-Closure.md`
    - `Fixtures/M1-S8/README.md`
+   - `M1-S9-Task-Board.md`
+   - `M1-S9-Closure.md`
+   - `Fixtures/M1-S9/README.md`
 5. Wire lock:
    - `M0-B-Wire-Lock-Open-Decisions.md`
    - `M0-B-Wire-Examples.md`

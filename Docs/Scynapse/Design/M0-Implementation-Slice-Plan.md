@@ -145,4 +145,5 @@ Current next action:
 8. M1-S6 reference-token guard slice completed (`M1-S6-Closure.md`)
 9. M1-S7 reference-grant guard slice completed (`M1-S7-Closure.md`)
 10. M1-S8 reference-grant proof-binding slice completed (`M1-S8-Closure.md`)
-11. define next bounded M1 slice from M1-S8 closure baseline
+11. M1-S9 reference-grant freshness/replay slice completed (`M1-S9-Closure.md`)
+12. define next bounded M1 slice from M1-S9 closure baseline

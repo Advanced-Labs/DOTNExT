@@ -1,0 +1,53 @@
+{
+  "id": "TV-1404",
+  "title": "M1-S9 Invalid Freshness Status",
+  "slice_profile": "M1-S9",
+  "expect_conformance": "fail",
+  "expected_error_ids": [
+    "E3141_M1S9_REFERENCE_GRANT_PROOF_FRESHNESS_STATUS_INVALID"
+  ],
+  "expected_error_contains": [
+    "reference_grant_proof_freshness_status"
+  ],
+  "preconditions": [
+    "reference grant is active",
+    "freshness status has invalid value"
+  ],
+  "messages": [
+    { "type": "HandshakeInit", "role": "requester" },
+    { "type": "HandshakeChallenge", "role": "mediator" },
+    { "type": "HandshakeProof", "role": "requester", "body": { "verification_mode": "strict", "proof_ref": "nid:m1s9.schema.invalid.freshness" } },
+    {
+      "type": "HandshakeAccept",
+      "role": "mediator",
+      "body": {
+        "route_mode": "parent_mediated",
+        "disclosure_level": "mediator_visible",
+        "token_transport": "reference",
+        "relation_token_ref": "tid:reltok-1404",
+        "relation_token_cid": "sha256:4444444444444444444444444444444444444444444444444444444444444444",
+        "reference_lookup_status": "resolved",
+        "reference_lookup_cid": "sha256:4444444444444444444444444444444444444444444444444444444444444444",
+        "reference_grant_status": "active",
+        "reference_grant_ref": "gid:grant-1404",
+        "reference_grant_verification_mode": "strict",
+        "reference_grant_proof_ref": "gid:grantproof-1404",
+        "reference_grant_strict_failure_mode": "none",
+        "reference_grant_proof_freshness_status": "very_fresh",
+        "reference_grant_proof_replay_status": "clear"
+      }
+    }
+  ],
+  "expected_state_trace": [
+    "MediatedHandshake",
+    "RelayedSession",
+    "Completed"
+  ],
+  "expected_outcome": {
+    "success": true,
+    "deny_code": null
+  },
+  "assertions": [
+    { "id": "A1", "kind": "error", "check": "deny_code_absent", "value": true }
+  ]
+}

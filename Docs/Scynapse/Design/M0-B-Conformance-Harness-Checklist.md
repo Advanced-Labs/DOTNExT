@@ -285,6 +285,23 @@ M1-S8 extension note:
    - `E3125_M1S8_REFERENCE_GRANT_PROOF_FIELDS_FORBIDDEN`
    - `E3126_M1S8_REFERENCE_GRANT_STRICT_FAILURE_MODE_INVALID`
 
+M1-S9 extension note:
+
+1. `slice_profile: "M1-S9"` extends M1-S8 with active-grant freshness/replay checks.
+2. M1-S9 `HandshakeAccept` with `token_transport=reference` and `reference_grant_status=active` must include:
+   - `reference_grant_proof_freshness_status` (`fresh|stale`)
+   - `reference_grant_proof_replay_status` (`clear|replayed`)
+3. non-active grant statuses must not include freshness/replay fields.
+4. deterministic runtime IDs:
+   - `E3150_M1S9_REFERENCE_GRANT_PROOF_FRESHNESS_STALE`
+   - `E3151_M1S9_REFERENCE_GRANT_PROOF_REPLAY_DETECTED`
+5. deterministic schema IDs:
+   - `E3140_M1S9_REFERENCE_GRANT_PROOF_FRESHNESS_STATUS_REQUIRED`
+   - `E3141_M1S9_REFERENCE_GRANT_PROOF_FRESHNESS_STATUS_INVALID`
+   - `E3142_M1S9_REFERENCE_GRANT_PROOF_REPLAY_STATUS_REQUIRED`
+   - `E3143_M1S9_REFERENCE_GRANT_PROOF_REPLAY_STATUS_INVALID`
+   - `E3144_M1S9_REFERENCE_GRANT_PROOF_FRESHNESS_FIELDS_FORBIDDEN`
+
 ---
 
 ## 5. Conformance Gates (Pass/Fail)
@@ -327,6 +344,7 @@ Pass criteria:
 10. M1-S6 reference lookup unresolved/rebinding/CID mismatch paths map deterministically to `E3101`/`E3102`/`E3103` without bypassing existing handshake state rules.
 11. M1-S7 reference grant missing/expired/revoked paths map deterministically to `E3111`/`E3112`/`E3113` before reference lookup-resolution guard checks.
 12. M1-S8 active-grant proof verification failures map deterministically to `E3130`..`E3135` with deny-code mapping preserved (`GrantExpired`, `PolicyDenied`, `TrustInsufficient`) before reference lookup-resolution guard checks.
+13. M1-S9 active-grant freshness/replay failures map deterministically to `E3150`/`E3151` with deny-code mapping preserved (`GrantExpired`, `TrustInsufficient`) before reference lookup-resolution guard checks.
 
 ### 5.5 Gate G5: Observation Conformance
 

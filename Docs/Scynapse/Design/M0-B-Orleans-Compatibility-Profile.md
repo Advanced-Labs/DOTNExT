@@ -256,7 +256,18 @@ This profile maps M0-B protocol fields to their Orleans lineage, with explicit c
 
 ---
 
-## 22. Review Checklist
+## 22. M1-S9 Reference-Grant Freshness/Replay Behavior Classification
+
+| Hardened Behavior | Tag | Notes |
+|---|---|---|
+| M1-S8 proof-binding guard reuse in `M1-S9` handshake accept path | `A` | adapts prior proof-binding gates into bounded freshness/replay checks |
+| Active-grant freshness/replay contract on `HandshakeAccept` (`fresh|stale`, `clear|replayed`) | `N` | Scynapse-native deterministic freshness/replay gate for reference grant use |
+| Deterministic freshness/replay deny mapping (`E3150`, `E3151`) | `N` | machine-checkable conformance behavior for stale/replay outcomes |
+| Freshness/replay handling relying on silo/client trust shortcuts | `D` | explicitly blocked; remains node-unified and capability-gated by policy semantics |
+
+---
+
+## 23. Review Checklist
 
 1. Are any fields tagged `A` but still carrying hidden silo/cluster assumptions?
 2. Are all `N` fields tied to M0-A invariants?

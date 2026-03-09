@@ -624,3 +624,41 @@ Use this structure for each new entry:
    - open next task board/branch and continue with bounded harness-first scope.
 6. Risks/blockers:
    - none immediate; keep deterministic error-ID stability and gate-order invariants intact.
+
+### 2026-03-08 (M1-S9 Reference-Grant Freshness/Replay Slice Implementation)
+
+1. Scope:
+   - execute M1-S9 task board on top of M1-S8 baseline and harden active-grant freshness/replay determinism.
+2. Key outputs:
+   - created `codex/m1-s9-grant-proof-freshness-replay` from M1-S8 baseline.
+   - added `slice_profile: "M1-S9"` handling in conformance engine.
+   - added M1-S9 schema contract on `HandshakeAccept` for active reference grants:
+     - `reference_grant_proof_freshness_status` (`fresh|stale`)
+     - `reference_grant_proof_replay_status` (`clear|replayed`)
+     - deterministic forbidden-field checks when grant status is non-active
+   - added deterministic M1-S9 schema/runtime IDs:
+     - `E3140`..`E3144`
+     - `E3150`..`E3151`
+   - added isolated fixture pack `Fixtures/M1-S9`: `TV-1401..TV-1410`.
+   - synchronized protocol + continuity docs for M1-S9 profile propagation.
+3. Validation runs:
+   - S1: 14/14
+   - S2: 8/8
+   - S3: 4/4
+   - S4: 4/4
+   - S5: 3/3
+   - M1-S1: 10/10
+   - M1-S2: 6/6
+   - M1-S3: 5/5
+   - M1-S4: 6/6
+   - M1-S5: 4/4
+   - M1-S6: 5/5
+   - M1-S7: 7/7
+   - M1-S8: 13/13
+   - M1-S9: 10/10
+4. Current doing:
+   - final continuity synchronization and scoped commit/push preparation on `codex/m1-s9-grant-proof-freshness-replay`.
+5. Next:
+   - push M1-S9 closure baseline and open the next bounded M1 slice.
+6. Risks/blockers:
+   - none immediate; preserve deterministic freshness/replay/error-ID stability across all active packs.

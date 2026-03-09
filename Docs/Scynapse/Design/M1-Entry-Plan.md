@@ -129,6 +129,18 @@ Deliverables:
 2. deterministic schema validation for mode-specific fields and forbidden proof fields when grant status is non-active.
 3. deterministic deny mapping for strict/mock proof failures with stable machine-checkable IDs.
 
+### M1-S9: Reference Grant Freshness/Replay Guard (Bounded)
+
+Primary goal:
+
+1. enforce deterministic freshness/replay checks for active reference-grant proof acceptance.
+
+Deliverables:
+
+1. profile `M1-S9` extending M1-S8 with freshness/replay status contract.
+2. deterministic schema validation for freshness/replay required and forbidden-field paths.
+3. deterministic deny mapping for stale/replayed proof outcomes with stable machine-checkable IDs.
+
 ---
 
 ## 4. Non-Negotiable Guardrails
@@ -168,4 +180,5 @@ Deliverables:
 6. `M1-S6` reference-token guard execution complete (`M1-S6-Closure.md`).
 7. `M1-S7` reference-grant guard execution complete (`M1-S7-Closure.md`).
 8. `M1-S8` reference-grant proof-binding execution complete (`M1-S8-Closure.md`).
-9. open next bounded M1 slice task board from this closure baseline.
+9. `M1-S9` reference-grant freshness/replay execution complete (`M1-S9-Closure.md`).
+10. open next bounded M1 slice task board from this closure baseline.

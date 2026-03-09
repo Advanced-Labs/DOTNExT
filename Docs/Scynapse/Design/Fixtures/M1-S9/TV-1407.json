@@ -1,0 +1,49 @@
+{
+  "id": "TV-1407",
+  "title": "M1-S9 Freshness Fields Forbidden For Non-Active Grant",
+  "slice_profile": "M1-S9",
+  "expect_conformance": "fail",
+  "expected_error_ids": [
+    "E3144_M1S9_REFERENCE_GRANT_PROOF_FRESHNESS_FIELDS_FORBIDDEN"
+  ],
+  "expected_error_contains": [
+    "freshness/replay proof fields are forbidden"
+  ],
+  "preconditions": [
+    "reference grant status is non-active",
+    "freshness/replay fields are present"
+  ],
+  "messages": [
+    { "type": "HandshakeInit", "role": "requester" },
+    { "type": "HandshakeChallenge", "role": "mediator" },
+    { "type": "HandshakeProof", "role": "requester", "body": { "verification_mode": "strict", "proof_ref": "nid:m1s9.schema.nonactive.forbidden" } },
+    {
+      "type": "HandshakeAccept",
+      "role": "mediator",
+      "body": {
+        "route_mode": "parent_mediated",
+        "disclosure_level": "mediator_visible",
+        "token_transport": "reference",
+        "relation_token_ref": "tid:reltok-1407",
+        "relation_token_cid": "sha256:7777777777777777777777777777777777777777777777777777777777777777",
+        "reference_lookup_status": "resolved",
+        "reference_lookup_cid": "sha256:7777777777777777777777777777777777777777777777777777777777777777",
+        "reference_grant_status": "not_required",
+        "reference_grant_proof_freshness_status": "fresh",
+        "reference_grant_proof_replay_status": "clear"
+      }
+    }
+  ],
+  "expected_state_trace": [
+    "MediatedHandshake",
+    "RelayedSession",
+    "Completed"
+  ],
+  "expected_outcome": {
+    "success": true,
+    "deny_code": null
+  },
+  "assertions": [
+    { "id": "A1", "kind": "error", "check": "deny_code_absent", "value": true }
+  ]
+}

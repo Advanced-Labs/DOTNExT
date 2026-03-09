@@ -63,3 +63,4 @@ Deferred:
 9. M1-S6 reference-token guard closure completed: `M1-S6-Closure.md`
 10. M1-S7 reference-grant guard closure completed: `M1-S7-Closure.md`
 11. M1-S8 reference-grant proof-binding closure completed: `M1-S8-Closure.md`
+12. M1-S9 reference-grant freshness/replay closure completed: `M1-S9-Closure.md`

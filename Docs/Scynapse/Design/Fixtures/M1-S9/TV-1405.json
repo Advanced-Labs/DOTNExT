@@ -1,0 +1,52 @@
+{
+  "id": "TV-1405",
+  "title": "M1-S9 Missing Replay Status",
+  "slice_profile": "M1-S9",
+  "expect_conformance": "fail",
+  "expected_error_ids": [
+    "E3142_M1S9_REFERENCE_GRANT_PROOF_REPLAY_STATUS_REQUIRED"
+  ],
+  "expected_error_contains": [
+    "requires 'reference_grant_proof_replay_status'"
+  ],
+  "preconditions": [
+    "reference grant is active",
+    "replay status is missing"
+  ],
+  "messages": [
+    { "type": "HandshakeInit", "role": "requester" },
+    { "type": "HandshakeChallenge", "role": "mediator" },
+    { "type": "HandshakeProof", "role": "requester", "body": { "verification_mode": "strict", "proof_ref": "nid:m1s9.schema.missing.replay" } },
+    {
+      "type": "HandshakeAccept",
+      "role": "mediator",
+      "body": {
+        "route_mode": "parent_mediated",
+        "disclosure_level": "mediator_visible",
+        "token_transport": "reference",
+        "relation_token_ref": "tid:reltok-1405",
+        "relation_token_cid": "sha256:5555555555555555555555555555555555555555555555555555555555555555",
+        "reference_lookup_status": "resolved",
+        "reference_lookup_cid": "sha256:5555555555555555555555555555555555555555555555555555555555555555",
+        "reference_grant_status": "active",
+        "reference_grant_ref": "gid:grant-1405",
+        "reference_grant_verification_mode": "strict",
+        "reference_grant_proof_ref": "gid:grantproof-1405",
+        "reference_grant_strict_failure_mode": "none",
+        "reference_grant_proof_freshness_status": "fresh"
+      }
+    }
+  ],
+  "expected_state_trace": [
+    "MediatedHandshake",
+    "RelayedSession",
+    "Completed"
+  ],
+  "expected_outcome": {
+    "success": true,
+    "deny_code": null
+  },
+  "assertions": [
+    { "id": "A1", "kind": "error", "check": "deny_code_absent", "value": true }
+  ]
+}

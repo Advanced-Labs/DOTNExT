@@ -1,0 +1,53 @@
+{
+  "id": "TV-1408",
+  "title": "M1-S9 Grant Proof Freshness Stale",
+  "slice_profile": "M1-S9",
+  "expect_conformance": "fail",
+  "expected_error_ids": [
+    "E3150_M1S9_REFERENCE_GRANT_PROOF_FRESHNESS_STALE"
+  ],
+  "expected_error_contains": [
+    "grant proof freshness is stale"
+  ],
+  "preconditions": [
+    "reference grant is active",
+    "proof freshness status is stale"
+  ],
+  "messages": [
+    { "type": "HandshakeInit", "role": "requester" },
+    { "type": "HandshakeChallenge", "role": "mediator" },
+    { "type": "HandshakeProof", "role": "requester", "body": { "verification_mode": "strict", "proof_ref": "nid:m1s9.runtime.stale" } },
+    {
+      "type": "HandshakeAccept",
+      "role": "mediator",
+      "body": {
+        "route_mode": "parent_mediated",
+        "disclosure_level": "mediator_visible",
+        "token_transport": "reference",
+        "relation_token_ref": "tid:reltok-1408",
+        "relation_token_cid": "sha256:8888888888888888888888888888888888888888888888888888888888888888",
+        "reference_lookup_status": "resolved",
+        "reference_lookup_cid": "sha256:8888888888888888888888888888888888888888888888888888888888888888",
+        "reference_grant_status": "active",
+        "reference_grant_ref": "gid:grant-1408",
+        "reference_grant_verification_mode": "strict",
+        "reference_grant_proof_ref": "gid:grantproof-1408",
+        "reference_grant_strict_failure_mode": "none",
+        "reference_grant_proof_freshness_status": "stale",
+        "reference_grant_proof_replay_status": "clear"
+      }
+    }
+  ],
+  "expected_state_trace": [
+    "MediatedHandshake",
+    "Deny"
+  ],
+  "expected_outcome": {
+    "success": false,
+    "deny_code": "GrantExpired",
+    "retryable": true
+  },
+  "assertions": [
+    { "id": "A1", "kind": "error", "check": "deny_code_equals", "value": "GrantExpired" }
+  ]
+}

@@ -65,6 +65,10 @@ Reference:
 - `Docs/Scynapse/Design/M1-S6-Closure.md`
 - `Docs/Scynapse/Design/M1-S7-Task-Board.md`
 - `Docs/Scynapse/Design/M1-S7-Closure.md`
+- `Docs/Scynapse/Design/M1-S8-Task-Board.md`
+- `Docs/Scynapse/Design/M1-S8-Closure.md`
+- `Docs/Scynapse/Design/M1-S9-Task-Board.md`
+- `Docs/Scynapse/Design/M1-S9-Closure.md`
 - `Docs/Scynapse/Design/M0-B-Wire-Lock-Open-Decisions.md`
 - `Docs/Scynapse/Design/M0-Status-Checkpoint.md`
 
@@ -364,3 +368,9 @@ Failure responses should include:
    - strict mode requires typed `reference_grant_proof_ref` and optional deterministic failure control `reference_grant_strict_failure_mode`.
    - mock mode requires boolean `reference_grant_mock_valid`.
    - deterministic runtime deny IDs: `E3130`..`E3135`.
+20. M1-S9 reference-grant freshness/replay profile:
+   - `HandshakeAccept` in `M1-S9` extends M1-S8 with active-grant freshness/replay checks.
+   - `reference_grant_status=active` requires `reference_grant_proof_freshness_status` in `fresh|stale`.
+   - `reference_grant_status=active` requires `reference_grant_proof_replay_status` in `clear|replayed`.
+   - stale freshness maps deterministically to `E3150` (`GrantExpired`).
+   - replayed proof maps deterministically to `E3151` (`TrustInsufficient`).

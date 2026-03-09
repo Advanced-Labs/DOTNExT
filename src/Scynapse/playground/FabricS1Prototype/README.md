@@ -105,6 +105,12 @@ Run M1-S8 fixture pack:
 dotnet run --project playground/FabricS1Prototype/FabricS1Prototype.csproj -- D:\Dev\dotnext\Docs\Scynapse\Design\Fixtures\M1-S8
 ```
 
+Run M1-S9 fixture pack:
+
+```powershell
+dotnet run --project playground/FabricS1Prototype/FabricS1Prototype.csproj -- D:\Dev\dotnext\Docs\Scynapse\Design\Fixtures\M1-S9
+```
+
 Expected-fail fixture semantics:
 
 1. `expected_error_ids` is the preferred exact failure oracle.
@@ -190,6 +196,14 @@ Slice profile semantics:
      - `E3130_M1S8_REFERENCE_GRANT_PROOF_INVALID_SIGNATURE`
      - `E3131_M1S8_REFERENCE_GRANT_PROOF_CHAIN_UNRESOLVABLE`
      - `E3132_M1S8_REFERENCE_GRANT_PROOF_EXPIRED`
-     - `E3133_M1S8_REFERENCE_GRANT_PROOF_REVOKED`
-     - `E3134_M1S8_REFERENCE_GRANT_PROOF_NOT_YET_VALID`
-     - `E3135_M1S8_REFERENCE_GRANT_PROOF_INVALID_MOCK`
+   - `E3133_M1S8_REFERENCE_GRANT_PROOF_REVOKED`
+   - `E3134_M1S8_REFERENCE_GRANT_PROOF_NOT_YET_VALID`
+   - `E3135_M1S8_REFERENCE_GRANT_PROOF_INVALID_MOCK`
+14. `slice_profile: "M1-S9"` extends M1-S8 with reference grant proof freshness/replay checks:
+   - active reference grant requires:
+     - `reference_grant_proof_freshness_status` (`fresh|stale`)
+     - `reference_grant_proof_replay_status` (`clear|replayed`)
+   - non-active grant statuses must not include freshness/replay fields
+   - deterministic freshness/replay IDs:
+     - `E3150_M1S9_REFERENCE_GRANT_PROOF_FRESHNESS_STALE`
+     - `E3151_M1S9_REFERENCE_GRANT_PROOF_REPLAY_DETECTED`

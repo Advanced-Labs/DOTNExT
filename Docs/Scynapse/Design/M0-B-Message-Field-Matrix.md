@@ -325,6 +325,8 @@ Relation token CID convention:
 | `reference_grant_proof_ref` | C | N | M1-S8 profile + `reference_grant_verification_mode=strict`: required typed identifier |
 | `reference_grant_mock_valid` | C | N | M1-S8 profile + `reference_grant_verification_mode=mock`: required boolean |
 | `reference_grant_strict_failure_mode` | O | N | M1-S8 strict mode optional deterministic failure injection (`none|expired|revoked|unresolvable_proof|invalid_signature|not_yet_valid`) |
+| `reference_grant_proof_freshness_status` | C | N | M1-S9 profile + `token_transport=reference` + `reference_grant_status=active`: required (`fresh|stale`) |
+| `reference_grant_proof_replay_status` | C | N | M1-S9 profile + `token_transport=reference` + `reference_grant_status=active`: required (`clear|replayed`) |
 
 ### 4.5 HandshakeDeny
 
@@ -478,6 +480,7 @@ Relation token CID convention:
 13. In M1-S6 profile, reference `HandshakeAccept` requires lookup status contract, and resolved lookup CID must match `relation_token_cid` or deterministic deny is emitted.
 14. In M1-S7 profile, reference `HandshakeAccept` requires grant status contract, and active grant requires typed `reference_grant_ref`; missing/expired/revoked grant states emit deterministic deny.
 15. In M1-S8 profile, active reference grant requires grant proof verification mode and mode-specific fields; strict/mock grant proof failures emit deterministic deny IDs (`E3130`..`E3135`) before reference lookup-resolution guard checks.
+16. In M1-S9 profile, active reference grant requires freshness/replay status fields; stale/replayed outcomes emit deterministic deny IDs (`E3150`, `E3151`) before reference lookup-resolution guard checks.
 
 ---
 
@@ -491,4 +494,4 @@ Completed:
 Current next step:
 
 1. keep this matrix synchronized with wire examples and conformance harness fixtures
-2. preserve M1-S1 wire-closure constraints while extending runtime bridge and security-adapter slices, including M1-S4 strict failure mapping, M1-S5 token-integrity constraints, M1-S6 reference-token guard constraints, M1-S7 reference-grant guard constraints, and M1-S8 reference-grant proof binding constraints
+2. preserve M1-S1 wire-closure constraints while extending runtime bridge and security-adapter slices, including M1-S4 strict failure mapping, M1-S5 token-integrity constraints, M1-S6 reference-token guard constraints, M1-S7 reference-grant guard constraints, M1-S8 reference-grant proof-binding constraints, and M1-S9 freshness/replay constraints

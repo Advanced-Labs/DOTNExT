@@ -1218,6 +1218,131 @@ Expected outcome:
 
 1. expected fail by exact error ID (`E3135_M1S8_REFERENCE_GRANT_PROOF_INVALID_MOCK`)
 
+### TV-1401 M1-S9 Active Grant Strict Freshness Pass
+
+Preconditions:
+
+1. reference token transport is selected
+2. reference grant is active
+3. `reference_grant_verification_mode=strict`
+4. proof freshness status is `fresh`
+5. proof replay status is `clear`
+
+Expected outcome:
+
+1. conformance pass
+
+### TV-1402 M1-S9 Active Grant Mock Freshness Pass
+
+Preconditions:
+
+1. reference token transport is selected
+2. reference grant is active
+3. `reference_grant_verification_mode=mock`
+4. `reference_grant_mock_valid=true`
+5. proof freshness status is `fresh`
+6. proof replay status is `clear`
+
+Expected outcome:
+
+1. conformance pass
+
+### TV-1403 M1-S9 Missing Freshness Status
+
+Preconditions:
+
+1. reference token transport is selected
+2. reference grant is active
+3. `reference_grant_proof_freshness_status` is omitted
+
+Expected outcome:
+
+1. expected fail by exact error ID (`E3140_M1S9_REFERENCE_GRANT_PROOF_FRESHNESS_STATUS_REQUIRED`)
+
+### TV-1404 M1-S9 Invalid Freshness Status
+
+Preconditions:
+
+1. reference token transport is selected
+2. reference grant is active
+3. `reference_grant_proof_freshness_status` is outside `fresh|stale`
+
+Expected outcome:
+
+1. expected fail by exact error ID (`E3141_M1S9_REFERENCE_GRANT_PROOF_FRESHNESS_STATUS_INVALID`)
+
+### TV-1405 M1-S9 Missing Replay Status
+
+Preconditions:
+
+1. reference token transport is selected
+2. reference grant is active
+3. `reference_grant_proof_replay_status` is omitted
+
+Expected outcome:
+
+1. expected fail by exact error ID (`E3142_M1S9_REFERENCE_GRANT_PROOF_REPLAY_STATUS_REQUIRED`)
+
+### TV-1406 M1-S9 Invalid Replay Status
+
+Preconditions:
+
+1. reference token transport is selected
+2. reference grant is active
+3. `reference_grant_proof_replay_status` is outside `clear|replayed`
+
+Expected outcome:
+
+1. expected fail by exact error ID (`E3143_M1S9_REFERENCE_GRANT_PROOF_REPLAY_STATUS_INVALID`)
+
+### TV-1407 M1-S9 Freshness/Replay Fields Present for Non-Active Grant
+
+Preconditions:
+
+1. reference token transport is selected
+2. reference grant status is not active
+3. freshness/replay fields are present
+
+Expected outcome:
+
+1. expected fail by exact error ID (`E3144_M1S9_REFERENCE_GRANT_PROOF_FRESHNESS_FIELDS_FORBIDDEN`)
+
+### TV-1408 M1-S9 Freshness Stale
+
+Preconditions:
+
+1. reference token transport is selected
+2. reference grant is active
+3. proof freshness status is `stale`
+
+Expected outcome:
+
+1. expected fail by exact error ID (`E3150_M1S9_REFERENCE_GRANT_PROOF_FRESHNESS_STALE`)
+
+### TV-1409 M1-S9 Replay Detected
+
+Preconditions:
+
+1. reference token transport is selected
+2. reference grant is active
+3. proof replay status is `replayed`
+
+Expected outcome:
+
+1. expected fail by exact error ID (`E3151_M1S9_REFERENCE_GRANT_PROOF_REPLAY_DETECTED`)
+
+### TV-1410 M1-S9 Freshness/Replay Precedence
+
+Preconditions:
+
+1. reference token transport is selected
+2. reference grant is active
+3. proof freshness is `stale` and replay status is `replayed`
+
+Expected outcome:
+
+1. expected fail by exact error ID (`E3150_M1S9_REFERENCE_GRANT_PROOF_FRESHNESS_STALE`)
+
 ---
 
 ## 4. Minimal Coverage Map
@@ -1235,6 +1360,7 @@ Expected outcome:
 11. M1 reference token guard: TV-1101, TV-1102, TV-1103, TV-1104, TV-1105
 12. M1 reference grant guard: TV-1201, TV-1202, TV-1203, TV-1204, TV-1205, TV-1206, TV-1207
 13. M1 reference grant proof binding: TV-1301, TV-1302, TV-1303, TV-1304, TV-1305, TV-1306, TV-1307, TV-1308, TV-1309, TV-1310, TV-1311, TV-1312, TV-1313
+14. M1 reference grant freshness/replay: TV-1401, TV-1402, TV-1403, TV-1404, TV-1405, TV-1406, TV-1407, TV-1408, TV-1409, TV-1410
 
 ### 4.1 S1 Transition-Edge Negative Extension Set
 
@@ -1339,6 +1465,17 @@ Expected outcome:
     - TV-1311 (strict grant proof unresolvable; expected fail by exact error ID)
     - TV-1312 (strict grant proof not-yet-valid; expected fail by exact error ID)
     - TV-1313 (mock grant proof invalid; expected fail by exact error ID)
+14. M1-S9 owned vectors:
+    - TV-1401 (active grant strict freshness/replay pass)
+    - TV-1402 (active grant mock freshness/replay pass)
+    - TV-1403 (active grant missing freshness status schema; expected fail by exact error ID)
+    - TV-1404 (active grant invalid freshness status schema; expected fail by exact error ID)
+    - TV-1405 (active grant missing replay status schema; expected fail by exact error ID)
+    - TV-1406 (active grant invalid replay status schema; expected fail by exact error ID)
+    - TV-1407 (freshness/replay fields forbidden when grant status non-active; expected fail by exact error ID)
+    - TV-1408 (grant proof freshness stale; expected fail by exact error ID)
+    - TV-1409 (grant proof replay detected; expected fail by exact error ID)
+    - TV-1410 (freshness/replay precedence validates stale-first deterministic path; expected fail by exact error ID)
 
 ---
 
@@ -1363,5 +1500,6 @@ Current next step:
 6. M1-S6 reference-token guard vectors executed and stabilized (`TV-1101..TV-1105`)
 7. M1-S7 reference-grant guard vectors executed and stabilized (`TV-1201..TV-1207`)
 8. M1-S8 reference-grant proof-binding vectors executed and stabilized (`TV-1301..TV-1313`)
-9. preserve S1/S2/S3/S4/S5 + M1-S1 + M1-S2 + M1-S3 + M1-S4 + M1-S5 + M1-S6 + M1-S7 + M1-S8 baseline behavior and machine-checkable error ID stability
-10. open next bounded M1 slice from current closure baseline
+9. M1-S9 reference-grant freshness/replay vectors executed and stabilized (`TV-1401..TV-1410`)
+10. preserve S1/S2/S3/S4/S5 + M1-S1 + M1-S2 + M1-S3 + M1-S4 + M1-S5 + M1-S6 + M1-S7 + M1-S8 + M1-S9 baseline behavior and machine-checkable error ID stability
+11. open next bounded M1 slice from current closure baseline
