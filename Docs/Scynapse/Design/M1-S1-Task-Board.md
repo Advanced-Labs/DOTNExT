@@ -72,3 +72,12 @@ Exit criteria:
 2. new vectors and harness behavior are deterministic and reproducible.
 3. no S1..S5 regression.
 4. continuity docs updated at session close.
+
+---
+
+## 4. Progress Snapshot (2026-03-08)
+
+1. W1: complete (`D3`, `D5`, `D7`, `D8` locked in `M0-B-Wire-Lock-Open-Decisions.md`)
+2. W2: complete (protocol skeleton, field matrix, wire examples, compatibility profile synchronized)
+3. W3: complete (`Fixtures/M1-S1` added with TV-601..TV-610 and exact fail-ID checks)
+4. W4: complete (S1 14/14, S2 8/8, S3 4/4, S4 4/4, S5 3/3, M1-S1 10/10)

@@ -4,13 +4,13 @@ Last updated: 2026-03-08
 
 ## 1. Mission Snapshot
 
-Current mission: carry stable M0 baseline into M1 by executing deferred wire closure first (`M1-S1`), without regressing S1..S5 behavior.
+Current mission: carry M1-S1 closure forward into M1-S2 runtime-bridge work while preserving deterministic S1..S5 + M1-S1 behavior.
 
 Latest checkpoint status (2026-03-08):
 
-1. active branch: `codex/m0-exit-m1-entry`
+1. active branch: `codex/m1-s1-wire-closure`
 2. continuity files synchronized
-3. S1..S5 rerun on this branch confirmed 33/33 effective pass
+3. closure rerun confirmed 43/43 effective pass (S1..S5 + M1-S1)
 
 Current active path:
 
@@ -21,6 +21,7 @@ Current active path:
 5. S3 endpoint-grant slice implemented (encrypted endpoint disclosure gate semantics)
 6. S4 observation/replay slice implemented (observe lifecycle and replay-expiry semantics)
 7. S5 policy hard-lock slice implemented (policy inheritance deterministic deny semantics)
+8. M1-S1 wire-closure slice implemented (D3/D5/D7/D8 locked with deterministic fixture coverage)
 
 ---
 
@@ -83,16 +84,21 @@ Current active path:
 53. M1 entry plan completed (`M1-Entry-Plan.md`)
 54. M1-S1 first execution board completed (`M1-S1-Task-Board.md`)
 55. baseline rerun on planning branch confirmed stable: S1 14/14, S2 8/8, S3 4/4, S4 4/4, S5 3/3
+56. M1-S1 harness/profile implemented with wire-closure validators (`slice_profile: "M1-S1"`)
+57. M1-S1 fixture pack added (`Docs/Scynapse/Design/Fixtures/M1-S1`, TV-601..TV-610)
+58. deferred wire decisions (`D3`, `D5`, `D7`, `D8`) locked in wire decision authority doc
+59. cross-pack rerun stable: S1 14/14, S2 8/8, S3 4/4, S4 4/4, S5 3/3, M1-S1 10/10
+60. M1-S1 closure artifact added (`M1-S1-Closure.md`) and M1 checkpoint initialized (`M1-Status-Checkpoint.md`)
 
 ### Doing
 
-1. continuity synchronization for M0-exit to M1-entry handoff
+1. continuity synchronization for M1-S1 closure handoff
 
 ### Next
 
-1. execute M1-S1 deferred wire closure (`D3`, `D5`, `D7`, `D8`)
-2. preserve S1/S2/S3/S4/S5 fixture and error-ID stability during M1-S1
-3. start M1 runtime-bridge slice only after M1-S1 closure
+1. open and execute M1-S2 runtime-bridge slice
+2. preserve S1/S2/S3/S4/S5 + M1-S1 fixture and error-ID stability
+3. keep locked wire decisions (`D1`..`D8`) stable unless explicitly reopened
 
 ---
 
@@ -110,19 +116,16 @@ Current active path:
 
 ## 4. Open Decision Register (Current)
 
-S1 locked:
+Locked:
 
 1. `D1` enum encoding strategy
 2. `D2` timestamp wire representation
-3. `D4` proof reference encoding
-4. `D6` body key dictionary freeze policy
-
-S2+ deferrable:
-
-1. `D3` typed identifier strictness
-2. `D5` normalization versioning details
-3. `D7` deny envelope required-field policy
-4. `D8` relation token serialization boundary optimization
+3. `D3` typed identifier encoding strictness
+4. `D4` proof reference encoding
+5. `D5` normalization versioning details
+6. `D6` body key dictionary freeze policy
+7. `D7` deny envelope required-field policy
+8. `D8` relation token serialization boundary
 
 Authority file:
 
@@ -144,7 +147,9 @@ Authority file:
 10. `M0-Exit-Review.md`
 11. `M1-Entry-Plan.md`
 12. `M1-S1-Task-Board.md`
-13. latest entry in `SESSION-LOG.md`
+13. `M1-S1-Closure.md`
+14. `M1-Status-Checkpoint.md`
+15. latest entry in `SESSION-LOG.md`
 
 ---
 
@@ -173,6 +178,9 @@ Authority file:
    - `M0-Exit-Review.md`
    - `M1-Entry-Plan.md`
    - `M1-S1-Task-Board.md`
+   - `M1-S1-Closure.md`
+   - `M1-Status-Checkpoint.md`
+   - `Fixtures/M1-S1/README.md`
 5. Wire lock:
    - `M0-B-Wire-Lock-Open-Decisions.md`
    - `M0-B-Wire-Examples.md`

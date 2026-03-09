@@ -159,6 +159,17 @@ S5 extension note:
    - `PolicyDelta.override_granted` (bool)
    - `PolicyDeny.deny_code` (deterministic match required when hard-lock violation occurs)
 
+M1-S1 extension note:
+
+1. `slice_profile: "M1-S1"` enables deferred wire-closure checks for `D3`, `D5`, `D7`, `D8`.
+2. M1-S1 typed identifier checks enforce `<prefix>:<value>` for id/ref fields.
+3. `expr_norm` requires integer `expr_norm_v` and supported version membership.
+4. policy-causal deny codes require `policy_ref`.
+5. `HandshakeAccept` relation token boundary checks enforce:
+   - `token_transport` (`reference|inline`)
+   - required `relation_token_ref` + `relation_token_cid`
+   - conditional `relation_token_blob` (inline-only)
+
 ---
 
 ## 5. Conformance Gates (Pass/Fail)

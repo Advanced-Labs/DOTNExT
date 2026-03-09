@@ -163,7 +163,19 @@ This profile maps M0-B protocol fields to their Orleans lineage, with explicit c
 
 ---
 
-## 14. Review Checklist
+## 14. M1-S1 Wire-Closure Behavior Classification
+
+| Hardened Behavior | Tag | Notes |
+|---|---|---|
+| Typed identifier lock (`<prefix>:<value>`) for id/ref surfaces | `N` | Scynapse-native deterministic identity/reference encoding contract |
+| `expr_norm` with required supported `expr_norm_v` | `N` | Scynapse-native normalization compatibility control point |
+| Policy-causal deny envelope requiring `policy_ref` | `A` | adapts explicit policy-causality reasoning into deterministic wire contract |
+| Relation token boundary (`token_transport`, ref/cid/blob rules) | `N` | Scynapse-native transport optimization with explicit verification anchors |
+| Reintroduction of implicit silo/gateway id assumptions through identifier shortcuts | `D` | explicitly blocked; typed id prefixes remain topology-neutral |
+
+---
+
+## 15. Review Checklist
 
 1. Are any fields tagged `A` but still carrying hidden silo/cluster assumptions?
 2. Are all `N` fields tied to M0-A invariants?

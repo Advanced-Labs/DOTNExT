@@ -57,6 +57,12 @@ Run S5 fixture pack:
 dotnet run --project playground/FabricS1Prototype/FabricS1Prototype.csproj -- D:\Dev\dotnext\Docs\Scynapse\Design\Fixtures\S5
 ```
 
+Run M1-S1 fixture pack:
+
+```powershell
+dotnet run --project playground/FabricS1Prototype/FabricS1Prototype.csproj -- D:\Dev\dotnext\Docs\Scynapse\Design\Fixtures\M1-S1
+```
+
 Expected-fail fixture semantics:
 
 1. `expected_error_ids` is the preferred exact failure oracle.
@@ -85,3 +91,12 @@ Slice profile semantics:
    - `PolicyDelta.child_weaken_attempt`
    - `PolicyDelta.override_granted`
    - `PolicyDeny.deny_code`
+6. `slice_profile: "M1-S1"` enables deferred wire-closure validation:
+   - typed identifiers (`<prefix>:<value>`) for id/ref fields
+   - `expr_norm` requires `expr_norm_v=1`
+   - policy-causal deny messages require `policy_ref`
+   - `HandshakeAccept` relation token boundary:
+     - `token_transport` (`reference|inline`)
+     - `relation_token_ref`
+     - `relation_token_cid` (`sha256:<hex>`)
+     - `relation_token_blob` required only when `token_transport=inline`

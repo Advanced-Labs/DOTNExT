@@ -67,7 +67,7 @@ Rule:
 Do this in order before any design/code action:
 
 1. Read `EXECUTIVE-MEMORY.md`.
-2. Read active milestone checkpoint (`M0-Status-Checkpoint.md`).
+2. Read active milestone checkpoint (`M0-Status-Checkpoint.md` or `M1-Status-Checkpoint.md`).
 3. Read active phase skeleton (`M0-B-Protocol-Skeleton.md` for current phase).
 4. Read `SESSION-LOG.md` newest entry.
 5. Confirm:
@@ -99,11 +99,13 @@ If any mismatch exists between files:
 1. `M0-A-*`
 2. `M0-B-*`
 3. `M0-Status-Checkpoint.md`
+4. `M1-Status-Checkpoint.md` (when M1 work is active)
 
 ### L3: Execution Plan
 
 1. `M0-Implementation-Slice-Plan.md`
 2. `M0-S1-Task-Board.md`
+3. active M1 task board when M1 work is active (for example `M1-S1-Task-Board.md`)
 
 ### L4: Verification Assets
 

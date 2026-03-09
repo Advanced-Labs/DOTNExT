@@ -1,4 +1,4 @@
-# M0-B Wire Examples (S1 Lock Profile)
+# M0-B Wire Examples (S1 + M1-S1 Lock Profile)
 
 ## 1. Purpose
 
@@ -18,6 +18,11 @@ These are semantic examples, not golden byte fixtures.
 3. Timestamps are Unix epoch milliseconds (`int64`, UTC) on wire (`D2`).
 4. Proof refs are digest tuples (`[alg_code, digest_bstr]`) on wire (`D4`).
 5. Key dictionary `v1` is frozen for S1 field set (`D6`).
+6. M1-S1 wire closure locks:
+   - typed identifiers for id/ref fields (`D3`)
+   - `expr_norm` requires `expr_norm_v` (`D5`)
+   - policy-causal denies require `policy_ref` (`D7`)
+   - relation token transport boundary fields in `HandshakeAccept` (`D8`)
 
 Authority references:
 
@@ -53,8 +58,8 @@ Nested map keys:
 
 Example S1 body keys used below:
 
-1. resolve: `33=expr_raw`, `35=operation_class`, `49=deny_code`, `50=reason`, `51=retryable`, `52=remediation`
-2. handshake: `75=relation_token`, `76=route_mode`, `77=disclosure_level`, `71=expires_at`
+1. resolve: `33=expr_raw`, `34=expr_norm`, `53=expr_norm_v`, `35=operation_class`, `49=deny_code`, `50=reason`, `51=retryable`, `52=remediation`
+2. handshake: `75=relation_token`, `76=route_mode`, `77=disclosure_level`, `71=expires_at`, `80=policy_ref`, `82=token_transport`, `83=relation_token_ref`, `84=relation_token_cid`, `85=relation_token_blob`
 3. route/upgrade: `101=upgrade_target_mode`, `102=endpoint_disclosure_grant_ref`, `103=consent_proof`, `104=fallback_route_ref`
 
 ---
@@ -95,11 +100,11 @@ JSON debug:
 ```json
 {
   "msg_type": "ResolveRequest",
-  "msg_id": "msg-0001",
-  "trace_id": "tr-1001",
+  "msg_id": "mid:msg-0001",
+  "trace_id": "trc:tr-1001",
   "timestamp": 1772964000000,
   "from": {
-    "node_id": "N1PUB",
+    "node_id": "nid:N1PUB",
     "name_anchor": ".Users.Alice"
   },
   "intent": "resolve",
@@ -107,6 +112,8 @@ JSON debug:
   "ttl_ms": 30000,
   "body": {
     "expr_raw": ".Adult.Games.RedX",
+    "expr_norm": ".adult.games.redx",
+    "expr_norm_v": 1,
     "operation_class": "meta"
   }
 }
@@ -117,15 +124,17 @@ CBOR diagnostic:
 ```cbor-diag
 {
   1: "ResolveRequest",
-  2: "msg-0001",
-  3: "tr-1001",
+  2: "mid:msg-0001",
+  3: "trc:tr-1001",
   4: 1772964000000,
-  5: {1: "N1PUB", 2: ".Users.Alice"},
+  5: {1: "nid:N1PUB", 2: ".Users.Alice"},
   6: 0,
   7: ".Adult.Games.RedX",
   12: 30000,
   13: {
     33: ".Adult.Games.RedX",
+    34: ".adult.games.redx",
+    53: 1,
     35: 0
   }
 }
@@ -138,11 +147,11 @@ JSON debug:
 ```json
 {
   "msg_type": "ResolveDeny",
-  "msg_id": "msg-0002",
-  "trace_id": "tr-1001",
+  "msg_id": "mid:msg-0002",
+  "trace_id": "trc:tr-1001",
   "timestamp": 1772964001000,
   "from": {
-    "node_id": "PARENTPUB",
+    "node_id": "nid:PARENTPUB",
     "name_anchor": ".Adult"
   },
   "intent": "resolve",
@@ -162,10 +171,10 @@ CBOR diagnostic:
 ```cbor-diag
 {
   1: "ResolveDeny",
-  2: "msg-0002",
-  3: "tr-1001",
+  2: "mid:msg-0002",
+  3: "trc:tr-1001",
   4: 1772964001000,
-  5: {1: "PARENTPUB", 2: ".Adult"},
+  5: {1: "nid:PARENTPUB", 2: ".Adult"},
   6: 0,
   7: ".Adult.Games.RedX",
   12: 30000,
@@ -185,23 +194,25 @@ JSON debug:
 ```json
 {
   "msg_type": "HandshakeAccept",
-  "msg_id": "msg-0010",
-  "trace_id": "tr-2001",
+  "msg_id": "mid:msg-0010",
+  "trace_id": "trc:tr-2001",
   "timestamp": 1772964120000,
   "from": {
-    "node_id": "PARENTPUB",
+    "node_id": "nid:PARENTPUB",
     "name_anchor": ".Adult"
   },
   "intent": "invoke",
   "target_scope": ".Adult.Games.RedX",
-  "relation_id": "rel-777",
+  "relation_id": "rid:rel-777",
   "route_mode": "parent_mediated",
   "disclosure_level": "mediator_visible",
   "ttl_ms": 30000,
   "body": {
-    "relation_token": "tok-rel-777-v1",
     "route_mode": "parent_mediated",
     "disclosure_level": "mediator_visible",
+    "token_transport": "reference",
+    "relation_token_ref": "tid:rel-777.token",
+    "relation_token_cid": "sha256:5d7c01ab99fe33cc",
     "expires_at": 1772965020000
   }
 }
@@ -212,20 +223,22 @@ CBOR diagnostic:
 ```cbor-diag
 {
   1: "HandshakeAccept",
-  2: "msg-0010",
-  3: "tr-2001",
+  2: "mid:msg-0010",
+  3: "trc:tr-2001",
   4: 1772964120000,
-  5: {1: "PARENTPUB", 2: ".Adult"},
+  5: {1: "nid:PARENTPUB", 2: ".Adult"},
   6: 1,
   7: ".Adult.Games.RedX",
-  8: "rel-777",
+  8: "rid:rel-777",
   9: 0,
   10: 1,
   12: 30000,
   13: {
-    75: "tok-rel-777-v1",
     76: 0,
     77: 1,
+    82: "reference",
+    83: "tid:rel-777.token",
+    84: "sha256:5d7c01ab99fe33cc",
     71: 1772965020000
   }
 }
@@ -238,16 +251,16 @@ JSON debug:
 ```json
 {
   "msg_type": "RouteUpgradeProbe",
-  "msg_id": "msg-0011",
-  "trace_id": "tr-2001",
+  "msg_id": "mid:msg-0011",
+  "trace_id": "trc:tr-2001",
   "timestamp": 1772964180000,
   "from": {
-    "node_id": "N1PUB",
+    "node_id": "nid:N1PUB",
     "name_anchor": ".Users.Alice"
   },
   "intent": "invoke",
   "target_scope": ".Adult.Games.RedX",
-  "relation_id": "rel-777",
+  "relation_id": "rid:rel-777",
   "route_mode": "parent_mediated",
   "disclosure_level": "mediator_visible",
   "ttl_ms": 30000,
@@ -257,9 +270,9 @@ JSON debug:
   },
   "body": {
     "upgrade_target_mode": "direct_upgraded",
-    "endpoint_disclosure_grant_ref": "grant-ep-123",
+    "endpoint_disclosure_grant_ref": "gid:grant-ep-123",
     "consent_proof": "consent-n1-n2-v1",
-    "fallback_route_ref": "route-parent-relay-7"
+    "fallback_route_ref": "rte:parent-relay-7"
   }
 }
 ```
@@ -269,24 +282,71 @@ CBOR diagnostic:
 ```cbor-diag
 {
   1: "RouteUpgradeProbe",
-  2: "msg-0011",
-  3: "tr-2001",
+  2: "mid:msg-0011",
+  3: "trc:tr-2001",
   4: 1772964180000,
-  5: {1: "N1PUB", 2: ".Users.Alice"},
+  5: {1: "nid:N1PUB", 2: ".Users.Alice"},
   6: 1,
   7: ".Adult.Games.RedX",
-  8: "rel-777",
+  8: "rid:rel-777",
   9: 0,
   10: 1,
   11: {1: [[1, h'5D7C01']], 2: h'7369672D6265617265722D31'},
   12: 30000,
   13: {
     101: 3,
-    102: "grant-ep-123",
+    102: "gid:grant-ep-123",
     103: "consent-n1-n2-v1",
-    104: "route-parent-relay-7"
+    104: "rte:parent-relay-7"
+  }
+}
+```
+
+### 6.5 HandshakeDeny (policy-causal deny requires policy_ref)
+
+JSON debug:
+
+```json
+{
+  "msg_type": "HandshakeDeny",
+  "msg_id": "mid:msg-0012",
+  "trace_id": "trc:tr-2001",
+  "timestamp": 1772964200000,
+  "from": {
+    "node_id": "nid:PARENTPUB",
+    "name_anchor": ".Adult"
+  },
+  "intent": "invoke",
+  "target_scope": ".Adult.Games.RedX",
+  "ttl_ms": 30000,
+  "body": {
+    "deny_code": "PolicyDenied",
+    "policy_ref": "pid:adult.policy.v5",
+    "retryable": false
+  }
+}
+```
+
+CBOR diagnostic:
+
+```cbor-diag
+{
+  1: "HandshakeDeny",
+  2: "mid:msg-0012",
+  3: "trc:tr-2001",
+  4: 1772964200000,
+  5: {1: "nid:PARENTPUB", 2: ".Adult"},
+  6: 1,
+  7: ".Adult.Games.RedX",
+  12: 30000,
+  13: {
+    79: 2,
+    80: "pid:adult.policy.v5",
+    81: false
   }
 }
 ```
 
 Observe-family wire examples are intentionally deferred to S2 when observe key assignments are locked.
+
+

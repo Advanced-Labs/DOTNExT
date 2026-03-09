@@ -1,0 +1,43 @@
+{
+  "id": "TV-610",
+  "title": "M1-S1 D8 Fail: HandshakeAccept missing relation_token_cid",
+  "slice_profile": "M1-S1",
+  "expect_conformance": "fail",
+  "expected_error_ids": [
+    "E2070_TOKEN_CID_REQUIRED"
+  ],
+  "expected_error_contains": [
+    "requires 'relation_token_cid'"
+  ],
+  "preconditions": [
+    "token transport is specified",
+    "relation token CID is missing"
+  ],
+  "messages": [
+    { "type": "HandshakeInit", "role": "requester" },
+    { "type": "HandshakeChallenge", "role": "mediator" },
+    { "type": "HandshakeProof", "role": "requester" },
+    {
+      "type": "HandshakeAccept",
+      "role": "mediator",
+      "body": {
+        "route_mode": "parent_mediated",
+        "disclosure_level": "mediator_visible",
+        "token_transport": "reference",
+        "relation_token_ref": "tid:rel780.token"
+      }
+    }
+  ],
+  "expected_state_trace": [
+    "MediatedHandshake",
+    "RelayedSession",
+    "Completed"
+  ],
+  "expected_outcome": {
+    "success": true,
+    "deny_code": null
+  },
+  "assertions": [
+    { "id": "A1", "kind": "state", "check": "final_state_equals", "value": "Completed" }
+  ]
+}

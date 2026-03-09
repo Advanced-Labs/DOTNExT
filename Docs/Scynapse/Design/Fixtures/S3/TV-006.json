@@ -18,7 +18,7 @@
         "endpoint_disclosure_allowed": true
       }
     },
-    { "type": "ResolveDeny", "role": "authority", "body": { "deny_code": "GrantMissing" } }
+    { "type": "ResolveDeny", "role": "authority", "body": { "deny_code": "GrantMissing", "policy_ref": "pid:endpoint.disclosure.v3" } }
   ],
   "expected_state_trace": [
     "ResolveIntent",

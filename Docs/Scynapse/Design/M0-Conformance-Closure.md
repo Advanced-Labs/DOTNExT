@@ -55,3 +55,4 @@ Deferred:
 1. M0 exit review completed on 2026-03-08: `M0-Exit-Review.md`
 2. M1 entry plan established: `M1-Entry-Plan.md`
 3. first M1 execution board established: `M1-S1-Task-Board.md`
+4. M1-S1 deferred wire closure completed: `M1-S1-Closure.md`

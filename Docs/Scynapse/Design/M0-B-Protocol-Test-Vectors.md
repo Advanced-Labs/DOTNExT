@@ -334,6 +334,158 @@ Expected outcome:
 1. `UpgradeRejected` or specific gate code
 2. relayed fallback continuity confirmed
 
+### TV-601 D5 Normalization Version Pass
+
+Preconditions:
+
+1. resolve request includes `expr_norm`
+2. `expr_norm_v=1`
+
+Sequence:
+
+1. `ResolveRequest` with `expr_raw`, `expr_norm`, `expr_norm_v`
+2. terminal resolve decision
+
+Expected outcome:
+
+1. conformance pass
+2. no normalization-version failure
+
+### TV-602 D5 Normalization Version Missing
+
+Preconditions:
+
+1. resolve request includes `expr_norm`
+2. `expr_norm_v` omitted
+
+Sequence:
+
+1. `ResolveRequest` with missing `expr_norm_v`
+
+Expected outcome:
+
+1. expected fail by exact error ID (`E2061_EXPR_NORM_VERSION_REQUIRED`)
+
+### TV-603 D5 Normalization Version Unsupported
+
+Preconditions:
+
+1. resolve request includes `expr_norm`
+2. `expr_norm_v` outside supported set
+
+Sequence:
+
+1. `ResolveRequest` with unsupported `expr_norm_v`
+
+Expected outcome:
+
+1. expected fail by exact error ID (`E2063_EXPR_NORM_VERSION_UNSUPPORTED`)
+
+### TV-604 D7 Policy-Causal Deny Missing Policy Reference
+
+Preconditions:
+
+1. deny code is policy-causal (`PolicyDenied`)
+2. `policy_ref` omitted
+
+Sequence:
+
+1. handshake deny path emits policy-causal code without `policy_ref`
+
+Expected outcome:
+
+1. expected fail by exact error ID (`E2065_POLICY_REF_REQUIRED_FOR_DENY`)
+
+### TV-605 D7 Policy-Causal Deny with Policy Reference
+
+Preconditions:
+
+1. deny code is policy-causal (`PolicyDenied`)
+2. `policy_ref` present
+
+Sequence:
+
+1. handshake deny path with typed `policy_ref`
+
+Expected outcome:
+
+1. conformance pass
+
+### TV-606 D8 Relation Token Reference Transport Pass
+
+Preconditions:
+
+1. handshake accept path active
+2. token transport mode is `reference`
+
+Sequence:
+
+1. `HandshakeAccept` with `token_transport`, `relation_token_ref`, `relation_token_cid`
+
+Expected outcome:
+
+1. conformance pass
+
+### TV-607 D8 Relation Token Inline Transport Pass
+
+Preconditions:
+
+1. handshake accept path active
+2. token transport mode is `inline`
+
+Sequence:
+
+1. `HandshakeAccept` with boundary fields + `relation_token_blob`
+
+Expected outcome:
+
+1. conformance pass
+
+### TV-608 D8 Reference Transport with Inline Blob (Invalid)
+
+Preconditions:
+
+1. token transport mode is `reference`
+2. inline token blob is present
+
+Sequence:
+
+1. `HandshakeAccept` includes forbidden blob field
+
+Expected outcome:
+
+1. expected fail by exact error ID (`E2073_TOKEN_BLOB_FORBIDDEN_REFERENCE`)
+
+### TV-609 D3 Typed Identifier Fail
+
+Preconditions:
+
+1. policy-causal deny carries `policy_ref`
+2. `policy_ref` is not typed identifier format
+
+Sequence:
+
+1. handshake deny with invalid `policy_ref` value
+
+Expected outcome:
+
+1. expected fail by exact error ID (`E2080_TYPED_IDENTIFIER_INVALID`)
+
+### TV-610 D8 Missing Token CID
+
+Preconditions:
+
+1. handshake accept path active
+2. `relation_token_cid` missing
+
+Sequence:
+
+1. `HandshakeAccept` missing required token CID
+
+Expected outcome:
+
+1. expected fail by exact error ID (`E2070_TOKEN_CID_REQUIRED`)
+
 ---
 
 ## 4. Minimal Coverage Map
@@ -343,6 +495,7 @@ Expected outcome:
 3. Endpoint grant/disclosure: TV-005, TV-006
 4. Observation/replay: TV-007, TV-008, TV-009, TV-010
 5. Policy inheritance: TV-011
+6. M1 wire closure: TV-601, TV-602, TV-603, TV-604, TV-605, TV-606, TV-607, TV-608, TV-609, TV-610
 
 ### 4.1 S1 Transition-Edge Negative Extension Set
 
@@ -383,6 +536,17 @@ Expected outcome:
    - TV-011 (parent hard policy blocks child weakening)
    - TV-501 (policy deny before policy context; expected fail by exact error ID)
    - TV-502 (policy deny code mismatch; expected fail by exact error ID)
+6. M1-S1 owned vectors:
+   - TV-601 (expr_norm with supported expr_norm_v pass)
+   - TV-602 (expr_norm missing expr_norm_v; expected fail by exact error ID)
+   - TV-603 (expr_norm unsupported expr_norm_v; expected fail by exact error ID)
+   - TV-604 (policy-causal deny without policy_ref; expected fail by exact error ID)
+   - TV-605 (policy-causal deny with typed policy_ref pass)
+   - TV-606 (relation token boundary reference mode pass)
+   - TV-607 (relation token boundary inline mode pass)
+   - TV-608 (reference mode with token blob; expected fail by exact error ID)
+   - TV-609 (typed identifier invalid for policy_ref; expected fail by exact error ID)
+   - TV-610 (missing relation token CID; expected fail by exact error ID)
 
 ---
 
@@ -399,6 +563,6 @@ Completed:
 
 Current next step:
 
-1. M0 closure and exit review completed (`M0-Conformance-Closure.md`, `M0-Exit-Review.md`)
-2. preserve S1/S2/S3/S4/S5 baseline behavior and machine-checkable error ID stability
-3. execute M1-S1 deferred wire closure vectors for `D3`, `D5`, `D7`, `D8` (`M1-S1-Task-Board.md`)
+1. M1-S1 deferred wire closure vectors executed and stabilized (`TV-601..TV-610`)
+2. preserve S1/S2/S3/S4/S5 + M1-S1 baseline behavior and machine-checkable error ID stability
+3. start M1-S2 runtime-bridge vectors from this locked baseline

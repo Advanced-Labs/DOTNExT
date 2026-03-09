@@ -1,0 +1,41 @@
+{
+  "id": "TV-609",
+  "title": "M1-S1 D3 Fail: policy_ref must be typed identifier",
+  "slice_profile": "M1-S1",
+  "expect_conformance": "fail",
+  "expected_error_ids": [
+    "E2080_TYPED_IDENTIFIER_INVALID"
+  ],
+  "expected_error_contains": [
+    "not a valid typed identifier"
+  ],
+  "preconditions": [
+    "policy-causal deny includes policy_ref",
+    "policy_ref format is untyped"
+  ],
+  "messages": [
+    { "type": "HandshakeInit", "role": "requester" },
+    { "type": "HandshakeChallenge", "role": "mediator" },
+    { "type": "HandshakeProof", "role": "requester" },
+    {
+      "type": "HandshakeDeny",
+      "role": "mediator",
+      "body": {
+        "deny_code": "PolicyDenied",
+        "policy_ref": "adult.policy.v5"
+      }
+    }
+  ],
+  "expected_state_trace": [
+    "MediatedHandshake",
+    "Deny"
+  ],
+  "expected_outcome": {
+    "success": false,
+    "deny_code": "PolicyDenied",
+    "retryable": false
+  },
+  "assertions": [
+    { "id": "A1", "kind": "state", "check": "final_state_equals", "value": "Deny" }
+  ]
+}

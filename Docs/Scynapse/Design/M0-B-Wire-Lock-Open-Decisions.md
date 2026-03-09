@@ -7,6 +7,7 @@ Record wire-level decision status and locked outcomes for M0-B.
 Last lock pass:
 
 1. 2026-03-08 (S1 baseline lock)
+2. 2026-03-08 (M1-S1 deferred wire closure lock)
 
 ---
 
@@ -16,12 +17,12 @@ Last lock pass:
 |---|---|---|---|
 | `D1` enum encoding strategy | `LOCKED` | S1 | unsigned integer enum codes on wire; canonical text in debug/tooling |
 | `D2` timestamp representation | `LOCKED` | S1 | Unix epoch milliseconds (`int64`, UTC) on wire |
-| `D3` identifier encoding | `DEFERRED` | S2+ | keep typed-string recommendation pending |
+| `D3` identifier encoding | `LOCKED` | M1-S1 | typed identifiers use canonical `<prefix>:<value>` form with locked prefix set |
 | `D4` proof reference encoding | `LOCKED` | S1 | compact binary digest references on wire |
-| `D5` `expr_norm` versioning | `DEFERRED` | S2+ | keep normalization-version lock pending |
+| `D5` `expr_norm` versioning | `LOCKED` | M1-S1 | `expr_norm` requires `expr_norm_v`; supported version set currently `{1}` |
 | `D6` body key dictionary stability | `LOCKED` | S1 | dictionary `v1` frozen for S1 field set; reserved growth ranges |
-| `D7` deny envelope field policy | `DEFERRED` | S2+ | conditional `policy_ref` retained |
-| `D8` relation token serialization boundary | `DEFERRED` | S2+ | keep reference + signed blob hash path pending |
+| `D7` deny envelope field policy | `LOCKED` | M1-S1 | policy-causal deny codes require `policy_ref` |
+| `D8` relation token serialization boundary | `LOCKED` | M1-S1 | `HandshakeAccept` requires `token_transport` + `relation_token_ref` + `relation_token_cid`; blob inline-only |
 
 ---
 
@@ -105,14 +106,60 @@ Canonical per-field key assignments for `v1` live in:
 
 1. `Docs/Scynapse/Design/M0-B-Message-Field-Matrix.md`
 
+### 3.5 D3 Identifier Encoding (`LOCKED`)
+
+1. Canonical wire identifier format is typed-string: `<prefix>:<value>`.
+2. Locked prefixes:
+   - `nid` node identifier
+   - `rid` relation identifier
+   - `gid` grant identifier/reference
+   - `pid` policy identifier/reference
+   - `tid` token identifier/reference
+   - `rte` route reference
+   - `mid` message identifier
+   - `trc` trace identifier
+3. `value` segment constraints:
+   - ASCII
+   - first character alphanumeric
+   - remaining characters from `[A-Za-z0-9._-]`
+   - length `3..128`
+4. M0 fixture packs remain accepted for continuity; strict typed-identifier conformance is asserted in `slice_profile: "M1-S1"` vectors.
+
+### 3.6 D5 `expr_norm` Versioning (`LOCKED`)
+
+1. When `expr_norm` is present, `expr_norm_v` is required.
+2. `expr_norm_v` must be integer.
+3. Supported version set is currently `{1}`.
+4. `expr_norm_v` without `expr_norm` is invalid.
+
+### 3.7 D7 Deny Envelope Field Policy (`LOCKED`)
+
+1. For deny message families (`ResolveDeny`, `HandshakeDeny`, `PolicyDeny`), `policy_ref` is required when `deny_code` is policy-causal.
+2. Policy-causal deny codes:
+   - `PolicyDenied`
+   - `DisclosureDenied`
+   - `GrantMissing`
+   - `GrantExpired`
+3. For non-policy-causal deny codes, `policy_ref` remains optional.
+
+### 3.8 D8 Relation Token Serialization Boundary (`LOCKED`)
+
+1. `HandshakeAccept` relation token transport is explicit via `token_transport`:
+   - `reference`
+   - `inline`
+2. Required in both transport modes:
+   - `relation_token_ref`
+   - `relation_token_cid` (`sha256:<hex>`)
+3. `relation_token_blob`:
+   - required when `token_transport=inline`
+   - forbidden when `token_transport=reference`
+4. This boundary avoids unconditional token blob duplication while retaining deterministic verification inputs.
+
 ---
 
-## 4. Deferred Decisions (S2+)
+## 4. Deferred Decisions (Current)
 
-1. `D3`: identifier typed-string hardening
-2. `D5`: normalization version field (`expr_norm_v`) lock
-3. `D7`: conditional/always `policy_ref` final policy
-4. `D8`: relation token embed vs reference boundary optimization
+1. none from the original M0 deferred set (`D3`, `D5`, `D7`, `D8` now locked)
 
 ---
 
@@ -123,4 +170,4 @@ Locked decisions must stay synchronized in:
 1. `M0-B-Protocol-Skeleton.md`
 2. `M0-B-Message-Field-Matrix.md`
 3. `M0-B-Wire-Examples.md`
-
+4. `M0-B-Conformance-Harness-Checklist.md`

@@ -1,0 +1,34 @@
+{
+  "id": "TV-604",
+  "title": "M1-S1 D7 Fail: PolicyDenied without policy_ref",
+  "slice_profile": "M1-S1",
+  "expect_conformance": "fail",
+  "expected_error_ids": [
+    "E2065_POLICY_REF_REQUIRED_FOR_DENY"
+  ],
+  "expected_error_contains": [
+    "requires 'policy_ref'"
+  ],
+  "preconditions": [
+    "handshake deny is policy-causal",
+    "policy_ref is omitted"
+  ],
+  "messages": [
+    { "type": "HandshakeInit", "role": "requester" },
+    { "type": "HandshakeChallenge", "role": "mediator" },
+    { "type": "HandshakeProof", "role": "requester" },
+    { "type": "HandshakeDeny", "role": "mediator", "body": { "deny_code": "PolicyDenied" } }
+  ],
+  "expected_state_trace": [
+    "MediatedHandshake",
+    "Deny"
+  ],
+  "expected_outcome": {
+    "success": false,
+    "deny_code": "PolicyDenied",
+    "retryable": false
+  },
+  "assertions": [
+    { "id": "A1", "kind": "state", "check": "final_state_equals", "value": "Deny" }
+  ]
+}

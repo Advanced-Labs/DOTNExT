@@ -12,7 +12,7 @@ Scope:
 4. deterministic failure classes
 5. scenario checklist for implementation and tests
 
-This is a design skeleton with S1 wire-lock decisions applied (`D1`, `D2`, `D4`, `D6`).
+This is a design skeleton with S1 and M1-S1 wire-lock decisions applied (`D1`, `D2`, `D3`, `D4`, `D5`, `D6`, `D7`, `D8`).
 
 ---
 
@@ -51,6 +51,8 @@ Reference:
 - `Docs/Scynapse/Design/M0-Exit-Review.md`
 - `Docs/Scynapse/Design/M1-Entry-Plan.md`
 - `Docs/Scynapse/Design/M1-S1-Task-Board.md`
+- `Docs/Scynapse/Design/M1-S1-Closure.md`
+- `Docs/Scynapse/Design/M1-Status-Checkpoint.md`
 - `Docs/Scynapse/Design/M0-B-Wire-Lock-Open-Decisions.md`
 - `Docs/Scynapse/Design/M0-Status-Checkpoint.md`
 
@@ -308,3 +310,16 @@ Failure responses should include:
    - dictionary `v1` is frozen for S1 field set.
    - family key ranges are reserved for forward-compatible growth.
    - field-level key assignments are canonicalized in `M0-B-Message-Field-Matrix.md`.
+10. Identifier encoding strictness (`D3`):
+   - canonical id/ref format is typed-string `<prefix>:<value>`.
+   - locked prefix set: `nid`, `rid`, `gid`, `pid`, `tid`, `rte`, `mid`, `trc`.
+11. Normalization versioning (`D5`):
+   - `expr_norm` requires `expr_norm_v`.
+   - supported `expr_norm_v` set currently `{1}`.
+   - `expr_norm_v` without `expr_norm` is invalid.
+12. Deny envelope policy reference (`D7`):
+   - for policy-causal deny codes (`PolicyDenied`, `DisclosureDenied`, `GrantMissing`, `GrantExpired`), `policy_ref` is required.
+13. Relation token serialization boundary (`D8`):
+   - `HandshakeAccept` must declare `token_transport` (`reference|inline`).
+   - `relation_token_ref` + `relation_token_cid` are required in both modes.
+   - `relation_token_blob` is required only for `inline` and forbidden for `reference`.

@@ -24,14 +24,14 @@ Envelope fields that apply to all messages:
 | Field | Req | Tag | Rule |
 |---|---|---|---|
 | `msg_type` | R | A | Must match family/type exactly |
-| `msg_id` | R | A | Unique within sender replay window |
-| `trace_id` | R | A | Stable across a relation flow |
+| `msg_id` | R | A | Unique within sender replay window; canonical typed form `mid:<value>` in M1-S1 strict profile |
+| `trace_id` | R | A | Stable across a relation flow; canonical typed form `trc:<value>` in M1-S1 strict profile |
 | `timestamp` | R | A | Unix epoch milliseconds (`int64`, UTC) on wire |
-| `from.node_id` | R | A | Node identity key or equivalent id |
+| `from.node_id` | R | A | Node identity key or equivalent id; canonical typed form `nid:<value>` in M1-S1 strict profile |
 | `from.name_anchor` | C | N | Required when CNS policy/path context is relevant |
 | `intent` | R | N | enum code on wire; text label in debug rendering |
 | `target_scope` | C | N | Required for scope-addressed operations |
-| `relation_id` | C | N | Required after relation establishment |
+| `relation_id` | C | N | Required after relation establishment; canonical typed form `rid:<value>` in M1-S1 strict profile |
 | `route_mode` | C | N | enum code on wire; text label in debug rendering |
 | `disclosure_level` | C | N | enum code on wire; text label in debug rendering |
 | `proofs.capability_refs` | C | N | array of digest tuples (`[alg_code, digest_bstr]`) |
@@ -140,6 +140,7 @@ Resolve keys (S1-assigned):
 | `50` | `reason` |
 | `51` | `retryable` |
 | `52` | `remediation` |
+| `53` | `expr_norm_v` |
 
 Handshake keys (S1-assigned):
 
@@ -162,6 +163,10 @@ Handshake keys (S1-assigned):
 | `79` | `deny_code` |
 | `80` | `policy_ref` |
 | `81` | `retryable` |
+| `82` | `token_transport` |
+| `83` | `relation_token_ref` |
+| `84` | `relation_token_cid` |
+| `85` | `relation_token_blob` |
 
 Route/upgrade keys (S1-assigned):
 
@@ -182,6 +187,25 @@ Route/upgrade keys (S1-assigned):
 
 ---
 
+### 2.3 M1-S1 Strict Wire-Closure Conventions
+
+Typed identifier convention:
+
+1. canonical format: `<prefix>:<value>`
+2. locked prefixes: `nid`, `rid`, `gid`, `pid`, `tid`, `rte`, `mid`, `trc`
+3. value constraints:
+   - ASCII
+   - starts with alphanumeric
+   - remaining chars from `[A-Za-z0-9._-]`
+   - length `3..128`
+
+Relation token CID convention:
+
+1. canonical format: `sha256:<hex>`
+2. used with `relation_token_ref` in `HandshakeAccept` strict boundary mode
+
+---
+
 ## 3. Resolve Family
 
 ### 3.1 ResolveRequest
@@ -190,6 +214,7 @@ Route/upgrade keys (S1-assigned):
 |---|---|---|---|
 | `expr_raw` | R | N | Original expression string |
 | `expr_norm` | O | N | Canonicalized expression |
+| `expr_norm_v` | C | N | Required when `expr_norm` is present; supported version set currently `{1}` |
 | `operation_class` | R | N | `meta|value|endpoint|invoke|observe` |
 | `preferred_route_mode` | O | N | Hint only; policy may override |
 | `selector_hints` | O | N | Disambiguation hints |
@@ -200,6 +225,8 @@ Route/upgrade keys (S1-assigned):
 | Field | Req | Tag | Rule |
 |---|---|---|---|
 | `resolved_scope` | R | N | Canonical target scope |
+| `expr_norm` | O | N | Canonicalized resolved expression when provided |
+| `expr_norm_v` | C | N | Required when `expr_norm` is present; supported version set currently `{1}` |
 | `candidate_bindings` | R | A | Policy-filtered candidate set (can be empty) |
 | `effective_policy_ref` | R | N | Policy revision reference |
 | `disclosure_constraints` | R | N | Allowed visibility level(s) |
@@ -211,6 +238,8 @@ Route/upgrade keys (S1-assigned):
 | Field | Req | Tag | Rule |
 |---|---|---|---|
 | `referral_scope` | R | A | Next authority scope |
+| `expr_norm` | O | N | Canonicalized expression associated with referral |
+| `expr_norm_v` | C | N | Required when `expr_norm` is present; supported version set currently `{1}` |
 | `referral_expiry` | R | A | Absolute expiry |
 | `relay_requirements` | O | N | Parent/relay constraints |
 | `policy_proof_refs` | O | N | Why referral is authoritative |
@@ -223,6 +252,7 @@ Route/upgrade keys (S1-assigned):
 | `reason` | R | A | Stable human-readable reason |
 | `retryable` | R | A | bool |
 | `remediation` | O | N | Action hint |
+| `policy_ref` | C | N | Required when deny code is policy-causal (`PolicyDenied|DisclosureDenied|GrantMissing|GrantExpired`) |
 
 ---
 
@@ -258,18 +288,22 @@ Route/upgrade keys (S1-assigned):
 
 | Field | Req | Tag | Rule |
 |---|---|---|---|
-| `relation_token` | R | N | Signed relation contract |
+| `relation_token` | C | N | Legacy/debug alias; optional when `relation_token_ref` + `relation_token_cid` are used |
 | `route_mode` | R | N | Active route mode |
 | `disclosure_level` | R | N | Granted disclosure level |
 | `expires_at` | R | N | Relation token expiry |
 | `fallback_route_ref` | C | N | Required if direct-upgrade is granted |
+| `token_transport` | C | N | M1-S1 strict profile: required (`reference|inline`) |
+| `relation_token_ref` | C | N | M1-S1 strict profile: required typed identifier |
+| `relation_token_cid` | C | N | M1-S1 strict profile: required `sha256:<hex>` digest id |
+| `relation_token_blob` | C | N | M1-S1 strict profile: required for `inline`, forbidden for `reference` |
 
 ### 4.5 HandshakeDeny
 
 | Field | Req | Tag | Rule |
 |---|---|---|---|
 | `deny_code` | R | N | Deterministic deny code |
-| `policy_ref` | O | N | Relevant policy revision |
+| `policy_ref` | C | N | Required when deny code is policy-causal (`PolicyDenied|DisclosureDenied|GrantMissing|GrantExpired`) |
 | `retryable` | R | A | bool |
 
 ---
@@ -397,6 +431,10 @@ Route/upgrade keys (S1-assigned):
 3. `direct_upgraded` route mode is invalid unless upgrade gates are satisfied.
 4. Observation events without subscription authorization must be denied, not dropped silently.
 5. Any `expr_raw`/`expr_norm` mismatch must emit an auditable warning or deny based on policy.
+6. When `expr_norm` is present, `expr_norm_v` must be present and supported.
+7. Policy-causal deny codes require `policy_ref`.
+8. In M1-S1 strict profile, id/ref fields use typed identifiers (`<prefix>:<value>`).
+9. In M1-S1 strict profile, `HandshakeAccept` relation token boundary fields are mandatory and mode-consistent.
 
 ---
 
@@ -410,4 +448,4 @@ Completed:
 Current next step:
 
 1. keep this matrix synchronized with wire examples and conformance harness fixtures
-2. extend dictionary assignments for observe/policy families when S2 scope opens
+2. preserve M1-S1 wire-closure constraints while extending runtime bridge slices

@@ -137,4 +137,5 @@ Current next action:
 
 1. package M0 conformance closure artifact from S1..S5 baseline (`M0-Conformance-Closure.md`)
 2. complete M0 exit review (`M0-Exit-Review.md`)
-3. start M1 using bounded wire-closure slice board (`M1-Entry-Plan.md`, `M1-S1-Task-Board.md`)
+3. M1-S1 wire-closure slice completed (`M1-S1-Closure.md`)
+4. start M1-S2 runtime-bridge slice from locked wire baseline

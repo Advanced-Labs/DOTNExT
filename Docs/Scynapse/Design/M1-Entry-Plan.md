@@ -100,4 +100,5 @@ Deliverables:
 
 ## 7. Immediate Next Action
 
-1. execute `M1-S1` task board (`M1-S1-Task-Board.md`) with strict no-scope-creep discipline.
+1. `M1-S1` execution complete (`M1-S1-Closure.md`).
+2. open `M1-S2` runtime-bridge task board from this closure baseline.

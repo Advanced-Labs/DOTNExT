@@ -13,7 +13,8 @@ If a task touches `Docs/Scynapse` or Scynapse runtime/design work:
 1. Read `Docs/Scynapse/Design/EXECUTIVE-MEMORY.md` first.
 2. Read `Docs/Scynapse/Design/METHODOLOGY.md` second.
 3. Read `Docs/Scynapse/Design/M0-Status-Checkpoint.md` third.
-4. Use these files as the authoritative re-entry context before coding or drafting.
+4. If present, read `Docs/Scynapse/Design/M1-Status-Checkpoint.md` before coding.
+5. Use these files as the authoritative re-entry context before coding or drafting.
 
 ## Session Hygiene (Required for Scynapse Work)
 

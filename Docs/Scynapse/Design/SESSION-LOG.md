@@ -306,3 +306,33 @@ Use this structure for each new entry:
    - create `codex/m1-s1-wire-closure` and execute M1-S1 with strict S1..S5 regression gates.
 5. Risks/blockers:
    - none immediate; maintain strict scope boundary to avoid premature runtime-surface expansion.
+
+### 2026-03-08 (M1-S1 Deferred Wire Closure Implementation)
+
+1. Scope:
+   - execute M1-S1 task board and close deferred wire decisions (`D3`, `D5`, `D7`, `D8`) with deterministic harness coverage.
+2. Key outputs:
+   - implemented `slice_profile: "M1-S1"` validation logic in `FabricS1Prototype` for:
+     - typed identifier strictness
+     - `expr_norm` / `expr_norm_v` rules
+     - policy-causal deny `policy_ref` requirement
+     - relation token boundary fields on `HandshakeAccept`
+   - added `Fixtures/M1-S1` pack with `TV-601..TV-610`.
+   - locked `D3`, `D5`, `D7`, `D8` in `M0-B-Wire-Lock-Open-Decisions.md` and propagated updates across matrix/wire/examples/checklist/vectors/docs.
+   - synchronized older fixtures where policy-causal deny now requires `policy_ref` (`S1`, `S3`, `S5` impacted vectors).
+   - added closure/continuity artifacts:
+     - `M1-S1-Closure.md`
+     - `M1-Status-Checkpoint.md`
+3. Validation runs:
+   - S1: 14/14
+   - S2: 8/8
+   - S3: 4/4
+   - S4: 4/4
+   - S5: 3/3
+   - M1-S1: 10/10
+4. Current doing:
+   - final continuity synchronization and scoped commit preparation on `codex/m1-s1-wire-closure`.
+5. Next:
+   - start M1-S2 runtime-bridge slice from locked wire baseline.
+6. Risks/blockers:
+   - none immediate; keep wire decisions closed unless explicitly reopened.

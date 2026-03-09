@@ -1,4 +1,5 @@
 using System.Text.Json;
+using System.Text.RegularExpressions;
 
 namespace FabricS1Prototype;
 
@@ -9,6 +10,10 @@ internal sealed class ConformanceEngine
     private const string SliceProfileS3 = "S3";
     private const string SliceProfileS4 = "S4";
     private const string SliceProfileS5 = "S5";
+    private const string SliceProfileM1S1 = "M1-S1";
+
+    private static readonly Regex TypedIdentifierRegex = new("^[a-z]{2,6}:[A-Za-z0-9][A-Za-z0-9._-]{2,127}$", RegexOptions.Compiled);
+    private static readonly Regex RelationTokenCidRegex = new("^sha256:[0-9a-fA-F]{8,128}$", RegexOptions.Compiled);
 
     private static readonly HashSet<string> KnownSliceProfiles = new(StringComparer.Ordinal)
     {
@@ -16,7 +21,34 @@ internal sealed class ConformanceEngine
         SliceProfileS2,
         SliceProfileS3,
         SliceProfileS4,
-        SliceProfileS5
+        SliceProfileS5,
+        SliceProfileM1S1
+    };
+
+    private static readonly HashSet<string> KnownTokenTransportModes = new(StringComparer.Ordinal)
+    {
+        "reference",
+        "inline"
+    };
+
+    private static readonly HashSet<string> PolicyCausalDenyCodes = new(StringComparer.Ordinal)
+    {
+        "PolicyDenied",
+        "DisclosureDenied",
+        "GrantMissing",
+        "GrantExpired"
+    };
+
+    private static readonly HashSet<string> TypedIdentifierPrefixes = new(StringComparer.Ordinal)
+    {
+        "nid",
+        "rid",
+        "gid",
+        "pid",
+        "tid",
+        "rte",
+        "mid",
+        "trc"
     };
 
     private static readonly HashSet<string> KnownGrantStatuses = new(StringComparer.Ordinal)
@@ -289,6 +321,9 @@ internal sealed class ConformanceEngine
                 }
             }
 
+            ValidateExprNormVersionFields(fixture, message, errors);
+            ValidateDenyPolicyReferenceFields(fixture, message, errors);
+
             if (string.Equals(sliceProfile, SliceProfileS2, StringComparison.Ordinal) &&
                 string.Equals(message.Type, "RouteUpgradeProbe", StringComparison.Ordinal))
             {
@@ -309,6 +344,11 @@ internal sealed class ConformanceEngine
             if (string.Equals(sliceProfile, SliceProfileS5, StringComparison.Ordinal))
             {
                 ValidateS5PolicyFields(fixture, message, errors);
+            }
+
+            if (string.Equals(sliceProfile, SliceProfileM1S1, StringComparison.Ordinal))
+            {
+                ValidateM1S1WireClosureFields(fixture, message, errors);
             }
         }
     }
@@ -506,6 +546,210 @@ internal sealed class ConformanceEngine
         ValidateRequiredBooleanField(fixture, message, "parent_hard_lock", errors);
         ValidateRequiredBooleanField(fixture, message, "child_weaken_attempt", errors);
         ValidateRequiredBooleanField(fixture, message, "override_granted", errors);
+    }
+
+    private static void ValidateExprNormVersionFields(FixtureCase fixture, FixtureMessage message, List<ConformanceError> errors)
+    {
+        if (!string.Equals(message.Type, "ResolveRequest", StringComparison.Ordinal) &&
+            !string.Equals(message.Type, "ResolveResponse", StringComparison.Ordinal) &&
+            !string.Equals(message.Type, "ResolveReferral", StringComparison.Ordinal))
+        {
+            return;
+        }
+
+        if (message.Body is null || message.Body.Value.ValueKind != JsonValueKind.Object)
+        {
+            return;
+        }
+
+        var hasExprNorm = message.Body.Value.TryGetProperty("expr_norm", out var exprNormElement);
+        var hasExprNormVersion = message.Body.Value.TryGetProperty("expr_norm_v", out var exprNormVersionElement);
+
+        if (!hasExprNorm)
+        {
+            if (hasExprNormVersion)
+            {
+                AddError(errors, "L2", "E2064_EXPR_NORM_V_WITHOUT_EXPR_NORM", $"{fixture.Id}/{message.Type} includes 'expr_norm_v' without 'expr_norm'.");
+            }
+
+            return;
+        }
+
+        if (exprNormElement.ValueKind != JsonValueKind.String || string.IsNullOrWhiteSpace(exprNormElement.GetString()))
+        {
+            AddError(errors, "L2", "E2062_EXPR_NORM_VERSION_INVALID_TYPE", $"{fixture.Id}/{message.Type} field 'expr_norm' must be a non-empty string when present.");
+            return;
+        }
+
+        if (!hasExprNormVersion)
+        {
+            AddError(errors, "L2", "E2061_EXPR_NORM_VERSION_REQUIRED", $"{fixture.Id}/{message.Type} requires 'expr_norm_v' when 'expr_norm' is present.");
+            return;
+        }
+
+        if (exprNormVersionElement.ValueKind != JsonValueKind.Number || !exprNormVersionElement.TryGetInt32(out var exprNormVersion))
+        {
+            AddError(errors, "L2", "E2062_EXPR_NORM_VERSION_INVALID_TYPE", $"{fixture.Id}/{message.Type} field 'expr_norm_v' must be an integer.");
+            return;
+        }
+
+        if (exprNormVersion != 1)
+        {
+            AddError(errors, "L2", "E2063_EXPR_NORM_VERSION_UNSUPPORTED", $"{fixture.Id}/{message.Type} field 'expr_norm_v' value '{exprNormVersion}' is unsupported. Expected '1'.");
+        }
+    }
+
+    private static void ValidateDenyPolicyReferenceFields(FixtureCase fixture, FixtureMessage message, List<ConformanceError> errors)
+    {
+        if (!string.Equals(message.Type, "ResolveDeny", StringComparison.Ordinal) &&
+            !string.Equals(message.Type, "HandshakeDeny", StringComparison.Ordinal) &&
+            !string.Equals(message.Type, "PolicyDeny", StringComparison.Ordinal))
+        {
+            return;
+        }
+
+        if (message.Body is null || message.Body.Value.ValueKind != JsonValueKind.Object)
+        {
+            return;
+        }
+
+        var denyCode = GetBodyString(message, "deny_code");
+        if (denyCode is null || !PolicyCausalDenyCodes.Contains(denyCode))
+        {
+            return;
+        }
+
+        if (!message.Body.Value.TryGetProperty("policy_ref", out var policyRefElement))
+        {
+            AddError(errors, "L2", "E2065_POLICY_REF_REQUIRED_FOR_DENY", $"{fixture.Id}/{message.Type} deny_code '{denyCode}' requires 'policy_ref'.");
+            return;
+        }
+
+        if (policyRefElement.ValueKind != JsonValueKind.String || string.IsNullOrWhiteSpace(policyRefElement.GetString()))
+        {
+            AddError(errors, "L2", "E2066_POLICY_REF_INVALID_TYPE", $"{fixture.Id}/{message.Type} field 'policy_ref' must be a non-empty string.");
+        }
+    }
+
+    private static void ValidateM1S1WireClosureFields(FixtureCase fixture, FixtureMessage message, List<ConformanceError> errors)
+    {
+        if (message.Body is null || message.Body.Value.ValueKind != JsonValueKind.Object)
+        {
+            return;
+        }
+
+        ValidateOptionalTypedIdentifierField(fixture, message, "policy_ref", errors);
+        ValidateOptionalTypedIdentifierField(fixture, message, "grant_ref", errors);
+        ValidateOptionalTypedIdentifierField(fixture, message, "endpoint_disclosure_grant_ref", errors);
+        ValidateOptionalTypedIdentifierField(fixture, message, "fallback_route_ref", errors);
+        ValidateOptionalTypedIdentifierField(fixture, message, "active_route_ref", errors);
+        ValidateOptionalTypedIdentifierField(fixture, message, "relation_token_ref", errors);
+
+        if (!string.Equals(message.Type, "HandshakeAccept", StringComparison.Ordinal))
+        {
+            return;
+        }
+
+        if (!message.Body.Value.TryGetProperty("token_transport", out var tokenTransportElement))
+        {
+            AddError(errors, "L2", "E2067_TOKEN_TRANSPORT_REQUIRED", $"{fixture.Id}/{message.Type} requires 'token_transport' ('reference' or 'inline').");
+            return;
+        }
+
+        if (tokenTransportElement.ValueKind != JsonValueKind.String)
+        {
+            AddError(errors, "L2", "E2068_TOKEN_TRANSPORT_INVALID", $"{fixture.Id}/{message.Type} field 'token_transport' must be a string.");
+            return;
+        }
+
+        var tokenTransport = tokenTransportElement.GetString() ?? string.Empty;
+        if (!KnownTokenTransportModes.Contains(tokenTransport))
+        {
+            AddError(errors, "L2", "E2068_TOKEN_TRANSPORT_INVALID", $"{fixture.Id}/{message.Type} field 'token_transport' value '{tokenTransport}' is invalid.");
+            return;
+        }
+
+        if (!message.Body.Value.TryGetProperty("relation_token_ref", out var relationTokenRefElement))
+        {
+            AddError(errors, "L2", "E2069_TOKEN_REF_REQUIRED", $"{fixture.Id}/{message.Type} requires 'relation_token_ref'.");
+            return;
+        }
+
+        if (relationTokenRefElement.ValueKind != JsonValueKind.String || !IsTypedIdentifier(relationTokenRefElement.GetString() ?? string.Empty))
+        {
+            AddError(errors, "L2", "E2069_TOKEN_REF_REQUIRED", $"{fixture.Id}/{message.Type} field 'relation_token_ref' must be a typed identifier.");
+        }
+
+        if (!message.Body.Value.TryGetProperty("relation_token_cid", out var relationTokenCidElement))
+        {
+            AddError(errors, "L2", "E2070_TOKEN_CID_REQUIRED", $"{fixture.Id}/{message.Type} requires 'relation_token_cid'.");
+            return;
+        }
+
+        if (relationTokenCidElement.ValueKind != JsonValueKind.String)
+        {
+            AddError(errors, "L2", "E2071_TOKEN_CID_INVALID", $"{fixture.Id}/{message.Type} field 'relation_token_cid' must be a string.");
+            return;
+        }
+
+        var relationTokenCid = relationTokenCidElement.GetString() ?? string.Empty;
+        if (!RelationTokenCidRegex.IsMatch(relationTokenCid))
+        {
+            AddError(errors, "L2", "E2071_TOKEN_CID_INVALID", $"{fixture.Id}/{message.Type} field 'relation_token_cid' value '{relationTokenCid}' is invalid. Expected 'sha256:<hex>'.");
+        }
+
+        var hasTokenBlob = message.Body.Value.TryGetProperty("relation_token_blob", out var tokenBlobElement);
+        if (string.Equals(tokenTransport, "inline", StringComparison.Ordinal))
+        {
+            if (!hasTokenBlob || tokenBlobElement.ValueKind != JsonValueKind.String || string.IsNullOrWhiteSpace(tokenBlobElement.GetString()))
+            {
+                AddError(errors, "L2", "E2072_TOKEN_BLOB_REQUIRED_INLINE", $"{fixture.Id}/{message.Type} requires non-empty 'relation_token_blob' when token_transport='inline'.");
+            }
+        }
+        else
+        {
+            if (hasTokenBlob && !(tokenBlobElement.ValueKind == JsonValueKind.String && string.IsNullOrWhiteSpace(tokenBlobElement.GetString())))
+            {
+                AddError(errors, "L2", "E2073_TOKEN_BLOB_FORBIDDEN_REFERENCE", $"{fixture.Id}/{message.Type} must not include 'relation_token_blob' when token_transport='reference'.");
+            }
+        }
+    }
+
+    private static void ValidateOptionalTypedIdentifierField(FixtureCase fixture, FixtureMessage message, string fieldName, List<ConformanceError> errors)
+    {
+        if (!message.Body!.Value.TryGetProperty(fieldName, out var element))
+        {
+            return;
+        }
+
+        if (element.ValueKind != JsonValueKind.String)
+        {
+            AddError(errors, "L2", "E2080_TYPED_IDENTIFIER_INVALID", $"{fixture.Id}/{message.Type} field '{fieldName}' must be a typed identifier string.");
+            return;
+        }
+
+        var value = element.GetString() ?? string.Empty;
+        if (!IsTypedIdentifier(value))
+        {
+            AddError(errors, "L2", "E2080_TYPED_IDENTIFIER_INVALID", $"{fixture.Id}/{message.Type} field '{fieldName}' value '{value}' is not a valid typed identifier.");
+        }
+    }
+
+    private static bool IsTypedIdentifier(string value)
+    {
+        if (!TypedIdentifierRegex.IsMatch(value))
+        {
+            return false;
+        }
+
+        var separator = value.IndexOf(':');
+        if (separator <= 0)
+        {
+            return false;
+        }
+
+        var prefix = value[..separator];
+        return TypedIdentifierPrefixes.Contains(prefix);
     }
 
     private static OperationContext ExecuteMessageFlow(FixtureCase fixture, string sliceProfile, List<ConformanceError> errors)

@@ -13,7 +13,7 @@
     "deny message is emitted without policy operation context"
   ],
   "messages": [
-    { "type": "PolicyDeny", "role": "ancestor_authority", "body": { "deny_code": "PolicyDenied" } }
+    { "type": "PolicyDeny", "role": "ancestor_authority", "body": { "deny_code": "PolicyDenied", "policy_ref": "pid:adult.policy.hardlock.v1" } }
   ],
   "expected_state_trace": [
     "Deny"

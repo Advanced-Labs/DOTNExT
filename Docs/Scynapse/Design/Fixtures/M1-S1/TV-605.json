@@ -1,19 +1,23 @@
 {
-  "id": "TV-109",
-  "title": "Mediated Handshake Rejection Is Terminal",
-  "expect_conformance": "fail",
-  "expected_error_ids": [
-    "E3006_POST_TERMINAL_MESSAGE"
-  ],
+  "id": "TV-605",
+  "title": "M1-S1 D7 Pass: PolicyDenied with typed policy_ref",
+  "slice_profile": "M1-S1",
   "preconditions": [
-    "handshake gate rejection already emitted"
+    "handshake deny is policy-causal",
+    "policy_ref is present in typed identifier format"
   ],
   "messages": [
     { "type": "HandshakeInit", "role": "requester" },
     { "type": "HandshakeChallenge", "role": "mediator" },
     { "type": "HandshakeProof", "role": "requester" },
-    { "type": "HandshakeDeny", "role": "mediator", "body": { "deny_code": "PolicyDenied", "policy_ref": "pid:adult.policy.v5" } },
-    { "type": "HandshakeAccept", "role": "mediator", "body": { "route_mode": "parent_mediated", "disclosure_level": "mediator_visible" } }
+    {
+      "type": "HandshakeDeny",
+      "role": "mediator",
+      "body": {
+        "deny_code": "PolicyDenied",
+        "policy_ref": "pid:adult.policy.v5"
+      }
+    }
   ],
   "expected_state_trace": [
     "MediatedHandshake",

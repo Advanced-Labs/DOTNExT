@@ -1,0 +1,40 @@
+{
+  "id": "TV-607",
+  "title": "M1-S1 D8 Pass: HandshakeAccept relation token in inline mode",
+  "slice_profile": "M1-S1",
+  "preconditions": [
+    "handshake proof succeeded",
+    "relation token is carried inline with reference + CID"
+  ],
+  "messages": [
+    { "type": "HandshakeInit", "role": "requester" },
+    { "type": "HandshakeChallenge", "role": "mediator" },
+    { "type": "HandshakeProof", "role": "requester" },
+    {
+      "type": "HandshakeAccept",
+      "role": "mediator",
+      "body": {
+        "route_mode": "parent_mediated",
+        "disclosure_level": "mediator_visible",
+        "token_transport": "inline",
+        "relation_token_ref": "tid:rel778.token",
+        "relation_token_cid": "sha256:7a9d11cc88af2200",
+        "relation_token_blob": "c2lnbmVkLXJlbGF0aW9uLXRva2Vu",
+        "expires_at": 1772965030000
+      }
+    }
+  ],
+  "expected_state_trace": [
+    "MediatedHandshake",
+    "RelayedSession",
+    "Completed"
+  ],
+  "expected_outcome": {
+    "success": true,
+    "deny_code": null
+  },
+  "assertions": [
+    { "id": "A1", "kind": "state", "check": "final_state_equals", "value": "Completed" },
+    { "id": "A2", "kind": "error", "check": "deny_code_absent", "value": true }
+  ]
+}

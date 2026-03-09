@@ -1,0 +1,36 @@
+{
+  "id": "TV-601",
+  "title": "M1-S1 D5 Pass: ResolveRequest expr_norm with expr_norm_v=1",
+  "slice_profile": "M1-S1",
+  "preconditions": [
+    "resolve request includes normalized expression",
+    "normalization version is explicit and supported"
+  ],
+  "messages": [
+    {
+      "type": "ResolveRequest",
+      "role": "requester",
+      "body": {
+        "expr_raw": ".Adult.Games.RedX",
+        "expr_norm": ".adult.games.redx",
+        "expr_norm_v": 1,
+        "operation_class": "meta"
+      }
+    },
+    { "type": "ResolveDeny", "role": "authority", "body": { "deny_code": "PathNotFound" } }
+  ],
+  "expected_state_trace": [
+    "ResolveIntent",
+    "DiscoverPath",
+    "Deny"
+  ],
+  "expected_outcome": {
+    "success": false,
+    "deny_code": "PathNotFound",
+    "retryable": false
+  },
+  "assertions": [
+    { "id": "A1", "kind": "state", "check": "final_state_equals", "value": "Deny" },
+    { "id": "A2", "kind": "error", "check": "deny_code_equals", "value": "PathNotFound" }
+  ]
+}
