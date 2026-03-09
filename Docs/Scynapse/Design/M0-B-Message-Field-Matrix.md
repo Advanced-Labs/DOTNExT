@@ -89,8 +89,8 @@ Family ranges:
 
 1. `1-31` envelope/common
 2. `32-63` resolve
-3. `64-95` handshake
-4. `96-127` route/upgrade
+3. `64-96` handshake
+4. `97-127` route/upgrade
 5. `128-159` observe (reserved in S1)
 6. `160-191` policy/grant (reserved in S1)
 
@@ -176,6 +176,8 @@ Handshake keys (S1-assigned):
 | `92` | `strict_failure_mode` |
 | `93` | `reference_lookup_status` |
 | `94` | `reference_lookup_cid` |
+| `95` | `reference_grant_status` |
+| `96` | `reference_grant_ref` |
 
 Route/upgrade keys (S1-assigned):
 
@@ -317,6 +319,8 @@ Relation token CID convention:
 | `relation_token_blob` | C | N | M1-S1/M1-S5/M1-S6 profile: required for `inline`, forbidden for `reference` |
 | `reference_lookup_status` | C | N | M1-S6 profile + `token_transport=reference`: required (`resolved|missing|rebinding_detected`) |
 | `reference_lookup_cid` | C | N | M1-S6 profile + `token_transport=reference` + `reference_lookup_status=resolved`: required `sha256:<hex>` |
+| `reference_grant_status` | C | N | M1-S7 profile + `token_transport=reference`: required (`active|missing|expired|revoked|not_required`) |
+| `reference_grant_ref` | C | N | M1-S7 profile + `reference_grant_status=active`: required typed identifier |
 
 ### 4.5 HandshakeDeny
 
@@ -468,6 +472,7 @@ Relation token CID convention:
 11. In M1-S4 profile, `HandshakeProof.strict_failure_mode` is valid only in strict mode and must be from the locked domain.
 12. In M1-S5 profile, inline `HandshakeAccept` token CID must match `sha256(relation_token_blob)` or deterministic deny is emitted.
 13. In M1-S6 profile, reference `HandshakeAccept` requires lookup status contract, and resolved lookup CID must match `relation_token_cid` or deterministic deny is emitted.
+14. In M1-S7 profile, reference `HandshakeAccept` requires grant status contract, and active grant requires typed `reference_grant_ref`; missing/expired/revoked grant states emit deterministic deny.
 
 ---
 
@@ -481,4 +486,4 @@ Completed:
 Current next step:
 
 1. keep this matrix synchronized with wire examples and conformance harness fixtures
-2. preserve M1-S1 wire-closure constraints while extending runtime bridge and security-adapter slices, including M1-S4 strict failure mapping, M1-S5 token-integrity constraints, and M1-S6 reference-token guard constraints
+2. preserve M1-S1 wire-closure constraints while extending runtime bridge and security-adapter slices, including M1-S4 strict failure mapping, M1-S5 token-integrity constraints, M1-S6 reference-token guard constraints, and M1-S7 reference-grant guard constraints

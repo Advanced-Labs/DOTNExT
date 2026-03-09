@@ -1,0 +1,47 @@
+{
+  "id": "TV-1206",
+  "title": "M1-S7 Active Grant Missing Reference",
+  "slice_profile": "M1-S7",
+  "expect_conformance": "fail",
+  "expected_error_ids": [
+    "E3115_M1S7_REFERENCE_GRANT_REF_REQUIRED"
+  ],
+  "expected_error_contains": [
+    "requires 'reference_grant_ref'"
+  ],
+  "preconditions": [
+    "reference grant status is active",
+    "reference grant reference is omitted"
+  ],
+  "messages": [
+    { "type": "HandshakeInit", "role": "requester" },
+    { "type": "HandshakeChallenge", "role": "mediator" },
+    { "type": "HandshakeProof", "role": "requester", "body": { "verification_mode": "strict", "proof_ref": "nid:m1s7.reference.schema.grantref" } },
+    {
+      "type": "HandshakeAccept",
+      "role": "mediator",
+      "body": {
+        "route_mode": "parent_mediated",
+        "disclosure_level": "mediator_visible",
+        "token_transport": "reference",
+        "relation_token_ref": "tid:reltok-1206",
+        "relation_token_cid": "sha256:ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+        "reference_lookup_status": "resolved",
+        "reference_lookup_cid": "sha256:ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+        "reference_grant_status": "active"
+      }
+    }
+  ],
+  "expected_state_trace": [
+    "MediatedHandshake",
+    "RelayedSession",
+    "Completed"
+  ],
+  "expected_outcome": {
+    "success": true,
+    "deny_code": null
+  },
+  "assertions": [
+    { "id": "A1", "kind": "error", "check": "deny_code_absent", "value": true }
+  ]
+}

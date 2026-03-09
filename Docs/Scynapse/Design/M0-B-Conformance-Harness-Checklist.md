@@ -241,6 +241,23 @@ M1-S6 extension note:
    - `E3105_M1S6_REFERENCE_LOOKUP_CID_INVALID`
    - `E3106_M1S6_REFERENCE_LOOKUP_STATUS_INVALID`
 
+M1-S7 extension note:
+
+1. `slice_profile: "M1-S7"` extends M1-S6 with reference lookup grant checks.
+2. M1-S7 `HandshakeAccept` with `token_transport=reference` must include:
+   - `reference_grant_status` (`active|missing|expired|revoked|not_required`)
+3. `reference_grant_status=active` requires:
+   - typed `reference_grant_ref`
+4. deterministic reference grant IDs:
+   - `E3111_M1S7_REFERENCE_GRANT_MISSING`
+   - `E3112_M1S7_REFERENCE_GRANT_EXPIRED`
+   - `E3113_M1S7_REFERENCE_GRANT_REVOKED`
+5. deterministic schema IDs:
+   - `E3110_M1S7_REFERENCE_GRANT_STATUS_REQUIRED`
+   - `E3114_M1S7_REFERENCE_GRANT_STATUS_INVALID`
+   - `E3115_M1S7_REFERENCE_GRANT_REF_REQUIRED`
+   - `E3116_M1S7_REFERENCE_GRANT_REF_INVALID`
+
 ---
 
 ## 5. Conformance Gates (Pass/Fail)
@@ -281,6 +298,7 @@ Pass criteria:
 8. M1-S4 strict temporal/revocation/proof-chain failures map deterministically to stable strict-failure IDs, with invalid mode rejected at schema level.
 9. M1-S5 inline relation-token CID integrity mismatches map deterministically to `E3091` without bypassing existing handshake state rules.
 10. M1-S6 reference lookup unresolved/rebinding/CID mismatch paths map deterministically to `E3101`/`E3102`/`E3103` without bypassing existing handshake state rules.
+11. M1-S7 reference grant missing/expired/revoked paths map deterministically to `E3111`/`E3112`/`E3113` before reference lookup-resolution guard checks.
 
 ### 5.5 Gate G5: Observation Conformance
 

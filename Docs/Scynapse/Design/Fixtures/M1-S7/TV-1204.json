@@ -1,0 +1,46 @@
+{
+  "id": "TV-1204",
+  "title": "M1-S7 Reference Grant Expired",
+  "slice_profile": "M1-S7",
+  "expect_conformance": "fail",
+  "expected_error_ids": [
+    "E3112_M1S7_REFERENCE_GRANT_EXPIRED"
+  ],
+  "expected_error_contains": [
+    "reference lookup grant is expired"
+  ],
+  "preconditions": [
+    "reference grant is present but expired"
+  ],
+  "messages": [
+    { "type": "HandshakeInit", "role": "requester" },
+    { "type": "HandshakeChallenge", "role": "mediator" },
+    { "type": "HandshakeProof", "role": "requester", "body": { "verification_mode": "strict", "proof_ref": "nid:m1s7.reference.grant.expired" } },
+    {
+      "type": "HandshakeAccept",
+      "role": "mediator",
+      "body": {
+        "route_mode": "parent_mediated",
+        "disclosure_level": "mediator_visible",
+        "token_transport": "reference",
+        "relation_token_ref": "tid:reltok-1204",
+        "relation_token_cid": "sha256:dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+        "reference_lookup_status": "resolved",
+        "reference_lookup_cid": "sha256:dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+        "reference_grant_status": "expired"
+      }
+    }
+  ],
+  "expected_state_trace": [
+    "MediatedHandshake",
+    "Deny"
+  ],
+  "expected_outcome": {
+    "success": false,
+    "deny_code": "GrantExpired",
+    "retryable": true
+  },
+  "assertions": [
+    { "id": "A1", "kind": "error", "check": "deny_code_equals", "value": "GrantExpired" }
+  ]
+}

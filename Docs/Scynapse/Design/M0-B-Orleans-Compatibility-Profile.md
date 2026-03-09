@@ -233,7 +233,19 @@ This profile maps M0-B protocol fields to their Orleans lineage, with explicit c
 
 ---
 
-## 20. Review Checklist
+## 20. M1-S7 Reference-Grant Guard Behavior Classification
+
+| Hardened Behavior | Tag | Notes |
+|---|---|---|
+| M1-S6 reference lookup guard reuse in `M1-S7` handshake accept path | `A` | adapts prior reference integrity checks into grant-gated disclosure model |
+| Reference grant status contract on `HandshakeAccept` (`active|missing|expired|revoked|not_required`) | `N` | Scynapse-native deterministic grant-state gate for reference resolution |
+| Active-grant typed reference requirement (`reference_grant_ref`) | `N` | Scynapse-native capability-causality anchor for auditable grant binding |
+| Deterministic reference-grant deny mapping (`E3111`, `E3112`, `E3113`) | `N` | machine-checkable conformance behavior for grant gate failures |
+| Reference grant handling relying on silo/client trust shortcuts | `D` | explicitly blocked; remains node-unified and capability-gated by policy semantics |
+
+---
+
+## 21. Review Checklist
 
 1. Are any fields tagged `A` but still carrying hidden silo/cluster assumptions?
 2. Are all `N` fields tied to M0-A invariants?

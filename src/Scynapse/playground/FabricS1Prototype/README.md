@@ -93,6 +93,12 @@ Run M1-S6 fixture pack:
 dotnet run --project playground/FabricS1Prototype/FabricS1Prototype.csproj -- D:\Dev\dotnext\Docs\Scynapse\Design\Fixtures\M1-S6
 ```
 
+Run M1-S7 fixture pack:
+
+```powershell
+dotnet run --project playground/FabricS1Prototype/FabricS1Prototype.csproj -- D:\Dev\dotnext\Docs\Scynapse\Design\Fixtures\M1-S7
+```
+
 Expected-fail fixture semantics:
 
 1. `expected_error_ids` is the preferred exact failure oracle.
@@ -162,3 +168,10 @@ Slice profile semantics:
      - `E3101_M1S6_REFERENCE_TOKEN_UNRESOLVED`
      - `E3102_M1S6_REFERENCE_TOKEN_CID_MISMATCH`
      - `E3103_M1S6_REFERENCE_TOKEN_REBIND_DETECTED`
+12. `slice_profile: "M1-S7"` extends M1-S6 with capability-gated reference lookup grant checks:
+   - reference transport requires `reference_grant_status` (`active|missing|expired|revoked|not_required`)
+   - `active` status requires typed `reference_grant_ref`
+   - deterministic reference grant IDs:
+     - `E3111_M1S7_REFERENCE_GRANT_MISSING`
+     - `E3112_M1S7_REFERENCE_GRANT_EXPIRED`
+     - `E3113_M1S7_REFERENCE_GRANT_REVOKED`

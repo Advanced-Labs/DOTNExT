@@ -63,6 +63,8 @@ Reference:
 - `Docs/Scynapse/Design/M1-S5-Closure.md`
 - `Docs/Scynapse/Design/M1-S6-Task-Board.md`
 - `Docs/Scynapse/Design/M1-S6-Closure.md`
+- `Docs/Scynapse/Design/M1-S7-Task-Board.md`
+- `Docs/Scynapse/Design/M1-S7-Closure.md`
 - `Docs/Scynapse/Design/M0-B-Wire-Lock-Open-Decisions.md`
 - `Docs/Scynapse/Design/M0-Status-Checkpoint.md`
 
@@ -351,3 +353,8 @@ Failure responses should include:
    - `token_transport=reference` requires `reference_lookup_status` in `resolved|missing|rebinding_detected`.
    - resolved lookup requires `reference_lookup_cid` and equality with `relation_token_cid`.
    - deterministic deny IDs: `E3101` (unresolved), `E3102` (CID mismatch), `E3103` (rebinding).
+18. M1-S7 reference-grant guard profile:
+   - `HandshakeAccept` in `M1-S7` extends M1-S6 with reference grant status checks.
+   - `token_transport=reference` requires `reference_grant_status` in `active|missing|expired|revoked|not_required`.
+   - `reference_grant_status=active` requires typed `reference_grant_ref`.
+   - deterministic deny IDs: `E3111` (grant missing), `E3112` (grant expired), `E3113` (grant revoked).

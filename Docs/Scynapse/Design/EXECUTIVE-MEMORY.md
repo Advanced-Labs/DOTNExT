@@ -4,13 +4,13 @@ Last updated: 2026-03-08
 
 ## 1. Mission Snapshot
 
-Current mission: close and checkpoint M1-S6 reference-token resolution/rebinding guard work, then open the next bounded M1 slice while preserving deterministic S1..S5 + M1-S1 + M1-S2 + M1-S3 + M1-S4 + M1-S5 + M1-S6 behavior.
+Current mission: close and checkpoint M1-S7 reference-grant guard work, then open the next bounded M1 slice while preserving deterministic S1..S5 + M1-S1 + M1-S2 + M1-S3 + M1-S4 + M1-S5 + M1-S6 + M1-S7 behavior.
 
 Latest checkpoint status (2026-03-08):
 
-1. active branch: `codex/m1-s6-reference-token-guard`
+1. active branch: `codex/m1-s7-reference-grant-guard`
 2. continuity files synchronized
-3. closure rerun confirmed 69/69 effective pass (S1..S5 + M1-S1 + M1-S2 + M1-S3 + M1-S4 + M1-S5 + M1-S6)
+3. closure rerun confirmed 76/76 effective pass (S1..S5 + M1-S1 + M1-S2 + M1-S3 + M1-S4 + M1-S5 + M1-S6 + M1-S7)
 
 Current active path:
 
@@ -27,6 +27,7 @@ Current active path:
 11. M1-S4 strict failure mapping slice implemented (deterministic strict temporal/revocation/chain fail IDs)
 12. M1-S5 relation-token integrity slice implemented (inline token CID integrity deterministic deny mapping)
 13. M1-S6 reference-token guard slice implemented (reference lookup unresolved/rebinding/CID-mismatch deterministic deny mapping)
+14. M1-S7 reference-grant guard slice implemented (grant-state deterministic deny mapping for reference transport)
 
 ---
 
@@ -124,16 +125,21 @@ Current active path:
 88. deterministic M1-S6 IDs added (`E3100`..`E3106`) for unresolved/rebinding/mismatch/schema failures
 89. M1-S6 fixture pack added (`Docs/Scynapse/Design/Fixtures/M1-S6`, TV-1101..TV-1105)
 90. cross-pack rerun stable: S1 14/14, S2 8/8, S3 4/4, S4 4/4, S5 3/3, M1-S1 10/10, M1-S2 6/6, M1-S3 5/5, M1-S4 6/6, M1-S5 4/4, M1-S6 5/5
+91. M1-S7 implementation branch created: `codex/m1-s7-reference-grant-guard`
+92. M1-S7 profile support added (`slice_profile: "M1-S7"`) with reference-grant status contract on reference transport
+93. deterministic M1-S7 IDs added (`E3110`..`E3116`) for grant-status and grant-ref schema/runtime deny paths
+94. M1-S7 fixture pack added (`Docs/Scynapse/Design/Fixtures/M1-S7`, TV-1201..TV-1207)
+95. closure rerun stable: S1 14/14, S2 8/8, S3 4/4, S4 4/4, S5 3/3, M1-S1 10/10, M1-S2 6/6, M1-S3 5/5, M1-S4 6/6, M1-S5 4/4, M1-S6 5/5, M1-S7 7/7
 
 ### Doing
 
-1. final continuity synchronization and scoped commit/push preparation for M1-S6 closure baseline
+1. final continuity synchronization and scoped commit/push preparation for M1-S7 closure baseline
 
 ### Next
 
-1. commit and push M1-S6 closure baseline on `codex/m1-s6-reference-token-guard`
-2. define and open the next bounded M1 slice from M1-S6 closure
-3. preserve S1/S2/S3/S4/S5 + M1-S1 + M1-S2 + M1-S3 + M1-S4 + M1-S5 + M1-S6 fixture and error-ID stability
+1. commit and push M1-S7 closure baseline on `codex/m1-s7-reference-grant-guard`
+2. define and open the next bounded M1 slice from M1-S7 closure
+3. preserve S1/S2/S3/S4/S5 + M1-S1 + M1-S2 + M1-S3 + M1-S4 + M1-S5 + M1-S6 + M1-S7 fixture and error-ID stability
 
 ---
 
@@ -194,7 +200,9 @@ Authority file:
 22. `M1-S5-Closure.md`
 23. `M1-S6-Task-Board.md`
 24. `M1-S6-Closure.md`
-25. latest entry in `SESSION-LOG.md`
+25. `M1-S7-Task-Board.md`
+26. `M1-S7-Closure.md`
+27. latest entry in `SESSION-LOG.md`
 
 ---
 
@@ -241,6 +249,9 @@ Authority file:
    - `M1-S6-Task-Board.md`
    - `M1-S6-Closure.md`
    - `Fixtures/M1-S6/README.md`
+   - `M1-S7-Task-Board.md`
+   - `M1-S7-Closure.md`
+   - `Fixtures/M1-S7/README.md`
 5. Wire lock:
    - `M0-B-Wire-Lock-Open-Decisions.md`
    - `M0-B-Wire-Examples.md`

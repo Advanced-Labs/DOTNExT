@@ -143,4 +143,5 @@ Current next action:
 6. M1-S4 strict failure-mapping slice completed (`M1-S4-Closure.md`)
 7. M1-S5 relation-token integrity slice completed (`M1-S5-Closure.md`)
 8. M1-S6 reference-token guard slice completed (`M1-S6-Closure.md`)
-9. define next bounded M1 slice from M1-S6 closure baseline
+9. M1-S7 reference-grant guard slice completed (`M1-S7-Closure.md`)
+10. define next bounded M1 slice from M1-S7 closure baseline

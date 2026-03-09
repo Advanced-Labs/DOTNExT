@@ -1,0 +1,46 @@
+{
+  "id": "TV-1202",
+  "title": "M1-S7 Reference Grant Schema Missing Status",
+  "slice_profile": "M1-S7",
+  "expect_conformance": "fail",
+  "expected_error_ids": [
+    "E3110_M1S7_REFERENCE_GRANT_STATUS_REQUIRED"
+  ],
+  "expected_error_contains": [
+    "requires 'reference_grant_status'"
+  ],
+  "preconditions": [
+    "token transport is reference",
+    "reference grant status is omitted"
+  ],
+  "messages": [
+    { "type": "HandshakeInit", "role": "requester" },
+    { "type": "HandshakeChallenge", "role": "mediator" },
+    { "type": "HandshakeProof", "role": "requester", "body": { "verification_mode": "strict", "proof_ref": "nid:m1s7.reference.schema.status" } },
+    {
+      "type": "HandshakeAccept",
+      "role": "mediator",
+      "body": {
+        "route_mode": "parent_mediated",
+        "disclosure_level": "mediator_visible",
+        "token_transport": "reference",
+        "relation_token_ref": "tid:reltok-1202",
+        "relation_token_cid": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "reference_lookup_status": "resolved",
+        "reference_lookup_cid": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+      }
+    }
+  ],
+  "expected_state_trace": [
+    "MediatedHandshake",
+    "RelayedSession",
+    "Completed"
+  ],
+  "expected_outcome": {
+    "success": true,
+    "deny_code": null
+  },
+  "assertions": [
+    { "id": "A1", "kind": "error", "check": "deny_code_absent", "value": true }
+  ]
+}

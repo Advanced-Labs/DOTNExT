@@ -921,6 +921,129 @@ Expected outcome:
 
 1. expected fail by exact error ID (`E3104_M1S6_REFERENCE_LOOKUP_CID_REQUIRED`)
 
+### TV-1201 M1-S7 Reference Grant Active and Lookup Resolved
+
+Preconditions:
+
+1. strict security mode is active
+2. reference token transport is selected
+3. reference grant status is active with typed grant reference
+4. reference lookup resolves with CID equal to `relation_token_cid`
+
+Sequence:
+
+1. mediated handshake flow reaches `HandshakeProof`
+2. `HandshakeAccept` provides active grant metadata plus resolved lookup metadata
+
+Expected outcome:
+
+1. success
+2. no deny code
+
+### TV-1202 M1-S7 Reference Grant Schema Missing Status
+
+Preconditions:
+
+1. strict security mode is active
+2. reference token transport is selected
+3. grant status metadata is omitted
+
+Sequence:
+
+1. mediated handshake flow reaches `HandshakeProof`
+2. schema validation evaluates grant metadata on `HandshakeAccept`
+
+Expected outcome:
+
+1. expected fail by exact error ID (`E3110_M1S7_REFERENCE_GRANT_STATUS_REQUIRED`)
+
+### TV-1203 M1-S7 Reference Grant Missing
+
+Preconditions:
+
+1. strict security mode is active
+2. reference token transport is selected
+3. reference grant status is `missing`
+
+Sequence:
+
+1. mediated handshake flow reaches `HandshakeProof`
+2. `HandshakeAccept` provides `reference_grant_status=missing`
+
+Expected outcome:
+
+1. expected fail by exact error ID (`E3111_M1S7_REFERENCE_GRANT_MISSING`)
+
+### TV-1204 M1-S7 Reference Grant Expired
+
+Preconditions:
+
+1. strict security mode is active
+2. reference token transport is selected
+3. reference grant status is `expired`
+
+Sequence:
+
+1. mediated handshake flow reaches `HandshakeProof`
+2. `HandshakeAccept` provides `reference_grant_status=expired`
+
+Expected outcome:
+
+1. expected fail by exact error ID (`E3112_M1S7_REFERENCE_GRANT_EXPIRED`)
+
+### TV-1205 M1-S7 Reference Grant Revoked
+
+Preconditions:
+
+1. strict security mode is active
+2. reference token transport is selected
+3. reference grant status is `revoked`
+
+Sequence:
+
+1. mediated handshake flow reaches `HandshakeProof`
+2. `HandshakeAccept` provides `reference_grant_status=revoked`
+
+Expected outcome:
+
+1. expected fail by exact error ID (`E3113_M1S7_REFERENCE_GRANT_REVOKED`)
+
+### TV-1206 M1-S7 Active Grant Missing Reference
+
+Preconditions:
+
+1. strict security mode is active
+2. reference token transport is selected
+3. reference grant status is `active`
+4. `reference_grant_ref` is omitted
+
+Sequence:
+
+1. mediated handshake flow reaches `HandshakeProof`
+2. schema validation evaluates active grant metadata on `HandshakeAccept`
+
+Expected outcome:
+
+1. expected fail by exact error ID (`E3115_M1S7_REFERENCE_GRANT_REF_REQUIRED`)
+
+### TV-1207 M1-S7 Active Grant Invalid Reference
+
+Preconditions:
+
+1. strict security mode is active
+2. reference token transport is selected
+3. reference grant status is `active`
+4. `reference_grant_ref` is not a valid typed identifier
+
+Sequence:
+
+1. mediated handshake flow reaches `HandshakeProof`
+2. schema validation evaluates active grant metadata on `HandshakeAccept`
+
+Expected outcome:
+
+1. expected fail by exact error ID (`E3116_M1S7_REFERENCE_GRANT_REF_INVALID`)
+
 ---
 
 ## 4. Minimal Coverage Map
@@ -936,6 +1059,7 @@ Expected outcome:
 9. M1 strict failure mapping: TV-901, TV-902, TV-903, TV-904, TV-905, TV-906
 10. M1 relation token integrity: TV-1001, TV-1002, TV-1003, TV-1004
 11. M1 reference token guard: TV-1101, TV-1102, TV-1103, TV-1104, TV-1105
+12. M1 reference grant guard: TV-1201, TV-1202, TV-1203, TV-1204, TV-1205, TV-1206, TV-1207
 
 ### 4.1 S1 Transition-Edge Negative Extension Set
 
@@ -1018,6 +1142,14 @@ Expected outcome:
    - TV-1103 (reference lookup CID mismatch; expected fail by exact error ID)
    - TV-1104 (reference lookup rebinding detected; expected fail by exact error ID)
    - TV-1105 (resolved lookup missing CID; expected fail by exact error ID)
+12. M1-S7 owned vectors:
+   - TV-1201 (active grant + resolved lookup pass)
+   - TV-1202 (missing grant status schema; expected fail by exact error ID)
+   - TV-1203 (grant missing deny; expected fail by exact error ID)
+   - TV-1204 (grant expired deny; expected fail by exact error ID)
+   - TV-1205 (grant revoked deny; expected fail by exact error ID)
+   - TV-1206 (active grant missing ref schema; expected fail by exact error ID)
+   - TV-1207 (active grant invalid ref schema; expected fail by exact error ID)
 
 ---
 
@@ -1040,5 +1172,6 @@ Current next step:
 4. M1-S4 strict failure-mapping vectors executed and stabilized (`TV-901..TV-906`)
 5. M1-S5 relation-token integrity vectors executed and stabilized (`TV-1001..TV-1004`)
 6. M1-S6 reference-token guard vectors executed and stabilized (`TV-1101..TV-1105`)
-7. preserve S1/S2/S3/S4/S5 + M1-S1 + M1-S2 + M1-S3 + M1-S4 + M1-S5 + M1-S6 baseline behavior and machine-checkable error ID stability
-8. open next bounded M1 slice from current closure baseline
+7. M1-S7 reference-grant guard vectors executed and stabilized (`TV-1201..TV-1207`)
+8. preserve S1/S2/S3/S4/S5 + M1-S1 + M1-S2 + M1-S3 + M1-S4 + M1-S5 + M1-S6 + M1-S7 baseline behavior and machine-checkable error ID stability
+9. open next bounded M1 slice from current closure baseline

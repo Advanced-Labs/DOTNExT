@@ -515,3 +515,43 @@ Use this structure for each new entry:
    - push M1-S6 closure baseline and open the next bounded M1 slice.
 6. Risks/blockers:
    - none immediate; preserve deterministic reference-token guard/error-ID stability across all active packs.
+
+### 2026-03-08 (M1-S7 Reference-Grant Guard Slice Implementation)
+
+1. Scope:
+   - execute M1-S7 task board on top of M1-S6 baseline and harden capability-gated reference grant checks.
+2. Key outputs:
+   - created `codex/m1-s7-reference-grant-guard` from M1-S6 baseline.
+   - added `slice_profile: "M1-S7"` handling in conformance engine.
+   - added M1-S7 grant-status field contract on `HandshakeAccept` reference transport:
+     - `reference_grant_status` (`active|missing|expired|revoked|not_required`)
+     - `reference_grant_ref` required and typed when status is `active`
+   - added deterministic M1-S7 runtime/schema IDs:
+     - `E3110_M1S7_REFERENCE_GRANT_STATUS_REQUIRED`
+     - `E3111_M1S7_REFERENCE_GRANT_MISSING`
+     - `E3112_M1S7_REFERENCE_GRANT_EXPIRED`
+     - `E3113_M1S7_REFERENCE_GRANT_REVOKED`
+     - `E3114_M1S7_REFERENCE_GRANT_STATUS_INVALID`
+     - `E3115_M1S7_REFERENCE_GRANT_REF_REQUIRED`
+     - `E3116_M1S7_REFERENCE_GRANT_REF_INVALID`
+   - added isolated fixture pack `Fixtures/M1-S7`: `TV-1201..TV-1207`.
+   - synchronized continuity + protocol docs for M1-S7 profile propagation.
+3. Validation runs:
+   - S1: 14/14
+   - S2: 8/8
+   - S3: 4/4
+   - S4: 4/4
+   - S5: 3/3
+   - M1-S1: 10/10
+   - M1-S2: 6/6
+   - M1-S3: 5/5
+   - M1-S4: 6/6
+   - M1-S5: 4/4
+   - M1-S6: 5/5
+   - M1-S7: 7/7
+4. Current doing:
+   - final continuity synchronization and scoped commit/push preparation on `codex/m1-s7-reference-grant-guard`.
+5. Next:
+   - push M1-S7 closure baseline and open the next bounded M1 slice.
+6. Risks/blockers:
+   - none immediate; preserve deterministic grant-gate/error-ID stability across all active packs.

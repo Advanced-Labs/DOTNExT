@@ -105,6 +105,18 @@ Deliverables:
 2. deterministic deny mapping for `missing`, `rebinding_detected`, and resolved CID mismatch outcomes.
 3. schema-level validation for required/valid lookup CID in resolved reference paths.
 
+### M1-S7: Reference Lookup Grant Guard (Bounded)
+
+Primary goal:
+
+1. enforce deterministic capability-grant checks for reference transport before accepting lookup resolution.
+
+Deliverables:
+
+1. profile `M1-S7` extending M1-S6 with `reference_grant_status` contract.
+2. typed `reference_grant_ref` requirement when `reference_grant_status=active`.
+3. deterministic deny mapping for `missing`, `expired`, and `revoked` grant states.
+
 ---
 
 ## 4. Non-Negotiable Guardrails
@@ -142,4 +154,5 @@ Deliverables:
 4. `M1-S4` strict failure-mapping execution complete (`M1-S4-Closure.md`).
 5. `M1-S5` relation-token integrity execution complete (`M1-S5-Closure.md`).
 6. `M1-S6` reference-token guard execution complete (`M1-S6-Closure.md`).
-7. open next bounded M1 slice task board from this closure baseline.
+7. `M1-S7` reference-grant guard execution complete (`M1-S7-Closure.md`).
+8. open next bounded M1 slice task board from this closure baseline.
