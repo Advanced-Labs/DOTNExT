@@ -66,3 +66,4 @@ Deferred:
 12. M1-S9 reference-grant freshness/replay closure completed: `M1-S9-Closure.md`
 13. M1-S10 reference-grant claim-binding closure completed: `M1-S10-Closure.md`
 14. M1-S11 reference-grant challenge-session nonce-binding closure completed: `M1-S11-Closure.md`
+15. M1-S12 reference-grant issuer-binding closure completed: `M1-S12-Closure.md`

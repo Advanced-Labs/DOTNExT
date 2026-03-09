@@ -353,6 +353,23 @@ M1-S11 extension note:
    - `E3185_M1S11_ACCEPT_NONCE_INVALID`
    - `E3186_M1S11_ACCEPT_NONCE_FIELD_FORBIDDEN`
 
+M1-S12 extension note:
+
+1. `slice_profile: "M1-S12"` extends M1-S11 with deterministic issuer-binding checks.
+2. M1-S12 `HandshakeInit` must include:
+   - `requested_grant_issuer_ref` (typed identifier)
+3. M1-S12 active reference-grant `HandshakeAccept` (`token_transport=reference` and `reference_grant_status=active`) must include:
+   - `reference_grant_claim_issuer_ref` (typed identifier)
+4. non-active reference-grant statuses must not include `reference_grant_claim_issuer_ref`.
+5. deterministic runtime ID:
+   - `E3210_M1S12_REFERENCE_GRANT_ISSUER_MISMATCH`
+6. deterministic schema IDs:
+   - `E3200_M1S12_REQUESTED_GRANT_ISSUER_REF_REQUIRED`
+   - `E3201_M1S12_REQUESTED_GRANT_ISSUER_REF_INVALID`
+   - `E3202_M1S12_REFERENCE_GRANT_CLAIM_ISSUER_REF_REQUIRED`
+   - `E3203_M1S12_REFERENCE_GRANT_CLAIM_ISSUER_REF_INVALID`
+   - `E3204_M1S12_REFERENCE_GRANT_CLAIM_ISSUER_REF_FORBIDDEN`
+
 ---
 
 ## 5. Conformance Gates (Pass/Fail)
@@ -398,6 +415,7 @@ Pass criteria:
 13. M1-S9 active-grant freshness/replay failures map deterministically to `E3150`/`E3151` with deny-code mapping preserved (`GrantExpired`, `TrustInsufficient`) before reference lookup-resolution guard checks.
 14. M1-S10 claim-binding mismatch failures map deterministically to `E3170`/`E3171`/`E3172` with deny-code mapping preserved (`TrustInsufficient`, `PolicyDenied`) before M1-S6 reference lookup-resolution guard checks.
 15. M1-S11 challenge-session nonce mismatches map deterministically to `E3190`/`E3191` with deny-code mapping preserved (`TrustInsufficient`) before M1-S6 reference lookup-resolution guard checks.
+16. M1-S12 issuer-binding mismatches map deterministically to `E3210` with deny-code mapping preserved (`TrustInsufficient`) before M1-S6 reference lookup-resolution guard checks.
 
 ### 5.5 Gate G5: Observation Conformance
 

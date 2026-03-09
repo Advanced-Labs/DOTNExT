@@ -292,7 +292,19 @@ This profile maps M0-B protocol fields to their Orleans lineage, with explicit c
 
 ---
 
-## 25. Review Checklist
+## 25. M1-S12 Reference-Grant Issuer-Binding Behavior Classification
+
+| Hardened Behavior | Tag | Notes |
+|---|---|---|
+| M1-S11 nonce-binding guard reuse in `M1-S12` handshake accept path | `A` | adapts prior challenge-session nonce integrity gates into issuer-binding layer |
+| `HandshakeInit` issuer source contract (`requested_grant_issuer_ref`) | `N` | Scynapse-native deterministic issuer intent anchor for grant binding |
+| Active-grant `HandshakeAccept` issuer claim contract (`reference_grant_claim_issuer_ref`) | `N` | Scynapse-native deterministic grant-issuer assertion guard |
+| Deterministic issuer mismatch deny mapping (`E3210`) | `N` | machine-checkable conformance behavior for issuer-binding failures |
+| Issuer trust handling relying on silo/client trust shortcuts | `D` | explicitly blocked; remains node-unified and capability-gated by policy semantics |
+
+---
+
+## 26. Review Checklist
 
 1. Are any fields tagged `A` but still carrying hidden silo/cluster assumptions?
 2. Are all `N` fields tied to M0-A invariants?

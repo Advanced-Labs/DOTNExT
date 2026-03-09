@@ -1,0 +1,81 @@
+{
+  "id": "TV-1707",
+  "title": "M1-S12 Issuer Claim Field Forbidden Outside Active Grant",
+  "slice_profile": "M1-S12",
+  "preconditions": [
+    "reference grant status is non-active",
+    "issuer claim field is present"
+  ],
+  "messages": [
+    {
+      "type": "HandshakeInit",
+      "role": "requester",
+      "body": {
+        "proposed_route_mode": "parent_mediated",
+        "requested_ops": [
+          "invoke",
+          "meta"
+        ],
+        "requested_scope": ".Adult.Games.RedX",
+        "requester_subject_ref": "nid:subject.alice",
+        "requested_disclosure_level": "mediator_visible",
+        "requested_grant_issuer_ref": "gid:issuer.alpha"
+      }
+    },
+    {
+      "type": "HandshakeChallenge",
+      "role": "mediator",
+      "body": {
+        "challenge_nonce": "nonce-1701"
+      }
+    },
+    {
+      "type": "HandshakeProof",
+      "role": "requester",
+      "body": {
+        "verification_mode": "strict",
+        "proof_ref": "nid:m1s12.handshake.tv-1701",
+        "challenge_nonce": "nonce-1701"
+      }
+    },
+    {
+      "type": "HandshakeAccept",
+      "role": "mediator",
+      "body": {
+        "route_mode": "parent_mediated",
+        "disclosure_level": "mediator_visible",
+        "token_transport": "reference",
+        "relation_token_ref": "tid:reltok-1701",
+        "relation_token_cid": "sha256:1111111111111111111111111111111111111111111111111111111111111111",
+        "reference_lookup_status": "resolved",
+        "reference_lookup_cid": "sha256:1111111111111111111111111111111111111111111111111111111111111111",
+        "reference_grant_status": "not_required",
+        "reference_grant_claim_issuer_ref": "gid:issuer.alpha"
+      }
+    }
+  ],
+  "expected_state_trace": [
+    "MediatedHandshake",
+    "RelayedSession",
+    "Completed"
+  ],
+  "expected_outcome": {
+    "deny_code": null,
+    "success": true
+  },
+  "assertions": [
+    {
+      "id": "A1",
+      "kind": "error",
+      "check": "deny_code_absent",
+      "value": true
+    }
+  ],
+  "expect_conformance": "fail",
+  "expected_error_ids": [
+    "E3204_M1S12_REFERENCE_GRANT_CLAIM_ISSUER_REF_FORBIDDEN"
+  ],
+  "expected_error_contains": [
+    "issuer claim field is forbidden"
+  ]
+}

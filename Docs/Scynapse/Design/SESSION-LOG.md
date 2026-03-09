@@ -789,3 +789,33 @@ Use this structure for each new entry:
    - push M1-S11 closure baseline and define the next bounded M1 slice.
 6. Risks/blockers:
    - none immediate; preserve deterministic nonce-binding/error-ID stability and gate-order invariants.
+
+### 2026-03-09 (M1-S12 Reference-Grant Issuer-Binding Slice + Claude Bootstrap)
+
+1. Scope:
+   - execute M1-S12 task board on top of M1-S11 baseline and add collaboration bootstrap artifacts for Claude.
+2. Key outputs:
+   - created `codex/m1-s12-grant-issuer-binding` from M1-S11 baseline.
+   - added `slice_profile: "M1-S12"` handling in conformance engine.
+   - added M1-S12 schema contract:
+     - `HandshakeInit.requested_grant_issuer_ref` required typed identifier
+     - active reference-grant `HandshakeAccept.reference_grant_claim_issuer_ref` required typed identifier
+     - non-active grant statuses forbid issuer claim field
+   - added deterministic M1-S12 schema/runtime IDs:
+     - `E3200`..`E3204`
+     - `E3210`
+   - added isolated fixture pack `Fixtures/M1-S12`: `TV-1701..TV-1710`.
+   - synchronized protocol + matrix + checklist + vector + compatibility + continuity docs for M1-S12 propagation.
+   - added Claude collaboration artifacts:
+     - `Scynapse-Plan-Report-For-Claude.md`
+     - `AI-Collab-Operating-Model.md`
+     - `AI-Task-0001-M1-S12-Followups.md`
+3. Validation runs:
+   - M1-S12 fixture pack: 10/10 effective pass.
+   - full baseline rerun: S1 14/14, S2 8/8, S3 4/4, S4 4/4, S5 3/3, M1-S1 10/10, M1-S2 6/6, M1-S3 5/5, M1-S4 6/6, M1-S5 4/4, M1-S6 5/5, M1-S7 7/7, M1-S8 13/13, M1-S9 10/10, M1-S10 14/14, M1-S11 12/12, M1-S12 10/10.
+4. Current doing:
+   - final continuity synchronization and scoped commit/push preparation on `codex/m1-s12-grant-issuer-binding`.
+5. Next:
+   - open next bounded M1 slice from M1-S12 closure baseline and review Claude packet outputs under the new operating model.
+6. Risks/blockers:
+   - none immediate; preserve deterministic issuer-binding/error-ID stability and gate-order invariants.

@@ -165,6 +165,18 @@ Deliverables:
 2. deterministic schema validation for required/forbidden nonce-binding fields.
 3. deterministic deny mapping for proof/challenge and accept/proof nonce mismatches with stable machine-checkable IDs.
 
+### M1-S12: Reference Grant Issuer Binding (Bounded)
+
+Primary goal:
+
+1. enforce deterministic grant issuer binding between `HandshakeInit` requested issuer and active reference-grant issuer claim on `HandshakeAccept`.
+
+Deliverables:
+
+1. profile `M1-S12` extending M1-S11 with requested-issuer and active-grant issuer-claim contracts.
+2. deterministic schema validation for required/forbidden issuer-binding fields.
+3. deterministic deny mapping for issuer mismatch with stable machine-checkable IDs.
+
 ---
 
 ## 4. Non-Negotiable Guardrails
@@ -207,4 +219,5 @@ Deliverables:
 9. `M1-S9` reference-grant freshness/replay execution complete (`M1-S9-Closure.md`).
 10. `M1-S10` reference-grant claim-binding execution complete (`M1-S10-Closure.md`).
 11. `M1-S11` reference-grant challenge-session nonce-binding execution complete (`M1-S11-Closure.md`).
-12. open next bounded M1 slice task board from this closure baseline.
+12. `M1-S12` reference-grant issuer-binding execution complete (`M1-S12-Closure.md`).
+13. open next bounded M1 slice task board from this closure baseline.

@@ -1,0 +1,84 @@
+{
+  "messages": [
+    {
+      "type": "HandshakeInit",
+      "role": "requester",
+      "body": {
+        "proposed_route_mode": "parent_mediated",
+        "requested_ops": [
+          "invoke",
+          "meta"
+        ],
+        "requested_scope": ".Adult.Games.RedX",
+        "requester_subject_ref": "nid:subject.alice",
+        "requested_disclosure_level": "mediator_visible",
+        "requested_grant_issuer_ref": "gid:issuer.alpha"
+      }
+    },
+    {
+      "type": "HandshakeChallenge",
+      "role": "mediator",
+      "body": {
+        "challenge_nonce": "nonce-1702"
+      }
+    },
+    {
+      "type": "HandshakeProof",
+      "role": "requester",
+      "body": {
+        "verification_mode": "strict",
+        "proof_ref": "nid:m1s12.handshake.tv-1702",
+        "challenge_nonce": "nonce-1702"
+      }
+    },
+    {
+      "type": "HandshakeAccept",
+      "role": "mediator",
+      "body": {
+        "route_mode": "parent_mediated",
+        "disclosure_level": "mediator_visible",
+        "token_transport": "reference",
+        "relation_token_ref": "tid:reltok-1702",
+        "relation_token_cid": "sha256:2222222222222222222222222222222222222222222222222222222222222222",
+        "reference_lookup_status": "resolved",
+        "reference_lookup_cid": "sha256:2222222222222222222222222222222222222222222222222222222222222222",
+        "reference_grant_status": "active",
+        "reference_grant_ref": "gid:grant-1702",
+        "reference_grant_verification_mode": "mock",
+        "reference_grant_proof_freshness_status": "fresh",
+        "reference_grant_proof_replay_status": "clear",
+        "reference_grant_claim_subject_ref": "nid:subject.alice",
+        "reference_grant_claim_scope": ".Adult.Games.RedX",
+        "reference_grant_claim_action": "invoke",
+        "reference_grant_challenge_nonce": "nonce-1702",
+        "reference_grant_claim_issuer_ref": "gid:issuer.alpha",
+        "reference_grant_mock_valid": true
+      }
+    }
+  ],
+  "preconditions": [
+    "reference transport active grant mock path",
+    "challenge/proof/accept nonce chain aligned",
+    "requested grant issuer and active grant issuer claim are aligned"
+  ],
+  "expected_outcome": {
+    "deny_code": null,
+    "success": true
+  },
+  "title": "M1-S12 Active Grant Mock Issuer Binding Pass",
+  "assertions": [
+    {
+      "id": "A1",
+      "kind": "error",
+      "check": "deny_code_absent",
+      "value": true
+    }
+  ],
+  "slice_profile": "M1-S12",
+  "expected_state_trace": [
+    "MediatedHandshake",
+    "RelayedSession",
+    "Completed"
+  ],
+  "id": "TV-1702"
+}

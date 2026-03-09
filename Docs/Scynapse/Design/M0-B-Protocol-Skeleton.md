@@ -73,6 +73,8 @@ Reference:
 - `Docs/Scynapse/Design/M1-S10-Closure.md`
 - `Docs/Scynapse/Design/M1-S11-Task-Board.md`
 - `Docs/Scynapse/Design/M1-S11-Closure.md`
+- `Docs/Scynapse/Design/M1-S12-Task-Board.md`
+- `Docs/Scynapse/Design/M1-S12-Closure.md`
 - `Docs/Scynapse/Design/M0-B-Wire-Lock-Open-Decisions.md`
 - `Docs/Scynapse/Design/M0-Status-Checkpoint.md`
 
@@ -394,3 +396,10 @@ Failure responses should include:
 - mismatch deny mapping is deterministic:
   - `E3190` proof/challenge nonce mismatch -> `TrustInsufficient`
   - `E3191` accept/proof nonce mismatch -> `TrustInsufficient`
+23. M1-S12 reference-grant issuer-binding profile:
+- `M1-S12` extends M1-S11 with requested-issuer to grant-issuer binding checks for active reference grant acceptance.
+- `HandshakeInit` must provide typed `requested_grant_issuer_ref`.
+- `HandshakeAccept` with active reference grant must provide typed `reference_grant_claim_issuer_ref`.
+- non-active grant statuses must not include `reference_grant_claim_issuer_ref`.
+- mismatch deny mapping is deterministic:
+  - `E3210` issuer mismatch -> `TrustInsufficient`

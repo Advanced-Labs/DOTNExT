@@ -123,6 +123,12 @@ Run M1-S11 fixture pack:
 dotnet run --project playground/FabricS1Prototype/FabricS1Prototype.csproj -- D:\Dev\dotnext\Docs\Scynapse\Design\Fixtures\M1-S11
 ```
 
+Run M1-S12 fixture pack:
+
+```powershell
+dotnet run --project playground/FabricS1Prototype/FabricS1Prototype.csproj -- D:\Dev\dotnext\Docs\Scynapse\Design\Fixtures\M1-S12
+```
+
 Expected-fail fixture semantics:
 
 1. `expected_error_ids` is the preferred exact failure oracle.
@@ -241,3 +247,14 @@ Slice profile semantics:
    - deterministic nonce-binding IDs:
      - `E3190_M1S11_PROOF_CHALLENGE_NONCE_MISMATCH`
      - `E3191_M1S11_ACCEPT_PROOF_NONCE_MISMATCH`
+17. `slice_profile: "M1-S12"` extends M1-S11 with grant issuer-binding checks:
+   - `HandshakeInit` requires typed `requested_grant_issuer_ref`
+   - active reference-grant `HandshakeAccept` requires typed `reference_grant_claim_issuer_ref`
+   - non-active grant statuses forbid `reference_grant_claim_issuer_ref`
+   - deterministic issuer-binding IDs:
+     - `E3200_M1S12_REQUESTED_GRANT_ISSUER_REF_REQUIRED`
+     - `E3201_M1S12_REQUESTED_GRANT_ISSUER_REF_INVALID`
+     - `E3202_M1S12_REFERENCE_GRANT_CLAIM_ISSUER_REF_REQUIRED`
+     - `E3203_M1S12_REFERENCE_GRANT_CLAIM_ISSUER_REF_INVALID`
+     - `E3204_M1S12_REFERENCE_GRANT_CLAIM_ISSUER_REF_FORBIDDEN`
+     - `E3210_M1S12_REFERENCE_GRANT_ISSUER_MISMATCH`

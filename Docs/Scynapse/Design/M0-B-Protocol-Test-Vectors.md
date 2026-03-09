@@ -1532,6 +1532,90 @@ Expected outcome:
 
 1. expected fail by exact error ID (`E3191_M1S11_ACCEPT_PROOF_NONCE_MISMATCH`)
 
+### TV-1701 M1-S12 Active Grant Strict Issuer-Binding Pass
+
+Preconditions:
+
+1. reference token transport is selected
+2. reference grant is active with strict verification and fresh/clear proof status
+3. challenge/proof/accept nonce values are aligned
+4. `HandshakeInit.requested_grant_issuer_ref` equals active grant `HandshakeAccept.reference_grant_claim_issuer_ref`
+
+Expected outcome:
+
+1. conformance pass
+
+### TV-1702 M1-S12 Active Grant Mock Issuer-Binding Pass
+
+Preconditions:
+
+1. reference token transport is selected
+2. reference grant is active with mock verification and fresh/clear proof status
+3. challenge/proof/accept nonce values are aligned
+4. `HandshakeInit.requested_grant_issuer_ref` equals active grant `HandshakeAccept.reference_grant_claim_issuer_ref`
+
+Expected outcome:
+
+1. conformance pass
+
+### TV-1703 M1-S12 Missing Requested Grant Issuer Ref
+
+Expected outcome:
+
+1. expected fail by exact error ID (`E3200_M1S12_REQUESTED_GRANT_ISSUER_REF_REQUIRED`)
+
+### TV-1704 M1-S12 Invalid Requested Grant Issuer Ref
+
+Expected outcome:
+
+1. expected fail by exact error ID (`E3201_M1S12_REQUESTED_GRANT_ISSUER_REF_INVALID`)
+
+### TV-1705 M1-S12 Missing Active Grant Issuer Claim Ref
+
+Expected outcome:
+
+1. expected fail by exact error ID (`E3202_M1S12_REFERENCE_GRANT_CLAIM_ISSUER_REF_REQUIRED`)
+
+### TV-1706 M1-S12 Invalid Active Grant Issuer Claim Ref
+
+Expected outcome:
+
+1. expected fail by exact error ID (`E3203_M1S12_REFERENCE_GRANT_CLAIM_ISSUER_REF_INVALID`)
+
+### TV-1707 M1-S12 Issuer Claim Field Forbidden Outside Active Grant
+
+Expected outcome:
+
+1. expected fail by exact error ID (`E3204_M1S12_REFERENCE_GRANT_CLAIM_ISSUER_REF_FORBIDDEN`)
+
+### TV-1708 M1-S12 Grant Issuer Mismatch Runtime Deny
+
+Expected outcome:
+
+1. expected fail by exact error ID (`E3210_M1S12_REFERENCE_GRANT_ISSUER_MISMATCH`)
+
+### TV-1709 M1-S12 Issuer Mismatch Precedence over Lookup CID Mismatch
+
+Preconditions:
+
+1. issuer mismatch and lookup CID mismatch are both present
+2. issuer mismatch deny must be emitted before M1-S6 lookup guard mismatch
+
+Expected outcome:
+
+1. expected fail by exact error ID (`E3210_M1S12_REFERENCE_GRANT_ISSUER_MISMATCH`)
+
+### TV-1710 M1-S12 Compatibility Precedence Uses M1-S10 Subject Mismatch First
+
+Preconditions:
+
+1. M1-S10 subject mismatch and M1-S12 issuer mismatch are both present
+2. M1-S10 subject mismatch deny must be emitted first to preserve prior slice precedence
+
+Expected outcome:
+
+1. expected fail by exact error ID (`E3170_M1S10_REFERENCE_GRANT_CLAIM_SUBJECT_MISMATCH`)
+
 ---
 
 ## 4. Minimal Coverage Map
@@ -1552,6 +1636,7 @@ Expected outcome:
 14. M1 reference grant freshness/replay: TV-1401, TV-1402, TV-1403, TV-1404, TV-1405, TV-1406, TV-1407, TV-1408, TV-1409, TV-1410
 15. M1 reference grant claim binding: TV-1501, TV-1502, TV-1503, TV-1504, TV-1505, TV-1506, TV-1507, TV-1508, TV-1509, TV-1510, TV-1511, TV-1512, TV-1513, TV-1514
 16. M1 reference grant challenge-session nonce binding: TV-1601, TV-1602, TV-1603, TV-1604, TV-1605, TV-1606, TV-1607, TV-1608, TV-1609, TV-1610, TV-1611, TV-1612
+17. M1 reference grant issuer binding: TV-1701, TV-1702, TV-1703, TV-1704, TV-1705, TV-1706, TV-1707, TV-1708, TV-1709, TV-1710
 
 ### 4.1 S1 Transition-Edge Negative Extension Set
 
@@ -1695,6 +1780,17 @@ Expected outcome:
     - TV-1610 (proof/challenge nonce mismatch; expected fail by exact error ID)
     - TV-1611 (accept/proof nonce mismatch; expected fail by exact error ID)
     - TV-1612 (nonce mismatch precedence over lookup CID mismatch; expected fail by exact error ID)
+17. M1-S12 owned vectors:
+    - TV-1701 (active grant strict issuer-binding pass)
+    - TV-1702 (active grant mock issuer-binding pass)
+    - TV-1703 (missing requested grant issuer schema; expected fail by exact error ID)
+    - TV-1704 (invalid requested grant issuer schema; expected fail by exact error ID)
+    - TV-1705 (active grant missing issuer claim schema; expected fail by exact error ID)
+    - TV-1706 (active grant invalid issuer claim schema; expected fail by exact error ID)
+    - TV-1707 (issuer claim field forbidden for non-active grant; expected fail by exact error ID)
+    - TV-1708 (grant issuer mismatch; expected fail by exact error ID)
+    - TV-1709 (issuer mismatch precedence over lookup CID mismatch; expected fail by exact error ID)
+    - TV-1710 (compatibility precedence keeps M1-S10 subject mismatch first; expected fail by exact error ID)
 
 ---
 
@@ -1722,5 +1818,6 @@ Current next step:
 9. M1-S9 reference-grant freshness/replay vectors executed and stabilized (`TV-1401..TV-1410`)
 10. M1-S10 reference-grant claim-binding vectors executed and stabilized (`TV-1501..TV-1514`)
 11. M1-S11 reference-grant challenge-session nonce-binding vectors executed and stabilized (`TV-1601..TV-1612`)
-12. preserve S1/S2/S3/S4/S5 + M1-S1 + M1-S2 + M1-S3 + M1-S4 + M1-S5 + M1-S6 + M1-S7 + M1-S8 + M1-S9 + M1-S10 + M1-S11 baseline behavior and machine-checkable error ID stability
-13. open next bounded M1 slice from current closure baseline
+12. M1-S12 reference-grant issuer-binding vectors executed and stabilized (`TV-1701..TV-1710`)
+13. preserve S1/S2/S3/S4/S5 + M1-S1 + M1-S2 + M1-S3 + M1-S4 + M1-S5 + M1-S6 + M1-S7 + M1-S8 + M1-S9 + M1-S10 + M1-S11 + M1-S12 baseline behavior and machine-checkable error ID stability
+14. open next bounded M1 slice from current closure baseline

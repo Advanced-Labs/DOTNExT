@@ -172,3 +172,18 @@ The work is on-track when:
 2. open decisions are explicit and bounded
 3. next executable step is unambiguous
 4. test vectors and conformance gates map to planned slice
+
+---
+
+## 11. Multi-Agent Collaboration Mode
+
+When another AI agent (for example Claude) is introduced:
+
+1. GPT lead remains planning/review authority.
+2. collaboration is file-mediated only through task packets.
+3. required control files:
+   - `Scynapse-Plan-Report-For-Claude.md`
+   - `AI-Collab-Operating-Model.md`
+   - active `AI-Task-*.md` packet
+4. every packet must include bounded scope, deterministic acceptance gates, and required response format.
+5. no packet is accepted until GPT lead review is explicitly recorded in continuity docs.

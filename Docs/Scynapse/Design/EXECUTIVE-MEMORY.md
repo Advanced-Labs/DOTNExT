@@ -4,13 +4,13 @@ Last updated: 2026-03-09
 
 ## 1. Mission Snapshot
 
-Current mission: close and checkpoint M1-S11 reference-grant challenge-session nonce-binding work, then open the next bounded M1 slice while preserving deterministic S1..S5 + M1-S1 + M1-S2 + M1-S3 + M1-S4 + M1-S5 + M1-S6 + M1-S7 + M1-S8 + M1-S9 + M1-S10 + M1-S11 behavior.
+Current mission: close and checkpoint M1-S12 reference-grant issuer-binding work, then open the next bounded M1 slice while preserving deterministic S1..S5 + M1-S1 + M1-S2 + M1-S3 + M1-S4 + M1-S5 + M1-S6 + M1-S7 + M1-S8 + M1-S9 + M1-S10 + M1-S11 + M1-S12 behavior.
 
 Latest checkpoint status (2026-03-09):
 
-1. active branch: `codex/m1-s11-grant-challenge-binding`
+1. active branch: `codex/m1-s12-grant-issuer-binding`
 2. continuity files synchronized
-3. closure rerun confirmed 125/125 effective pass (S1..S5 + M1-S1 + M1-S2 + M1-S3 + M1-S4 + M1-S5 + M1-S6 + M1-S7 + M1-S8 + M1-S9 + M1-S10 + M1-S11)
+3. closure rerun confirmed 135/135 effective pass (S1..S5 + M1-S1 + M1-S2 + M1-S3 + M1-S4 + M1-S5 + M1-S6 + M1-S7 + M1-S8 + M1-S9 + M1-S10 + M1-S11 + M1-S12)
 
 Current active path:
 
@@ -32,6 +32,7 @@ Current active path:
 16. M1-S9 reference-grant freshness/replay slice implemented (active-grant freshness/replay deterministic deny mapping)
 17. M1-S10 reference-grant claim-binding slice implemented (request-context to grant-claim deterministic binding checks)
 18. M1-S11 reference-grant challenge-session nonce-binding slice implemented (challenge/proof/accept nonce deterministic binding checks)
+19. M1-S12 reference-grant issuer-binding slice implemented (requested-issuer to active-grant issuer deterministic binding checks)
 
 ---
 
@@ -157,15 +158,22 @@ Current active path:
 116. deterministic M1-S11 IDs added (`E3180`..`E3191`) for nonce-binding schema/runtime deny paths
 117. M1-S11 fixture pack added (`Docs/Scynapse/Design/Fixtures/M1-S11`, TV-1601..TV-1612)
 118. closure rerun stable: S1 14/14, S2 8/8, S3 4/4, S4 4/4, S5 3/3, M1-S1 10/10, M1-S2 6/6, M1-S3 5/5, M1-S4 6/6, M1-S5 4/4, M1-S6 5/5, M1-S7 7/7, M1-S8 13/13, M1-S9 10/10, M1-S10 14/14, M1-S11 12/12
+119. M1-S12 implementation branch created: `codex/m1-s12-grant-issuer-binding`
+120. M1-S12 profile support added (`slice_profile: "M1-S12"`) with requested-issuer and active-grant issuer-claim contracts
+121. deterministic M1-S12 IDs added (`E3200`..`E3210`) for issuer-binding schema/runtime deny paths
+122. M1-S12 fixture pack added (`Docs/Scynapse/Design/Fixtures/M1-S12`, TV-1701..TV-1710)
+123. closure rerun stable: S1 14/14, S2 8/8, S3 4/4, S4 4/4, S5 3/3, M1-S1 10/10, M1-S2 6/6, M1-S3 5/5, M1-S4 6/6, M1-S5 4/4, M1-S6 5/5, M1-S7 7/7, M1-S8 13/13, M1-S9 10/10, M1-S10 14/14, M1-S11 12/12, M1-S12 10/10
+124. M1-S12 task/closure artifacts added (`M1-S12-Task-Board.md`, `M1-S12-Closure.md`)
+125. Claude collaboration bootstrap docs added (`Scynapse-Plan-Report-For-Claude.md`, `AI-Collab-Operating-Model.md`, `AI-Task-0001-M1-S12-Followups.md`)
 
 ### Doing
 
-1. define and sequence the next bounded M1 slice from M1-S11 closure baseline
+1. define and sequence the next bounded M1 slice from M1-S12 closure baseline
 
 ### Next
 
-1. open next M1 task board and branch from `codex/m1-s11-grant-challenge-binding`
-2. preserve S1/S2/S3/S4/S5 + M1-S1 + M1-S2 + M1-S3 + M1-S4 + M1-S5 + M1-S6 + M1-S7 + M1-S8 + M1-S9 + M1-S10 + M1-S11 fixture and error-ID stability
+1. open next M1 task board and branch from `codex/m1-s12-grant-issuer-binding`
+2. preserve S1/S2/S3/S4/S5 + M1-S1 + M1-S2 + M1-S3 + M1-S4 + M1-S5 + M1-S6 + M1-S7 + M1-S8 + M1-S9 + M1-S10 + M1-S11 + M1-S12 fixture and error-ID stability
 
 ---
 
@@ -236,7 +244,11 @@ Authority file:
 32. `M1-S10-Closure.md`
 33. `M1-S11-Task-Board.md`
 34. `M1-S11-Closure.md`
-35. latest entry in `SESSION-LOG.md`
+35. `M1-S12-Task-Board.md`
+36. `M1-S12-Closure.md`
+37. `Scynapse-Plan-Report-For-Claude.md`
+38. `AI-Collab-Operating-Model.md`
+39. latest entry in `SESSION-LOG.md`
 
 ---
 
@@ -298,6 +310,12 @@ Authority file:
    - `M1-S11-Task-Board.md`
    - `M1-S11-Closure.md`
    - `Fixtures/M1-S11/README.md`
+   - `M1-S12-Task-Board.md`
+   - `M1-S12-Closure.md`
+   - `Fixtures/M1-S12/README.md`
+   - `Scynapse-Plan-Report-For-Claude.md`
+   - `AI-Collab-Operating-Model.md`
+   - `AI-Task-0001-M1-S12-Followups.md`
 5. Wire lock:
    - `M0-B-Wire-Lock-Open-Decisions.md`
    - `M0-B-Wire-Examples.md`
