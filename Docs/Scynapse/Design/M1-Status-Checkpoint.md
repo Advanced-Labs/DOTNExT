@@ -253,5 +253,5 @@ Status:
 ## 5. Done/Doing/Next Snapshot
 
 1. `Done`: M0 exit review, M1 entry plan, M1-S1 closure, M1-S2 closure, M1-S3 closure, M1-S4 closure, M1-S5 closure, M1-S6 closure, M1-S7 closure, M1-S8 closure.
-2. `Doing`: final continuity synchronization and scoped commit/push preparation for M1-S8 closure.
-3. `Next`: define next bounded M1 slice.
+2. `Doing`: next bounded M1 slice selection and sequencing from M1-S8 closure baseline.
+3. `Next`: open the next M1 task board and implementation branch.

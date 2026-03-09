@@ -136,16 +136,16 @@ Current active path:
 98. deterministic M1-S8 IDs added (`E3120`..`E3135`) for grant-proof schema/runtime deny paths
 99. M1-S8 fixture pack added (`Docs/Scynapse/Design/Fixtures/M1-S8`, TV-1301..TV-1313)
 100. closure rerun stable: S1 14/14, S2 8/8, S3 4/4, S4 4/4, S5 3/3, M1-S1 10/10, M1-S2 6/6, M1-S3 5/5, M1-S4 6/6, M1-S5 4/4, M1-S6 5/5, M1-S7 7/7, M1-S8 13/13
+101. M1-S8 closure committed and pushed on `codex/m1-s8-reference-grant-proof-binding` (`150a424da2`)
 
 ### Doing
 
-1. final continuity synchronization and scoped commit/push preparation for M1-S8 closure baseline
+1. define and sequence the next bounded M1 slice from M1-S8 closure baseline
 
 ### Next
 
-1. commit and push M1-S8 closure baseline on `codex/m1-s8-reference-grant-proof-binding`
-2. define and open the next bounded M1 slice from M1-S8 closure
-3. preserve S1/S2/S3/S4/S5 + M1-S1 + M1-S2 + M1-S3 + M1-S4 + M1-S5 + M1-S6 + M1-S7 + M1-S8 fixture and error-ID stability
+1. open next M1 task board and branch from `codex/m1-s8-reference-grant-proof-binding`
+2. preserve S1/S2/S3/S4/S5 + M1-S1 + M1-S2 + M1-S3 + M1-S4 + M1-S5 + M1-S6 + M1-S7 + M1-S8 fixture and error-ID stability
 
 ---
 
