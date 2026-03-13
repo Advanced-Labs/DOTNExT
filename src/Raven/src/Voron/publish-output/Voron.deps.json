@@ -1,0 +1,455 @@
+{
+  "runtimeTarget": {
+    "name": ".NETCoreApp,Version=v8.0",
+    "signature": ""
+  },
+  "compilationOptions": {},
+  "targets": {
+    ".NETCoreApp,Version=v8.0": {
+      "Voron/1.0.0": {
+        "dependencies": {
+          "Microsoft.SourceLink.GitHub": "10.0.102",
+          "Raven.CodeAnalysis": "1.0.13",
+          "Sparrow.Server": "1.0.0",
+          "System.Numerics.Tensors": "10.0.2"
+        },
+        "runtime": {
+          "Voron.dll": {}
+        }
+      },
+      "Microsoft.Build.Tasks.Git/10.0.102": {},
+      "Microsoft.IO.RecyclableMemoryStream/3.0.1": {
+        "runtime": {
+          "lib/net6.0/Microsoft.IO.RecyclableMemoryStream.dll": {
+            "assemblyVersion": "3.0.1.0",
+            "fileVersion": "3.0.1.0"
+          }
+        }
+      },
+      "Microsoft.SourceLink.Common/10.0.102": {},
+      "Microsoft.SourceLink.GitHub/10.0.102": {
+        "dependencies": {
+          "Microsoft.Build.Tasks.Git": "10.0.102",
+          "Microsoft.SourceLink.Common": "10.0.102"
+        }
+      },
+      "Mono.Posix.NETStandard/1.0.0": {
+        "runtimeTargets": {
+          "runtimes/linux-arm/lib/netstandard2.0/Mono.Posix.NETStandard.dll": {
+            "rid": "linux-arm",
+            "assetType": "runtime",
+            "assemblyVersion": "1.0.0.0",
+            "fileVersion": "1.0.0.0"
+          },
+          "runtimes/linux-arm64/lib/netstandard2.0/Mono.Posix.NETStandard.dll": {
+            "rid": "linux-arm64",
+            "assetType": "runtime",
+            "assemblyVersion": "1.0.0.0",
+            "fileVersion": "1.0.0.0"
+          },
+          "runtimes/linux-armel/lib/netstandard2.0/Mono.Posix.NETStandard.dll": {
+            "rid": "linux-armel",
+            "assetType": "runtime",
+            "assemblyVersion": "1.0.0.0",
+            "fileVersion": "1.0.0.0"
+          },
+          "runtimes/linux-x64/lib/netstandard2.0/Mono.Posix.NETStandard.dll": {
+            "rid": "linux-x64",
+            "assetType": "runtime",
+            "assemblyVersion": "1.0.0.0",
+            "fileVersion": "1.0.0.0"
+          },
+          "runtimes/linux-x86/lib/netstandard2.0/Mono.Posix.NETStandard.dll": {
+            "rid": "linux-x86",
+            "assetType": "runtime",
+            "assemblyVersion": "1.0.0.0",
+            "fileVersion": "1.0.0.0"
+          },
+          "runtimes/osx/lib/netstandard2.0/Mono.Posix.NETStandard.dll": {
+            "rid": "osx",
+            "assetType": "runtime",
+            "assemblyVersion": "1.0.0.0",
+            "fileVersion": "1.0.0.0"
+          },
+          "runtimes/win-x64/lib/netstandard2.0/Mono.Posix.NETStandard.dll": {
+            "rid": "win-x64",
+            "assetType": "runtime",
+            "assemblyVersion": "1.0.0.0",
+            "fileVersion": "1.0.0.0"
+          },
+          "runtimes/win-x86/lib/netstandard2.0/Mono.Posix.NETStandard.dll": {
+            "rid": "win-x86",
+            "assetType": "runtime",
+            "assemblyVersion": "1.0.0.0",
+            "fileVersion": "1.0.0.0"
+          },
+          "runtimes/linux-arm/native/libMonoPosixHelper.so": {
+            "rid": "linux-arm",
+            "assetType": "native",
+            "fileVersion": "0.0.0.0"
+          },
+          "runtimes/linux-arm64/native/libMonoPosixHelper.so": {
+            "rid": "linux-arm64",
+            "assetType": "native",
+            "fileVersion": "0.0.0.0"
+          },
+          "runtimes/linux-armel/native/libMonoPosixHelper.so": {
+            "rid": "linux-armel",
+            "assetType": "native",
+            "fileVersion": "0.0.0.0"
+          },
+          "runtimes/linux-x64/native/libMonoPosixHelper.so": {
+            "rid": "linux-x64",
+            "assetType": "native",
+            "fileVersion": "0.0.0.0"
+          },
+          "runtimes/linux-x86/native/libMonoPosixHelper.so": {
+            "rid": "linux-x86",
+            "assetType": "native",
+            "fileVersion": "0.0.0.0"
+          },
+          "runtimes/osx/native/libMonoPosixHelper.dylib": {
+            "rid": "osx",
+            "assetType": "native",
+            "fileVersion": "0.0.0.0"
+          },
+          "runtimes/win-x64/native/MonoPosixHelper.dll": {
+            "rid": "win-x64",
+            "assetType": "native",
+            "fileVersion": "0.0.0.0"
+          },
+          "runtimes/win-x64/native/libMonoPosixHelper.dll": {
+            "rid": "win-x64",
+            "assetType": "native",
+            "fileVersion": "0.0.0.0"
+          },
+          "runtimes/win-x86/native/MonoPosixHelper.dll": {
+            "rid": "win-x86",
+            "assetType": "native",
+            "fileVersion": "0.0.0.0"
+          },
+          "runtimes/win-x86/native/libMonoPosixHelper.dll": {
+            "rid": "win-x86",
+            "assetType": "native",
+            "fileVersion": "0.0.0.0"
+          }
+        }
+      },
+      "Nito.AsyncEx.Coordination/5.1.2": {
+        "dependencies": {
+          "Nito.AsyncEx.Tasks": "5.1.2",
+          "Nito.Collections.Deque": "1.1.1"
+        },
+        "runtime": {
+          "lib/netstandard2.0/Nito.AsyncEx.Coordination.dll": {
+            "assemblyVersion": "5.1.2.0",
+            "fileVersion": "5.1.2.0"
+          }
+        }
+      },
+      "Nito.AsyncEx.Tasks/5.1.2": {
+        "dependencies": {
+          "Nito.Disposables": "2.2.1"
+        },
+        "runtime": {
+          "lib/netstandard2.0/Nito.AsyncEx.Tasks.dll": {
+            "assemblyVersion": "5.1.2.0",
+            "fileVersion": "5.1.2.0"
+          }
+        }
+      },
+      "Nito.Collections.Deque/1.1.1": {
+        "runtime": {
+          "lib/netstandard2.0/Nito.Collections.Deque.dll": {
+            "assemblyVersion": "1.1.1.0",
+            "fileVersion": "1.1.1.0"
+          }
+        }
+      },
+      "Nito.Disposables/2.2.1": {
+        "dependencies": {
+          "System.Collections.Immutable": "10.0.2"
+        },
+        "runtime": {
+          "lib/netstandard2.1/Nito.Disposables.dll": {
+            "assemblyVersion": "2.2.1.0",
+            "fileVersion": "2.2.1.0"
+          }
+        }
+      },
+      "NLog/5.5.1": {
+        "runtime": {
+          "lib/netstandard2.0/NLog.dll": {
+            "assemblyVersion": "5.0.0.0",
+            "fileVersion": "5.5.1.4315"
+          }
+        }
+      },
+      "Raven.CodeAnalysis/1.0.13": {},
+      "System.Collections.Immutable/10.0.2": {
+        "runtime": {
+          "lib/net8.0/System.Collections.Immutable.dll": {
+            "assemblyVersion": "10.0.0.0",
+            "fileVersion": "10.0.225.61305"
+          }
+        }
+      },
+      "System.Configuration.ConfigurationManager/10.0.2": {
+        "dependencies": {
+          "System.Diagnostics.EventLog": "10.0.2",
+          "System.Security.Cryptography.ProtectedData": "10.0.2"
+        },
+        "runtime": {
+          "lib/net8.0/System.Configuration.ConfigurationManager.dll": {
+            "assemblyVersion": "10.0.0.0",
+            "fileVersion": "10.0.225.61305"
+          }
+        }
+      },
+      "System.Diagnostics.EventLog/10.0.2": {
+        "runtime": {
+          "lib/net8.0/System.Diagnostics.EventLog.dll": {
+            "assemblyVersion": "10.0.0.0",
+            "fileVersion": "10.0.225.61305"
+          }
+        },
+        "runtimeTargets": {
+          "runtimes/win/lib/net8.0/System.Diagnostics.EventLog.Messages.dll": {
+            "rid": "win",
+            "assetType": "runtime",
+            "assemblyVersion": "10.0.0.0",
+            "fileVersion": "0.0.0.0"
+          },
+          "runtimes/win/lib/net8.0/System.Diagnostics.EventLog.dll": {
+            "rid": "win",
+            "assetType": "runtime",
+            "assemblyVersion": "10.0.0.0",
+            "fileVersion": "10.0.225.61305"
+          }
+        }
+      },
+      "System.Diagnostics.PerformanceCounter/10.0.2": {
+        "dependencies": {
+          "System.Configuration.ConfigurationManager": "10.0.2",
+          "System.Threading.AccessControl": "10.0.2"
+        },
+        "runtime": {
+          "lib/net8.0/System.Diagnostics.PerformanceCounter.dll": {
+            "assemblyVersion": "10.0.0.0",
+            "fileVersion": "10.0.225.61305"
+          }
+        },
+        "runtimeTargets": {
+          "runtimes/win/lib/net8.0/System.Diagnostics.PerformanceCounter.dll": {
+            "rid": "win",
+            "assetType": "runtime",
+            "assemblyVersion": "10.0.0.0",
+            "fileVersion": "10.0.225.61305"
+          }
+        }
+      },
+      "System.Numerics.Tensors/10.0.2": {
+        "runtime": {
+          "lib/net8.0/System.Numerics.Tensors.dll": {
+            "assemblyVersion": "10.0.0.2",
+            "fileVersion": "10.0.225.61305"
+          }
+        }
+      },
+      "System.Security.Cryptography.ProtectedData/10.0.2": {
+        "runtime": {
+          "lib/net8.0/System.Security.Cryptography.ProtectedData.dll": {
+            "assemblyVersion": "10.0.0.0",
+            "fileVersion": "10.0.225.61305"
+          }
+        }
+      },
+      "System.Threading.AccessControl/10.0.2": {
+        "runtime": {
+          "lib/net8.0/System.Threading.AccessControl.dll": {
+            "assemblyVersion": "10.0.0.0",
+            "fileVersion": "10.0.225.61305"
+          }
+        },
+        "runtimeTargets": {
+          "runtimes/win/lib/net8.0/System.Threading.AccessControl.dll": {
+            "rid": "win",
+            "assetType": "runtime",
+            "assemblyVersion": "10.0.0.0",
+            "fileVersion": "10.0.225.61305"
+          }
+        }
+      },
+      "Sparrow/1.0.0": {
+        "dependencies": {
+          "Microsoft.IO.RecyclableMemoryStream": "3.0.1",
+          "Nito.AsyncEx.Coordination": "5.1.2"
+        },
+        "runtime": {
+          "Sparrow.dll": {
+            "assemblyVersion": "1.0.0",
+            "fileVersion": "7.1.6.71"
+          }
+        }
+      },
+      "Sparrow.Server/1.0.0": {
+        "dependencies": {
+          "Mono.Posix.NETStandard": "1.0.0",
+          "NLog": "5.5.1",
+          "Sparrow": "1.0.0",
+          "System.Diagnostics.PerformanceCounter": "10.0.2",
+          "System.Numerics.Tensors": "10.0.2"
+        },
+        "runtime": {
+          "Sparrow.Server.dll": {
+            "assemblyVersion": "1.0.0",
+            "fileVersion": "7.1.6.71"
+          }
+        }
+      }
+    }
+  },
+  "libraries": {
+    "Voron/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "Microsoft.Build.Tasks.Git/10.0.102": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-0i81LYX31U6UiXz4NOLbvc++u+/mVDmOt+PskrM/MygpDxkv9THKQyRUmavBpLK6iBV0abNWnn+CQgSRz//Pwg==",
+      "path": "microsoft.build.tasks.git/10.0.102",
+      "hashPath": "microsoft.build.tasks.git.10.0.102.nupkg.sha512"
+    },
+    "Microsoft.IO.RecyclableMemoryStream/3.0.1": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-s/s20YTVY9r9TPfTrN5g8zPF1YhwxyqO6PxUkrYTGI2B+OGPe9AdajWZrLhFqXIvqIW23fnUE4+ztrUWNU1+9g==",
+      "path": "microsoft.io.recyclablememorystream/3.0.1",
+      "hashPath": "microsoft.io.recyclablememorystream.3.0.1.nupkg.sha512"
+    },
+    "Microsoft.SourceLink.Common/10.0.102": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-Mk1IMb9q5tahC2NltxYXFkLBtuBvfBoCQ3pIxYQWfzbCE9o1OB9SsHe0hnNGo7lWgTA/ePbFAJLWu6nLL9K17A==",
+      "path": "microsoft.sourcelink.common/10.0.102",
+      "hashPath": "microsoft.sourcelink.common.10.0.102.nupkg.sha512"
+    },
+    "Microsoft.SourceLink.GitHub/10.0.102": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-Oxq3RCIJSdtpIU4hLqO7XaDe/Ra3HS9Wi8rJl838SAg6Zu1iQjerA0+xXWBgUFYbgknUGCLOU0T+lzMLkvY9Qg==",
+      "path": "microsoft.sourcelink.github/10.0.102",
+      "hashPath": "microsoft.sourcelink.github.10.0.102.nupkg.sha512"
+    },
+    "Mono.Posix.NETStandard/1.0.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-vSN/L1uaVwKsiLa95bYu2SGkF0iY3xMblTfxc8alSziPuVfJpj3geVqHGAA75J7cZkMuKpFVikz82Lo6y6LLdA==",
+      "path": "mono.posix.netstandard/1.0.0",
+      "hashPath": "mono.posix.netstandard.1.0.0.nupkg.sha512"
+    },
+    "Nito.AsyncEx.Coordination/5.1.2": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-QMyUfsaxov//0ZMbOHWr9hJaBFteZd66DV1ay4J5wRODDb8+K/uHC7+3VsOflo6SVw/29mu8OWZp8vMDSuzc0w==",
+      "path": "nito.asyncex.coordination/5.1.2",
+      "hashPath": "nito.asyncex.coordination.5.1.2.nupkg.sha512"
+    },
+    "Nito.AsyncEx.Tasks/5.1.2": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-jEkCfR2/M26OK/U4G7SEN063EU/F4LiVA06TtpZILMdX/quIHCg+wn31Zerl2LC+u1cyFancjTY3cNAr2/89PA==",
+      "path": "nito.asyncex.tasks/5.1.2",
+      "hashPath": "nito.asyncex.tasks.5.1.2.nupkg.sha512"
+    },
+    "Nito.Collections.Deque/1.1.1": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-CU0/Iuv5VDynK8I8pDLwkgF0rZhbQoZahtodfL0M3x2gFkpBRApKs8RyMyNlAi1mwExE4gsmqQXk4aFVvW9a4Q==",
+      "path": "nito.collections.deque/1.1.1",
+      "hashPath": "nito.collections.deque.1.1.1.nupkg.sha512"
+    },
+    "Nito.Disposables/2.2.1": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-6sZ5uynQeAE9dPWBQGKebNmxbY4xsvcc5VplB5WkYEESUS7oy4AwnFp0FhqxTSKm/PaFrFqLrYr696CYN8cugg==",
+      "path": "nito.disposables/2.2.1",
+      "hashPath": "nito.disposables.2.2.1.nupkg.sha512"
+    },
+    "NLog/5.5.1": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-ZpLbXSi91tZJPjzNefE+3NugAkQtpWZpSLfZWJGcP1y8qMiXDKxW/nAQ+LYWo7GwH2iYsbKOdsLCK9S3BeRQxA==",
+      "path": "nlog/5.5.1",
+      "hashPath": "nlog.5.5.1.nupkg.sha512"
+    },
+    "Raven.CodeAnalysis/1.0.13": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-y733ab7+flKRJQLD1UTQp/udreIdpwPqk1O8idJditHl842ZH8ZC7N4+vT9XwYxOwggUV9yw1XUj3wV68htZdg==",
+      "path": "raven.codeanalysis/1.0.13",
+      "hashPath": "raven.codeanalysis.1.0.13.nupkg.sha512"
+    },
+    "System.Collections.Immutable/10.0.2": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-ty6kCaqyoh/M/jKV5yojgta+nf7T8zkkjpRI1beLQkrTC+9R6LS1eCEc+3ED2YUlRyA0g0PXExESnxnW3HcVVQ==",
+      "path": "system.collections.immutable/10.0.2",
+      "hashPath": "system.collections.immutable.10.0.2.nupkg.sha512"
+    },
+    "System.Configuration.ConfigurationManager/10.0.2": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-UpBPpVzF+xbB3GsBrraPvlYCwUiOhs+RLxnTMKLqDs2gNNaAtxQRlKjXfMV3zxE+hiQkGId5olZ+9tE6xXHdwQ==",
+      "path": "system.configuration.configurationmanager/10.0.2",
+      "hashPath": "system.configuration.configurationmanager.10.0.2.nupkg.sha512"
+    },
+    "System.Diagnostics.EventLog/10.0.2": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-TJPpTLF5MFPobq09c9BQ5X8QuviQfsKvH0Jbm7MkGylGvfIdRqJQLZDPC5sMRFkk9aZhmgir1NJKekip2NxfaA==",
+      "path": "system.diagnostics.eventlog/10.0.2",
+      "hashPath": "system.diagnostics.eventlog.10.0.2.nupkg.sha512"
+    },
+    "System.Diagnostics.PerformanceCounter/10.0.2": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-aUW7WlSpuagd0rea9LSgMJ9c73aZ2FlzS3Mk4Aqfjz43sWBu0xcVfaBNoV0KOEWhrpk6tv1PV3xqSq82vsDfRA==",
+      "path": "system.diagnostics.performancecounter/10.0.2",
+      "hashPath": "system.diagnostics.performancecounter.10.0.2.nupkg.sha512"
+    },
+    "System.Numerics.Tensors/10.0.2": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-EzimXy5WX7RJxf1pHBfolBApA4GR7qje1cY9XofD4C+cQepx0a5ZVlZjde8NHk+W1+6kltrbbfa8LIOVpTM6yQ==",
+      "path": "system.numerics.tensors/10.0.2",
+      "hashPath": "system.numerics.tensors.10.0.2.nupkg.sha512"
+    },
+    "System.Security.Cryptography.ProtectedData/10.0.2": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-me7W69hkjdu5EzHXCQSXv9OS3uAkMXT26oZuWTaabeoO5BPxSVuRVJ2FSfIW8xyGxBb6mKCE6ZKg7TLk3IzJBQ==",
+      "path": "system.security.cryptography.protecteddata/10.0.2",
+      "hashPath": "system.security.cryptography.protecteddata.10.0.2.nupkg.sha512"
+    },
+    "System.Threading.AccessControl/10.0.2": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-oASBukOYT+HyJeekgLtZ9drK/w7JTR3BnwZgQRdx1UhCjDyRVUGsAX6CBVsKI5SglYlOMo9kdDpOG17MJ550Gw==",
+      "path": "system.threading.accesscontrol/10.0.2",
+      "hashPath": "system.threading.accesscontrol.10.0.2.nupkg.sha512"
+    },
+    "Sparrow/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "Sparrow.Server/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    }
+  }
+}

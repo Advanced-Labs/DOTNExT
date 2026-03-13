@@ -1,0 +1,21 @@
+\:VSINSTALLDIR : The term '\:VSINSTALLDIR' is not recognized as the name of a cmdlet, function, script file, or 
+operable program. Check the spelling of the name, or if a path was included, verify that the path is correct and try 
+again.
+At line:1 char:5
++ & { \:VSINSTALLDIR = 'C:\Program Files\Microsoft Visual Studio\2022\C ...
++     ~~~~~~~~~~~~~~
+    + CategoryInfo          : ObjectNotFound: (\:VSINSTALLDIR:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+ 
+**********************************************************************
+** Visual Studio 2022 Developer Command Prompt v17.14.24
+** Copyright (c) 2025 Microsoft Corporation
+**********************************************************************
+D:\Dev\DOTNExT\.packages\microsoft.dotnet.arcade.sdk\9.0.0-beta.25462.4\tools\Build.proj
+MSBUILD : error MSB1001: Unknown switch.
+    Full command line: 'D:\Dev\DOTNExT\.dotnet\sdk\9.0.111\MSBuild.dll -maxcpucount -verbosity:m -tlp:default=auto /m /nologo /clp:Summary /v:minimal /nr:True /p:ContinuousIntegrationBuild=False /warnaserror /p:TreatWarningsAsErrors=true -restore D:\Dev\DOTNExT\build.proj /t:Build /p:Configuration=Debug -subset clr -arch x64 -distributedlogger:Microsoft.DotNet.Tools.MSBuild.MSBuildLogger,D:\Dev\DOTNExT\.dotnet\sdk\9.0.111\dotnet.dll*Microsoft.DotNet.Tools.MSBuild.MSBuildForwardingLogger,D:\Dev\DOTNExT\.dotnet\sdk\9.0.111\dotnet.dll'
+  Switches appended by response files:
+Switch: -subset
+
+For switch syntax, type "MSBuild -help"
+Build failed with exit code 1. Check errors above.

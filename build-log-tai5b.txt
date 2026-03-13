@@ -1,0 +1,39 @@
+  Determining projects to restore...
+  Tool 'coverlet.console' (version '6.0.0') was restored. Available commands: coverlet
+  Tool 'dotnet-reportgenerator-globaltool' (version '5.3.0') was restored. Available commands: reportgenerator
+  Tool 'microsoft.dotnet.xharness.cli' (version '9.0.0-prerelease.25504.2') was restored. Available commands: xharness
+  Tool 'microsoft.visualstudio.slngen.tool' (version '11.1.0') was restored. Available commands: slngen
+  
+  Restore was successful.
+  All projects are up-to-date for restore.
+  Determining projects to restore...
+  All projects are up-to-date for restore.
+  ILLink.RoslynAnalyzer -> D:\Dev\DOTNExT\src\runtime\artifacts\bin\ILLink.RoslynAnalyzer\Debug\netstandard2.0\ILLink.RoslynAnalyzer.dll
+  ILLink.CodeFixProvider -> D:\Dev\DOTNExT\src\runtime\artifacts\bin\ILLink.CodeFixProvider\Debug\netstandard2.0\ILLink.CodeFixProvider.dll
+  Mono.Linker -> D:\Dev\DOTNExT\src\runtime\artifacts\bin\Mono.Linker\ref\Debug\net9.0\illink.dll
+  Mono.Linker -> D:\Dev\DOTNExT\src\runtime\artifacts\bin\Mono.Linker\Debug\net9.0\illink.dll
+  ILLink.Tasks -> D:\Dev\DOTNExT\src\runtime\artifacts\bin\ILLink.Tasks\Debug\net9.0\ILLink.Tasks.dll
+  System.Private.CoreLib.Generators -> D:\Dev\DOTNExT\src\runtime\artifacts\bin\System.Private.CoreLib.Generators\Debug\netstandard2.0\System.Private.CoreLib.Generators.dll
+  Microsoft.Interop.SourceGeneration -> D:\Dev\DOTNExT\src\runtime\artifacts\bin\Microsoft.Interop.SourceGeneration\Debug\netstandard2.0\Microsoft.Interop.SourceGeneration.dll
+  LibraryImportGenerator -> D:\Dev\DOTNExT\src\runtime\artifacts\bin\LibraryImportGenerator\Debug\netstandard2.0\Microsoft.Interop.LibraryImportGenerator.dll
+  System.Private.CoreLib -> D:\Dev\DOTNExT\src\runtime\artifacts\bin\System.Private.CoreLib\ref\Debug\net9.0\System.Private.CoreLib.dll
+C:\Users\vaero\.nuget\packages\microsoft.dotnet.apicompat.task\9.0.109\build\Microsoft.DotNet.ApiCompat.ValidateAssemblies.Common.targets(16,5): error : API compatibility errors between 'ref/net9.0/System.Private.CoreLib.dll' (left) and 'lib/net9.0/System.Private.CoreLib.dll' (right): [D:\Dev\DOTNExT\src\runtime\src\coreclr\System.Private.CoreLib\System.Private.CoreLib.csproj]
+C:\Users\vaero\.nuget\packages\microsoft.dotnet.apicompat.task\9.0.109\build\Microsoft.DotNet.ApiCompat.ValidateAssemblies.Common.targets(16,5): error CP0001: Type 'System.OS.TypeDriverHelper' exists on lib/net9.0/System.Private.CoreLib.dll but not on ref/net9.0/System.Private.CoreLib.dll [D:\Dev\DOTNExT\src\runtime\src\coreclr\System.Private.CoreLib\System.Private.CoreLib.csproj]
+C:\Users\vaero\.nuget\packages\microsoft.dotnet.apicompat.task\9.0.109\build\Microsoft.DotNet.ApiCompat.ValidateAssemblies.Common.targets(16,5): error CP0001: Type 'System.OS.VirtualAttribute' exists on lib/net9.0/System.Private.CoreLib.dll but not on ref/net9.0/System.Private.CoreLib.dll [D:\Dev\DOTNExT\src\runtime\src\coreclr\System.Private.CoreLib\System.Private.CoreLib.csproj]
+C:\Users\vaero\.nuget\packages\microsoft.dotnet.apicompat.task\9.0.109\build\Microsoft.DotNet.ApiCompat.ValidateAssemblies.Common.targets(16,5): error CP0001: Type 'System.OS.PersistentAttribute' exists on lib/net9.0/System.Private.CoreLib.dll but not on ref/net9.0/System.Private.CoreLib.dll [D:\Dev\DOTNExT\src\runtime\src\coreclr\System.Private.CoreLib\System.Private.CoreLib.csproj]
+C:\Users\vaero\.nuget\packages\microsoft.dotnet.apicompat.task\9.0.109\build\Microsoft.DotNet.ApiCompat.ValidateAssemblies.Common.targets(16,5): error : API breaking changes found. If those are intentional, the APICompat suppression file can be updated by rebuilding with '/p:ApiCompatGenerateSuppressionFile=true' [D:\Dev\DOTNExT\src\runtime\src\coreclr\System.Private.CoreLib\System.Private.CoreLib.csproj]
+
+Build FAILED.
+
+C:\Users\vaero\.nuget\packages\microsoft.dotnet.apicompat.task\9.0.109\build\Microsoft.DotNet.ApiCompat.ValidateAssemblies.Common.targets(16,5): error : API compatibility errors between 'ref/net9.0/System.Private.CoreLib.dll' (left) and 'lib/net9.0/System.Private.CoreLib.dll' (right): [D:\Dev\DOTNExT\src\runtime\src\coreclr\System.Private.CoreLib\System.Private.CoreLib.csproj]
+C:\Users\vaero\.nuget\packages\microsoft.dotnet.apicompat.task\9.0.109\build\Microsoft.DotNet.ApiCompat.ValidateAssemblies.Common.targets(16,5): error CP0001: Type 'System.OS.TypeDriverHelper' exists on lib/net9.0/System.Private.CoreLib.dll but not on ref/net9.0/System.Private.CoreLib.dll [D:\Dev\DOTNExT\src\runtime\src\coreclr\System.Private.CoreLib\System.Private.CoreLib.csproj]
+C:\Users\vaero\.nuget\packages\microsoft.dotnet.apicompat.task\9.0.109\build\Microsoft.DotNet.ApiCompat.ValidateAssemblies.Common.targets(16,5): error CP0001: Type 'System.OS.VirtualAttribute' exists on lib/net9.0/System.Private.CoreLib.dll but not on ref/net9.0/System.Private.CoreLib.dll [D:\Dev\DOTNExT\src\runtime\src\coreclr\System.Private.CoreLib\System.Private.CoreLib.csproj]
+C:\Users\vaero\.nuget\packages\microsoft.dotnet.apicompat.task\9.0.109\build\Microsoft.DotNet.ApiCompat.ValidateAssemblies.Common.targets(16,5): error CP0001: Type 'System.OS.PersistentAttribute' exists on lib/net9.0/System.Private.CoreLib.dll but not on ref/net9.0/System.Private.CoreLib.dll [D:\Dev\DOTNExT\src\runtime\src\coreclr\System.Private.CoreLib\System.Private.CoreLib.csproj]
+C:\Users\vaero\.nuget\packages\microsoft.dotnet.apicompat.task\9.0.109\build\Microsoft.DotNet.ApiCompat.ValidateAssemblies.Common.targets(16,5): error : API breaking changes found. If those are intentional, the APICompat suppression file can be updated by rebuilding with '/p:ApiCompatGenerateSuppressionFile=true' [D:\Dev\DOTNExT\src\runtime\src\coreclr\System.Private.CoreLib\System.Private.CoreLib.csproj]
+    0 Warning(s)
+    5 Error(s)
+
+Time Elapsed 00:00:33.27
+Build failed with exit code 1. Check errors above.
+Some builds failed:
+	Configuration: Debug, Architecture: x64

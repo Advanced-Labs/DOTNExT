@@ -1,0 +1,491 @@
+**********************************************************************
+** Visual Studio 2022 Developer Command Prompt v17.14.24
+** Copyright (c) 2025 Microsoft Corporation
+**********************************************************************
+  Determining projects to restore...
+  Tool 'coverlet.console' (version '6.0.0') was restored. Available commands: coverlet
+  Tool 'dotnet-reportgenerator-globaltool' (version '5.3.0') was restored. Available commands: reportgenerator
+  Tool 'microsoft.dotnet.xharness.cli' (version '9.0.0-prerelease.25504.2') was restored. Available commands: xharness
+  Tool 'microsoft.visualstudio.slngen.tool' (version '11.1.0') was restored. Available commands: slngen
+  
+  Restore was successful.
+  All projects are up-to-date for restore.
+  Determining projects to restore...
+  All projects are up-to-date for restore.
+  ILLink.RoslynAnalyzer -> D:\Dev\DOTNExT\src\runtime\artifacts\bin\ILLink.RoslynAnalyzer\Debug\netstandard2.0\ILLink.RoslynAnalyzer.dll
+  ILLink.CodeFixProvider -> D:\Dev\DOTNExT\src\runtime\artifacts\bin\ILLink.CodeFixProvider\Debug\netstandard2.0\ILLink.CodeFixProvider.dll
+  Mono.Linker -> D:\Dev\DOTNExT\src\runtime\artifacts\bin\Mono.Linker\ref\Debug\net9.0\illink.dll
+  Mono.Linker -> D:\Dev\DOTNExT\src\runtime\artifacts\bin\Mono.Linker\Debug\net9.0\illink.dll
+  ILLink.Tasks -> D:\Dev\DOTNExT\src\runtime\artifacts\bin\ILLink.Tasks\Debug\net9.0\ILLink.Tasks.dll
+  System.Private.CoreLib.Generators -> D:\Dev\DOTNExT\src\runtime\artifacts\bin\System.Private.CoreLib.Generators\Debug\netstandard2.0\System.Private.CoreLib.Generators.dll
+  Microsoft.Interop.SourceGeneration -> D:\Dev\DOTNExT\src\runtime\artifacts\bin\Microsoft.Interop.SourceGeneration\Debug\netstandard2.0\Microsoft.Interop.SourceGeneration.dll
+  LibraryImportGenerator -> D:\Dev\DOTNExT\src\runtime\artifacts\bin\LibraryImportGenerator\Debug\netstandard2.0\Microsoft.Interop.LibraryImportGenerator.dll
+  System.Private.CoreLib -> D:\Dev\DOTNExT\src\runtime\artifacts\bin\System.Private.CoreLib\ref\Debug\net9.0\System.Private.CoreLib.dll
+  System.Private.CoreLib -> D:\Dev\DOTNExT\src\runtime\artifacts\bin\coreclr\windows.x64.Debug\IL\System.Private.CoreLib.dll
+  cdac-build-tool -> D:\Dev\DOTNExT\src\runtime\artifacts\bin\coreclr\windows.x64.Debug\cdac-build-tool\cdac-build-tool.dll
+  Executing "D:\Dev\DOTNExT\src\runtime\src\coreclr\build-runtime.cmd" -x64 -debug -os windows -outputrid win-x64 -cmakeargs "-DCLR_DOTNET_HOST_PATH=D:\Dev\DOTNExT\src\runtime\.dotnet\dotnet.exe" -cmakeargs "-DCDAC_BUILD_TOOL_BINARY_PATH=D:\Dev\DOTNExT\src\runtime\artifacts\bin\coreclr\windows.x64.Debug\cdac-build-tool\cdac-build-tool.dll"
+  BUILD: Starting Build at 19:26:24.32
+  BUILD: Commencing CoreCLR product build
+  BUILD: Checking prerequisites
+  BUILD: Using CMake from C:\Users\vaero\AppData\Local\Microsoft\WinGet\Packages\BrechtSanders.WinLibs.POSIX.UCRT_Microsoft.Winget.Source_8wekyb3d8bbwe\mingw64\bin\cmake.exe
+  'wmic' is not recognized as an internal or external command,
+  operable program or batch file.
+  BUILD: Number of processor cores 0
+  BUILD: Commencing build of native components for windows.x64.Debug
+  BUILD: Using environment: "C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Auxiliary\Build\vcvarsall.bat" amd64
+  **********************************************************************
+  ** Visual Studio 2022 Developer Command Prompt v17.14.24
+  ** Copyright (c) 2025 Microsoft Corporation
+  **********************************************************************
+  [vcvarsall.bat] Environment initialized for: 'x64'
+  BUILD: Regenerating the Visual Studio solution
+  Calling "D:\Dev\DOTNExT\src\runtime\eng\native\gen-buildsys.cmd" "D:\Dev\DOTNExT\src\runtime\src\coreclr" "D:\Dev\DOTNExT\src\runtime\artifacts\obj\coreclr\windows.x64.Debug" vs2022 x64 windows "-DCMAKE_BUILD_TYPE=Debug" "-DCLR_CMAKE_TARGET_ARCH=x64" "-DCLR_CMAKE_TARGET_OS=windows" "-DCLI_CMAKE_FALLBACK_OS=win10" "-DCLR_CMAKE_PGO_INSTRUMENT=0" "-DCLR_CMAKE_OPTDATA_PATH=" "-DCLR_CMAKE_PGO_OPTIMIZE=0" "-DCDAC_BUILD_TOOL_BINARY_PATH=D:\Dev\DOTNExT\src\runtime\artifacts\bin\coreclr\windows.x64.Debug\cdac-build-tool\cdac-build-tool.dll" "-DCLR_DOTNET_HOST_PATH=D:\Dev\DOTNExT\src\runtime\.dotnet\dotnet.exe" 
+  The CMake command line is the same as the last run. Skipping running CMake.
+  running "C:\Users\vaero\AppData\Local\Microsoft\WinGet\Packages\BrechtSanders.WinLibs.POSIX.UCRT_Microsoft.Winget.Source_8wekyb3d8bbwe\mingw64\bin\cmake.exe" --build D:\Dev\DOTNExT\src\runtime\artifacts\obj\coreclr\windows.x64.Debug --target install --config Debug -- 
+  [0/1] Re-running CMake...
+  CMake Deprecation Warning at D:/Dev/DOTNExT/src/runtime/src/native/external/zlib-ng/CMakeLists.txt:1 (cmake_minimum_required):
+    Compatibility with CMake < 3.10 will be removed from a future version of
+    CMake.
+  
+    Update the VERSION argument <min> value.  Or, use the <min>...<max> syntax
+    to tell CMake that the project requires at least <min> but has been updated
+    to work with policies introduced by <max> or earlier.
+  
+  
+  -- Using CMake version 4.0.3
+  -- ZLIB_HEADER_VERSION: 1.3.1
+  -- ZLIBNG_HEADER_VERSION: 2.2.1
+  -- Arch detected: 'x86_64'
+  -- Basearch of 'x86_64' has been detected as: 'x86'
+  -- Architecture-specific source files: arch/x86/x86_features.c;arch/x86/chunkset_sse2.c;arch/x86/compare256_sse2.c;arch/x86/slide_hash_sse2.c;arch/x86/adler32_ssse3.c;arch/x86/chunkset_ssse3.c;arch/x86/adler32_sse42.c;arch/x86/crc32_pclmulqdq.c;arch/x86/slide_hash_avx2.c;arch/x86/chunkset_avx2.c;arch/x86/compare256_avx2.c;arch/x86/adler32_avx2.c;arch/x86/adler32_avx512.c;arch/x86/adler32_avx512_vnni.c;arch/x86/crc32_vpclmulqdq.c
+  -- The following features have been enabled:
+  
+   * CMAKE_BUILD_TYPE, Build type: Debug (selected)
+   * XSAVE, Support XSAVE intrinsics using ""
+   * SSSE3_ADLER32, Support SSSE3-accelerated adler32, using ""
+   * SSE42_CRC, Support SSE4.2 optimized adler32 hash generation, using ""
+   * PCLMUL_CRC, Support CRC hash generation using PCLMULQDQ, using " "
+   * AVX2_SLIDEHASH, Support AVX2 optimized slide_hash, using "/arch:AVX2"
+   * AVX2_CHUNKSET, Support AVX2 optimized chunkset, using "/arch:AVX2"
+   * AVX2_COMPARE256, Support AVX2 optimized compare256, using "/arch:AVX2"
+   * AVX2_ADLER32, Support AVX2-accelerated adler32, using "/arch:AVX2"
+   * AVX512_ADLER32, Support AVX512-accelerated adler32, using "/arch:AVX512"
+   * AVX512VNNI_ADLER32, Support AVX512VNNI adler32, using "/arch:AVX512"
+   * VPCLMUL_CRC, Support CRC hash generation using VPCLMULQDQ, using "  /arch:AVX512"
+   * WITH_GZFILEOP, Compile with support for gzFile related functions
+   * ZLIB_COMPAT, Compile with zlib compatible API
+   * WITH_SANITIZER, Enable sanitizer support
+   * WITH_GTEST, Build gtest_zlib
+   * WITH_OPTIM, Build with optimisation
+   * WITH_NEW_STRATEGIES, Use new strategies
+   * WITH_RUNTIME_CPU_DETECTION, Build with runtime CPU detection
+   * WITH_AVX2, Build with AVX2
+   * WITH_AVX512, Build with AVX512
+   * WITH_AVX512VNNI, Build with AVX512 VNNI
+   * WITH_SSE2, Build with SSE2
+   * WITH_SSSE3, Build with SSSE3
+   * WITH_SSE42, Build with SSE42
+   * WITH_PCLMULQDQ, Build with PCLMULQDQ
+   * WITH_VPCLMULQDQ, Build with VPCLMULQDQ
+  
+  -- The following features have been disabled:
+  
+   * ZLIB_SYMBOL_PREFIX, Publicly exported symbols DO NOT have a custom prefix
+   * ZLIB_ENABLE_TESTS, Build test binaries
+   * ZLIBNG_ENABLE_TESTS, Test zlib-ng specific API
+   * WITH_FUZZERS, Build test/fuzz
+   * WITH_BENCHMARKS, Build test/benchmarks
+   * WITH_BENCHMARK_APPS, Build application benchmarks
+   * WITH_NATIVE_INSTRUCTIONS, Instruct the compiler to use the full instruction set on this host (gcc/clang -march=native)
+   * WITH_MAINTAINER_WARNINGS, Build with project maintainer warnings
+   * WITH_CODE_COVERAGE, Enable code coverage reporting
+   * WITH_INFLATE_STRICT, Build with strict inflate distance checking
+   * WITH_INFLATE_ALLOW_INVALID_DIST, Build with zero fill for inflate invalid distances
+   * INSTALL_UTILS, Copy minigzip and minideflate during install
+  
+  CMake Warning (dev) at D:/Dev/DOTNExT/src/runtime/eng/native/functions.cmake:492 (install):
+    Policy CMP0177 is not set: install() DESTINATION paths are normalized.  Run
+    "cmake --help-policy CMP0177" for policy details.  Use the cmake_policy
+    command to set the policy and suppress this warning.
+  Call Stack (most recent call first):
+    D:/Dev/DOTNExT/src/runtime/eng/native/functions.cmake:561 (install_symbol_file)
+    D:/Dev/DOTNExT/src/runtime/src/native/watchdog/CMakeLists.txt:2 (install_clr)
+  This warning is for project developers.  Use -Wno-dev to suppress it.
+  
+  CMake Warning (dev) at D:/Dev/DOTNExT/src/runtime/eng/native/functions.cmake:492 (install):
+    Policy CMP0177 is not set: install() DESTINATION paths are normalized.  Run
+    "cmake --help-policy CMP0177" for policy details.  Use the cmake_policy
+    command to set the policy and suppress this warning.
+  Call Stack (most recent call first):
+    D:/Dev/DOTNExT/src/runtime/eng/native/functions.cmake:561 (install_symbol_file)
+    D:/Dev/DOTNExT/src/runtime/src/native/watchdog/CMakeLists.txt:3 (install_clr)
+  This warning is for project developers.  Use -Wno-dev to suppress it.
+  
+  CMake Warning (dev) at D:/Dev/DOTNExT/src/runtime/eng/native/functions.cmake:492 (install):
+    Policy CMP0177 is not set: install() DESTINATION paths are normalized.  Run
+    "cmake --help-policy CMP0177" for policy details.  Use the cmake_policy
+    command to set the policy and suppress this warning.
+  Call Stack (most recent call first):
+    D:/Dev/DOTNExT/src/runtime/eng/native/functions.cmake:561 (install_symbol_file)
+    tools/aot/jitinterface/CMakeLists.txt:25 (install_clr)
+  This warning is for project developers.  Use -Wno-dev to suppress it.
+  
+  CMake Warning (dev) at D:/Dev/DOTNExT/src/runtime/eng/native/functions.cmake:492 (install):
+    Policy CMP0177 is not set: install() DESTINATION paths are normalized.  Run
+    "cmake --help-policy CMP0177" for policy details.  Use the cmake_policy
+    command to set the policy and suppress this warning.
+  Call Stack (most recent call first):
+    D:/Dev/DOTNExT/src/runtime/eng/native/functions.cmake:561 (install_symbol_file)
+    tools/aot/jitinterface/CMakeLists.txt:26 (install_clr)
+  This warning is for project developers.  Use -Wno-dev to suppress it.
+  
+  CMake Warning (dev) at nativeaot/Runtime/Full/CMakeLists.txt:85 (add_custom_command):
+    The following keywords are not supported when using
+    add_custom_command(TARGET): DEPENDS.
+  
+    Policy CMP0175 is not set: add_custom_command() rejects invalid arguments.
+    Run "cmake --help-policy CMP0175" for policy details.  Use the cmake_policy
+    command to set the policy and suppress this warning.
+  This warning is for project developers.  Use -Wno-dev to suppress it.
+  
+  CMake Warning (dev) at nativeaot/Runtime/Full/CMakeLists.txt:85 (add_custom_command):
+    Exactly one of PRE_BUILD, PRE_LINK, or POST_BUILD must be given.  Assuming
+    POST_BUILD to preserve backward compatibility.
+  
+    Policy CMP0175 is not set: add_custom_command() rejects invalid arguments.
+    Run "cmake --help-policy CMP0175" for policy details.  Use the cmake_policy
+    command to set the policy and suppress this warning.
+  This warning is for project developers.  Use -Wno-dev to suppress it.
+  
+  CMake Warning (dev) at D:/Dev/DOTNExT/src/runtime/eng/native/functions.cmake:492 (install):
+    Policy CMP0177 is not set: install() DESTINATION paths are normalized.  Run
+    "cmake --help-policy CMP0177" for policy details.  Use the cmake_policy
+    command to set the policy and suppress this warning.
+  Call Stack (most recent call first):
+    D:/Dev/DOTNExT/src/runtime/eng/native/functions.cmake:561 (install_symbol_file)
+    gc/CMakeLists.txt:113 (install_clr)
+  This warning is for project developers.  Use -Wno-dev to suppress it.
+  
+  CMake Warning (dev) at D:/Dev/DOTNExT/src/runtime/eng/native/functions.cmake:492 (install):
+    Policy CMP0177 is not set: install() DESTINATION paths are normalized.  Run
+    "cmake --help-policy CMP0177" for policy details.  Use the cmake_policy
+    command to set the policy and suppress this warning.
+  Call Stack (most recent call first):
+    D:/Dev/DOTNExT/src/runtime/eng/native/functions.cmake:561 (install_symbol_file)
+    gc/CMakeLists.txt:120 (install_clr)
+  This warning is for project developers.  Use -Wno-dev to suppress it.
+  
+  CMake Warning (dev) at D:/Dev/DOTNExT/src/runtime/eng/native/functions.cmake:492 (install):
+    Policy CMP0177 is not set: install() DESTINATION paths are normalized.  Run
+    "cmake --help-policy CMP0177" for policy details.  Use the cmake_policy
+    command to set the policy and suppress this warning.
+  Call Stack (most recent call first):
+    D:/Dev/DOTNExT/src/runtime/eng/native/functions.cmake:561 (install_symbol_file)
+    gc/CMakeLists.txt:137 (install_clr)
+  This warning is for project developers.  Use -Wno-dev to suppress it.
+  
+  CMake Warning (dev) at D:/Dev/DOTNExT/src/runtime/eng/native/functions.cmake:492 (install):
+    Policy CMP0177 is not set: install() DESTINATION paths are normalized.  Run
+    "cmake --help-policy CMP0177" for policy details.  Use the cmake_policy
+    command to set the policy and suppress this warning.
+  Call Stack (most recent call first):
+    D:/Dev/DOTNExT/src/runtime/eng/native/functions.cmake:561 (install_symbol_file)
+    gc/CMakeLists.txt:139 (install_clr)
+  This warning is for project developers.  Use -Wno-dev to suppress it.
+  
+  CMake Warning (dev) at D:/Dev/DOTNExT/src/runtime/eng/native/functions.cmake:492 (install):
+    Policy CMP0177 is not set: install() DESTINATION paths are normalized.  Run
+    "cmake --help-policy CMP0177" for policy details.  Use the cmake_policy
+    command to set the policy and suppress this warning.
+  Call Stack (most recent call first):
+    D:/Dev/DOTNExT/src/runtime/eng/native/functions.cmake:561 (install_symbol_file)
+    ilasm/CMakeLists.txt:132 (install_clr)
+  This warning is for project developers.  Use -Wno-dev to suppress it.
+  
+  CMake Warning (dev) at D:/Dev/DOTNExT/src/runtime/eng/native/functions.cmake:492 (install):
+    Policy CMP0177 is not set: install() DESTINATION paths are normalized.  Run
+    "cmake --help-policy CMP0177" for policy details.  Use the cmake_policy
+    command to set the policy and suppress this warning.
+  Call Stack (most recent call first):
+    D:/Dev/DOTNExT/src/runtime/eng/native/functions.cmake:561 (install_symbol_file)
+    ildasm/exe/CMakeLists.txt:121 (install_clr)
+  This warning is for project developers.  Use -Wno-dev to suppress it.
+  
+  CMake Warning (dev) at D:/Dev/DOTNExT/src/runtime/eng/native/functions.cmake:492 (install):
+    Policy CMP0177 is not set: install() DESTINATION paths are normalized.  Run
+    "cmake --help-policy CMP0177" for policy details.  Use the cmake_policy
+    command to set the policy and suppress this warning.
+  Call Stack (most recent call first):
+    D:/Dev/DOTNExT/src/runtime/eng/native/functions.cmake:561 (install_symbol_file)
+    jit/CMakeLists.txt:624 (install_clr)
+    jit/CMakeLists.txt:64 (add_jit)
+    jit/CMakeLists.txt:640 (create_standalone_jit)
+  This warning is for project developers.  Use -Wno-dev to suppress it.
+  
+  CMake Warning (dev) at D:/Dev/DOTNExT/src/runtime/eng/native/functions.cmake:492 (install):
+    Policy CMP0177 is not set: install() DESTINATION paths are normalized.  Run
+    "cmake --help-policy CMP0177" for policy details.  Use the cmake_policy
+    command to set the policy and suppress this warning.
+  Call Stack (most recent call first):
+    D:/Dev/DOTNExT/src/runtime/eng/native/functions.cmake:561 (install_symbol_file)
+    jit/CMakeLists.txt:641 (install_clr)
+  This warning is for project developers.  Use -Wno-dev to suppress it.
+  
+  CMake Warning (dev) at D:/Dev/DOTNExT/src/runtime/eng/native/functions.cmake:492 (install):
+    Policy CMP0177 is not set: install() DESTINATION paths are normalized.  Run
+    "cmake --help-policy CMP0177" for policy details.  Use the cmake_policy
+    command to set the policy and suppress this warning.
+  Call Stack (most recent call first):
+    D:/Dev/DOTNExT/src/runtime/eng/native/functions.cmake:561 (install_symbol_file)
+    jit/CMakeLists.txt:624 (install_clr)
+    jit/CMakeLists.txt:64 (add_jit)
+    jit/CMakeLists.txt:647 (create_standalone_jit)
+  This warning is for project developers.  Use -Wno-dev to suppress it.
+  
+  CMake Warning (dev) at D:/Dev/DOTNExT/src/runtime/eng/native/functions.cmake:492 (install):
+    Policy CMP0177 is not set: install() DESTINATION paths are normalized.  Run
+    "cmake --help-policy CMP0177" for policy details.  Use the cmake_policy
+    command to set the policy and suppress this warning.
+  Call Stack (most recent call first):
+    D:/Dev/DOTNExT/src/runtime/eng/native/functions.cmake:561 (install_symbol_file)
+    jit/CMakeLists.txt:624 (install_clr)
+    jit/CMakeLists.txt:64 (add_jit)
+    jit/CMakeLists.txt:648 (create_standalone_jit)
+  This warning is for project developers.  Use -Wno-dev to suppress it.
+  
+  CMake Warning (dev) at D:/Dev/DOTNExT/src/runtime/eng/native/functions.cmake:492 (install):
+    Policy CMP0177 is not set: install() DESTINATION paths are normalized.  Run
+    "cmake --help-policy CMP0177" for policy details.  Use the cmake_policy
+    command to set the policy and suppress this warning.
+  Call Stack (most recent call first):
+    D:/Dev/DOTNExT/src/runtime/eng/native/functions.cmake:561 (install_symbol_file)
+    jit/CMakeLists.txt:624 (install_clr)
+    jit/CMakeLists.txt:64 (add_jit)
+    jit/CMakeLists.txt:649 (create_standalone_jit)
+  This warning is for project developers.  Use -Wno-dev to suppress it.
+  
+  CMake Warning (dev) at D:/Dev/DOTNExT/src/runtime/eng/native/functions.cmake:492 (install):
+    Policy CMP0177 is not set: install() DESTINATION paths are normalized.  Run
+    "cmake --help-policy CMP0177" for policy details.  Use the cmake_policy
+    command to set the policy and suppress this warning.
+  Call Stack (most recent call first):
+    D:/Dev/DOTNExT/src/runtime/eng/native/functions.cmake:561 (install_symbol_file)
+    jit/CMakeLists.txt:624 (install_clr)
+    jit/CMakeLists.txt:64 (add_jit)
+    jit/CMakeLists.txt:659 (create_standalone_jit)
+  This warning is for project developers.  Use -Wno-dev to suppress it.
+  
+  CMake Warning (dev) at D:/Dev/DOTNExT/src/runtime/eng/native/functions.cmake:492 (install):
+    Policy CMP0177 is not set: install() DESTINATION paths are normalized.  Run
+    "cmake --help-policy CMP0177" for policy details.  Use the cmake_policy
+    command to set the policy and suppress this warning.
+  Call Stack (most recent call first):
+    D:/Dev/DOTNExT/src/runtime/eng/native/functions.cmake:561 (install_symbol_file)
+    jit/CMakeLists.txt:624 (install_clr)
+    jit/CMakeLists.txt:64 (add_jit)
+    jit/CMakeLists.txt:661 (create_standalone_jit)
+  This warning is for project developers.  Use -Wno-dev to suppress it.
+  
+  CMake Warning (dev) at D:/Dev/DOTNExT/src/runtime/eng/native/functions.cmake:492 (install):
+    Policy CMP0177 is not set: install() DESTINATION paths are normalized.  Run
+    "cmake --help-policy CMP0177" for policy details.  Use the cmake_policy
+    command to set the policy and suppress this warning.
+  Call Stack (most recent call first):
+    D:/Dev/DOTNExT/src/runtime/eng/native/functions.cmake:561 (install_symbol_file)
+    debug/createdump/CMakeLists.txt:111 (install_clr)
+  This warning is for project developers.  Use -Wno-dev to suppress it.
+  
+  CMake Warning (dev) at D:/Dev/DOTNExT/src/runtime/eng/native/functions.cmake:492 (install):
+    Policy CMP0177 is not set: install() DESTINATION paths are normalized.  Run
+    "cmake --help-policy CMP0177" for policy details.  Use the cmake_policy
+    command to set the policy and suppress this warning.
+  Call Stack (most recent call first):
+    D:/Dev/DOTNExT/src/runtime/eng/native/functions.cmake:561 (install_symbol_file)
+    dlls/clretwrc/CMakeLists.txt:28 (install_clr)
+  This warning is for project developers.  Use -Wno-dev to suppress it.
+  
+  CMake Warning (dev) at D:/Dev/DOTNExT/src/runtime/eng/native/functions.cmake:492 (install):
+    Policy CMP0177 is not set: install() DESTINATION paths are normalized.  Run
+    "cmake --help-policy CMP0177" for policy details.  Use the cmake_policy
+    command to set the policy and suppress this warning.
+  Call Stack (most recent call first):
+    D:/Dev/DOTNExT/src/runtime/eng/native/functions.cmake:561 (install_symbol_file)
+    dlls/mscordbi/CMakeLists.txt:135 (install_clr)
+  This warning is for project developers.  Use -Wno-dev to suppress it.
+  
+  CMake Warning (dev) at D:/Dev/DOTNExT/src/runtime/eng/native/functions.cmake:492 (install):
+    Policy CMP0177 is not set: install() DESTINATION paths are normalized.  Run
+    "cmake --help-policy CMP0177" for policy details.  Use the cmake_policy
+    command to set the policy and suppress this warning.
+  Call Stack (most recent call first):
+    D:/Dev/DOTNExT/src/runtime/eng/native/functions.cmake:561 (install_symbol_file)
+    dlls/mscordac/CMakeLists.txt:199 (install_clr)
+  This warning is for project developers.  Use -Wno-dev to suppress it.
+  
+  Read file version from native version header at 'D:/Dev/DOTNExT/src/runtime/artifacts/obj/_version.h'.
+  CMake Warning (dev) at D:/Dev/DOTNExT/src/runtime/eng/native/functions.cmake:492 (install):
+    Policy CMP0177 is not set: install() DESTINATION paths are normalized.  Run
+    "cmake --help-policy CMP0177" for policy details.  Use the cmake_policy
+    command to set the policy and suppress this warning.
+  Call Stack (most recent call first):
+    D:/Dev/DOTNExT/src/runtime/eng/native/functions.cmake:561 (install_symbol_file)
+    dlls/mscoree/coreclr/CMakeLists.txt:231 (install_clr)
+  This warning is for project developers.  Use -Wno-dev to suppress it.
+  
+  CMake Warning (dev) at D:/Dev/DOTNExT/src/runtime/eng/native/functions.cmake:492 (install):
+    Policy CMP0177 is not set: install() DESTINATION paths are normalized.  Run
+    "cmake --help-policy CMP0177" for policy details.  Use the cmake_policy
+    command to set the policy and suppress this warning.
+  Call Stack (most recent call first):
+    D:/Dev/DOTNExT/src/runtime/eng/native/functions.cmake:561 (install_symbol_file)
+    dlls/mscorrc/CMakeLists.txt:22 (install_clr)
+  This warning is for project developers.  Use -Wno-dev to suppress it.
+  
+  CMake Warning (dev) at D:/Dev/DOTNExT/src/runtime/eng/native/functions.cmake:492 (install):
+    Policy CMP0177 is not set: install() DESTINATION paths are normalized.  Run
+    "cmake --help-policy CMP0177" for policy details.  Use the cmake_policy
+    command to set the policy and suppress this warning.
+  Call Stack (most recent call first):
+    D:/Dev/DOTNExT/src/runtime/eng/native/functions.cmake:561 (install_symbol_file)
+    tools/superpmi/superpmi/CMakeLists.txt:81 (install_clr)
+  This warning is for project developers.  Use -Wno-dev to suppress it.
+  
+  CMake Warning (dev) at D:/Dev/DOTNExT/src/runtime/eng/native/functions.cmake:492 (install):
+    Policy CMP0177 is not set: install() DESTINATION paths are normalized.  Run
+    "cmake --help-policy CMP0177" for policy details.  Use the cmake_policy
+    command to set the policy and suppress this warning.
+  Call Stack (most recent call first):
+    D:/Dev/DOTNExT/src/runtime/eng/native/functions.cmake:561 (install_symbol_file)
+    tools/superpmi/mcs/CMakeLists.txt:75 (install_clr)
+  This warning is for project developers.  Use -Wno-dev to suppress it.
+  
+  CMake Warning (dev) at D:/Dev/DOTNExT/src/runtime/eng/native/functions.cmake:492 (install):
+    Policy CMP0177 is not set: install() DESTINATION paths are normalized.  Run
+    "cmake --help-policy CMP0177" for policy details.  Use the cmake_policy
+    command to set the policy and suppress this warning.
+  Call Stack (most recent call first):
+    D:/Dev/DOTNExT/src/runtime/eng/native/functions.cmake:561 (install_symbol_file)
+    tools/superpmi/superpmi-shim-collector/CMakeLists.txt:89 (install_clr)
+  This warning is for project developers.  Use -Wno-dev to suppress it.
+  
+  CMake Warning (dev) at D:/Dev/DOTNExT/src/runtime/eng/native/functions.cmake:492 (install):
+    Policy CMP0177 is not set: install() DESTINATION paths are normalized.  Run
+    "cmake --help-policy CMP0177" for policy details.  Use the cmake_policy
+    command to set the policy and suppress this warning.
+  Call Stack (most recent call first):
+    D:/Dev/DOTNExT/src/runtime/eng/native/functions.cmake:561 (install_symbol_file)
+    tools/superpmi/superpmi-shim-counter/CMakeLists.txt:70 (install_clr)
+  This warning is for project developers.  Use -Wno-dev to suppress it.
+  
+  CMake Warning (dev) at D:/Dev/DOTNExT/src/runtime/eng/native/functions.cmake:492 (install):
+    Policy CMP0177 is not set: install() DESTINATION paths are normalized.  Run
+    "cmake --help-policy CMP0177" for policy details.  Use the cmake_policy
+    command to set the policy and suppress this warning.
+  Call Stack (most recent call first):
+    D:/Dev/DOTNExT/src/runtime/eng/native/functions.cmake:561 (install_symbol_file)
+    tools/superpmi/superpmi-shim-simple/CMakeLists.txt:69 (install_clr)
+  This warning is for project developers.  Use -Wno-dev to suppress it.
+  
+  CMake Warning (dev) at D:/Dev/DOTNExT/src/runtime/eng/native/functions.cmake:492 (install):
+    Policy CMP0177 is not set: install() DESTINATION paths are normalized.  Run
+    "cmake --help-policy CMP0177" for policy details.  Use the cmake_policy
+    command to set the policy and suppress this warning.
+  Call Stack (most recent call first):
+    D:/Dev/DOTNExT/src/runtime/eng/native/functions.cmake:561 (install_symbol_file)
+    tools/StressLogAnalyzer/CMakeLists.txt:16 (install_clr)
+  This warning is for project developers.  Use -Wno-dev to suppress it.
+  
+  CMake Warning (dev) at D:/Dev/DOTNExT/src/runtime/eng/native/functions.cmake:492 (install):
+    Policy CMP0177 is not set: install() DESTINATION paths are normalized.  Run
+    "cmake --help-policy CMP0177" for policy details.  Use the cmake_policy
+    command to set the policy and suppress this warning.
+  Call Stack (most recent call first):
+    D:/Dev/DOTNExT/src/runtime/eng/native/functions.cmake:561 (install_symbol_file)
+    hosts/coreshim/CMakeLists.txt:26 (install_clr)
+  This warning is for project developers.  Use -Wno-dev to suppress it.
+  
+  -- Configuring done (1.7s)
+  -- Generating done (1.1s)
+  -- Build files have been written to: D:/Dev/DOTNExT/src/runtime/artifacts/obj/coreclr/windows.x64.Debug
+  [1/14] Preprocessing D:/Dev/DOTNExT/src/runtime/artifacts/obj/coreclr/windows.x64.Debug/vm/wks/AsmConstants.tmp. Outputting to D:/Dev/DOTNExT/src/runtime/artifacts/obj/coreclr/windows.x64.Debug/vm/wks/AsmConstants.inc
+  AsmConstants.tmp
+  [2/14] Linking RC shared library dlls\clretwrc\clretwrc.dll
+  [3/14] Linking RC shared library dlls\mscorrc\mscorrc.dll
+  [4/14] C:\Windows\system32\cmd.exe /C "cd /D D:\Dev\DOTNExT\src\runtime\artifacts\obj\coreclr\windows.x64.Debug\dlls\mscoree\coreclr && powershell -NoProfile -ExecutionPolicy ByPass -File D:/Dev/DOTNExT/src/runtime/src/coreclr/dlls/mscoree/coreclr/GenClrDebugResource.ps1 -dac D:/Dev/DOTNExT/src/runtime/artifacts/obj/coreclr/windows.x64.Debug/dlls/mscordac/mscordaccore.dll -dbi D:/Dev/DOTNExT/src/runtime/artifacts/obj/coreclr/windows.x64.Debug/dlls/mscordbi/mscordbi.dll -out D:/Dev/DOTNExT/src/runtime/artifacts/obj/coreclr/windows.x64.Debug/dlls/mscoree/coreclr/clr_debug_resource.bin"
+  [5/14] Building CXX object vm\wks\CMakeFiles\cee_wks_core.dir\__\tds\tdsqcalls.cpp.obj
+  [6/14] Building CXX object vm\wks\CMakeFiles\cee_wks_core.dir\__\qcallentrypoints.cpp.obj
+  [7/14] Linking CXX static library dlls\mscoree\coreclr\coreclr_static.lib
+  [8/14] Linking CXX shared library dlls\mscoree\coreclr\coreclr.dll
+  [9/14] Generating coreclr module index file -> D:/Dev/DOTNExT/src/runtime/artifacts/obj/coreclr/windows.x64.Debug/debug/runtimeinfo/runtimemoduleindex.h
+  [10/14] Building CXX object debug\runtimeinfo\CMakeFiles\runtimeinfo.dir\runtimeinfo.cpp.obj
+  [11/14] Linking CXX static library debug\runtimeinfo\runtimeinfo.lib
+  [12/14] Linking CXX executable Corehost.Static\singlefilehost.exe
+  [12/14] Install the project...
+  -- Install configuration: "Debug"
+  -- Installing: D:/Dev/DOTNExT/src/runtime/artifacts/bin/coreclr/windows.x64.Debug/corehost/PDB/singlefilehost.pdb
+  -- Installing: D:/Dev/DOTNExT/src/runtime/artifacts/bin/coreclr/windows.x64.Debug/corehost/singlefilehost.exe
+  -- Installing: D:/Dev/DOTNExT/src/runtime/artifacts/bin/coreclr/windows.x64.Debug/lib/runtimeinfo.lib
+  -- Installing: D:/Dev/DOTNExT/src/runtime/artifacts/bin/coreclr/windows.x64.Debug/./clretwrc.dll
+  -- Installing: D:/Dev/DOTNExT/src/runtime/artifacts/bin/coreclr/windows.x64.Debug/./PDB/clretwrc.pdb
+  -- Installing: D:/Dev/DOTNExT/src/runtime/artifacts/bin/coreclr/windows.x64.Debug/sharedFramework/clretwrc.dll
+  -- Installing: D:/Dev/DOTNExT/src/runtime/artifacts/bin/coreclr/windows.x64.Debug/sharedFramework/PDB/clretwrc.pdb
+  -- Installing: D:/Dev/DOTNExT/src/runtime/artifacts/bin/coreclr/windows.x64.Debug/./coreclr.dll
+  -- Installing: D:/Dev/DOTNExT/src/runtime/artifacts/bin/coreclr/windows.x64.Debug/./PDB/coreclr.pdb
+  -- Installing: D:/Dev/DOTNExT/src/runtime/artifacts/bin/coreclr/windows.x64.Debug/sharedFramework/coreclr.dll
+  -- Installing: D:/Dev/DOTNExT/src/runtime/artifacts/bin/coreclr/windows.x64.Debug/sharedFramework/PDB/coreclr.pdb
+  -- Installing: D:/Dev/DOTNExT/src/runtime/artifacts/bin/coreclr/windows.x64.Debug/./mscorrc.dll
+  -- Installing: D:/Dev/DOTNExT/src/runtime/artifacts/bin/coreclr/windows.x64.Debug/./PDB/mscorrc.pdb
+  -- Installing: D:/Dev/DOTNExT/src/runtime/artifacts/bin/coreclr/windows.x64.Debug/sharedFramework/mscorrc.dll
+  -- Installing: D:/Dev/DOTNExT/src/runtime/artifacts/bin/coreclr/windows.x64.Debug/sharedFramework/PDB/mscorrc.pdb
+  BUILD: Build succeeded.  Finished at 19:26:33.75
+  BUILD: Product binaries are available at D:\Dev\DOTNExT\src\runtime\artifacts\bin\coreclr\windows.x64.Debug
+  cdac-build-tool -> D:\Dev\DOTNExT\src\runtime\artifacts\bin\coreclr\linux.x64.Debug\cdac-build-tool\cdac-build-tool.dll
+  Executing "D:\Dev\DOTNExT\src\runtime\src\coreclr\build-runtime.cmd" -cmakeargs "-DCLR_CROSS_COMPONENTS_BUILD=1" -x64 -debug -os linux -hostarch x64 -outputrid linux-x64 -cmakeargs "-DCLR_DOTNET_HOST_PATH=D:\Dev\DOTNExT\src\runtime\.dotnet\dotnet.exe" -cmakeargs "-DCDAC_BUILD_TOOL_BINARY_PATH=D:\Dev\DOTNExT\src\runtime\artifacts\bin\coreclr\linux.x64.Debug\cdac-build-tool\cdac-build-tool.dll" -component crosscomponents
+  BUILD: Starting Build at 19:26:33.89
+  BUILD: Commencing CoreCLR product build
+  BUILD: Checking prerequisites
+  BUILD: Using CMake from C:\Users\vaero\AppData\Local\Microsoft\WinGet\Packages\BrechtSanders.WinLibs.POSIX.UCRT_Microsoft.Winget.Source_8wekyb3d8bbwe\mingw64\bin\cmake.exe
+  'wmic' is not recognized as an internal or external command,
+  operable program or batch file.
+  BUILD: Number of processor cores 0
+  BUILD: Commencing build of native components for linux.x64.Debug
+  BUILD: Using environment: "C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Auxiliary\Build\vcvarsall.bat" amd64
+  **********************************************************************
+  ** Visual Studio 2022 Developer Command Prompt v17.14.24
+  ** Copyright (c) 2025 Microsoft Corporation
+  **********************************************************************
+  [vcvarsall.bat] Environment initialized for: 'x64'
+  BUILD: Regenerating the Visual Studio solution
+  Calling "D:\Dev\DOTNExT\src\runtime\eng\native\gen-buildsys.cmd" "D:\Dev\DOTNExT\src\runtime\src\coreclr" "D:\Dev\DOTNExT\src\runtime\artifacts\obj\coreclr\linux.x64.Debug\x64" vs2022 x64 linux "-DCMAKE_BUILD_TYPE=Debug" "-DCLR_CMAKE_TARGET_ARCH=x64" "-DCLR_CMAKE_TARGET_OS=linux" "-DCLI_CMAKE_FALLBACK_OS=linux" "-DCLR_CMAKE_PGO_INSTRUMENT=0" "-DCLR_CMAKE_OPTDATA_PATH=" "-DCLR_CMAKE_PGO_OPTIMIZE=0" "-DCDAC_BUILD_TOOL_BINARY_PATH=D:\Dev\DOTNExT\src\runtime\artifacts\bin\coreclr\linux.x64.Debug\cdac-build-tool\cdac-build-tool.dll" "-DCLR_DOTNET_HOST_PATH=D:\Dev\DOTNExT\src\runtime\.dotnet\dotnet.exe" "-DCLR_CROSS_COMPONENTS_BUILD=1" 
+  The CMake command line is the same as the last run. Skipping running CMake.
+  running "C:\Users\vaero\AppData\Local\Microsoft\WinGet\Packages\BrechtSanders.WinLibs.POSIX.UCRT_Microsoft.Winget.Source_8wekyb3d8bbwe\mingw64\bin\cmake.exe" --build D:\Dev\DOTNExT\src\runtime\artifacts\obj\coreclr\linux.x64.Debug\x64 --target  crosscomponents --config Debug -- 
+  [0/1] Re-running CMake...
+  Read file version from native version header at 'D:/Dev/DOTNExT/src/runtime/artifacts/obj/_version.h'.
+  -- Configuring done (1.2s)
+  -- Generating done (0.8s)
+  -- Build files have been written to: D:/Dev/DOTNExT/src/runtime/artifacts/obj/coreclr/linux.x64.Debug/x64
+  [1/6] Building C object D:\Dev\DOTNExT\src\runtime\artifacts\obj\external\libunwind\CMakeFiles\libunwind_xdac.dir\D_\Dev\DOTNExT\src\runtime\src\native\external\libunwind\src\mi\mempool.c.obj
+  FAILED: [code=2] D:/Dev/DOTNExT/src/runtime/artifacts/obj/external/libunwind/CMakeFiles/libunwind_xdac.dir/D_/Dev/DOTNExT/src/runtime/src/native/external/libunwind/src/mi/mempool.c.obj 
+  C:\PROGRA~1\MICROS~1\2022\COMMUN~1\VC\Tools\MSVC\1444~1.352\bin\Hostx64\x64\cl.exe  /nologo -DBUILDENV_DEBUG=1 -DCROSS_COMPILE -DDEBUG -DDISABLE_CONTRACTS -DHAVE_CONFIG_H=1 -DHAVE_DL_ITERATE_PHDR=1 -DHAVE_UNW_GET_ACCESSORS -DHAVE___THREAD=0 -DHOST_64BIT -DHOST_AMD64 -DHOST_WINDOWS -DPACKAGE_BUGREPORT=\"\" -DPACKAGE_STRING=\"\" -DTARGET_64BIT -DTARGET_AMD64 -DTARGET_LINUX -DTARGET_UNIX -DUNW_REMOTE_ONLY -DURTBLDENV_FRIENDLY=Debug -D_CRT_DECLARE_NONSTDC_NAMES -D_CRT_SECURE_NO_WARNINGS -D_DBG -D_DEBUG -D_FILE_OFFSET_BITS=64 -D_GNU_SOURCE -D_TIME_BITS=64 -D_Thread_local="" -D__amd64__ -D__linux__ -D__x86_64__ -ID:\Dev\DOTNExT\src\runtime\artifacts\obj\external\libunwind -ID:\Dev\DOTNExT\src\runtime\src\native\external\libunwind_extras -ID:\Dev\DOTNExT\src\runtime\src\native -ID:\Dev\DOTNExT\src\runtime\src\native\inc -ID:\Dev\DOTNExT\src\runtime\src\native\external\libunwind\include\tdep -ID:\Dev\DOTNExT\src\runtime\src\native\external\libunwind\include -ID:\Dev\DOTNExT\src\runtime\artifacts\obj\external\libunwind\include\tdep -ID:\Dev\DOTNExT\src\runtime\artifacts\obj\external\libunwind\include -ID:\Dev\DOTNExT\src\runtime\src\native\external\libunwind\include\remote -ID:\Dev\DOTNExT\src\runtime\src\native\external\libunwind\include\remote\win -ID:\Dev\DOTNExT\src\runtime\src\native\external\libunwind\src /DWIN32 /D_WINDOWS /Zi /Ob0 /Od /RTC1 -std:c11 -MTd /Od /nologo /W4 /WX /Oi /Oy- /Gm- /Zp8 /Gy /GS /fp:precise /FC /MP /Zm200 /Zc:strictStrings /Zc:wchar_t /Zc:inline /Zc:forScope /wd4065 /wd4100 /wd4127 /wd4131 /wd4189 /wd4200 /wd4201 /wd4206 /wd4239 /wd4245 /wd4291 /wd4310 /wd4324 /wd4366 /wd4456 /wd4457 /wd4458 /wd4459 /wd4463 /wd4505 /wd4702 /wd4706 /wd4733 /wd4815 /wd4838 /wd4918 /wd4960 /wd4961 /wd5105 /wd5205 /we4007 /we4013 /we4102 /we4551 /we4640 /we4806 /we4055 /we4146 /we4242 /we4244 /we4267 /we4302 /we4308 /we4509 /we4510 /we4532 /we4533 /we4610 /we4611 /we4700 /we4701 /we4703 /we4789 /we4995 /we4996 /w34092 /w34121 /w34125 /w34130 /w34132 /w34212 /w34530 /w35038 /w44177 /Zi /ZH:SHA_256 /source-charset:utf-8 /homeparams /guard:cf /guard:ehcont /permissive- -wd4068 -wd4334 -wd4311 -wd4475 -wd4477 /TC /showIncludes /FoD:\Dev\DOTNExT\src\runtime\artifacts\obj\external\libunwind\CMakeFiles\libunwind_xdac.dir\D_\Dev\DOTNExT\src\runtime\src\native\external\libunwind\src\mi\mempool.c.obj /FdD:\Dev\DOTNExT\src\runtime\artifacts\obj\external\libunwind\CMakeFiles\libunwind_xdac.dir\ /FS -c D:\Dev\DOTNExT\src\runtime\src\native\external\libunwind\src\mi\mempool.c
+  D:\Dev\DOTNExT\src\runtime\src\native\external\libunwind\src\mi\mempool.c(96): error C2220: the following warning is treated as an error
+  D:\Dev\DOTNExT\src\runtime\src\native\external\libunwind\src\mi\mempool.c(96): warning C4319: '~': zero extending 'unsigned long' to 'size_t' of greater size
+  D:\Dev\DOTNExT\src\runtime\src\native\external\libunwind\src\mi\mempool.c(127): warning C4319: '~': zero extending 'unsigned long' to 'size_t' of greater size
+  [2/6] Linking CXX static library vm\cee_dac.lib
+  [3/6] Linking CXX shared library dlls\mscordbi\mscordbi.dll
+  ninja: build stopped: subcommand failed.
+  BUILD: Error: native component build failed. Refer to the build log files for details.
+      "D:\Dev\DOTNExT\src\runtime\artifacts\log\Debug\CoreCLR_linux__x64__Debug__x64.log"
+      "D:\Dev\DOTNExT\src\runtime\artifacts\log\Debug\CoreCLR_linux__x64__Debug__x64.wrn"
+      "D:\Dev\DOTNExT\src\runtime\artifacts\log\Debug\CoreCLR_linux__x64__Debug__x64.err"
+D:\Dev\DOTNExT\src\runtime\src\coreclr\runtime.proj(108,5): error MSB3073: The command ""D:\Dev\DOTNExT\src\runtime\src\coreclr\build-runtime.cmd" -cmakeargs "-DCLR_CROSS_COMPONENTS_BUILD=1" -x64 -debug -os linux -hostarch x64 -outputrid linux-x64 -cmakeargs "-DCLR_DOTNET_HOST_PATH=D:\Dev\DOTNExT\src\runtime\.dotnet\dotnet.exe" -cmakeargs "-DCDAC_BUILD_TOOL_BINARY_PATH=D:\Dev\DOTNExT\src\runtime\artifacts\bin\coreclr\linux.x64.Debug\cdac-build-tool\cdac-build-tool.dll" -component crosscomponents" exited with code 2.
+
+Build FAILED.
+
+D:\Dev\DOTNExT\src\runtime\src\coreclr\runtime.proj(108,5): error MSB3073: The command ""D:\Dev\DOTNExT\src\runtime\src\coreclr\build-runtime.cmd" -cmakeargs "-DCLR_CROSS_COMPONENTS_BUILD=1" -x64 -debug -os linux -hostarch x64 -outputrid linux-x64 -cmakeargs "-DCLR_DOTNET_HOST_PATH=D:\Dev\DOTNExT\src\runtime\.dotnet\dotnet.exe" -cmakeargs "-DCDAC_BUILD_TOOL_BINARY_PATH=D:\Dev\DOTNExT\src\runtime\artifacts\bin\coreclr\linux.x64.Debug\cdac-build-tool\cdac-build-tool.dll" -component crosscomponents" exited with code 2.
+    0 Warning(s)
+    1 Error(s)
+
+Time Elapsed 00:00:16.91
+Build failed with exit code 1. Check errors above.
+Some builds failed:
+	Configuration: Debug, Architecture: x64

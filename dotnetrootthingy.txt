@@ -1,0 +1,5 @@
+DOTNET_ROOT
+D:\Dev\DOTNExT\src\sdk\artifacts\bin\redist\Release\dotnet
+
+CORE_ROOT
+D:\Dev\DOTNExT\src\runtime\artifacts\tests\coreclr\windows.x64.Release\Tests\Core_Root

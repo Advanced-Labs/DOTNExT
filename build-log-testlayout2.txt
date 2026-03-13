@@ -1,0 +1,70 @@
+**********************************************************************
+** Visual Studio 2022 Developer Command Prompt v17.14.24
+** Copyright (c) 2025 Microsoft Corporation
+**********************************************************************
+BUILDTEST: Starting Build at 20:41:06.41
+BUILDTEST: Commencing CoreCLR test build
+BUILDTEST: Common MSBuild args: "/p:TargetOS=windows" "/p:Configuration=Debug" "/p:TargetArchitecture=x64" "/p:RuntimeFlavor=coreclr" /nologo /verbosity:minimal /clp:Summary /maxcpucount   /p:LibrariesConfiguration=Debug
+**********************************************************************
+** Visual Studio 2022 Developer Command Prompt v17.14.24
+** Copyright (c) 2025 Microsoft Corporation
+**********************************************************************
+[vcvarsall.bat] Environment initialized for: 'x64'
+BUILDTEST: powershell -NoProfile -ExecutionPolicy ByPass -NoLogo -Command "D:\Dev\DOTNExT\src\runtime\eng\common\msbuild.ps1"   D:\Dev\DOTNExT\src\runtime\src\tests\build.proj -warnAsError:0 /t:TestBuild /nodeReuse:false  /p:RestoreDefaultOptimizationDataPackage=false /p:PortableBuild=true  /p:UsePartialNGENOptimization=false /maxcpucount '/flp:Verbosity=normal;LogFile="D:\Dev\DOTNExT\src\runtime\artifacts\log\TestBuild_windows__x64__Debug.log"' '/flp1:WarningsOnly;LogFile="D:\Dev\DOTNExT\src\runtime\artifacts\log\TestBuild_windows__x64__Debug.wrn"' '/flp2:ErrorsOnly;LogFile="D:\Dev\DOTNExT\src\runtime\artifacts\log\TestBuild_windows__x64__Debug.err"' '/bl:"D:\Dev\DOTNExT\src\runtime\artifacts\log\TestBuild_windows__x64__Debug.binlog"'  "/p:TargetOS=windows" "/p:Configuration=Debug" "/p:TargetArchitecture=x64" "/p:RuntimeFlavor=coreclr" /nologo /verbosity:minimal /clp:Summary /maxcpucount   /p:LibrariesConfiguration=Debug
+
+  [20:41:08.22] Restoring all packages...
+  
+    Determining projects to restore...
+    Restored D:\Dev\DOTNExT\src\runtime\src\tests\Common\test_dependencies_fs\test_dependencies.fsproj (in 5.25 sec).
+  
+    Determining projects to restore...
+    Restored D:\Dev\DOTNExT\src\runtime\src\tests\Common\test_dependencies\test_dependencies.csproj (in 876 ms).
+  
+    Determining projects to restore...
+    Restored D:\Dev\DOTNExT\src\runtime\src\tests\Common\CoreCLRTestLibrary\CoreCLRTestLibrary.csproj (in 110 ms).
+  
+    Determining projects to restore...
+    Restored D:\Dev\DOTNExT\src\runtime\src\tests\Common\GenerateHWIntrinsicTests\GenerateHWIntrinsicTests_Arm.csproj (in 92 ms).
+  
+    Determining projects to restore...
+    Restored D:\Dev\DOTNExT\src\runtime\src\tests\Common\GenerateHWIntrinsicTests\GenerateHWIntrinsicTests_General.csproj (in 91 ms).
+  
+    Determining projects to restore...
+    Restored D:\Dev\DOTNExT\src\runtime\src\tests\Common\GenerateHWIntrinsicTests\GenerateHWIntrinsicTests_X86.csproj (in 90 ms).
+  
+    Determining projects to restore...
+    Restored D:\Dev\DOTNExT\src\runtime\src\tests\Common\XUnitLogChecker\XUnitLogChecker.csproj (in 95 ms).
+  
+    Determining projects to restore...
+    Restored D:\Dev\DOTNExT\src\runtime\src\tests\Common\XUnitWrapperGenerator\XUnitWrapperGenerator.csproj (in 126 ms).
+  
+    Determining projects to restore...
+    Restored D:\Dev\DOTNExT\src\runtime\src\tests\Common\XUnitWrapperLibrary\XUnitWrapperLibrary.csproj (in 90 ms).
+  
+    Determining projects to restore...
+    Restored D:\Dev\DOTNExT\src\runtime\src\tests\Common\XHarnessRunnerLibrary\XHarnessRunnerLibrary.csproj (in 1.57 sec).
+    1 of 2 projects are up-to-date for restore.
+  
+    Determining projects to restore...
+    Restored D:\Dev\DOTNExT\src\runtime\src\tests\Common\external\external.csproj (in 1.77 sec).
+  
+    Determining projects to restore...
+    Restored D:\Dev\DOTNExT\src\runtime\src\tests\Common\ilasm\ilasm.ilproj (in 938 ms).
+  [20:41:29.56] Restoring all packages...Done.
+  Building Targeting Pack
+  external -> 
+D:\Dev\DOTNExT\src\runtime\eng\liveBuilds.targets(151,5): error : The 'libs' subset must be built before building this project. Missing artifacts: D:\Dev\DOTNExT\src\runtime\artifacts\bin\microsoft.netcore.app.runtime.win-x64\Debug\runtimes\win-x64\lib\net9.0\. Configuration: 'Debug'. To use a different configuration, specify the 'LibrariesConfiguration' property. [D:\Dev\DOTNExT\src\runtime\src\tests\Common\test_dependencies\test_dependencies.csproj]
+
+Build FAILED.
+
+D:\Dev\DOTNExT\src\runtime\eng\liveBuilds.targets(151,5): error : The 'libs' subset must be built before building this project. Missing artifacts: D:\Dev\DOTNExT\src\runtime\artifacts\bin\microsoft.netcore.app.runtime.win-x64\Debug\runtimes\win-x64\lib\net9.0\. Configuration: 'Debug'. To use a different configuration, specify the 'LibrariesConfiguration' property. [D:\Dev\DOTNExT\src\runtime\src\tests\Common\test_dependencies\test_dependencies.csproj]
+    0 Warning(s)
+    1 Error(s)
+
+Time Elapsed 00:00:22.66
+Build failed with exit code 1. Check errors above.
+See log: D:\Dev\DOTNExT\src\runtime\artifacts\log\TestBuild_windows__x64__Debug.binlog
+BUILDTEST: Error: Test build failed. Refer to the build log files for details:
+    "D:\Dev\DOTNExT\src\runtime\artifacts\log\TestBuild_windows__x64__Debug.log"
+    "D:\Dev\DOTNExT\src\runtime\artifacts\log\TestBuild_windows__x64__Debug.wrn"
+    "D:\Dev\DOTNExT\src\runtime\artifacts\log\TestBuild_windows__x64__Debug.err"

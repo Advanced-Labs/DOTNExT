@@ -1,0 +1,63 @@
+**********************************************************************
+** Visual Studio 2022 Developer Command Prompt v17.14.24
+** Copyright (c) 2025 Microsoft Corporation
+**********************************************************************
+BUILDTEST: Starting Build at 20:44:31.40
+BUILDTEST: Commencing CoreCLR test build
+BUILDTEST: Common MSBuild args: "/p:TargetOS=windows" "/p:Configuration=Debug" "/p:TargetArchitecture=x64" "/p:RuntimeFlavor=coreclr" /nologo /verbosity:minimal /clp:Summary /maxcpucount   /p:LibrariesConfiguration=Release
+**********************************************************************
+** Visual Studio 2022 Developer Command Prompt v17.14.24
+** Copyright (c) 2025 Microsoft Corporation
+**********************************************************************
+[vcvarsall.bat] Environment initialized for: 'x64'
+BUILDTEST: powershell -NoProfile -ExecutionPolicy ByPass -NoLogo -Command "D:\Dev\DOTNExT\src\runtime\eng\common\msbuild.ps1"   D:\Dev\DOTNExT\src\runtime\src\tests\build.proj -warnAsError:0 /t:TestBuild /nodeReuse:false  /p:RestoreDefaultOptimizationDataPackage=false /p:PortableBuild=true  /p:UsePartialNGENOptimization=false /maxcpucount '/flp:Verbosity=normal;LogFile="D:\Dev\DOTNExT\src\runtime\artifacts\log\TestBuild_windows__x64__Debug.log"' '/flp1:WarningsOnly;LogFile="D:\Dev\DOTNExT\src\runtime\artifacts\log\TestBuild_windows__x64__Debug.wrn"' '/flp2:ErrorsOnly;LogFile="D:\Dev\DOTNExT\src\runtime\artifacts\log\TestBuild_windows__x64__Debug.err"' '/bl:"D:\Dev\DOTNExT\src\runtime\artifacts\log\TestBuild_windows__x64__Debug.binlog"'  "/p:TargetOS=windows" "/p:Configuration=Debug" "/p:TargetArchitecture=x64" "/p:RuntimeFlavor=coreclr" /nologo /verbosity:minimal /clp:Summary /maxcpucount   /p:LibrariesConfiguration=Release
+
+  [20:44:33.05] Restoring all packages...
+  
+    Determining projects to restore...
+    All projects are up-to-date for restore.
+  
+    Determining projects to restore...
+    All projects are up-to-date for restore.
+  
+    Determining projects to restore...
+    All projects are up-to-date for restore.
+  
+    Determining projects to restore...
+    All projects are up-to-date for restore.
+  
+    Determining projects to restore...
+    All projects are up-to-date for restore.
+  
+    Determining projects to restore...
+    All projects are up-to-date for restore.
+  
+    Determining projects to restore...
+    All projects are up-to-date for restore.
+  
+    Determining projects to restore...
+    All projects are up-to-date for restore.
+  
+    Determining projects to restore...
+    All projects are up-to-date for restore.
+  
+    Determining projects to restore...
+    All projects are up-to-date for restore.
+  
+    Determining projects to restore...
+    All projects are up-to-date for restore.
+  
+    Determining projects to restore...
+    All projects are up-to-date for restore.
+  [20:44:43.33] Restoring all packages...Done.
+  Building Targeting Pack
+  external -> 
+  XUnitLogChecker -> D:\Dev\DOTNExT\src\runtime\artifacts\tests\coreclr\windows.x64.Debug\Common\XUnitLogChecker\XUnitLogChecker\XUnitLogChecker.dll
+
+Build succeeded.
+    0 Warning(s)
+    0 Error(s)
+
+Time Elapsed 00:00:12.98
+BUILDTEST: Test build succeeded.  Finished at 20:44:45.85
+BUILDTEST: Test binaries are available at D:\Dev\DOTNExT\src\runtime\artifacts\tests\coreclr\windows.x64.Debug
